@@ -17,13 +17,13 @@ var LIB_FULL_PATH = "";
 if (os.arch()=='x64') {
   switch (os.platform()) {
     case 'darwin':
-      LIB_FULL_PATH = __dirname + '/lib/x64Darwin16clang8.0/librtiddsconnector.dylib';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/x64Darwin16clang8.0/librtiddsconnector.dylib';
       break;
     case 'linux':
-      LIB_FULL_PATH = __dirname + '/lib/x64Linux2.6gcc4.4.5/librtiddsconnector.so';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/x64Linux2.6gcc4.4.5/librtiddsconnector.so';
       break;
     case 'win32':
-      LIB_FULL_PATH = __dirname + '/lib/x64Win64VS2013/rtiddsconnector.dll';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/x64Win64VS2013/rtiddsconnector.dll';
       break;
     default:
       console.log(os.platform() + ' not yet supported');
@@ -31,10 +31,10 @@ if (os.arch()=='x64') {
 } else if (os.arch() == 'ia32') {
   switch (os.platform()) {
     case 'linux':
-      LIB_FULL_PATH = __dirname + '/lib/i86Linux3.xgcc4.6.3/librtiddsconnector.so';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/i86Linux3.xgcc4.6.3/librtiddsconnector.so';
       break;
     case 'win32':
-      LIB_FULL_PATH = __dirname + '/lib/i86Win32VS2010/rtiddsconnector.dll';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/i86Win32VS2010/rtiddsconnector.dll';
       break;
     default:
       console.log(os.platform() + ' not yet supported');
@@ -42,7 +42,7 @@ if (os.arch()=='x64') {
 } else if (os.arch() == 'arm') {
   switch (os.platform()) {
     case 'linux':
-      LIB_FULL_PATH = __dirname + '/lib/armv6vfphLinux3.xgcc4.7.2/librtiddsconnector.so';
+      LIB_FULL_PATH = __dirname + '/rticonnextdds-connector/lib/armv6vfphLinux3.xgcc4.7.2/librtiddsconnector.so';
       break;
     default:
       console.log(os.platform() + ' not yet supported');
