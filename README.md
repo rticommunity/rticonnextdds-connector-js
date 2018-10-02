@@ -38,7 +38,7 @@ When the installation is complete, cd into your node_modules directory and have 
 
 
 ### Available examples
-You can find several sets of examples in this directory: [examples/nodejs/README.md](examples/nodejs/README.md)
+You can find several sets of examples in this directory: [examples/nodejs](examples/nodejs)
 
  * **simple**: shows how to write samples, how to read/take, and how to use event-based reading.
  * **transform**: shows how to write a simple transformation using *Connector*. This is also a good place to understand how to use the setFromJSON and getJSON APIs to interact with samples and instances.
