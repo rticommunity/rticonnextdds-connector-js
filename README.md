@@ -8,6 +8,9 @@ It is based on [XML Application Creation](https://community.rti.com/static/docum
 
 ### Language Support
 This repository is specific to Node.js/JavaScript, for other languages (python, lua, C) refer to the [main repository of connector](https://github.com/rticommunity/rticonnextdds-connector)
+
+We use [libffi](https://github.com/node-ffi/node-ffi) to call our library, but we try to hide that from you using a nice JavaScript wrapper. We tested our Node.js/JavaScript implementation with node v8.7.0; it should work also with lower versions.
+
 ### Platform support
 We are building our library for a few architectures only. Check them out [here](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib). If you need another architecture, please contact your RTI account manager or sales@rti.com.
 
