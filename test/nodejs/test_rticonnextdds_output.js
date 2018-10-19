@@ -1,8 +1,16 @@
+/******************************************************************************
+* (c) 2005-2015 Copyright, Real-Time Innovations.  All rights reserved.       *
+* No duplications, whole or partial, manual or electronic, may be made        *
+* without express written permission.  Any such copies, or revisions thereof, *
+* must display this notice unaltered.                                         *
+* This code contains trade secrets of Real-Time Innovations, Inc.             *
+******************************************************************************/
+
 var expect=require('chai').expect
 var rti= require(__dirname + '/../../rticonnextdds-connector')
 
 describe('Output Tests',function() {
-  var connector=null 
+  var connector=null
   // Initialization before all tests execute
   before(function(){
     var participant_profile = "MyParticipantLibrary::Zero"
@@ -14,7 +22,7 @@ describe('Output Tests',function() {
   after(function() {
     this.timeout(0)
     connector.delete()
-    
+
   })
 
   it('Output object should not get instantiated for invalid DataWriter',function(){
@@ -22,13 +30,13 @@ describe('Output Tests',function() {
     expect(function(){
       connector.getWriter(invalid_DW)
     }).to.throw(Error)
-  }) 
+  })
 
   it('Output object should get instantiated for valid ' +
       'Publication::DataWriter name',function (){
-    var valid_DW = "MyPublisher::MySquareWriter" 
+    var valid_DW = "MyPublisher::MySquareWriter"
     var output= connector.getOutput(valid_DW)
-    expect(output).to.exist 
+    expect(output).to.exist
     expect(output.name).to.equal(valid_DW)
     expect(output.connector).to.equal(connector)
   })
@@ -37,7 +45,7 @@ describe('Output Tests',function() {
     var output = null
     //Initialization before all tests execute in this describe block
     before(function(){
-      output= connector.getOutput("MyPublisher::MySquareWriter")  
+      output= connector.getOutput("MyPublisher::MySquareWriter")
     })
 
     it('output\'s instance should exist',function(){
@@ -120,7 +128,7 @@ describe('Output Tests',function() {
         output.instance.setNumber(number_field,{"key":"value"})
       }).to.throw(Error)
     })
- 
+
     //skipped test: Condition being tested has not been accounted for yet
     it.skip('setBoolean with string value should throw Error and '+
       'subscriber should not get a  message with erroneous field data', function(){
@@ -143,8 +151,8 @@ describe('Output Tests',function() {
     })
 
     //skipped test: Condition being tested has not been accounted for yet
-    it.skip('setFromJSON for JSON object with incompatible value types ' + 
-      'should throw Error and subscriber should not get a message with ' + 
+    it.skip('setFromJSON for JSON object with incompatible value types ' +
+      'should throw Error and subscriber should not get a message with ' +
       'erroneous field data', function(){
         expect(function(){
           var str= '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'

@@ -1,9 +1,17 @@
+/******************************************************************************
+* (c) 2005-2015 Copyright, Real-Time Innovations.  All rights reserved.       *
+* No duplications, whole or partial, manual or electronic, may be made        *
+* without express written permission.  Any such copies, or revisions thereof, *
+* must display this notice unaltered.                                         *
+* This code contains trade secrets of Real-Time Innovations, Inc.             *
+******************************************************************************/
+
 var expect=require('chai').expect
 var rti= require(__dirname + '/../../rticonnextdds-connector')
 var sleep=require('sleep')
 
 // Test Parameterization- describe block will execute once for each param
-var params=["read","take"] 
+var params=["read","take"]
 
 params.forEach(function(retrieval_method) {
 
@@ -17,8 +25,8 @@ params.forEach(function(retrieval_method) {
       connector = new rti.Connector(participant_profile,xml_profile)
       input = connector.getInput("MySubscriber::MySquareReader")
       output = connector.getOutput("MyPublisher::MySquareWriter")
-    })  
-   
+    })
+
     //Clean-up after all tests execute
     after(function() {
       this.timeout(0)
@@ -54,7 +62,7 @@ params.forEach(function(retrieval_method) {
       var validity=input.infos.isValid(1)
       expect(validity).to.equal(1)
     })
- 
+
     it('received JSON representation of data should be the same as '+
       'the JSON object sent',function(){
       var received_JSON=input.samples.getJSON(1)
@@ -76,7 +84,7 @@ params.forEach(function(retrieval_method) {
       expect(shapesize).to.equal(testMsg['shapesize'])
       expect(color).to.equal(testMsg['color'])
     })
-    
+
     //Unimplemented tests
     it('Behavior of getBoolean on String or Number fields should be considered')
     it('Behavior of getString on Number or Boolean fields should be considered')

@@ -1,3 +1,11 @@
+/******************************************************************************
+* (c) 2005-2015 Copyright, Real-Time Innovations.  All rights reserved.       *
+* No duplications, whole or partial, manual or electronic, may be made        *
+* without express written permission.  Any such copies, or revisions thereof, *
+* must display this notice unaltered.                                         *
+* This code contains trade secrets of Real-Time Innovations, Inc.             *
+******************************************************************************/
+
 var expect=require('chai').expect
 var rti= require(__dirname + '/../../rticonnextdds-connector')
 var sinon = require('sinon')
@@ -13,7 +21,7 @@ describe('Connector Tests',function() {
   })
 
   it('Connector should throw an error for invalid participant profile', function(){
-    var invalid_participant_profile = "InvalidParticipantProfile"  
+    var invalid_participant_profile = "InvalidParticipantProfile"
     var xml_path = __dirname+ "/../xml/ShapeExample.xml"
     expect(function(){
       new rti.Connector(invalid_participant_profile,xml_path)
@@ -27,14 +35,14 @@ describe('Connector Tests',function() {
       new rti.Connector(participant_profile,invalid_xml)
     }).to.throw(Error)
   })
- 
+
   it('Connector should get instantiated for valid' +
          'xml and participant profile', function(){
     var participant_profile = "MyParticipantLibrary::Zero"
     var xml_profile = __dirname +  "/../xml/ShapeExample.xml"
     var connector =  new rti.Connector(participant_profile,xml_profile)
     expect(connector).to.exist
-    expect(connector).to.be.instanceOf(rti.Connector) 
+    expect(connector).to.be.instanceOf(rti.Connector)
   })
 
   it('Multiple Connector objects can be instantiated', function(){
@@ -44,9 +52,9 @@ describe('Connector Tests',function() {
     for(var i=0; i< 5; i++)
       connectors.push(new rti.Connector(participant_profile,xml_profile))
     connectors.forEach(function(connector){
-      expect(connector).to.exist 
+      expect(connector).to.exist
       expect(connector).to.be.instanceOf(rti.Connector)
-    }) 
+    })
   })
 
   describe('Connector callback test', function () {
@@ -68,7 +76,7 @@ describe('Connector Tests',function() {
     it('on_data_available callback gets called when data is available',
       function (done){
       //spies are used for testing callbacks
-      var spy = sinon.spy() 
+      var spy = sinon.spy()
       setTimeout(function(){
         expect(spy.calledOnce).to.be.true
         done() //Pattern for async testing:  next test won't execute until done gets called.
@@ -77,7 +85,7 @@ describe('Connector Tests',function() {
       output = connector.getOutput("MyPublisher::MySquareWriter")
       testMsg='{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
       output.write(JSON.parse(testMsg))
-    }) 
-    
+    })
+
   })
 })
