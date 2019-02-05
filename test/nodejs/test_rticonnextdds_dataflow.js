@@ -59,23 +59,23 @@ params.forEach(function(retrieval_method) {
     })
 
     it('data received should be valid',function(){
-      var validity=input.infos.isValid(1)
+      var validity=input.infos.isValid(0)
       expect(validity).to.equal(1)
     })
 
     it('received JSON representation of data should be the same as '+
       'the JSON object sent',function(){
-      var received_JSON=input.samples.getJSON(1)
+      var received_JSON=input.samples.getJSON(0)
       expect(received_JSON).to.deep.equal(JSON.parse(JSON.stringify(testMsg)))
     })
 
     it('received fields of data should be the same as '+
       'that of the JSON object sent',function(){
-      var x = input.samples.getNumber(1,"x")
-      var y = input.samples.getNumber(1,"y")
-      var z = input.samples.getBoolean(1,"z")
-      var color = input.samples.getString(1,"color")
-      var shapesize = input.samples.getNumber(1,"shapesize")
+      var x = input.samples.getNumber(0,"x")
+      var y = input.samples.getNumber(0,"y")
+      var z = input.samples.getBoolean(0,"z")
+      var color = input.samples.getString(0,"color")
+      var shapesize = input.samples.getNumber(0,"shapesize")
 
       expect(x).to.equal(testMsg['x'])
       expect(y).to.equal(testMsg['y'])

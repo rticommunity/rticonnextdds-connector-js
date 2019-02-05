@@ -83,14 +83,39 @@ function Samples(input) {
   }
 
   this.getNumber = function(index, fieldName) {
+    if (typeof(index) != 'number' || !Number.isInteger(index)) {
+      throw "Index must be an integer"
+    }
+    if (index < 0 ) {
+      throw "Index must be positive"
+    }
+    /* Adding 1 to index because the C API was based on Lua where indexes start from 1 */
+    index = index + 1
     return rtin.RTIDDSConnector_getNumberFromSamples(input.connector.native,input.name,index,fieldName);
   }
 
   this.getBoolean = function(index, fieldName) {
+    if (typeof(index) != 'number' || !Number.isInteger(index)) {
+    throw "Index must be an integer"
+    }
+    if (index < 0 ) {
+    throw "Index must be positive"
+    }
+    /* Adding 1 to index because the C API was based on Lua where indexes start from 1 */
+    index = index + 1
     return rtin.RTIDDSConnector_getBooleanFromSamples(input.connector.native,input.name,index,fieldName);
   }
 
   this.getString = function(index, fieldName) {
+    if (typeof(index) != 'number' || !Number.isInteger(index)) {
+    throw "Index must be an integer"
+    }
+    if (index < 0 ) {
+    throw "Index must be positive"
+    }
+    /* Adding 1 to index because the C API was based on Lua where indexes start from 1 */
+    index = index + 1
+
     var myStr =  rtin.RTIDDSConnector_getStringFromSamples(input.connector.native,input.name,index,fieldName);
     if (!myStr) {
         throw "Error getting the string";
@@ -101,6 +126,16 @@ function Samples(input) {
   }
 
   this.getJSON = function(index) {
+    if (typeof(index) != 'number' || !Number.isInteger(index)) {
+    throw "Index must be an integer"
+    }
+    if (index < 0 ) {
+    throw "Index must be positive"
+    }
+    /* Adding 1 to index because the C API was based on Lua where indexes start from 1 */
+    index = index + 1
+
+
     var jsonStr = rtin.RTIDDSConnector_getJSONSample(input.connector.native, input.name, index);
     if (!jsonStr) {
         throw "Error getting the json string";
@@ -125,6 +160,14 @@ function Infos(input) {
   }
 
   this.isValid = function(index) {
+    if (typeof(index) != 'number' || !Number.isInteger(index)) {
+        throw "Index must be an integer"
+    }
+    if (index < 0 ) {
+        throw "Index must be positive"
+    }
+    /* Adding 1 to index because the C API was based on Lua where indexes start from 1 */
+    index = index + 1
     return rtin.RTIDDSConnector_getBooleanFromInfos(input.connector.native,input.name,index,'valid_data');
   }
 

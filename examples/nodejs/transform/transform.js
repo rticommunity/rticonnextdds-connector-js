@@ -16,7 +16,7 @@ var output = connector.getOutput("MyPublisher::MySquareWriter");
 connector.on('on_data_available',
    function() {
      input.take();
-     for (i=1; i <= input.samples.getLength(); i++) {
+     for (var i=0; i < input.samples.getLength(); i++) {
          if (input.infos.isValid(i)) {
              //get the received sample
              var mysample = input.samples.getJSON(i)

@@ -30,7 +30,7 @@ http.createServer(function (req, res) {
 
     res.writeHead(200, {'Content-Type': 'text/plain'});
     console.log(input.samples.getLength());
-    for (i=1; i <= input.samples.getLength(); i++) {
+    for (i=0; i < input.samples.getLength(); i++) {
       if (input.infos.isValid(i)) {
         res.write(JSON.stringify((input.samples.getJSON(i))));
       }

@@ -15,7 +15,7 @@ var input = connector.getInput("MySubscriber::MySquareReader");
 for (;;) {
     console.log("Waiting for samples...");
     input.take();
-    for (i=1; i <= input.samples.getLength(); i++) {
+    for (var i=0; i < input.samples.getLength(); i++) {
       if (input.infos.isValid(i)) {
         console.log(JSON.stringify(input.samples.getJSON(i)));
       }
