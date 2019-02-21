@@ -6,13 +6,39 @@ rticonnextdds-connector: Node.js/JavaScript
 functionality of [RTI Connext DDS](http://www.rti.com/products/index.html).
 It is based on [XML Application Creation](https://community.rti.com/static/documentation/connext-dds/5.3.1/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
 
+### Dependencies
+
+#### Node.js packages:
+The Node.js/JavaScript *RTI Connector* has few dependencies; they are listed in the package.json and reported right here:
+* [ref](https://www.npmjs.com/package/ref): Turn Buffer instances into "pointers"
+* [util](https://www.npmjs.com/package/util): used for 'inherits' and to format strings
+* [ffi](https://www.npmjs.com/package/ffi): for loading and calling dynamic libraries using pure JavaScript.
+* [events](): for the 'EventEmitter'
+
+We also have some dependencies for the examples:
+* [sleep](https://www.npmjs.com/package/sleep): to sleep x amount of seconds
+* [socket.io](https://www.npmjs.com/package/socket.io): for an example of integration between DDS and web-browser
+
+#### node-gyp and python
+Some of the dependencies are not pure JavaScript and they are shipped as source code. They use [node-gyp](https://github.com/nodejs/node-gyp) to compile. node-gpy require python 2.7 and it does not work with python 3.x.x.Please check the requirement for node-gpy at the following links:
+* [unix](https://github.com/nodejs/node-gyp#on-unix)
+* [dawin](https://github.com/nodejs/node-gyp#on-macos)
+* [windows](https://github.com/nodejs/node-gyp#on-windows)
+
+#### C/C++ compiler
+Some of the *RTI Connector* dependencies (e.g. [ref](https://www.npmjs.com/package/ref)) are distributed in source code and they depend on [nan](https://www.npmjs.com/package/nan)(Native Abstractions for Node.js). If you are using a modern version of Node.js you need to have a modern C++ compiler on your machine (C++11).
+
+Connector may work with older versions of OS/Compiler/Node if you are able to get all the dependencies compiled.
+
 ### Language Support
 This repository is specific to Node.js/JavaScript, for other languages (python, lua, C) refer to the [main repository of connector](https://github.com/rticommunity/rticonnextdds-connector)
 
 We use [libffi](https://github.com/node-ffi/node-ffi) to call our library, but we try to hide that from you using a nice JavaScript wrapper. We tested our Node.js/JavaScript implementation with node v8.7.0; it should work also with lower versions.
 
 ### Platform support
-We are building our library for a few architectures only. Check them out [here](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib). If you need another architecture, please contact your RTI account manager or sales@rti.com.
+We are building our library for a few architectures only. Check them out [here](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib).
+__Be sure to read the dependencies section right above.__
+If you need another architecture, please contact your RTI account manager or sales@rti.com.
 
 **Windows Note**: We tested the Node.js/JavaScript Connector on Win10 64 bit. We notice that npm works best with VS Express 2013.
 Feel free to ask questions on the [RTI Community forum](https://community.rti.com/forums/technical-questions) for more details on Windows and Connector.
