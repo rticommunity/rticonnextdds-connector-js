@@ -4,57 +4,57 @@ rticonnextdds-connector: Node.js/JavaScript
 ### RTI Connector for Connext DDS
 *RTI Connector* for Connext DDS is a quick and easy way to access the power and
 functionality of [RTI Connext DDS](http://www.rti.com/products/index.html).
-It is based on [XML Application Creation](https://community.rti.com/static/documentation/connext-dds/5.3.1/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
+It is based on [XML-Based Application Creation](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
 
 ### Dependencies
 
 #### Node.js packages:
-The Node.js/JavaScript *RTI Connector* has few dependencies; they are listed in the package.json and reported right here:
-* [ref](https://www.npmjs.com/package/ref): Turn Buffer instances into "pointers"
-* [util](https://www.npmjs.com/package/util): used for 'inherits' and to format strings
-* [ffi](https://www.npmjs.com/package/ffi): for loading and calling dynamic libraries using pure JavaScript.
-* [events](): for the 'EventEmitter'
+ The Node.js/JavaScript *Connector* has the following dependencies, which are also listed in package.json:
+* [ref](https://www.npmjs.com/package/ref): turns Buffer instances into "pointers"
+* [util](https://www.npmjs.com/package/util): used for 'inherits' and for formatting strings
+* [ffi](https://www.npmjs.com/package/ffi): used for loading and calling dynamic libraries using pure JavaScript
+* [events](): used for the 'EventEmitter'
 
-We also have some dependencies for the examples:
+There are also some dependencies for the examples:
 * [sleep](https://www.npmjs.com/package/sleep): to sleep x amount of seconds
-* [socket.io](https://www.npmjs.com/package/socket.io): for an example of integration between DDS and web-browser
+* [socket.io](https://www.npmjs.com/package/socket.io): for an example of integration between DDS and a web browser
 
 #### node-gyp and python
-Some of the dependencies are not pure JavaScript and they are shipped as source code. They use [node-gyp](https://github.com/nodejs/node-gyp) to compile. node-gpy require python 2.7 and it does not work with python 3.x.x.Please check the requirement for node-gpy at the following links:
+Some of the dependencies are not pure JavaScript and are shipped as source code. They use [node-gyp](https://github.com/nodejs/node-gyp) to compile. node-gpy requires python 2.7; it does not work with python 3.x.x. Please check the requirement for node-gpy at the following links:
 * [unix](https://github.com/nodejs/node-gyp#on-unix)
 * [dawin](https://github.com/nodejs/node-gyp#on-macos)
 * [windows](https://github.com/nodejs/node-gyp#on-windows)
 
 #### C/C++ compiler
-Some of the *RTI Connector* dependencies (e.g. [ref](https://www.npmjs.com/package/ref)) are distributed in source code and they depend on [nan](https://www.npmjs.com/package/nan)(Native Abstractions for Node.js). If you are using a modern version of Node.js you need to have a modern C++ compiler on your machine (C++11).
+Some of the *Connector* dependencies, such as [ref](https://www.npmjs.com/package/ref), are distributed in source code and they depend on [nan](https://www.npmjs.com/package/nan) (Native Abstractions for Node.js). If you are using a modern version of Node.js, have a modern C++ compiler on your machine (C++11).
 
-Connector may work with older versions of OS/Compiler/Node if you are able to get all the dependencies compiled.
+*Connector* may work with older versions of OS/Compiler/Node if you are able to get all the dependencies compiled.
 
 ### Language Support
-This repository is specific to Node.js/JavaScript, for other languages (python, lua, C) refer to the [main repository of connector](https://github.com/rticommunity/rticonnextdds-connector)
+This repository is specific to Node.js/JavaScript. For other languages (python, lua, C, etc.) refer to the [main *Connector* repository](https://github.com/rticommunity/rticonnextdds-connector).
 
-We use [libffi](https://github.com/node-ffi/node-ffi) to call our library, but we try to hide that from you using a nice JavaScript wrapper. We tested our Node.js/JavaScript implementation with node v8.7.0; it should work also with lower versions.
+We use [libffi](https://github.com/node-ffi/node-ffi) to call our library, but those details are hidden by a JavaScript wrapper. RTI tested its Node.js/JavaScript implementation with node v8.7.0; it should also work with lower versions.
 
 ### Platform support
-We are building our library for a few architectures only. Check them out [here](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib).
-__Be sure to read the dependencies section right above.__
+Node.js/JavaScript *Connector* builds its library for [select architectures](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib).
+__Be sure to read the dependencies section above.__
 If you need another architecture, please contact your RTI account manager or sales@rti.com.
 
-**Windows Note**: We tested the Node.js/JavaScript Connector on Win10 64 bit. We notice that npm works best with VS Express 2013.
-Feel free to ask questions on the [RTI Community forum](https://community.rti.com/forums/technical-questions) for more details on Windows and Connector.
+**Windows Note**: RTI tested the Node.js/JavaScript *Connector* on Windows® 10 64-bit. Those tests showed that npm works best with Visual Studio Express 2013.
+Feel free to ask questions on the [RTI Community forum](https://community.rti.com/forums/technical-questions) for more details on Windows and *Connector*.
 
-If you want to check the version of the libraries, run the following command:
+To check the version of the libraries, run the following command. For example:
 
 ``` bash
 strings librtiddsconnector.dylib | grep BUILD
 ```
 
 ### Threading model
-The *Connector* Native API does not yet implement any mechanism for thread safety. For now, the responsibility of protecting calls to the *Connector* is left to you. (In future we may add thread safety in the native layer.)
-In Node.js/JavaScript, threading should not be a problem due to the 'callback' style of the language itself.
+The *Connector* Native API does not yet implement any mechanism for thread safety. For now, the responsibility of protecting calls to the *Connector* is left to you. (In future, thread safety may be added in the native layer.)
+In Node.js/JavaScript, threading should not be a problem due to the 'callback' style of the language.
 
 ### Support
-This is an experimental RTI product. As such, we offer support through the [RTI Community forum](https://community.rti.com/forums/technical-questions).
+*Connector* is an experimental RTI product. If you have questions, use the [RTI Community forum](https://community.rti.com/forums/technical-questions).
 
 ### Getting started with Node.js
 Be sure you have all the tools to work with Node.js. Then invoke:
@@ -63,11 +63,11 @@ Be sure you have all the tools to work with Node.js. Then invoke:
 $ npm install rticonnextdds-connector
 ```
 
-When the installation is complete, cd into your node_modules directory and have a look at .
+When the installation is complete, cd into the node_modules directory.
 
 
 ### Available examples
-You can find several sets of examples in this directory: [examples/nodejs](examples/nodejs)
+You can find several sets of [examples](examples/nodejs) in the node_modules directory:
 
  * **simple**: shows how to write samples, how to read/take, and how to use event-based reading.
  * **transform**: shows how to write a simple transformation using *Connector*. This is also a good place to understand how to use the setFromJSON and getJSON APIs to interact with samples and instances.
@@ -76,23 +76,24 @@ You can find several sets of examples in this directory: [examples/nodejs](examp
 
 ### API overview
 #### require the *Connector* library
-If you want to use the `rticonnextdds-connector`, you have to require it:
+To use `rticonnextdds-connector`, require it as follows:
 
 ```js
 var rti = require('rticonnextdds-connector');
 ```
 
 #### instantiate a new *Connector*
-To create a new *Connector*, you have to pass an XML file and a configuration name. For more information on
-the XML format, see the [XML Application Creation Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/5.3.1/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) or
-have a look at the [ShapeExample.xml](examples/nodejs/ShapeExample.xml) file included in the example directory.   
+To create a new *Connector*, pass an XML file and a configuration name:    
 
 ```js
 var connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
 ```
+For more information on
+the XML format, see the [XML-Based Application Creation Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) or
+look at the [ShapeExample.xml](examples/nodejs/ShapeExample.xml) file included in the example directory.
 
 #### delete a *Connector*
-To destroy all the DDS entities that belong to a *Connector* previously created, call the ```delete``` function.
+To destroy all the DDS entities that belong to a *Connector* previously created, call the ```delete``` function:
 
 ```js
 var connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
@@ -132,11 +133,11 @@ The content of an instance can be set in two ways:
 output.instance.setNumber("y",2);
 ```
 
-The APIs to set an instance field by field are three: `setNumber(fieldName, number);` `setBoolean(fieldName, boolean);` and `setString(fieldName, string);`.
+The following APIs set an instance field by field: `setNumber(fieldName, number);` `setBoolean(fieldName, boolean);` and `setString(fieldName, string);`.
 
-Nested fields can be accessed with the dot notation: `"x.y.z"`. Arrays or sequences can be accessed with square brackets: `"x.y[1].z"`. For more information on how to access
-fields, see Section 6.4 *Data Access API* of the
-[RTI Prototyper Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/5.3.1/doc/manuals/connext_dds/prototyper/RTI_ConnextDDS_CoreLibraries_Prototyper_GettingStarted.pdf).
+Nested fields can be accessed with the dot notation `"x.y.z"`. Arrays or sequences can be accessed with square brackets: `"x.y[1].z"`. For more information on how to access
+fields, see the "Data Access API" section of the
+[RTI Prototyper Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/prototyper/RTI_ConnextDDS_CoreLibraries_Prototyper_GettingStarted.pdf).
 
 
  * **Passing a JSON object**:
@@ -165,7 +166,7 @@ input.read();
 input.take();
 ```
 
-The read/take operation can return multiple samples. So, we have to iterate on an array:
+The read/take operation can return multiple samples. Therefore, you must iterate on an array:
 
 ```js
 for (i=1; i <= input.samples.getLength(); i++) {
@@ -178,7 +179,7 @@ for (i=1; i <= input.samples.getLength(); i++) {
 #### access sample fields after a read/take
 A `read()` or `take()` operation can return multiple samples. They are stored in an array.
 
-We can access them in two ways:
+We can access the samples in two ways:
 
  * **Field by field**:
 
@@ -190,7 +191,7 @@ We can access them in two ways:
  }
  ```
 
- The APIs to access the samples are three: `getNumber(indexm fieldName);` `getBoolean(index, fieldName);` and `getString(index, fieldName);`.
+ The following APIs access the samples field by field: `getNumber(indexm fieldName);` `getBoolean(index, fieldName);` and `getString(index, fieldName);`.
 
  * **As a JSON object**:
 
@@ -204,7 +205,7 @@ We can access them in two ways:
 
 #### event-based reading
 
- If you don't want to do polling, you can ask *Connector* to notify you when data is available:
+ If you don't want to do polling, ask *Connector* to notify you when data is available:
 
  ```js
  connector.on('on_data_available',
@@ -219,7 +220,7 @@ We can access them in two ways:
 });
 ```
 
-Notice that if you have multiple inputs, you will have to check all of them yourself.  
+Notice that if you have multiple inputs, you will have to check all of them.  
 
 ### License
 With the sole exception of the contents of the "examples" subdirectory, all use of this product is subject to the RTI Software License Agreement included at the top level of this repository. Files within the "examples" subdirectory are licensed as marked within the file.
