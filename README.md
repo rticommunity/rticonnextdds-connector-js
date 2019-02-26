@@ -31,9 +31,9 @@ Some of the *Connector* dependencies, such as [ref](https://www.npmjs.com/packag
 *Connector* may work with older versions of OS/Compiler/Node if you are able to get all the dependencies compiled.
 
 ### Language Support
-This repository is specific to Node.js/JavaScript. For other languages (python, lua, C, etc.) refer to the [main *Connector* repository](https://github.com/rticommunity/rticonnextdds-connector).
+This repository is specific to Node.js/JavaScript. For other languages (python, lua, C, etc.), refer to the [main *Connector* repository](https://github.com/rticommunity/rticonnextdds-connector).
 
-We use [libffi](https://github.com/node-ffi/node-ffi) to call our library, but those details are hidden by a JavaScript wrapper. RTI tested its Node.js/JavaScript implementation with node v8.7.0; it should also work with lower versions.
+We use [libffi](https://github.com/node-ffi/node-ffi) to call our library; these details are hidden in a JavaScript wrapper. RTI tested its Node.js/JavaScript implementation with node v8.7.0; it should also work with lower versions.
 
 ### Platform support
 Node.js/JavaScript *Connector* builds its library for [select architectures](https://github.com/rticommunity/rticonnextdds-connector/tree/master/lib).
@@ -67,7 +67,7 @@ When the installation is complete, cd into the node_modules directory.
 
 
 ### Available examples
-You can find several sets of [examples](examples/nodejs) in the node_modules directory:
+You can find several sets of examples in the [examples/nodejs](examples/nodejs) directory:
 
  * **simple**: shows how to write samples, how to read/take, and how to use event-based reading.
  * **transform**: shows how to write a simple transformation using *Connector*. This is also a good place to understand how to use the setFromJSON and getJSON APIs to interact with samples and instances.
@@ -90,7 +90,7 @@ var connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.x
 ```
 For more information on
 the XML format, see the [XML-Based Application Creation Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) or
-look at the [ShapeExample.xml](examples/nodejs/ShapeExample.xml) file included in the example directory.
+look at the [ShapeExample.xml](examples/nodejs/ShapeExample.xml) file included in the examples directory.
 
 #### delete a *Connector*
 To destroy all the DDS entities that belong to a *Connector* previously created, call the ```delete``` function:
