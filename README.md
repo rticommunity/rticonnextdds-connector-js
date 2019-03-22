@@ -1,10 +1,12 @@
 rticonnextdds-connector: Node.js/JavaScript
 =======
 
+return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector)
+
 ### RTI Connector for Connext DDS
 *RTI Connector* for Connext DDS is a quick and easy way to access the power and
 functionality of [RTI Connext DDS](http://www.rti.com/products/index.html).
-It is based on [XML-Based Application Creation](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
+It is based on [XML Application Creation](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
 
 ### Dependencies
 
@@ -50,7 +52,7 @@ strings librtiddsconnector.dylib | grep BUILD
 ```
 
 ### Threading model
-The *Connector* Native API does not yet implement any mechanism for thread safety. For now, the responsibility of protecting calls to the *Connector* is left to you. (In future, thread safety may be added in the native layer.)
+The *Connector* Native API does not yet implement any mechanism for thread safety. For now, you are responsible for protecting calls to *Connector*. (In future, thread safety may be added in the native layer.)
 In Node.js/JavaScript, threading should not be a problem due to the 'callback' style of the language.
 
 ### Support
@@ -226,3 +228,5 @@ Notice that if you have multiple inputs, you will have to check all of them.
 With the sole exception of the contents of the "examples" subdirectory, all use of this product is subject to the RTI Software License Agreement included at the top level of this repository. Files within the "examples" subdirectory are licensed as marked within the file.
 
 This software is an experimental ("pre-production") product. The Software is provided "as is," with no warranty of any type, including any warranty for fitness for any purpose. RTI is under no obligation to maintain or support the software. RTI shall not be liable for any incidental or consequential damages arising out of the use or inability to use the software.
+
+return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector)
