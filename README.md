@@ -1,7 +1,7 @@
 rticonnextdds-connector: Node.js/JavaScript
 =======
 
-return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector)
+(return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector))
 
 ### RTI Connector for Connext DDS
 *RTI Connector* for Connext DDS is a quick and easy way to access the power and
@@ -47,6 +47,16 @@ Feel free to ask questions on the [RTI Community forum](https://community.rti.co
 
 To check the version of the libraries, run the following command. For example:
 
+### Testing
+We tested on:
+* For MacOS 64 bit : Darwin 18  clang 10
+* For Windows 64 bit: Windows 10 64 bit VS2015
+* For Windows 32 bit: Windows 7 32 bit VS2017
+* For Linux 64 bit: CentOS 6.5 gcc 4.8.2
+* For Linux 32 bit: Ubuntu 16.04 gcc 5.4.0
+* For ARM: Yocto linux 2.0.3 gcc 5.2.0
+
+### Version of Connext
 ``` bash
 strings librtiddsconnector.dylib | grep BUILD
 ```
@@ -229,4 +239,4 @@ With the sole exception of the contents of the "examples" subdirectory, all use 
 
 This software is an experimental ("pre-production") product. The Software is provided "as is," with no warranty of any type, including any warranty for fitness for any purpose. RTI is under no obligation to maintain or support the software. RTI shall not be liable for any incidental or consequential damages arising out of the use or inability to use the software.
 
-return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector)
+(return to [rticonnextdds-connector](https://github.com/rticommunity/rticonnextdds-connector))
