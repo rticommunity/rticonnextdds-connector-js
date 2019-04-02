@@ -79,7 +79,7 @@ When the installation is complete, cd into the node_modules directory.
 
 
 ### Available examples
-You can find several sets of examples in the [examples/nodejs](examples/nodejs) directory:
+You can find several sets of examples in the [examples/nodejs](examples/nodejs) directory.  If you used npm to install, you will need to clone the this repository to access the examples.
 
  * **simple**: shows how to write samples, how to read/take, and how to use event-based reading.
  * **transform**: shows how to write a simple transformation using *Connector*. This is also a good place to understand how to use the setFromJSON and getJSON APIs to interact with samples and instances.
@@ -181,7 +181,7 @@ input.take();
 The read/take operation can return multiple samples. Therefore, you must iterate on an array:
 
 ```js
-for (i=1; i <= input.samples.getLength(); i++) {
+for (i=0; i <= input.samples.getLength(); i++) {
   if (input.infos.isValid(i)) {
     console.log(JSON.stringify(input.samples.getJSON(i)));
   }
@@ -196,7 +196,7 @@ We can access the samples in two ways:
  * **Field by field**:
 
  ```js
- for (i=1; i <= input.samples.getLength(); i++) {
+ for (i=0; i <= input.samples.getLength(); i++) {
    if (input.infos.isValid(i)) {
      console.log(input.samples.getNumber(i, "x"));
    }
@@ -208,7 +208,7 @@ We can access the samples in two ways:
  * **As a JSON object**:
 
  ```js
- for (i=1; i <= input.samples.getLength(); i++) {
+ for (i=0; i <= input.samples.getLength(); i++) {
    if (input.infos.isValid(i)) {
      console.log(JSON.stringify(input.samples.getJSON(i)));
    }
@@ -223,7 +223,7 @@ We can access the samples in two ways:
  connector.on('on_data_available',
    function() {
      input.take();
-     for (i=1; i <= input.samples.getLength(); i++) {
+     for (i=0; i <= input.samples.getLength(); i++) {
          if (input.infos.isValid(i)) {
              console.log(JSON.stringify(input.samples.getJSON(i)));
          }
