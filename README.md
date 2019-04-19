@@ -8,6 +8,12 @@ rticonnextdds-connector: Node.js/JavaScript
 functionality of [RTI Connext DDS](http://www.rti.com/products/index.html).
 It is based on [XML Application Creation](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) and Dynamic Data.
 
+____
+**Warning**: The Node.js/JavaScript *Connector* uses 0-based indexing for sequences since
+v0.4.0. Previously sequences started at index 1. See *read/take data* more more
+information.
+____
+
 ### Dependencies
 
 #### Node.js packages:
