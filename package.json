@@ -16,12 +16,14 @@
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js.git"
   },
   "dependencies": {
-    "ref": "*",
-    "util": "*",
-    "ffi": "*",
-    "sleep": "*",
     "events": "*",
-    "socket.io": "*"
+    "ffi": "*",
+    "ref": "*",
+    "rticonnextdds-connector": "^0.4.3",
+    "sleep": "*",
+    "socket.io": "*",
+    "standard": "^14.2.0",
+    "util": "*"
   },
   "keywords": [
     "rti",

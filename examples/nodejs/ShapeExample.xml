@@ -36,7 +36,11 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 				</property>
 				 End Monitoring -->
 			</participant_qos>
-
+            <subscriber_qos>
+                <entity_factory>
+                    <autoenable_created_entities>false</autoenable_created_entities>
+                </entity_factory>
+            </subscriber_qos>
 
 		</qos_profile>
 	</qos_library>
@@ -45,10 +49,10 @@ This code contains trade secrets of Real-Time Innovations, Inc.
     <types>
 
 	   	<struct name="ShapeType" extensibility="extensible">
-			<member name="color" stringMaxLength="128" id="0" type="string" key="true"/>
-			<member name="x" id="1" type="long"/>
-			<member name="y" id="2" type="long"/>
-			<member name="shapesize" id="3" type="long"/>
+			<member name="color" stringMaxLength="128" type="string" key="true"/>
+			<member name="x" type="long"/>
+			<member name="y" type="long"/>
+			<member name="shapesize" type="long"/>
 		</struct>
 		<enum name="ShapeFillKind" extensibility="extensible">
 			<enumerator name="SOLID_FILL" value="0"/>
@@ -57,8 +61,8 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 			<enumerator name="VERTICAL_HATCH_FILL" value="3"/>
 		</enum>
 		<struct name="ShapeTypeExtended" baseType="ShapeType" extensibility="extensible">
-			<member name="fillKind" id="4" type="nonBasic" nonBasicTypeName="ShapeFillKind"/>
-			<member name="angle" id="5" type="float"/>
+			<member name="fillKind" type="nonBasic" nonBasicTypeName="ShapeFillKind"/>
+			<member name="angle" type="float"/>
 		</struct>
     </types>
 

@@ -5,22 +5,38 @@
 * must display this notice unaltered.                                         *
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
+var rti = require('rticonnextdds-connector')
+var path = require('path')
+var fullpath = path.join(__dirname, '/../ShapeExample.xml')
+var connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
+var input = connector.getInput('MySubscriber::MySquareReader')
 
-var sleep = require('sleep');
-var rti   = require('rticonnextdds-connector');
+function waitForDiscovery (theInput, publicationName) {
+  console.log('Waiting to match with ' + publicationName)
+  var matches = []
+  while (!matches.some(item => item.name === publicationName)) {
+    var changesInMatches = input.waitForPublications(2000)
+    if (changesInMatches > 0) {
+      matches = input.getMatchedPublications()
+    }
+  }
+  console.log('Matched with: ')
+  matches.forEach(function (match) {
+    console.log(match.name)
+  })
+}
 
-var connector = new rti.Connector("MyParticipantLibrary::Zero",__dirname + "/../ShapeExample.xml");
-var input = connector.getInput("MySubscriber::MySquareReader");
+// Wait for discovery to occur
+waitForDiscovery(input, 'MySquareWriter')
 
 connector.on('on_data_available',
-   function() {
-     input.take();
-     for (var i=0; i < input.samples.getLength(); i++) {
-         if (input.infos.isValid(i)) {
-             console.log(JSON.stringify(input.samples.getJSON(i)));
-         }
-     }
+  function () {
+    input.take()
+    for (var i = 0; i < input.samples.getLength(); i++) {
+      if (input.infos.isValid(i)) {
+        console.log(JSON.stringify(input.samples.getJSON(i)))
+      }
+    }
+  })
 
-});
-
-console.log("Waiting for data");
+console.log('Waiting for data')
