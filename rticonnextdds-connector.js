@@ -684,7 +684,6 @@ var EventEmitter = require('events').EventEmitter
 class Connector extends EventEmitter {
   constructor (configName, url) {
     super();
-    // Enable data event and 0-based indexing by default
     var options = new _ConnectorOptions();
     options.one_based_sequence_indexing = 1;
     options.enable_on_data_event = 1;
@@ -727,10 +726,9 @@ class Connector extends EventEmitter {
     // is passed as 'res' to the callback function.
     connectorBinding.api.RTI_Connector_wait_for_data.async(
       this.native,
-      10000,
+      1000,
       function (err, res) {
         if (err) throw err;
-        console.log('RTI_Connector_wait_for_data returned: ' + res);
         // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
         // we call this in a loop (and therefore expect to receive timeout error)
         // for this reason do not raise a timeout exception
@@ -745,7 +743,7 @@ class Connector extends EventEmitter {
         // Just do this forever until the user calls off('on_data_available')
         this.onDataAvailable();
         // TODO add a counter to know when to exit this loop
-      }
+      }.bind(this)
     );
   }
 
