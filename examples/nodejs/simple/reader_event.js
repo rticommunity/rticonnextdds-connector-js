@@ -29,6 +29,25 @@ function waitForDiscovery (theInput, publicationName) {
 // Wait for discovery to occur
 waitForDiscovery(input, 'MySquareWriter')
 
+input.wait() 
+console.log('input.wait works')
+input.take()
+for (var o = 0; o < input.samples.getLength(); o++) {
+  if (input.infos.isValid(o)) {
+    console.log(JSON.stringify(input.samples.getJson(o)))
+  }
+}
+
+// THIS IS WHAT IS BROKEN
+connector.waitForData(5000) 
+console.log('connector.wait works')
+input.take()
+for (var o = 0; o < input.samples.getLength(); o++) {
+  if (input.infos.isValid(o)) {
+    console.log(JSON.stringify(input.samples.getJson(o)))
+  }
+}
+
 connector.on('on_data_available',
   function () {
     console.log('in the call back')

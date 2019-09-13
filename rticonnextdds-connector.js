@@ -10,13 +10,15 @@ var os = require('os');
 var ref = require('ref');
 var ffi = require('ffi');
 var path = require('path');
-var Struct = require('ref-struct');
+var StructType = require('ref-struct');
 
-var _ConnectorOptions = Struct ({
-  enable_on_data_event: 'int',
-  one_based_sequence_indexing: 'int'
+// This is a structure which is passed to C from node so we need to define
+// it using ref-struct.
+// This must match the definition of RTI_Connector_Options
+var _ConnectorOptions = StructType({
+  enable_on_data_event: ref.types.int,
+  one_based_sequence_indexing: ref.types.int
 });
-var _ConnectorOptionsPtr = ref.refType(_ConnectorOptions)
 
 class _ConnectorBinding {
   constructor () {
@@ -66,7 +68,7 @@ class _ConnectorBinding {
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName);
     this.api = ffi.Library(this.library, {
-      RTI_Connector_new: ['pointer', ['string', 'string', _ConnectorOptionsPtr]],
+      RTI_Connector_new: ['pointer', ['string', 'string', ref.refType(_ConnectorOptions)]],
       RTI_Connector_delete: ['void', ['pointer']],
       RTI_Connector_get_datawriter: ['pointer', ['pointer', 'string']],
       RTI_Connector_get_datareader: ['pointer', ['pointer', 'string']],
@@ -381,7 +383,7 @@ class Input {
     } else if (!_isNumber(timeout)) {
       throw new TypeError('timeout must be a number');
     }
-    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data(
+    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data_on_reader(
       this.native,
       timeout));
   }
@@ -682,10 +684,10 @@ var EventEmitter = require('events').EventEmitter
 class Connector extends EventEmitter {
   constructor (configName, url) {
     super();
-    this.configName = configName;
-    this.url = url;
     // Enable data event and 0-based indexing by default
-    var options = new _ConnectorOptions(1, 0);
+    var options = new _ConnectorOptions();
+    options.one_based_sequence_indexing = 1;
+    options.enable_on_data_event = 1;
     this.native = connectorBinding.api.RTI_Connector_new(
       configName,
       url,
@@ -708,27 +710,49 @@ class Connector extends EventEmitter {
     return new Output(this, outputName);
   }
 
-  onDataAvailable () {
-    console.log('onDataAvailable callback...')
-    this.emit('on_data_available')
-    // connectorBinding.api.RTI_Connector_wait_for_data.async(
-    //   this.native,
-    //   2000,
-    //   function (err, res) {
-    //     if (err) {
-    //       throw err;
-    //     }
-    //     console.log(this.configName)
-    //     if (res !== _ReturnCodes.timeout) {
-    //       _checkRetcode(res)
-    //     }
-    //     if (res === _ReturnCodes.ok) {
-    //       this.emit('on_data_available')
-    //     }
-    //   }
-    // );
+  waitForData (timeout) {
+    // timeout is "optional" - if not supplied we default to infinite
+    if (timeout === undefined) {
+      timeout = -1;
+    } else if (!_isNumber(timeout)) {
+      throw new TypeError('timeout must be a number');
+    }
+    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data(
+      this.native,
+      timeout));
   }
 
+  onDataAvailable () {
+    // No need to cache return value. When using .async() the result
+    // is passed as 'res' to the callback function.
+    connectorBinding.api.RTI_Connector_wait_for_data.async(
+      this.native,
+      10000,
+      function (err, res) {
+        if (err) throw err;
+        console.log('RTI_Connector_wait_for_data returned: ' + res);
+        // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
+        // we call this in a loop (and therefore expect to receive timeout error)
+        // for this reason do not raise a timeout exception
+        if (res !== _ReturnCodes.timeout) {
+          _checkRetcode(res)
+        }
+        // Emitting this from the EventEmitter will trigger the callback created
+        // by the user
+        if (res === _ReturnCodes.ok) {
+          this.emit('on_data_available')
+        }
+        // Just do this forever until the user calls off('on_data_available')
+        this.onDataAvailable();
+        // TODO add a counter to know when to exit this loop
+      }
+    );
+  }
+
+  // This callback was added for the 'newListener' event, meaning it is triggered
+  // just before we add a new callback.
+  // We use this to identify when the user has requested on('on_data_available')
+  // We will now wait for data, and when some arrives will emit the event
   newListenerCallBack (eventName, functistener) {
     if (eventName === 'on_data_available') {
       this.onDataAvailable();
