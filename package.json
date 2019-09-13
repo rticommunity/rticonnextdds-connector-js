@@ -16,10 +16,13 @@
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js.git"
   },
   "dependencies": {
+    "chai": "^4.2.0",
     "events": "*",
     "ffi": "*",
+    "mocha": "^6.2.0",
     "ref": "*",
     "rticonnextdds-connector": "^0.4.3",
+    "sinon": "^7.4.2",
     "sleep": "*",
     "socket.io": "*",
     "standard": "^14.2.0"

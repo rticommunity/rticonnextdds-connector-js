@@ -79,8 +79,7 @@ params.forEach(function(retrieval_method) {
 
       expect(x).to.equal(testMsg['x'])
       expect(y).to.equal(testMsg['y'])
-      //NOTE: getBoolean returns an Integer representation of Boolean
-      expect(z).to.equal(+ testMsg['z'])
+      expect(z).to.equal(testMsg['z'])
       expect(shapesize).to.equal(testMsg['shapesize'])
       expect(color).to.equal(testMsg['color'])
     })

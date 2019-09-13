@@ -11,7 +11,6 @@ var ref = require('ref');
 var ffi = require('ffi');
 var path = require('path');
 var Struct = require('ref-struct');
-var EventEmitter = require('events').EventEmitter
 
 var _ConnectorOptions = Struct ({
   enable_on_data_event: 'int',
@@ -23,24 +22,20 @@ class _ConnectorBinding {
   constructor () {
     var libArch = '';
     var libName = '';
-    var libSuffix = '';
 
     if (os.arch() === 'x64') {
       switch (os.platform()) {
         case 'darwin':
           libArch = 'x64Darwin16clang8.0';
-          libName = 'librtiddsconnector';
-          libSuffix = '.dylib';
+          libName = 'librtiddsconnector.dylib';
           break;
         case 'linux':
           libArch = 'x64Linux2.6gcc4.4.5';
-          libName = 'librtiddsconnector';
-          libSuffix = '.so';
+          libName = 'librtiddsconnector.so';
           break;
         case 'win32':
           libArch = 'x64Win64VS2013';
-          libName = 'rtiddsconnector';
-          libSuffix = '.dll';
+          libName = 'rtiddsconnector.dll';
           break;
         default:
           throw new Error(os.platform() + ' not yet supported');
@@ -49,13 +44,11 @@ class _ConnectorBinding {
       switch (os.platform()) {
         case 'linux':
           libArch = 'i86Linux3.xgcc4.6.3';
-          libName = 'librtiddsconnector';
-          libSuffix = '.so';
+          libName = 'librtiddsconnector.so';
           break;
         case 'win32':
           libArch = 'i86Win32VS2010';
-          libName = 'rtiddsconnector';
-          libSuffix = '.dll';
+          libName = 'rtiddsconnector.dll';
           break;
         default:
           throw new Error(os.platform() + ' not yet supported');
@@ -64,15 +57,14 @@ class _ConnectorBinding {
       switch (os.platform()) {
         case 'linux':
           libArch = 'armv6vfphLinux3.xgcc4.7.2';
-          libName = 'librtiddsconnector';
-          libSuffix = '.so';
+          libName = 'librtiddsconnector.so';
           break;
         default:
           throw new Error(os.platform() + ' not yet supported');
       }
     }
 
-    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName, libSuffix);
+    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName);
     this.api = ffi.Library(this.library, {
       RTI_Connector_new: ['pointer', ['string', 'string', _ConnectorOptionsPtr]],
       RTI_Connector_delete: ['void', ['pointer']],
@@ -490,7 +482,7 @@ class Instance {
   }
 
   setFromJson (jsonObj) {
-    _checkRetcode(connectorBinding.api.RTI_Connector.RTI_Connector_set_json_instance(
+    _checkRetcode(connectorBinding.api.RTI_Connector_set_json_instance(
       this.output.connector.native,
       this.output.name,
       JSON.stringify(jsonObj)));
@@ -576,25 +568,120 @@ class Output {
   }
 }
 
-// Investigation
-// https://nodejs.org/api/events.html#events_asynchronous_vs_synchronous
-// https://medium.com/technoetics/node-js-event-emitter-explained-d4f7fd141a1a
-// https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls
-// EventEmitter.on('eventName', callback) - add callback as a callback if eventName is raised
-// EventEmitter.emit('eventName') - raise eventName
-// eventName === newListener - run before a new listener is added
-// eventName === removeListener - run after a listener is removed
-// callbacks are always called in the order they were registered
-// foo.async - run foo on a thread pool and run supplied callback when completed
+// // Investigation
+// // https://nodejs.org/api/events.html#events_asynchronous_vs_synchronous
+// // https://medium.com/technoetics/node-js-event-emitter-explained-d4f7fd141a1a
+// // https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls
+// // EventEmitter.on('eventName', callback) - add callback as a callback if eventName is raised
+// // EventEmitter.emit('eventName') - raise eventName
+// // eventName === newListener - run before a new listener is added
+// // eventName === removeListener - run after a listener is removed
+// // callbacks are always called in the order they were registered
+// // foo.async - run foo on a thread pool and run supplied callback when completed
 
-// Understanding:
-// We have onDataAvailaleRun to allow us to track when we should and should not use
-// the callback (e.g., if 3 listeners are removed, but one is still there - it is still true)
-// Why do we call this.onDataAvailable() if onDataAvailableRun is true?
-// in original code we called it once with `this` and once with `connector`
-// issue could be related to the fact that we are using it in class?
-class Connector {
+// // Understanding:
+// // We have onDataAvailaleRun to allow us to track when we should and should not use
+// // the callback (e.g., if 3 listeners are removed, but one is still there - it is still true)
+// // Why do we call this.onDataAvailable() if onDataAvailableRun is true?
+// // in original code we called it once with `this` and once with `connector`
+// // issue could be related to the fact that we are using it in class?
+
+// EventEmitter = require('events').EventEmitter
+// var util = require('util');
+
+// function Connector (configName, url) {
+//   // constructor (configName, url) {
+//   //   this.configName = configName;
+//   //   this.url = url;
+//   //   // Enable data event and 0-based indexing by default
+//   //   var options = new _ConnectorOptions(1, 0);
+//   //   this.native = connectorBinding.api.RTI_Connector_new(
+//   //     configName,
+//   //     url,
+//   //     options.ref());
+
+//   //   // this.emitter = new EventEmitter();
+//   //   // this.onDataAvailable = this.onDataAvailable.bind(this);
+//   //   // this.newListenerCallBack = this.newListenerCallBack.bind(this)
+//   //   // this.removeListenerCallBack = this.removeListenerCallBack.bind(this)
+//   //   // this.emitter.on('newListener', this.newListenerCallBack);
+//   //   // this.emitter.on('removeListener', this.removeListenerCallBack);
+//   // }
+// var onDataAvailableRun = false;
+//    this.configName = configName;
+//   this.url = url;
+//   // Enable data event and 0-based indexing by default
+//   var options = new _ConnectorOptions(1, 0);
+//   this.native = connectorBinding.api.RTI_Connector_new(
+//     configName,
+//     url,
+//     options.ref());
+
+//   this.delete = function () {
+//     connectorBinding.api.RTI_Connector_delete(this.native);
+//   }
+
+//   this.getInput = function (inputName) {
+//     return new Input(this, inputName);
+//   }
+
+//   this.getOutput = function (outputName) {
+//     return new Output(this, outputName);
+//   }
+
+//   var onDataAvailable = function (connector) {
+//     if (connector && connector.native !== null) {
+//       connectorBinding.api.RTI_Connector_wait_for_data.async(
+//         connector.native,
+//         2000,
+//         function (err, res) {
+//           if (err) {
+//             throw err;
+//           }
+//           console.log(connector.configName)
+//           if (res !== _ReturnCodes.timeout) {
+//             _checkRetcode(res)
+//           }
+//           if (res === _ReturnCodes.ok) {
+//             this.emit('on_data_available')
+//           }
+//           if (onDataAvailableRun === true) {
+//             onDataAvailable(connector);
+//           }
+//         }
+//       );
+//     }
+//   }
+
+//   var newListenerCallBack = function (eventName, functistener) {
+//     if (eventName === 'on_data_available') {
+//       if (onDataAvailableRun === false) {
+//         onDataAvailableRun = true;
+//         onDataAvailable(this);
+//       }
+//     }
+//   }
+
+//   var removeListenerCallBack = function (eventName, funcListener) {
+//     if (eventName === 'on_data_available') {
+//       if (EventEmitter.listenerCount(this, eventName) === 0) {
+//         onDataAvailableRun = false;
+//       }
+//     }
+//   }
+
+//   this.on('newListener', newListenerCallBack);
+//   this.on('removeListener', removeListenerCallBack);
+
+// }
+
+// util.inherits(Connector, EventEmitter)
+
+var EventEmitter = require('events').EventEmitter
+
+class Connector extends EventEmitter {
   constructor (configName, url) {
+    super();
     this.configName = configName;
     this.url = url;
     // Enable data event and 0-based indexing by default
@@ -603,10 +690,10 @@ class Connector {
       configName,
       url,
       options.ref());
-    // this.emitter = new EventEmitter();
-    // this.onDataAvailableRun = false;
-    // this.emitter.on('newListener', this.newListenerCallBack);
-    // this.emitter.on('removeListener', this.removeListenerCallBack);
+    if (this.native.isNull()) {
+      throw new Error('Invalid participant profile, xml path or xml profile')
+    }
+    this.on('newListener', this.newListenerCallBack);
   }
 
   delete () {
@@ -621,42 +708,32 @@ class Connector {
     return new Output(this, outputName);
   }
 
-  // onDataAvailable () {
-  //   if (this && this.native !== null) {
-  //     connectorBinding.api.RTI_Connector_wait_for_data.async(
-  //       this.native,
-  //       2000,
-  //       function (err, res) {
-  //         console.log('wait')
-  //         if (err) {
-  //           throw err;
-  //         }
-  //         if (this.onDataAvailableRun === true) {
-  //           this.onDataAvailable(this);
-  //         }
-  //         if (res === _ReturnCodes.ok) {
-  //           this.emit('on_data_available');
-  //         }
-  //       }
-  //     );
-  //   }
-  // }
+  onDataAvailable () {
+    console.log('onDataAvailable callback...')
+    this.emit('on_data_available')
+    // connectorBinding.api.RTI_Connector_wait_for_data.async(
+    //   this.native,
+    //   2000,
+    //   function (err, res) {
+    //     if (err) {
+    //       throw err;
+    //     }
+    //     console.log(this.configName)
+    //     if (res !== _ReturnCodes.timeout) {
+    //       _checkRetcode(res)
+    //     }
+    //     if (res === _ReturnCodes.ok) {
+    //       this.emit('on_data_available')
+    //     }
+    //   }
+    // );
+  }
 
-  // newListenerCallBack (eventName, functistener) {
-  //   if (eventName === 'on_data_available') {
-  //     if (this.onDataAvailableRun === false) {
-  //       this.onDataAvailableRun = true;
-  //       this.onDataAvailable();
-  //     }
-  //   }
-  // }
-
-  // removeListenerCallBack (eventName, funcListener) {
-  //   if (this.listenerCount(eventName) === 0) {
-  //     this.onDataAvailableRun = false;
-  //   }
-  // }
-
+  newListenerCallBack (eventName, functistener) {
+    if (eventName === 'on_data_available') {
+      this.onDataAvailable();
+    }
+  }
 }
 
 module.exports.Connector = Connector;

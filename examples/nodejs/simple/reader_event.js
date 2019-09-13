@@ -31,6 +31,7 @@ waitForDiscovery(input, 'MySquareWriter')
 
 connector.on('on_data_available',
   function () {
+    console.log('in the call back')
     input.take()
     for (var i = 0; i < input.samples.getLength(); i++) {
       if (input.infos.isValid(i)) {
