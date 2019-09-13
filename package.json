@@ -22,8 +22,7 @@
     "rticonnextdds-connector": "^0.4.3",
     "sleep": "*",
     "socket.io": "*",
-    "standard": "^14.2.0",
-    "util": "*"
+    "standard": "^14.2.0"
   },
   "keywords": [
     "rti",

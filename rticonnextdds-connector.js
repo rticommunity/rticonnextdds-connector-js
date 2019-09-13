@@ -9,7 +9,7 @@
 var os = require('os');
 var ref = require('ref');
 var ffi = require('ffi');
-var util = require('util');
+var path = require('path');
 var Struct = require('ref-struct');
 var EventEmitter = require('events').EventEmitter
 
@@ -72,7 +72,7 @@ class _ConnectorBinding {
       }
     }
 
-    this.library = __dirname + '/rticonnextdds-connector/lib/' + libArch + '/' + libName + libSuffix;
+    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName, libSuffix);
     this.api = ffi.Library(this.library, {
       RTI_Connector_new: ['pointer', ['string', 'string', _ConnectorOptionsPtr]],
       RTI_Connector_delete: ['void', ['pointer']],
