@@ -162,7 +162,7 @@ class Samples {
     this.input = input;
   }
 
-  getLength () {
+  get length () {
     var length = ref.alloc('double');
     var retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
@@ -317,7 +317,7 @@ class Infos {
     this.input = input;
   }
 
-  getLength () {
+  get length () {
     var length = ref.alloc('double');
     var retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
@@ -405,7 +405,7 @@ class Input {
     return currentChangeCount.deref();
   }
 
-  getMatchedPublications () {
+  get matchedPublications () {
     var cStr = ref.alloc('char *');
     var retcode = connectorBinding.api.RTI_Connector_get_matched_publications(
       this.native,
@@ -415,7 +415,7 @@ class Input {
   }
 
   // Consider making this a property
-  getSampleCount () {
+  get sampleCount () {
     return this.samples.getLength();
   }
 }
@@ -554,7 +554,7 @@ class Output {
     return currentChangeCount.deref();
   }
 
-  getMatchedSubscriptions () {
+  get matchedSubscriptions () {
     var cStr = ref.alloc('char *');
     var retcode = connectorBinding.api.RTI_Connector_get_matched_subscriptions(
       this.native,

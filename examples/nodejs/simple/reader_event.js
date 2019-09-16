@@ -17,7 +17,7 @@ function waitForDiscovery (theInput, publicationName) {
   while (!matches.some(item => item.name === publicationName)) {
     var changesInMatches = input.waitForPublications(2000)
     if (changesInMatches > 0) {
-      matches = input.getMatchedPublications()
+      matches = input.matchedPublications
     }
   }
   console.log('Matched with: ')
@@ -32,7 +32,7 @@ waitForDiscovery(input, 'MySquareWriter')
 connector.on('on_data_available',
   function () {
     input.take()
-    for (var i = 0; i < input.samples.getLength(); i++) {
+    for (var i = 0; i < input.samples.length; i++) {
       if (input.infos.isValid(i)) {
         console.log(JSON.stringify(input.samples.getJSON(i)))
       }

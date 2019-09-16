@@ -20,7 +20,7 @@ function waitForDiscovery (theOutput, subscriptionName) {
   while (!matches.some(item => item.name === subscriptionName)) {
     var changesInMatches = output.waitForSubscriptions(2000)
     if (changesInMatches > 0) {
-      matches = output.getMatchedSubscriptions()
+      matches = output.matchedSubscriptions
     }
   }
   console.log('Matched with: ')
