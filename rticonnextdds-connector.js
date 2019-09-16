@@ -414,9 +414,8 @@ class Input {
     return JSON.parse(_moveCString(cStr.deref()));
   }
 
-  // Consider making this a property
   get sampleCount () {
-    return this.samples.getLength();
+    return this.samples.length;
   }
 }
 

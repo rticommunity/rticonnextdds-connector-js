@@ -43,18 +43,18 @@ params.forEach(function(retrieval_method) {
       for (var i=0;i<20;i++){
         sleep.usleep(500)
         input[retrieval_method]()
-        if (input.samples.getLength() > 0)
+        if (input.samples.length > 0)
           break
       }
     })
 
     it('samples length should be 1',function(){
-      var len=input.samples.getLength()
+      var len=input.samples.length
       expect(len).to.equal(1)
     })
 
     it('infos length should be 1',function(){
-      var len=input.infos.getLength()
+      var len=input.infos.length
       expect(len).to.equal(1)
     })
 
