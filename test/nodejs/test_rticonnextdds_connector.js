@@ -84,7 +84,8 @@ describe('Connector Tests',function() {
       connector.once("on_data_available",spy)
       output = connector.getOutput("MyPublisher::MySquareWriter")
       testMsg='{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
-      output.write(JSON.parse(testMsg))
+      output.instance.setFromJson(JSON.parse(testMsg))
+      output.write()
     })
 
   })

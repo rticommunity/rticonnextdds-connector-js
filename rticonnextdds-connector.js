@@ -11,6 +11,7 @@ var ref = require('ref');
 var ffi = require('ffi');
 var path = require('path');
 var StructType = require('ref-struct');
+var EventEmitter = require('events').EventEmitter
 
 // This is a structure which is passed to C from node so we need to define
 // it using ref-struct.
@@ -417,8 +418,6 @@ class Input {
   getSampleCount () {
     return this.samples.getLength();
   }
-
-  // Add the iterator logic here
 }
 
 class Instance {
@@ -426,7 +425,7 @@ class Instance {
     this.output = output;
   }
 
-  clearMember(fieldName) {
+  clearMember (fieldName) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string');
     } else {
@@ -570,117 +569,6 @@ class Output {
   }
 }
 
-// // Investigation
-// // https://nodejs.org/api/events.html#events_asynchronous_vs_synchronous
-// // https://medium.com/technoetics/node-js-event-emitter-explained-d4f7fd141a1a
-// // https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls
-// // EventEmitter.on('eventName', callback) - add callback as a callback if eventName is raised
-// // EventEmitter.emit('eventName') - raise eventName
-// // eventName === newListener - run before a new listener is added
-// // eventName === removeListener - run after a listener is removed
-// // callbacks are always called in the order they were registered
-// // foo.async - run foo on a thread pool and run supplied callback when completed
-
-// // Understanding:
-// // We have onDataAvailaleRun to allow us to track when we should and should not use
-// // the callback (e.g., if 3 listeners are removed, but one is still there - it is still true)
-// // Why do we call this.onDataAvailable() if onDataAvailableRun is true?
-// // in original code we called it once with `this` and once with `connector`
-// // issue could be related to the fact that we are using it in class?
-
-// EventEmitter = require('events').EventEmitter
-// var util = require('util');
-
-// function Connector (configName, url) {
-//   // constructor (configName, url) {
-//   //   this.configName = configName;
-//   //   this.url = url;
-//   //   // Enable data event and 0-based indexing by default
-//   //   var options = new _ConnectorOptions(1, 0);
-//   //   this.native = connectorBinding.api.RTI_Connector_new(
-//   //     configName,
-//   //     url,
-//   //     options.ref());
-
-//   //   // this.emitter = new EventEmitter();
-//   //   // this.onDataAvailable = this.onDataAvailable.bind(this);
-//   //   // this.newListenerCallBack = this.newListenerCallBack.bind(this)
-//   //   // this.removeListenerCallBack = this.removeListenerCallBack.bind(this)
-//   //   // this.emitter.on('newListener', this.newListenerCallBack);
-//   //   // this.emitter.on('removeListener', this.removeListenerCallBack);
-//   // }
-// var onDataAvailableRun = false;
-//    this.configName = configName;
-//   this.url = url;
-//   // Enable data event and 0-based indexing by default
-//   var options = new _ConnectorOptions(1, 0);
-//   this.native = connectorBinding.api.RTI_Connector_new(
-//     configName,
-//     url,
-//     options.ref());
-
-//   this.delete = function () {
-//     connectorBinding.api.RTI_Connector_delete(this.native);
-//   }
-
-//   this.getInput = function (inputName) {
-//     return new Input(this, inputName);
-//   }
-
-//   this.getOutput = function (outputName) {
-//     return new Output(this, outputName);
-//   }
-
-//   var onDataAvailable = function (connector) {
-//     if (connector && connector.native !== null) {
-//       connectorBinding.api.RTI_Connector_wait_for_data.async(
-//         connector.native,
-//         2000,
-//         function (err, res) {
-//           if (err) {
-//             throw err;
-//           }
-//           console.log(connector.configName)
-//           if (res !== _ReturnCodes.timeout) {
-//             _checkRetcode(res)
-//           }
-//           if (res === _ReturnCodes.ok) {
-//             this.emit('on_data_available')
-//           }
-//           if (onDataAvailableRun === true) {
-//             onDataAvailable(connector);
-//           }
-//         }
-//       );
-//     }
-//   }
-
-//   var newListenerCallBack = function (eventName, functistener) {
-//     if (eventName === 'on_data_available') {
-//       if (onDataAvailableRun === false) {
-//         onDataAvailableRun = true;
-//         onDataAvailable(this);
-//       }
-//     }
-//   }
-
-//   var removeListenerCallBack = function (eventName, funcListener) {
-//     if (eventName === 'on_data_available') {
-//       if (EventEmitter.listenerCount(this, eventName) === 0) {
-//         onDataAvailableRun = false;
-//       }
-//     }
-//   }
-
-//   this.on('newListener', newListenerCallBack);
-//   this.on('removeListener', removeListenerCallBack);
-
-// }
-
-// util.inherits(Connector, EventEmitter)
-
-var EventEmitter = require('events').EventEmitter
-
 class Connector extends EventEmitter {
   constructor (configName, url) {
     super();
@@ -695,6 +583,8 @@ class Connector extends EventEmitter {
       throw new Error('Invalid participant profile, xml path or xml profile')
     }
     this.on('newListener', this.newListenerCallBack);
+    this.on('removeListener', this.removeListenerCallBack);
+    this.onDataAvailableRun = false;
   }
 
   delete () {
@@ -733,16 +623,16 @@ class Connector extends EventEmitter {
         // we call this in a loop (and therefore expect to receive timeout error)
         // for this reason do not raise a timeout exception
         if (res !== _ReturnCodes.timeout) {
-          _checkRetcode(res)
+          _checkRetcode(res);
+        }
+        if (this.onDataAvailableRun) {
+          this.onDataAvailable();
         }
         // Emitting this from the EventEmitter will trigger the callback created
         // by the user
         if (res === _ReturnCodes.ok) {
-          this.emit('on_data_available')
+          this.emit('on_data_available');
         }
-        // Just do this forever until the user calls off('on_data_available')
-        this.onDataAvailable();
-        // TODO add a counter to know when to exit this loop
       }.bind(this)
     );
   }
@@ -751,9 +641,18 @@ class Connector extends EventEmitter {
   // just before we add a new callback.
   // We use this to identify when the user has requested on('on_data_available')
   // We will now wait for data, and when some arrives will emit the event
-  newListenerCallBack (eventName, functistener) {
+  newListenerCallBack (eventName, functionListener) {
     if (eventName === 'on_data_available') {
-      this.onDataAvailable();
+      if (this.onDataAvailableRun === false) {
+        this.onDataAvailableRun = true;
+        this.onDataAvailable();
+      }
+    }
+  }
+
+  removeListenerCallBack (eventName, functionListener) {
+    if (this.listenerCount(eventName) === 0) {
+      this.onDataAvailableRun = false;
     }
   }
 }
