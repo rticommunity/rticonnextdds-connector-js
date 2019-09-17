@@ -714,27 +714,6 @@ class Connector extends EventEmitter {
     );
   }
 
-  temporaryFunction (timeout) {
-    if (timeout === undefined) {
-      timeout = -1
-    }
-    return new Promise(function (resolve, reject) {
-      connectorBinding.api.RTI_Connector_wait_for_data.async(
-        this.native,
-        timeout,
-        function (err, res) {
-          if (err) {
-            reject (err);
-          } else if (res !== _ReturnCodes.ok) {
-            reject (res);
-          } else {
-            resolve();
-          }
-        }
-      )
-    }.bind(this))
-  }
-
   // This callback was added for the 'newListener' event, meaning it is triggered
   // just before we add a new callback.
   // We use this to identify when the user has requested on('on_data_available')
@@ -752,6 +731,28 @@ class Connector extends EventEmitter {
     if (this.listenerCount(eventName) === 0) {
       this.onDataAvailableRun = false;
     }
+  }
+
+  waitForDataPromise (timeout) {
+    if (timeout === undefined) {
+      timeout = -1
+    } else if (!_isNumber(timeout)) {
+      throw new TypeError('timeout must be a number');
+    }
+    return new Promise(function (resolve, reject) {
+      connectorBinding.api.RTI_Connector_wait_for_data.async(
+        this.native,
+        timeout,
+        function (err, res) {
+          if (err) {
+            reject (err);
+          }
+          _checkRetcode(res);
+          // _checkRetcode will throw an exception if there is an issue
+          resolve();
+        }
+      )
+    }.bind(this))
   }
 }
 

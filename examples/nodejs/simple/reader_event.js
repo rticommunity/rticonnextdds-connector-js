@@ -30,23 +30,28 @@ function waitForDiscovery (theInput, publicationName) {
 waitForDiscovery(input, 'MySquareWriter')
 
 console.log('Waiting for data')
-connector.temporaryFunction().then(function (result) {
+
+// The waitForDataPromise will resolve if data is available within the supplied
+// timeout
+connector.waitForDataPromise(5000).then(function (result) {
+  console.log('got')
   input.take()
-  for (var i = 0; i < input.samples.length; i++) {
-    if (input.infos.isValid(i)) {
-      console.log(JSON.stringify(input.samples.getJson(i)))
-    }
+  for (var sample of input.validDataIterator) {
+    console.log(JSON.stringify(sample.getJson()))
   }
-}, function (err) {
-  console.log(err)
+},
+function (err) {
+  console.log('No data received, err: ' + err)
 });
 
-// connector.on('on_data_available',
-//   function () {
-//     input.take()
-//     for (var i = 0; i < input.samples.length; i++) {
-//       if (input.infos.isValid(i)) {
-//         console.log(JSON.stringify(input.samples.getJSON(i)))
-//       }
-//     }
-//   })
+// Alternatively, use 'on' to be notified (via an EventEmitter) when
+// data is available
+connector.on('on_data_available',
+  function () {
+    input.take()
+    for (var i = 0; i < input.samples.length; i++) {
+      if (input.infos.isValid(i)) {
+        console.log(JSON.stringify(input.samples.getJSON(i)))
+      }
+    }
+  })
