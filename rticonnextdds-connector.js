@@ -351,6 +351,78 @@ class Infos {
   }
 }
 
+class SampleIterator {
+  constructor (input, index) {
+    this.input = input;
+    if (index === undefined) {
+      index = -1;
+    }
+    this.index = index;
+    this.length = input.sampleCount;
+  }
+
+  get validData () {
+    return this.input.infos.isValid(this.index);
+  }
+
+  get info () {
+    return new SampleInfo(this.input, this.index);
+  }
+
+  getJson (memberName) {
+    return this.input.samples.getJson(this.index, memberName);
+  }
+
+  getNumber (fieldName) {
+    return this.input.samples.getNumber(this.index, fieldName);
+  }
+
+  getBoolean (fieldName) {
+    return this.input.samples.getBoolean(this.index, fieldName);
+  }
+
+  getString (fieldName) {
+    return this.input.samples.getString(this.index, fieldName);
+  }
+
+  get native () {
+    return this.input.samples.getNative(this.index);
+  }
+
+  [Symbol.iterator] () {
+    var _this = this;
+    return {
+      next () {
+        if ((_this.index + 1) < _this.length) {
+          _this.index += 1;
+          return { value: _this, done: false };
+        } else {
+          return { value: null, done: true };
+        }
+      }
+    }
+  }
+}
+
+class ValidSampleIterator extends SampleIterator {
+  [Symbol.iterator] () {
+    var _this = this;
+    return {
+      next () {
+        while (((_this.index + 1) < _this.length) && !(_this.input.infos.isValid(_this.index + 1))) {
+          _this.index += 1;
+        }
+        if ((_this.index + 1) < _this.length) {
+          _this.index += 1;
+          return { value: _this, done: false };
+        } else {
+          return { value: null, done: true };
+        }
+      }
+    }
+  }
+}
+
 class Input {
   constructor (connector, name) {
     this.connector = connector;
@@ -363,6 +435,14 @@ class Input {
     }
     this.samples = new Samples(this);
     this.infos = new Infos(this);
+  }
+
+  get dataIterator () {
+    return new SampleIterator(this);
+  }
+
+  get validDataIterator () {
+    return new ValidSampleIterator(this);
   }
 
   read () {
@@ -572,7 +652,7 @@ class Connector extends EventEmitter {
   constructor (configName, url) {
     super();
     var options = new _ConnectorOptions();
-    options.one_based_sequence_indexing = 1;
+    options.one_based_sequence_indexing = 0;
     options.enable_on_data_event = 1;
     this.native = connectorBinding.api.RTI_Connector_new(
       configName,

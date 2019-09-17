@@ -35,11 +35,11 @@ waitForDiscovery(input, 'MySquareWriter')
 for (;;) {
   console.log('Waiting for samples...')
   input.take()
-  for (var i=0; i < input.samples.length; i++) {
-    if (input.infos.isValid(i)) {
-      console.log(JSON.stringify(input.samples.getJSON(i)))
-      console.log(input.samples.getNumber(i, 'x'))
-      console.log(input.samples.getString(i, 'color'))
+  for (var sample of input.validDataIterator) {
+    if (sample.validData) {
+      console.log(JSON.stringify(sample.getJson()))
+      console.log(sample.getNumber('x'))
+      console.log(sample.getString('color'))
     }
   }
 
