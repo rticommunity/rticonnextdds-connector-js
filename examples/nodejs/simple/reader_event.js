@@ -29,14 +29,24 @@ function waitForDiscovery (theInput, publicationName) {
 // Wait for discovery to occur
 waitForDiscovery(input, 'MySquareWriter')
 
-connector.on('on_data_available',
-  function () {
-    input.take()
-    for (var i = 0; i < input.samples.length; i++) {
-      if (input.infos.isValid(i)) {
-        console.log(JSON.stringify(input.samples.getJSON(i)))
-      }
-    }
-  })
-
 console.log('Waiting for data')
+connector.temporaryFunction().then(function (result) {
+  input.take()
+  for (var i = 0; i < input.samples.length; i++) {
+    if (input.infos.isValid(i)) {
+      console.log(JSON.stringify(input.samples.getJson(i)))
+    }
+  }
+}, function (err) {
+  console.log(err)
+});
+
+// connector.on('on_data_available',
+//   function () {
+//     input.take()
+//     for (var i = 0; i < input.samples.length; i++) {
+//       if (input.infos.isValid(i)) {
+//         console.log(JSON.stringify(input.samples.getJSON(i)))
+//       }
+//     }
+//   })

@@ -390,35 +390,33 @@ class SampleIterator {
   }
 
   [Symbol.iterator] () {
-    var _this = this;
     return {
-      next () {
-        if ((_this.index + 1) < _this.length) {
-          _this.index += 1;
-          return { value: _this, done: false };
+      next: function () {
+        if ((this.index + 1) < this.length) {
+          this.index += 1;
+          return { value: this, done: false };
         } else {
           return { value: null, done: true };
         }
-      }
+      }.bind(this)
     }
   }
 }
 
 class ValidSampleIterator extends SampleIterator {
   [Symbol.iterator] () {
-    var _this = this;
     return {
-      next () {
-        while (((_this.index + 1) < _this.length) && !(_this.input.infos.isValid(_this.index + 1))) {
-          _this.index += 1;
+      next: function () {
+        while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
+          this.index += 1;
         }
-        if ((_this.index + 1) < _this.length) {
-          _this.index += 1;
-          return { value: _this, done: false };
+        if ((this.index + 1) < this.length) {
+          this.index += 1;
+          return { value: this, done: false };
         } else {
           return { value: null, done: true };
         }
-      }
+      }.bind(this)
     }
   }
 }
@@ -714,6 +712,27 @@ class Connector extends EventEmitter {
         }
       }.bind(this)
     );
+  }
+
+  temporaryFunction (timeout) {
+    if (timeout === undefined) {
+      timeout = -1
+    }
+    return new Promise(function (resolve, reject) {
+      connectorBinding.api.RTI_Connector_wait_for_data.async(
+        this.native,
+        timeout,
+        function (err, res) {
+          if (err) {
+            reject (err);
+          } else if (res !== _ReturnCodes.ok) {
+            reject (res);
+          } else {
+            resolve();
+          }
+        }
+      )
+    }.bind(this))
   }
 
   // This callback was added for the 'newListener' event, meaning it is triggered
