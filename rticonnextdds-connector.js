@@ -740,18 +740,14 @@ class Connector extends EventEmitter {
       throw new TypeError('timeout must be a number');
     }
     return new Promise(function (resolve, reject) {
-      connectorBinding.api.RTI_Connector_wait_for_data.async(
+      var retcode = connectorBinding.api.RTI_Connector_wait_for_data(
         this.native,
-        timeout,
-        function (err, res) {
-          if (err) {
-            reject (err);
-          }
-          _checkRetcode(res);
-          // _checkRetcode will throw an exception if there is an issue
-          resolve();
-        }
-      )
+        timeout)
+      if (retcode !== _ReturnCodes.ok) {
+        reject(retcode);
+      } else {
+        resolve();
+      }
     }.bind(this))
   }
 }

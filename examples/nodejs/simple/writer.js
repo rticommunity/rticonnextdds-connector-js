@@ -44,5 +44,5 @@ for (;;) {
   output.instance.setString('color', 'BLUE')
   console.log('Writing...')
   output.write()
-  sleep.sleep(2)
+  sleep.sleep(1)
 }
