@@ -36,11 +36,9 @@ for (;;) {
   console.log('Waiting for samples...')
   input.take()
   for (var sample of input.validDataIterator) {
-    if (sample.validData) {
-      console.log(JSON.stringify(sample.getJson()))
-      console.log(sample.getNumber('x'))
-      console.log(sample.getString('color'))
-    }
+    console.log(JSON.stringify(sample.getJson()))
+    console.log(sample.getNumber('x'))
+    console.log(sample.getString('color'))
   }
 
   sleep.sleep(2)
