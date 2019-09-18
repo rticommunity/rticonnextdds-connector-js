@@ -437,6 +437,7 @@ class Input {
     }
     this.samples = new Samples(this)
     this.infos = new Infos(this)
+    this.waitsetBusy = false
   }
 
   get dataIterator () {
@@ -460,31 +461,61 @@ class Input {
   }
 
   wait (timeout) {
-    // timeout is "optional" - if not supplied we default to infinite
-    if (timeout === undefined) {
-      timeout = -1
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number')
-    }
-    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data_on_reader(
-      this.native,
-      timeout))
+    return new Promise((resolve, reject) => {
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        return reject(TypeError('timeout must be a number'))
+      } else if (this.waitsetBusy) {
+        return reject(Error)
+      } else {
+        this.waitsetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
+          this.native,
+          timeout,
+          (err, res) => {
+            this.waitsetBusy = false
+            if (err) {
+              reject(err)
+            } else if (res !== _ReturnCodes.ok) {
+              reject(res)
+            } else {
+              resolve()
+            }
+          }
+        )
+      }
+    })
   }
 
   waitForPublications (timeout) {
-    // timeout is "optional" - if not supplied we default to infinite
-    if (timeout === undefined) {
-      timeout = -1
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number')
-    }
-    const currentChangeCount = ref.alloc('int')
-    const retcode = connectorBinding.api.RTI_Connector_wait_for_matched_publication(
-      this.native,
-      timeout,
-      currentChangeCount)
-    _checkRetcode(retcode)
-    return currentChangeCount.deref()
+    return new Promise((resolve, reject) => {
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        return reject(TypeError('timeout must be a number'))
+      } else if (this.waitsetBusy) {
+        return reject(Error)
+      } else {
+        const currentChangeCount = ref.alloc('int')
+        this.waitsetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_matched_publication.async(
+          this.native,
+          timeout,
+          currentChangeCount,
+          (err, res) => {
+            this.waitsetBusy = false
+            if (err) {
+              reject(err)
+            } else if (res !== _ReturnCodes.ok) {
+              reject(res)
+            } else {
+              resolve(currentChangeCount.deref())
+            }
+          }
+        )
+      }
+    })
   }
 
   get matchedPublications () {
@@ -587,6 +618,7 @@ class Output {
       throw new Error('Invalid Publisher::DataWriter name')
     }
     this.instance = new Instance(this)
+    this.waitsetBusy = false
   }
 
   write (params) {
@@ -609,30 +641,57 @@ class Output {
   }
 
   wait (timeout) {
-    if (timeout === undefined) {
-      timeout = -1
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be an error')
-    }
-    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_acknowledgments(
-      this.native,
-      timeout))
+    return new Promise((resolve, reject) => {
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        return reject(TypeError('timeout must be a number'))
+      } else {
+        connectorBinding.api.RTI_Connector_wait_for_acknowledgments.async(
+          this.native,
+          timeout,
+          (err, res) => {
+            if (err) {
+              reject(err)
+            } else if (res !== _ReturnCodes.ok) {
+              reject(res)
+            } else {
+              resolve()
+            }
+          }
+        )
+      }
+    })
   }
 
   waitForSubscriptions (timeout) {
-    // timeout is "optional" - if not supplied we default to infinite
-    if (timeout === undefined) {
-      timeout = -1
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number')
-    }
-    const currentChangeCount = ref.alloc('int')
-    const retcode = connectorBinding.api.RTI_Connector_wait_for_matched_subscription(
-      this.native,
-      timeout,
-      currentChangeCount)
-    _checkRetcode(retcode)
-    return currentChangeCount.deref()
+    return new Promise((resolve, reject) => {
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        return reject(TypeError('timeout must be a number'))
+      } else if (this.waitsetBusy) {
+        return reject(Error)
+      } else {
+        const currentChangeCount = ref.alloc('int')
+        this.waitsetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_matched_subscription.async(
+          this.native,
+          timeout,
+          currentChangeCount,
+          (err, res) => {
+            this.waitsetBusy = false
+            if (err) {
+              reject(err)
+            } else if (res !== _ReturnCodes.ok) {
+              reject(res)
+            } else {
+              resolve(currentChangeCount.deref())
+            }
+          }
+        )
+      }
+    })
   }
 
   get matchedSubscriptions () {
@@ -746,6 +805,9 @@ class Connector extends EventEmitter {
           this.onDataAvailableRun = false
           if (err) {
             return reject(err)
+          } else if (res !== _ReturnCodes.ok) {
+            _checkRetcode(res) // CR !! (same as above when reject(Error)
+            return reject(res)
           } else {
             return resolve()
           }
@@ -775,6 +837,7 @@ Since the user can specify the timeout it is not too bad (if they care they can 
      (basically we return instantly from that function when await is hit, meaning we just infinitely spawn promises)
   - How to handle write() / read() etc. that can also block
     - instead of putting infinite timeout as default but something reasonable?
+  - throwing errors in promises
 */
 
 /*
@@ -782,4 +845,5 @@ TODO
 - make every wait a promise
 - add docs saying cant wait on same waitset twice (eventemitter + promise)
 - add docs saying cant wait for pubs and for data
+- fix error handling in promises
 */

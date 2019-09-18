@@ -34,9 +34,10 @@ const takeAndLogData = (input) => {
 const waitForData = async (connector, input) => {
   for (;;) {
     try {
-      await connector.waitForData(5000)
+      await connector.waitForData(500)
       takeAndLogData(input)
     } catch (error) {
+      console.log(error)
       break
     }
   }
@@ -46,12 +47,13 @@ const input = connector.getInput('MySubscriber::MySquareReader')
 
 // Wait for discovery to occur
 waitForDiscovery(input, 'MySquareWriter')
-// Either use the modern async / await syntax
+// Use the modern async / await syntax:
 waitForData(connector, input)
-// Or the traditional Promise structure
-connector.waitForData(5000)
-  .then(() => {
-    takeAndLogData(input)
-  }, (err) => {
-    console.log('Error: ' + err)
-  })
+// Alternatively, use the more traditional Promise syntax:
+// connector.waitForData(500)
+//   .then(() => {
+//     takeAndLogData(input)
+//   }, (err) => {
+//     console.log('Error: ' + err)
+//   })
+//   .catch(error => console.log(error))
