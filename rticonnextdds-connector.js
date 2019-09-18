@@ -6,11 +6,11 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var os = require('os');
-var ref = require('ref');
-var ffi = require('ffi');
-var path = require('path');
-var StructType = require('ref-struct');
+var os = require('os')
+var ref = require('ref')
+var ffi = require('ffi')
+var path = require('path')
+var StructType = require('ref-struct')
 var EventEmitter = require('events').EventEmitter
 
 // This is a structure which is passed to C from node so we need to define
@@ -19,55 +19,55 @@ var EventEmitter = require('events').EventEmitter
 var _ConnectorOptions = StructType({
   enable_on_data_event: ref.types.int,
   one_based_sequence_indexing: ref.types.int
-});
+})
 
 class _ConnectorBinding {
   constructor () {
-    var libArch = '';
-    var libName = '';
+    let libArch = ''
+    let libName = ''
 
     if (os.arch() === 'x64') {
       switch (os.platform()) {
         case 'darwin':
-          libArch = 'x64Darwin16clang8.0';
-          libName = 'librtiddsconnector.dylib';
-          break;
+          libArch = 'x64Darwin16clang8.0'
+          libName = 'librtiddsconnector.dylib'
+          break
         case 'linux':
-          libArch = 'x64Linux2.6gcc4.4.5';
-          libName = 'librtiddsconnector.so';
-          break;
+          libArch = 'x64Linux2.6gcc4.4.5'
+          libName = 'librtiddsconnector.so'
+          break
         case 'win32':
-          libArch = 'x64Win64VS2013';
-          libName = 'rtiddsconnector.dll';
-          break;
+          libArch = 'x64Win64VS2013'
+          libName = 'rtiddsconnector.dll'
+          break
         default:
-          throw new Error(os.platform() + ' not yet supported');
+          throw new Error(os.platform() + ' not yet supported')
       }
     } else if (os.arch() === 'ia32') {
       switch (os.platform()) {
         case 'linux':
-          libArch = 'i86Linux3.xgcc4.6.3';
-          libName = 'librtiddsconnector.so';
-          break;
+          libArch = 'i86Linux3.xgcc4.6.3'
+          libName = 'librtiddsconnector.so'
+          break
         case 'win32':
-          libArch = 'i86Win32VS2010';
-          libName = 'rtiddsconnector.dll';
-          break;
+          libArch = 'i86Win32VS2010'
+          libName = 'rtiddsconnector.dll'
+          break
         default:
-          throw new Error(os.platform() + ' not yet supported');
+          throw new Error(os.platform() + ' not yet supported')
       }
     } else if (os.arch() === 'arm') {
       switch (os.platform()) {
         case 'linux':
-          libArch = 'armv6vfphLinux3.xgcc4.7.2';
-          libName = 'librtiddsconnector.so';
-          break;
+          libArch = 'armv6vfphLinux3.xgcc4.7.2'
+          libName = 'librtiddsconnector.so'
+          break
         default:
-          throw new Error(os.platform() + ' not yet supported');
+          throw new Error(os.platform() + ' not yet supported')
       }
     }
 
-    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName);
+    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
     this.api = ffi.Library(this.library, {
       RTI_Connector_new: ['pointer', ['string', 'string', ref.refType(_ConnectorOptions)]],
       RTI_Connector_delete: ['void', ['pointer']],
@@ -103,27 +103,27 @@ class _ConnectorBinding {
       RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
       RTI_Connector_free_string: ['void', ['char *']],
       RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
-    });
+    })
   }
 }
 
 // Create the connectorBinding
-var connectorBinding = new _ConnectorBinding();
+var connectorBinding = new _ConnectorBinding()
 
 // Move a string which is allocated within core to memory space of binding
 function _moveCString (cstring) {
-  var ret = ref.readCString(cstring)
-  connectorBinding.api.RTI_Connector_free_string(cstring);
-  return ret;
+  const ret = ref.readCString(cstring)
+  connectorBinding.api.RTI_Connector_free_string(cstring)
+  return ret
 }
 
 // Obtain last error message from the core
 function _getLastDdsErrorMessage () {
-  var cStr = connectorBinding.api.RTI_Connector_get_last_error_message();
+  const cStr = connectorBinding.api.RTI_Connector_get_last_error_message()
   if (cStr !== null) {
-    return _moveCString(cStr);
+    return _moveCString(cStr)
   }
-  return '';
+  return ''
 }
 
 // Node.js representation of DDS_ReturnCode_t
@@ -131,14 +131,15 @@ var _ReturnCodes = {
   ok: 0,
   timeout: 10,
   noData: 11
-};
-Object.freeze(_ReturnCodes);
+}
+// Make _ReturnCodes immutable
+Object.freeze(_ReturnCodes)
 
 // Check for success and raise exceptions if not
 function _checkRetcode (retcode) {
   if (retcode !== _ReturnCodes.ok && retcode !== _ReturnCodes.noData) {
     if (retcode === _ReturnCodes.timeout) {
-      throw new Error('Timeout error');
+      throw new Error('Timeout error')
     } else {
       throw new Error('DDS Error: ' + _getLastDdsErrorMessage())
     }
@@ -147,258 +148,261 @@ function _checkRetcode (retcode) {
 
 // var str = new String; will result in typeof returning Object not string
 function _isString (value) {
-  return typeof value === 'string' || value instanceof String;
+  return typeof value === 'string' || value instanceof String
 }
 
 // Do not want to return true for NaN or Infinity
 function _isNumber (value) {
-  return typeof value === 'number' && isFinite(value) && Number.isInteger(value);
+  return typeof value === 'number' && isFinite(value) && Number.isInteger(value)
 }
 
 // Public API
 
 class Samples {
   constructor (input) {
-    this.input = input;
+    this.input = input
   }
 
   get length () {
-    var length = ref.alloc('double');
-    var retcode = connectorBinding.api.RTI_Connector_get_sample_count(
+    const length = ref.alloc('double')
+    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
       this.input.name,
-      length);
-    _checkRetcode(retcode);
-    return length.deref();
+      length)
+    _checkRetcode(retcode)
+    return length.deref()
   }
 
   getNumber (index, fieldName) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must positive');
+      throw new RangeError('index must positive')
     } else if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else {
       // Increment index since C API based on Lua with 1-based indexes
-      index += 1;
-      var value = ref.alloc('double');
-      var retcode = connectorBinding.api.RTI_Connector_get_number_from_sample(
+      index += 1
+      const value = ref.alloc('double')
+      const retcode = connectorBinding.api.RTI_Connector_get_number_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
         index,
-        fieldName);
-      _checkRetcode(retcode);
+        fieldName)
+      _checkRetcode(retcode)
       // Return null if no_data was returned (unset optional)
       if (retcode === _ReturnCodes.noData) {
-        return null;
+        return null
       } else {
-        return value.deref();
+        return value.deref()
       }
     }
   }
 
   getBoolean (index, fieldName) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must positive');
+      throw new RangeError('index must positive')
     } else if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else {
       // Increment index since C API based on Lua with 1-based indexes
-      index += 1;
-      var value = ref.alloc('int');
-      var retcode = connectorBinding.api.RTI_Connector_get_boolean_from_sample(
+      index += 1
+      const value = ref.alloc('int')
+      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
         index,
-        fieldName);
-      _checkRetcode(retcode);
-      _checkRetcode(retcode);
+        fieldName)
+      _checkRetcode(retcode)
       // Return null if no_data was returned (unset optional)
       if (retcode === _ReturnCodes.noData) {
-        return null;
+        return null
       } else {
         // Convert the returned int to a boolean
-        return !!value.deref();
+        return !!value.deref()
       }
     }
   }
 
   getString (index, fieldName) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must positive');
+      throw new RangeError('index must positive')
     } else if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else {
       // Increment index since C API based on Lua with 1-based indexes
-      index += 1;
-      var value = ref.alloc('char *');
-      var retcode = connectorBinding.api.RTI_Connector_get_string_from_sample(
+      index += 1
+      const value = ref.alloc('char *')
+      const retcode = connectorBinding.api.RTI_Connector_get_string_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
         index,
-        fieldName);
-      _checkRetcode(retcode);
+        fieldName)
+      _checkRetcode(retcode)
       if (retcode === _ReturnCodes.noData) {
-        return null;
+        return null
       } else {
-        return _moveCString(value.deref());
+        return _moveCString(value.deref())
       }
     }
   }
 
   getJson (index, memberName) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must be positive');
+      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
-      index += 1;
-      var cStr = ref.alloc('char *');
-      var retcode;
+      index += 1
+      const cStr = ref.alloc('char *')
+      var retcode
       // memberName is "optional" - if supplied we will get the JSON object for
       // a specific complex member in the sample
       if (memberName !== undefined) {
         if (!_isString(memberName)) {
-          throw new TypeError('memberName must be a string');
+          throw new TypeError('memberName must be a string')
         } else {
           retcode = connectorBinding.api.RTI_Connector_get_json_member(
             this.input.connector.native,
             this.input.name,
             index,
-            cStr);
+            cStr)
         }
       } else {
         retcode = connectorBinding.api.RTI_Connector_get_json_sample(
           this.input.connector.native,
           this.input.name,
           index,
-          cStr);
+          cStr)
       }
-      _checkRetcode(retcode);
+      _checkRetcode(retcode)
       if (retcode === _ReturnCodes.noData) {
-        return null;
+        return null
       }
-      return JSON.parse(_moveCString(cStr.deref()));
+      return JSON.parse(_moveCString(cStr.deref()))
     }
   }
 
   // Deprecated, use getJson
   getJSON (index, memberName) {
-    return this.getJson(index, memberName);
+    return this.getJson(index, memberName)
   }
 
   getNative (index) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must be positive');
+      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
-      index += 1;
+      index += 1
       return connectorBinding.api.RTI_Connector_get_native_sample(
         this.input.connector.native,
         this.input.name,
-        index);
+        index)
     }
   }
 }
 
 class Infos {
   constructor (input) {
-    this.input = input;
+    this.input = input
   }
 
   get length () {
-    var length = ref.alloc('double');
-    var retcode = connectorBinding.api.RTI_Connector_get_sample_count(
+    const length = ref.alloc('double')
+    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
       this.input.name,
-      length);
-    _checkRetcode(retcode);
-    return length.deref();
+      length)
+    _checkRetcode(retcode)
+    return length.deref()
   }
 
   isValid (index) {
     if (!_isNumber(index)) {
-      throw new TypeError('index must be an integer');
+      throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must be positive');
+      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
-      index += 1;
-      var value = ref.alloc('int');
-      var retcode = connectorBinding.api.RTI_Connector_get_boolean_from_infos(
+      index += 1
+      const value = ref.alloc('int')
+      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_infos(
         this.input.connector.native,
         value,
         this.input.name,
         index,
-        'valid_data');
-      _checkRetcode(retcode);
+        'valid_data')
+      _checkRetcode(retcode)
       if (retcode === _ReturnCodes.noData) {
-        return null;
+        return null
       }
-      return value.deref();
+      return value.deref()
     }
   }
 }
 
+class SampleInfo {
+
+}
+
 class SampleIterator {
   constructor (input, index) {
-    this.input = input;
+    this.input = input
     if (index === undefined) {
-      index = -1;
+      index = -1
     }
-    this.index = index;
-    this.length = input.sampleCount;
+    this.index = index
+    this.length = input.sampleCount
   }
 
   get validData () {
-    return this.input.infos.isValid(this.index);
+    return this.input.infos.isValid(this.index)
   }
 
   get info () {
-    return new SampleInfo(this.input, this.index);
+    return new SampleInfo(this.input, this.index)
   }
 
   getJson (memberName) {
-    return this.input.samples.getJson(this.index, memberName);
+    return this.input.samples.getJson(this.index, memberName)
   }
 
   getNumber (fieldName) {
-    return this.input.samples.getNumber(this.index, fieldName);
+    return this.input.samples.getNumber(this.index, fieldName)
   }
 
   getBoolean (fieldName) {
-    return this.input.samples.getBoolean(this.index, fieldName);
+    return this.input.samples.getBoolean(this.index, fieldName)
   }
 
   getString (fieldName) {
-    return this.input.samples.getString(this.index, fieldName);
+    return this.input.samples.getString(this.index, fieldName)
   }
 
   get native () {
-    return this.input.samples.getNative(this.index);
+    return this.input.samples.getNative(this.index)
   }
 
   [Symbol.iterator] () {
     return {
-      next: function () {
+      next: () => {
         if ((this.index + 1) < this.length) {
-          this.index += 1;
-          return { value: this, done: false };
+          this.index += 1
+          return { value: this, done: false }
         } else {
-          return { value: null, done: true };
+          return { value: null, done: true }
         }
-      }.bind(this)
+      }
     }
   }
 }
@@ -406,156 +410,156 @@ class SampleIterator {
 class ValidSampleIterator extends SampleIterator {
   [Symbol.iterator] () {
     return {
-      next: function () {
+      next: () => {
         while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
-          this.index += 1;
+          this.index += 1
         }
         if ((this.index + 1) < this.length) {
-          this.index += 1;
-          return { value: this, done: false };
+          this.index += 1
+          return { value: this, done: false }
         } else {
-          return { value: null, done: true };
+          return { value: null, done: true }
         }
-      }.bind(this)
+      }
     }
   }
 }
 
 class Input {
   constructor (connector, name) {
-    this.connector = connector;
-    this.name = name;
+    this.connector = connector
+    this.name = name
     this.native = connectorBinding.api.RTI_Connector_get_datareader(
       this.connector.native,
-      this.name);
+      this.name)
     if (this.native.isNull()) {
-      throw new Error('Invalid Subscription::DataReader name');
+      throw new Error('Invalid Subscription::DataReader name')
     }
-    this.samples = new Samples(this);
-    this.infos = new Infos(this);
+    this.samples = new Samples(this)
+    this.infos = new Infos(this)
   }
 
   get dataIterator () {
-    return new SampleIterator(this);
+    return new SampleIterator(this)
   }
 
   get validDataIterator () {
-    return new ValidSampleIterator(this);
+    return new ValidSampleIterator(this)
   }
 
   read () {
     _checkRetcode(connectorBinding.api.RTI_Connector_read(
       this.connector.native,
-      this.name));
+      this.name))
   }
 
   take () {
     _checkRetcode(connectorBinding.api.RTI_Connector_take(
       this.connector.native,
-      this.name));
+      this.name))
   }
 
   wait (timeout) {
     // timeout is "optional" - if not supplied we default to infinite
     if (timeout === undefined) {
-      timeout = -1;
+      timeout = -1
     } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number');
+      throw new TypeError('timeout must be a number')
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data_on_reader(
       this.native,
-      timeout));
+      timeout))
   }
 
   waitForPublications (timeout) {
     // timeout is "optional" - if not supplied we default to infinite
     if (timeout === undefined) {
-      timeout = -1;
+      timeout = -1
     } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number');
+      throw new TypeError('timeout must be a number')
     }
-    var currentChangeCount = ref.alloc('int');
-    var retcode = connectorBinding.api.RTI_Connector_wait_for_matched_publication(
+    const currentChangeCount = ref.alloc('int')
+    const retcode = connectorBinding.api.RTI_Connector_wait_for_matched_publication(
       this.native,
       timeout,
-      currentChangeCount);
-    _checkRetcode(retcode);
-    return currentChangeCount.deref();
+      currentChangeCount)
+    _checkRetcode(retcode)
+    return currentChangeCount.deref()
   }
 
   get matchedPublications () {
-    var cStr = ref.alloc('char *');
-    var retcode = connectorBinding.api.RTI_Connector_get_matched_publications(
+    const cStr = ref.alloc('char *')
+    const retcode = connectorBinding.api.RTI_Connector_get_matched_publications(
       this.native,
-      cStr);
-    _checkRetcode(retcode);
-    return JSON.parse(_moveCString(cStr.deref()));
+      cStr)
+    _checkRetcode(retcode)
+    return JSON.parse(_moveCString(cStr.deref()))
   }
 
   get sampleCount () {
-    return this.samples.length;
+    return this.samples.length
   }
 }
 
 class Instance {
   constructor (output) {
-    this.output = output;
+    this.output = output
   }
 
   clearMember (fieldName) {
     if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else {
-      var retcode = connectorBinding.api.RTI_Connector_clear_member(
+      const retcode = connectorBinding.api.RTI_Connector_clear_member(
         this.output.connector.native,
         this.output.name,
-        fieldName);
-      _checkRetcode(retcode);
+        fieldName)
+      _checkRetcode(retcode)
     }
   }
 
   setNumber (fieldName, value) {
     if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else if (!_isNumber(value)) {
-      throw new TypeError('value must be a number');
+      throw new TypeError('value must be a number')
     } else {
-      var retcode = connectorBinding.api.RTI_Connector_set_number_into_samples(
+      const retcode = connectorBinding.api.RTI_Connector_set_number_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
-        value);
-      _checkRetcode(retcode);
+        value)
+      _checkRetcode(retcode)
     }
   }
 
   setBoolean (fieldName, value) {
     if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else if (typeof value !== 'boolean') {
-      throw new TypeError('value must be a boolean');
+      throw new TypeError('value must be a boolean')
     } else {
-      var retcode = connectorBinding.api.RTI_Connector_set_boolean_into_samples(
+      const retcode = connectorBinding.api.RTI_Connector_set_boolean_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
-        value);
-      _checkRetcode(retcode);
+        value)
+      _checkRetcode(retcode)
     }
   }
 
   setString (fieldName, value) {
     if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string');
+      throw new TypeError('fieldName must be a string')
     } else if (!_isString(value)) {
-      throw new TypeError('value must be a string');
+      throw new TypeError('value must be a string')
     } else {
-      var retcode = connectorBinding.api.RTI_Connector_set_string_into_samples(
+      const retcode = connectorBinding.api.RTI_Connector_set_string_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
-        value);
-      _checkRetcode(retcode);
+        value)
+      _checkRetcode(retcode)
     }
   }
 
@@ -563,129 +567,117 @@ class Instance {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_json_instance(
       this.output.connector.native,
       this.output.name,
-      JSON.stringify(jsonObj)));
+      JSON.stringify(jsonObj)))
   }
 
   // Deprecated, use setFromJson
   setFromJSON (jsonObj) {
-    this.setFromJson(jsonObj);
+    this.setFromJson(jsonObj)
   }
 }
 
 class Output {
   constructor (connector, name) {
-    this.connector = connector;
-    this.name = name;
+    this.connector = connector
+    this.name = name
     this.native = connectorBinding.api.RTI_Connector_get_datawriter(
       this.connector.native,
-      this.name);
+      this.name)
     if (this.native.isNull()) {
-      throw new Error('Invalid Publisher::DataWriter name');
+      throw new Error('Invalid Publisher::DataWriter name')
     }
-    this.instance = new Instance(this);
+    this.instance = new Instance(this)
   }
 
   write (params) {
-    var cStr;
+    var cStr
     if (params === undefined) {
-      cStr = null;
+      cStr = null
     } else {
-      cStr = JSON.stringify(params);
+      cStr = JSON.stringify(params)
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_write(
       this.connector.native,
       this.name,
-      cStr));
+      cStr))
   }
 
   clearMembers () {
     _checkRetcode(connectorBinding.api.RTI_Connector_clear(
       this.connector.native,
-      this.name));
+      this.name))
   }
 
   wait (timeout) {
     if (timeout === undefined) {
-      timeout = -1;
+      timeout = -1
     } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be an error');
+      throw new TypeError('timeout must be an error')
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_acknowledgments(
       this.native,
-      timeout));
+      timeout))
   }
 
   waitForSubscriptions (timeout) {
     // timeout is "optional" - if not supplied we default to infinite
     if (timeout === undefined) {
-      timeout = -1;
+      timeout = -1
     } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number');
+      throw new TypeError('timeout must be a number')
     }
-    var currentChangeCount = ref.alloc('int');
-    var retcode = connectorBinding.api.RTI_Connector_wait_for_matched_subscription(
+    const currentChangeCount = ref.alloc('int')
+    const retcode = connectorBinding.api.RTI_Connector_wait_for_matched_subscription(
       this.native,
       timeout,
-      currentChangeCount);
-    _checkRetcode(retcode);
-    return currentChangeCount.deref();
+      currentChangeCount)
+    _checkRetcode(retcode)
+    return currentChangeCount.deref()
   }
 
   get matchedSubscriptions () {
-    var cStr = ref.alloc('char *');
-    var retcode = connectorBinding.api.RTI_Connector_get_matched_subscriptions(
+    const cStr = ref.alloc('char *')
+    const retcode = connectorBinding.api.RTI_Connector_get_matched_subscriptions(
       this.native,
-      cStr);
-    _checkRetcode(retcode);
-    return JSON.parse(_moveCString(cStr.deref()));
+      cStr)
+    _checkRetcode(retcode)
+    return JSON.parse(_moveCString(cStr.deref()))
   }
 
   // Deprecated, use clearMembers
-  clear_members () {
-    return this.clearMembers();
+  clear_members () { // eslint-disable-line camelcase
+    return this.clearMembers()
   }
 }
 
 class Connector extends EventEmitter {
   constructor (configName, url) {
-    super();
-    var options = new _ConnectorOptions();
-    options.one_based_sequence_indexing = 0;
-    options.enable_on_data_event = 1;
+    super()
+    const options = new _ConnectorOptions()
+    options.one_based_sequence_indexing = 0
+    options.enable_on_data_event = 1
     this.native = connectorBinding.api.RTI_Connector_new(
       configName,
       url,
-      options.ref());
+      options.ref())
     if (this.native.isNull()) {
       throw new Error('Invalid participant profile, xml path or xml profile')
     }
-    this.on('newListener', this.newListenerCallBack);
-    this.on('removeListener', this.removeListenerCallBack);
-    this.onDataAvailableRun = false;
+    this.on('newListener', this.newListenerCallBack)
+    this.on('removeListener', this.removeListenerCallBack)
+    this.onDataAvailableRun = false
   }
 
   delete () {
-    connectorBinding.api.RTI_Connector_delete(this.native);
+    connectorBinding.api.RTI_Connector_delete(this.native)
   }
 
   getInput (inputName) {
-    return new Input(this, inputName);
+    return new Input(this, inputName)
   }
 
   getOutput (outputName) {
-    return new Output(this, outputName);
-  }
-
-  waitForData (timeout) {
-    // timeout is "optional" - if not supplied we default to infinite
-    if (timeout === undefined) {
-      timeout = -1;
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number');
-    }
-    _checkRetcode(connectorBinding.api.RTI_Connector_wait_for_data(
-      this.native,
-      timeout));
+    return new Output(this, outputName)
   }
 
   onDataAvailable () {
@@ -694,62 +686,99 @@ class Connector extends EventEmitter {
     connectorBinding.api.RTI_Connector_wait_for_data.async(
       this.native,
       1000,
-      function (err, res) {
-        if (err) throw err;
+      (err, res) => {
+        if (err) throw err
         // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
         // we call this in a loop (and therefore expect to receive timeout error)
         // for this reason do not raise a timeout exception
         if (res !== _ReturnCodes.timeout) {
-          _checkRetcode(res);
+          _checkRetcode(res)
         }
         if (this.onDataAvailableRun) {
-          this.onDataAvailable();
+          this.onDataAvailable()
         }
         // Emitting this from the EventEmitter will trigger the callback created
         // by the user
         if (res === _ReturnCodes.ok) {
-          this.emit('on_data_available');
+          this.emit('on_data_available')
         }
-      }.bind(this)
-    );
+      }
+    )
   }
 
   // This callback was added for the 'newListener' event, meaning it is triggered
   // just before we add a new callback.
-  // We use this to identify when the user has requested on('on_data_available')
-  // We will now wait for data, and when some arrives will emit the event
+  // Since the onDataAvailable() function above is using an asynchronous function
+  // and the Connector binding is not thread-safe we have to ensure it is not
+  // called concurrently
   newListenerCallBack (eventName, functionListener) {
     if (eventName === 'on_data_available') {
       if (this.onDataAvailableRun === false) {
-        this.onDataAvailableRun = true;
-        this.onDataAvailable();
+        this.onDataAvailableRun = true
+        this.onDataAvailable()
       }
     }
   }
 
   removeListenerCallBack (eventName, functionListener) {
     if (this.listenerCount(eventName) === 0) {
-      this.onDataAvailableRun = false;
+      this.onDataAvailableRun = false
     }
   }
 
-  waitForDataPromise (timeout) {
-    if (timeout === undefined) {
-      timeout = -1
-    } else if (!_isNumber(timeout)) {
-      throw new TypeError('timeout must be a number');
-    }
-    return new Promise(function (resolve, reject) {
-      var retcode = connectorBinding.api.RTI_Connector_wait_for_data(
-        this.native,
-        timeout)
-      if (retcode !== _ReturnCodes.ok) {
-        reject(retcode);
-      } else {
-        resolve();
+  waitForData (timeout) {
+    return new Promise((resolve, reject) => {
+      // timeout is defaulted to -1 (infinite) if not supplied
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        return reject(TypeError)
+      } else if (this.onDataAvailableRun) {
+        // Cannot wait on the wait WaitSet more than once concurrently
+        return reject(Error)
       }
-    }.bind(this))
+      this.onDataAvailableRun = true
+      connectorBinding.api.RTI_Connector_wait_for_data.async(
+        this.native,
+        timeout,
+        (err, res) => {
+          this.onDataAvailableRun = false
+          if (err) {
+            return reject(err)
+          } else {
+            return resolve()
+          }
+        })
+    })
   }
 }
 
-module.exports.Connector = Connector;
+module.exports.Connector = Connector
+
+/*
+CR questions
+- semicolons?
+- Should the wait in waitForDataPromise be async? Depending on it's use it will
+break stuff, without it being async it blocks the main JS thread (which is extremely un-JS)
+- Do we want the normal waitforData?
+- Do we want to keep supporting the EventEmitter stuff? Gianpiero added protections to
+ensure we didn't have any concurrency issues, but now that there are more than one way
+to wait for data we can't do that (and it is async, so not in the event loop)
+- Do we treat timeout error as a reject() in waitForDataPromise? Don't see another option.
+Since the user can specify the timeout it is not too bad (if they care they can set to infinite)
+- Question regarding reader_promise.js:
+  - first of all naming of waitforDataPromise is horrible - can it just be waitForData?
+  - since it uses promises (using async / await but this is just syntactical) the for loop has to be
+     in context of async function (not due to threading issues, but priority issues in node.js....)
+     https://stackoverflow.com/questions/46004290/will-async-await-block-a-thread-node-js explains it better than I can
+     (basically we return instantly from that function when await is hit, meaning we just infinitely spawn promises)
+  - How to handle write() / read() etc. that can also block
+    - instead of putting infinite timeout as default but something reasonable?
+*/
+
+/*
+TODO
+- make every wait a promise
+- add docs saying cant wait on same waitset twice (eventemitter + promise)
+- add docs saying cant wait for pubs and for data
+*/

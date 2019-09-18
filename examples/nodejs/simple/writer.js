@@ -14,26 +14,16 @@ var fullpath = path.join(__dirname, '/../ShapeExample.xml')
 var connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
 var output = connector.getOutput('MyPublisher::MySquareWriter')
 
-function waitForDiscovery (theOutput, subscriptionName) {
-  console.log('Waiting to match with ' + subscriptionName)
-  var matches = []
-  while (!matches.some(item => item.name === subscriptionName)) {
-    var changesInMatches = output.waitForSubscriptions(2000)
-    if (changesInMatches > 0) {
-      matches = output.matchedSubscriptions
-    }
-  }
-  console.log('Matched with: ')
-  matches.forEach(function (match) {
-    console.log(match.name)
-  })
-}
+// Wait up to 5 for discovery
+console.log('Waiting for discovery...')
+output.waitForSubscriptions(5000)
+const matches = output.matchedPublications
+console.log('Matched with: ')
+matches.forEach((match) => {
+  console.log(match.name)
+})
 
-// Wait for discovery to occur
-waitForDiscovery(output, 'MySquareReader')
-
-var i = 0
-for (;;) {
+for (let i = 0; i < 500; i++) {
   // We clear the instance associated with this output, otherwise the sample
   // will have the values set in the previous iteration
   output.clear_members()

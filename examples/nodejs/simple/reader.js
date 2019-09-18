@@ -14,32 +14,22 @@ var fullpath = path.join(__dirname, '/../ShapeExample.xml')
 var connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
 var input = connector.getInput('MySubscriber::MySquareReader')
 
-function waitForDiscovery (theInput, publicationName) {
-  console.log('Waiting to match with ' + publicationName)
-  var matches = []
-  while (!matches.some(item => item.name === publicationName)) {
-    var changesInMatches = input.waitForPublications(2000)
-    if (changesInMatches > 0) {
-      matches = input.matchedPublications
-    }
-  }
-  console.log('Matched with: ')
-  matches.forEach(function (match) {
-    console.log(match.name)
-  })
-}
-
-// Wait for discovery to occur
-waitForDiscovery(input, 'MySquareWriter')
+// Wait up to 5 for discovery
+console.log('Waiting for discovery...')
+input.waitForPublications(5000)
+const matches = input.matchedPublications
+console.log('Matched with: ')
+matches.forEach((match) => {
+  console.log(match.name)
+})
 
 for (;;) {
   console.log('Waiting for samples...')
+  input.wait(5000)
   input.take()
   for (var sample of input.validDataIterator) {
     console.log(JSON.stringify(sample.getJson()))
     console.log(sample.getNumber('x'))
     console.log(sample.getString('color'))
   }
-
-  sleep.sleep(2)
 }
