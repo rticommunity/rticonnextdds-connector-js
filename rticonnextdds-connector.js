@@ -734,7 +734,8 @@ class Connector extends EventEmitter {
       } else if (!_isNumber(timeout)) {
         return reject(TypeError)
       } else if (this.onDataAvailableRun) {
-        // Cannot wait on the wait WaitSet more than once concurrently
+        // Cannot wait on the same WaitSet more than once concurrently and currently
+        // this WaitSet is created when we do Connector.new
         return reject(Error)
       }
       this.onDataAvailableRun = true

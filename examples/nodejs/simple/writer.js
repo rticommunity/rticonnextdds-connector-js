@@ -16,12 +16,14 @@ var output = connector.getOutput('MyPublisher::MySquareWriter')
 
 // Wait up to 5 for discovery
 console.log('Waiting for discovery...')
-output.waitForSubscriptions(5000)
-const matches = output.matchedPublications
-console.log('Matched with: ')
-matches.forEach((match) => {
-  console.log(match.name)
-})
+if (output.waitForSubscriptions(5000) > 0) {
+  const matches = output.matchedSubscriptions
+  console.log('matches: ' + matches)
+  console.log('Matched with: ')
+  matches.forEach((match) => {
+    console.log(match.name)
+  })
+}
 
 for (let i = 0; i < 500; i++) {
   // We clear the instance associated with this output, otherwise the sample

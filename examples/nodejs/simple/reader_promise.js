@@ -24,16 +24,19 @@ const waitForDiscovery = (theInput, publicationName) => {
   })
 }
 
-const handleData = async (connector, input) => {
+const takeAndLogData = (input) => {
+  input.take()
+  for (const sample of input.validDataIterator) {
+    console.log(JSON.stringify(sample.getJson()))
+  }
+}
+
+const waitForData = async (connector, input) => {
   for (;;) {
     try {
-      await connector.waitForDataPromise(5000)
-      input.take()
-      for (const sample of input.validDataIterator) {
-        console.log(JSON.stringify(sample.getJson()))
-      }
+      await connector.waitForData(5000)
+      takeAndLogData(input)
     } catch (error) {
-      console.log('Error encountered whilst waiting for data: ' + error)
       break
     }
   }
@@ -43,11 +46,12 @@ const input = connector.getInput('MySubscriber::MySquareReader')
 
 // Wait for discovery to occur
 waitForDiscovery(input, 'MySquareWriter')
-handleData(connector, input)
-// Alternatively, we can use normal Promise syntax:
-//
-//
-//
-//
-//
-
+// Either use the modern async / await syntax
+waitForData(connector, input)
+// Or the traditional Promise structure
+connector.waitForData(5000)
+  .then(() => {
+    takeAndLogData(input)
+  }, (err) => {
+    console.log('Error: ' + err)
+  })
