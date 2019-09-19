@@ -460,6 +460,19 @@ class SampleIterator {
     return this.input.samples.getString(this.index, fieldName)
   }
 
+  getValue (fieldName) {
+    if (!_isString(fieldName)) {
+      throw new TypeError('fieldName must be a string')
+    } else {
+      return _getAnyValue(
+        connectorBinding.api.RTI_Connector_get_any_from_sample,
+        this.input.connector.native,
+        this.input.name,
+        this.index,
+        fieldName)
+    }
+  }
+
   get native () {
     return this.input.samples.getNative(this.index)
   }
