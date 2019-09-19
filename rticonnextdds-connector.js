@@ -318,7 +318,7 @@ class Samples {
       // Increment index since Lua arrays are 1-indexed
       index += 1
       const cStr = ref.alloc('char *')
-      var retcode
+      let retcode = _ReturnCodes.noData
       // memberName is "optional" - if supplied we will get the JSON object for
       // a specific complex member in the sample
       if (memberName !== undefined) {
@@ -561,11 +561,9 @@ class Input {
             this.waitsetBusy = false
             if (err) {
               reject(err)
-            } else if (res !== _ReturnCodes.ok) {
-              reject(res)
-            } else {
-              resolve()
             }
+            _checkRetcode(res)
+            resolve()
           }
         )
       }
@@ -591,11 +589,9 @@ class Input {
             this.waitsetBusy = false
             if (err) {
               reject(err)
-            } else if (res !== _ReturnCodes.ok) {
-              reject(res)
-            } else {
-              resolve(currentChangeCount.deref())
             }
+            _checkRetcode(res)
+            resolve(currentChangeCount.deref())
           }
         )
       }
@@ -737,11 +733,9 @@ class Output {
           (err, res) => {
             if (err) {
               reject(err)
-            } else if (res !== _ReturnCodes.ok) {
-              reject(res)
-            } else {
-              resolve()
             }
+            _checkRetcode(res)
+            resolve()
           }
         )
       }
@@ -767,11 +761,9 @@ class Output {
             this.waitsetBusy = false
             if (err) {
               reject(err)
-            } else if (res !== _ReturnCodes.ok) {
-              reject(res)
-            } else {
-              resolve(currentChangeCount.deref())
             }
+            _checkRetcode(res)
+            resolve(currentChangeCount.deref())
           }
         )
       }
@@ -887,12 +879,9 @@ class Connector extends EventEmitter {
           this.onDataAvailableRun = false
           if (err) {
             return reject(err)
-          } else if (res !== _ReturnCodes.ok) {
-            _checkRetcode(res) // CR !! (same as above when reject(Error)
-            return reject(res)
-          } else {
-            return resolve()
           }
+          _checkRetcode(res)
+          return resolve()
         })
     })
   }
