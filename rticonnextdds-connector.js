@@ -465,9 +465,9 @@ class Input {
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
-        return reject(TypeError('timeout must be a number'))
+        throw new TypeError('timeout must be a number')
       } else if (this.waitsetBusy) {
-        return reject(Error)
+        throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitsetBusy = true
         connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
@@ -493,12 +493,12 @@ class Input {
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
-        return reject(TypeError('timeout must be a number'))
+        throw new TypeError('timeout must be a number')
       } else if (this.waitsetBusy) {
-        return reject(Error)
+        throw new Error('Can not concurrently wait on the same Input')
       } else {
-        const currentChangeCount = ref.alloc('int')
         this.waitsetBusy = true
+        const currentChangeCount = ref.alloc('int')
         connectorBinding.api.RTI_Connector_wait_for_matched_publication.async(
           this.native,
           timeout,
@@ -645,7 +645,7 @@ class Output {
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
-        return reject(TypeError('timeout must be a number'))
+        throw new TypeError('timeout must be a number')
       } else {
         connectorBinding.api.RTI_Connector_wait_for_acknowledgments.async(
           this.native,
@@ -669,9 +669,9 @@ class Output {
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
-        return reject(TypeError('timeout must be a number'))
+        throw new TypeError('timeout must be a number')
       } else if (this.waitsetBusy) {
-        return reject(Error)
+        throw new Error('Can not concurrently wait on the same Output')
       } else {
         const currentChangeCount = ref.alloc('int')
         this.waitsetBusy = true
@@ -791,11 +791,9 @@ class Connector extends EventEmitter {
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
-        return reject(TypeError)
+        throw new TypeError('timeout must be a number')
       } else if (this.onDataAvailableRun) {
-        // Cannot wait on the same WaitSet more than once concurrently and currently
-        // this WaitSet is created when we do Connector.new
-        return reject(Error)
+        throw new Error('Can not concurrently wait on the same Connector object')
       }
       this.onDataAvailableRun = true
       connectorBinding.api.RTI_Connector_wait_for_data.async(
@@ -820,29 +818,12 @@ module.exports.Connector = Connector
 
 /*
 CR questions
-- semicolons?
-- Should the wait in waitForDataPromise be async? Depending on it's use it will
-break stuff, without it being async it blocks the main JS thread (which is extremely un-JS)
-- Do we want the normal waitforData?
-- Do we want to keep supporting the EventEmitter stuff? Gianpiero added protections to
-ensure we didn't have any concurrency issues, but now that there are more than one way
-to wait for data we can't do that (and it is async, so not in the event loop)
 - Do we treat timeout error as a reject() in waitForDataPromise? Don't see another option.
 Since the user can specify the timeout it is not too bad (if they care they can set to infinite)
-- Question regarding reader_promise.js:
-  - first of all naming of waitforDataPromise is horrible - can it just be waitForData?
-  - since it uses promises (using async / await but this is just syntactical) the for loop has to be
-     in context of async function (not due to threading issues, but priority issues in node.js....)
-     https://stackoverflow.com/questions/46004290/will-async-await-block-a-thread-node-js explains it better than I can
-     (basically we return instantly from that function when await is hit, meaning we just infinitely spawn promises)
-  - How to handle write() / read() etc. that can also block
-    - instead of putting infinite timeout as default but something reasonable?
-  - throwing errors in promises
 */
 
 /*
 TODO
-- make every wait a promise
 - add docs saying cant wait on same waitset twice (eventemitter + promise)
 - add docs saying cant wait for pubs and for data
 - fix error handling in promises
