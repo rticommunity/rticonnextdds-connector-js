@@ -6,7 +6,6 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var sleep = require('sleep')
 var rti = require('rticonnextdds-connector')
 var path = require('path')
 
@@ -44,7 +43,11 @@ const run = async (output) => {
       output.instance.setString('color', 'BLUE')
       console.log('Writing...')
       output.write()
-      sleep.sleep(1)
+      await new Promise(function (resolve, reject) {
+        setTimeout(() => {
+          resolve(0)
+        }, 1000)
+      })
     }
     // Wait for all matched subscriptions to acknowledge the sample (if using
     // reliable communication)
