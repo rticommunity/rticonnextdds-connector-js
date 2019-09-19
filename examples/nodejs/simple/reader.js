@@ -21,7 +21,8 @@ const printNewMatches = (input, newMatches) => {
 }
 
 const printNewData = (input) => {
-  for (var sample of input.validDataIterator) {
+  for (var sample of input.dataIterator) {
+    console.log('sample.info.getValue(valid_data): ' + sample.info.getValue('valid_data'))
     console.log(JSON.stringify(sample.getJson()))
   }
 }

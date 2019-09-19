@@ -96,6 +96,7 @@ class _ConnectorBinding {
       RTI_Connector_get_boolean_from_sample: ['int', ['pointer', ref.refType('int'), 'string', 'int', 'string']],
       RTI_Connector_get_string_from_sample: ['int', ['pointer', ref.refType('char *'), 'string', 'int', 'string']],
       RTI_Connector_get_any_from_sample: ['int', ['pointer', ref.refType('double'), ref.refType('int'), ref.refType('char *'), ref.refType('int'), 'string', 'int', 'string']],
+      RTI_Connector_get_any_from_info: ['int', ['pointer', ref.refType('double'), ref.refType('int'), ref.refType('char *'), ref.refType('int'), 'string', 'int', 'string']],
       RTI_Connector_get_json_sample: ['int', ['pointer', 'string', 'int', ref.refType('char *')]],
       RTI_Connector_get_json_member: ['int', ['pointer', 'string', 'int', 'string', ref.refType('char *')]],
       RTI_Connector_set_json_instance: ['int', ['pointer', 'string', 'string']],
@@ -127,13 +128,22 @@ function _getLastDdsErrorMessage () {
 }
 
 // Node.js representation of DDS_ReturnCode_t
-var _ReturnCodes = {
+const _ReturnCodes = {
   ok: 0,
   timeout: 10,
   noData: 11
 }
 // Make _ReturnCodes immutable
 Object.freeze(_ReturnCodes)
+
+// Node.js representation of RTI_Connector_AnyValueKind
+const _AnyValueKind = {
+  connector_none: 0,
+  connector_number: 1,
+  connector_boolean: 2,
+  connector_string: 3
+}
+Object.freeze(_AnyValueKind)
 
 // Check for success and raise exceptions if not
 function _checkRetcode (retcode) {
@@ -154,6 +164,51 @@ function _isString (value) {
 // Do not want to return true for NaN or Infinity
 function _isNumber (value) {
   return typeof value === 'number' && isFinite(value) && Number.isInteger(value)
+}
+
+function _getAnyValue (getter, connector, inputName, index, fieldName) {
+  if (typeof getter !== 'function') {
+    throw new TypeError('getter must be a function')
+  } else if (connector.isNull()) {
+    throw new Error('connector cannot be null')
+  } else if (!_isString(inputName)) {
+    throw new TypeError('inputName must be a string')
+  } else if (!_isNumber(index)) {
+    throw new TypeError('index must be a number')
+  } else if (index < 0) {
+    throw new RangeError('index must be positive')
+  } else if (!_isString(fieldName)) {
+    throw new TypeError('fieldName must be a string')
+  } else {
+    const numberVal = ref.alloc('double')
+    const boolVal = ref.alloc('int')
+    const stringVal = ref.alloc('char *')
+    let selection = ref.alloc('int')
+    const retcode = getter(
+      connector,
+      numberVal,
+      boolVal,
+      stringVal,
+      selection,
+      inputName,
+      index + 1,
+      fieldName)
+    _checkRetcode(retcode)
+    if (retcode === _ReturnCodes.noData) {
+      return null
+    }
+    selection = selection.deref()
+    if (selection === _AnyValueKind.connector_number) {
+      return numberVal.deref()
+    } else if (selection === _AnyValueKind.connector_boolean) {
+      return !!boolVal.deref()
+    } else if (selection === _AnyValueKind.connector_string) {
+      return _moveCString(stringVal.deref())
+    } else {
+      // This shouldn't happen
+      throw new Error('Unexpected type returned by ' + getter.name)
+    }
+  }
 }
 
 // Public API
@@ -177,7 +232,7 @@ class Samples {
     if (!_isNumber(index)) {
       throw new TypeError('index must be an integer')
     } else if (index < 0) {
-      throw new RangeError('index must positive')
+      throw new RangeError('index must be positive')
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
@@ -352,7 +407,23 @@ class Infos {
 }
 
 class SampleInfo {
+  constructor (input, index) {
+    this.input = input
+    this.index = index
+  }
 
+  getValue (fieldName) {
+    if (!_isString(fieldName)) {
+      throw new TypeError('fieldName must be a string')
+    } else {
+      return _getAnyValue(
+        connectorBinding.api.RTI_Connector_get_any_from_info,
+        this.input.connector.native,
+        this.input.name,
+        this.index,
+        fieldName)
+    }
+  }
 }
 
 class SampleIterator {
@@ -815,16 +886,3 @@ class Connector extends EventEmitter {
 }
 
 module.exports.Connector = Connector
-
-/*
-CR questions
-- Do we treat timeout error as a reject() in waitForDataPromise? Don't see another option.
-Since the user can specify the timeout it is not too bad (if they care they can set to infinite)
-*/
-
-/*
-TODO
-- add docs saying cant wait on same waitset twice (eventemitter + promise)
-- add docs saying cant wait for pubs and for data
-- fix error handling in promises
-*/

@@ -19,28 +19,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 				<transport_builtin>
 					<mask>UDPV4 | SHMEM</mask>
 				</transport_builtin>
-
-				<!-- Turn on monitoring -->
-				<!-- Begin Monitoring
-				<property>
-					<value>
-						<element>
-							<name>rti.monitor.library</name>
-							<value>rtimonitoring</value>
-						</element>
-						<element>
-							<name>rti.monitor.create_function_ptr</name>
-							<value>$(NDDS_MONITOR)</value>
-						</element>
-					</value>
-				</property>
-				 End Monitoring -->
 			</participant_qos>
-            <!-- <subscriber_qos>
-                <entity_factory>
-                    <autoenable_created_entities>false</autoenable_created_entities>
-                </entity_factory>
-            </subscriber_qos> -->
 
 		</qos_profile>
 	</qos_library>
