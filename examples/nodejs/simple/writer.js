@@ -14,27 +14,44 @@ var fullpath = path.join(__dirname, '/../ShapeExample.xml')
 var connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
 var output = connector.getOutput('MyPublisher::MySquareWriter')
 
-// Wait up to 5 for discovery
-console.log('Waiting for discovery...')
-if (output.waitForSubscriptions(5000) > 0) {
-  const matches = output.matchedSubscriptions
-  console.log('matches: ' + matches)
-  console.log('Matched with: ')
-  matches.forEach((match) => {
+const printNewMatches = (output, newMatches) => {
+  console.log('Matched with ' + newMatches + ' publications:')
+  output.matchedSubscriptions.forEach((match) => {
     console.log(match.name)
   })
 }
 
-for (let i = 0; i < 500; i++) {
-  // We clear the instance associated with this output, otherwise the sample
-  // will have the values set in the previous iteration
-  output.clear_members()
-  i = i + 1
-  output.instance.setNumber('x', i)
-  output.instance.setNumber('y', i * 2)
-  output.instance.setNumber('shapesize', 30)
-  output.instance.setString('color', 'BLUE')
-  console.log('Writing...')
-  output.write()
-  sleep.sleep(1)
+const waitForDiscovery = async (output) => {
+  try {
+    const newMatches = await output.waitForSubscriptions(5000)
+    printNewMatches(output, newMatches)
+    return newMatches
+  } catch (err) {
+    console.log('Error whilst waiting for discovery: ' + err)
+  }
 }
+
+const run = async (output) => {
+  try {
+    await waitForDiscovery(output)
+    for (let i = 0; i < 500; i++) {
+      // We clear the instance associated with this output, otherwise the sample
+      // will have the values set in the previous iteration
+      output.clear_members()
+      output.instance.setNumber('x', i)
+      output.instance.setNumber('y', i * 2)
+      output.instance.setNumber('shapesize', 30)
+      output.instance.setString('color', 'BLUE')
+      console.log('Writing...')
+      output.write()
+      sleep.sleep(1)
+    }
+    // Wait for all matched subscriptions to acknowledge the sample (if using
+    // reliable communication)
+    await output.wait(5000)
+  } catch (err) {
+    console.log('Error encountered: ' + err)
+  }
+}
+
+run(output)
