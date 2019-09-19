@@ -19,6 +19,7 @@
     "chai": "^4.2.0",
     "events": "*",
     "ffi": "*",
+    "jsdoc": "^3.6.3",
     "mocha": "^6.2.0",
     "ref": "*",
     "rticonnextdds-connector": "^0.4.3",

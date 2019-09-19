@@ -406,6 +406,9 @@ class Infos {
   }
 }
 
+/**
+ * The type of :attr:`SampleIterator.info`
+ */
 class SampleInfo {
   constructor (input, index) {
     this.input = input
@@ -426,6 +429,15 @@ class SampleInfo {
   }
 }
 
+/**
+ * Iterates and provides access to a data sample.
+ *
+ * A SampleIterator provides access to the data recived by an :class:`Input`.
+ * SampleIterators are accessed using :meth:`Input.dataIterator` and :meth:`Input.get_sample()`,
+ * :meth:`Input.validDataIterator` returns a subclass; :class:`ValidSampleIterator`.
+ *
+ * @see :ref:`Reading data (Input)`.
+ */
 class SampleIterator {
   constructor (input, index) {
     this.input = input
@@ -436,6 +448,15 @@ class SampleIterator {
     this.length = input.sampleCount
   }
 
+  /**
+   * Returns whether or not this sample contains valid data.
+   *
+   * If this returns ``false``, this object's getters should not be called.
+   * @throws {TypeError} index must be an integer
+   * @throws {RangeError} index must be positive
+   * @throws {Error} TimeoutError
+   * @throws {Error} DDS Error
+   */
   get validData () {
     return this.input.infos.isValid(this.index)
   }
@@ -609,6 +630,10 @@ class Input {
 
   get sampleCount () {
     return this.samples.length
+  }
+
+  getSample (index) {
+    return new SampleIterator(this, index)
   }
 }
 
