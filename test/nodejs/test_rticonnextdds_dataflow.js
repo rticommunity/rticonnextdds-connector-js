@@ -49,12 +49,12 @@ params.forEach(function(retrieval_method) {
     })
 
     it('samples length should be 1',function(){
-      var len=input.samples.length
+      var len=input.samples.length()
       expect(len).to.equal(1)
     })
 
     it('infos length should be 1',function(){
-      var len=input.infos.length
+      var len=input.infos.length()
       expect(len).to.equal(1)
     })
 

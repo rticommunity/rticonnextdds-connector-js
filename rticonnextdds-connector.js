@@ -13,9 +13,12 @@ var path = require('path')
 var StructType = require('ref-struct')
 var EventEmitter = require('events').EventEmitter
 
-// This is a structure which is passed to C from node so we need to define
-// it using ref-struct.
-// This must match the definition of RTI_Connector_Options
+/**
+ * The Node.js representation of the RTI_Connector_Options structure within
+ * the core. We define it here using the module ref-struct such that we can
+ * pass it by value into the Core when creating a Connector object.
+ * @private
+ */
 var _ConnectorOptions = StructType({
   enable_on_data_event: ref.types.int,
   one_based_sequence_indexing: ref.types.int
@@ -111,14 +114,22 @@ class _ConnectorBinding {
 // Create the connectorBinding
 var connectorBinding = new _ConnectorBinding()
 
-// Move a string which is allocated within core to memory space of binding
+/**
+ * Copies a natively-allocated string into a Node.js string and frees the
+ * native memory.
+ * @param {Buffer} cstring - The string returned by the core
+ * @private
+ */
 function _moveCString (cstring) {
   const ret = ref.readCString(cstring)
   connectorBinding.api.RTI_Connector_free_string(cstring)
   return ret
 }
 
-// Obtain last error message from the core
+/**
+ * Obtain the last error message from the RTI Connext DDS Core
+ * @private
+ */
 function _getLastDdsErrorMessage () {
   const cStr = connectorBinding.api.RTI_Connector_get_last_error_message()
   if (cStr !== null) {
@@ -127,7 +138,10 @@ function _getLastDdsErrorMessage () {
   return ''
 }
 
-// Node.js representation of DDS_ReturnCode_t
+/**
+ * Node.js representation of DDS_ReturnCode_t
+ * @private
+ */
 const _ReturnCodes = {
   ok: 0,
   timeout: 10,
@@ -136,7 +150,10 @@ const _ReturnCodes = {
 // Make _ReturnCodes immutable
 Object.freeze(_ReturnCodes)
 
-// Node.js representation of RTI_Connector_AnyValueKind
+/**
+ * Node.js representation of RTI_Connector_AnyValueKind
+ * @private
+ */
 const _AnyValueKind = {
   connector_none: 0,
   connector_number: 1,
@@ -145,80 +162,125 @@ const _AnyValueKind = {
 }
 Object.freeze(_AnyValueKind)
 
-// Check for success and raise exceptions if not
+/**
+ * A timeout error thrown by operations that can block
+ * @private
+ */
+class TimeoutError extends Error {
+  constructor (message, extra) {
+    super()
+    Error.captureStackTrace(this, this.constructor)
+    this.name = this.constructor.name
+    this.message = message
+    this.extra = extra
+  }
+}
+
+/**
+ * An error originating from the RTI Connect DDS Core
+ * @private
+ */
+class DDSError extends Error {
+  constructor (message, extra) {
+    super()
+    Error.captureStackTrace(this, this.constructor)
+    this.name = this.constructor.name
+    this.message = message
+    this.extra = extra
+  }
+}
+
+/**
+ * Checks the value returned by the functions in the core for success and throws
+ * the appropriate error on failure.
+ *
+ * @param {number} retcode - The retcode to check
+ * @private
+ */
 function _checkRetcode (retcode) {
   if (retcode !== _ReturnCodes.ok && retcode !== _ReturnCodes.noData) {
     if (retcode === _ReturnCodes.timeout) {
-      throw new Error('Timeout error')
+      throw new TimeoutError('Timeout error')
     } else {
-      throw new Error('DDS Error: ' + _getLastDdsErrorMessage())
+      throw new DDSError('DDS Error: ' + _getLastDdsErrorMessage())
     }
   }
 }
 
-// var str = new String; will result in typeof returning Object not string
+/**
+ * Checks if a value is a string type
+ * @param {string} value - The value to check the type of
+ * @private
+ */
 function _isString (value) {
   return typeof value === 'string' || value instanceof String
 }
 
-// Do not want to return true for NaN or Infinity
-function _isNumber (value) {
-  return typeof value === 'number' && isFinite(value) && Number.isInteger(value)
+/**
+ * Checks if a value is a valid index
+ * @param {number} value - The value to check the type of
+ * @private
+ */
+function _isValidIndex (value) {
+  return _isNumber(value) && Number.isInteger(value) && value >= 0
 }
 
+/**
+ * Checks if a value is a valid number (not NaN or Infinity)
+ * @param {number} value - The value to check the type of
+ */
+function _isNumber (value) {
+  return typeof value === 'number' && isFinite(value)
+}
+
+/**
+ * Function used to get any value from either the samples or infos (depending
+ * on the supplied getter). The type of the fieldName need not be specified.
+ * @param {function} getter - The function to use to get the value
+ * @param {Connector} connector - The Connector
+ * @param {string} inputName - The name of the input to access
+ * @param {number} index - The index in the samples / infos array
+ * @param {string} fieldName - The name of the fields to obtain
+ * @private
+ */
 function _getAnyValue (getter, connector, inputName, index, fieldName) {
-  if (typeof getter !== 'function') {
-    throw new TypeError('getter must be a function')
-  } else if (connector.isNull()) {
-    throw new Error('connector cannot be null')
-  } else if (!_isString(inputName)) {
-    throw new TypeError('inputName must be a string')
-  } else if (!_isNumber(index)) {
-    throw new TypeError('index must be a number')
-  } else if (index < 0) {
-    throw new RangeError('index must be positive')
-  } else if (!_isString(fieldName)) {
-    throw new TypeError('fieldName must be a string')
+  const numberVal = ref.alloc('double')
+  const boolVal = ref.alloc('int')
+  const stringVal = ref.alloc('char *')
+  let selection = ref.alloc('int')
+  const retcode = getter(
+    connector,
+    numberVal,
+    boolVal,
+    stringVal,
+    selection,
+    inputName,
+    index + 1,
+    fieldName)
+  _checkRetcode(retcode)
+  if (retcode === _ReturnCodes.noData) {
+    return null
+  }
+  selection = selection.deref()
+  if (selection === _AnyValueKind.connector_number) {
+    return numberVal.deref()
+  } else if (selection === _AnyValueKind.connector_boolean) {
+    return !!boolVal.deref()
+  } else if (selection === _AnyValueKind.connector_string) {
+    return _moveCString(stringVal.deref())
   } else {
-    const numberVal = ref.alloc('double')
-    const boolVal = ref.alloc('int')
-    const stringVal = ref.alloc('char *')
-    let selection = ref.alloc('int')
-    const retcode = getter(
-      connector,
-      numberVal,
-      boolVal,
-      stringVal,
-      selection,
-      inputName,
-      index + 1,
-      fieldName)
-    _checkRetcode(retcode)
-    if (retcode === _ReturnCodes.noData) {
-      return null
-    }
-    selection = selection.deref()
-    if (selection === _AnyValueKind.connector_number) {
-      return numberVal.deref()
-    } else if (selection === _AnyValueKind.connector_boolean) {
-      return !!boolVal.deref()
-    } else if (selection === _AnyValueKind.connector_string) {
-      return _moveCString(stringVal.deref())
-    } else {
-      // This shouldn't happen
-      throw new Error('Unexpected type returned by ' + getter.name)
-    }
+    // This shouldn't happen
+    throw new Error('Unexpected type returned by ' + getter.name)
   }
 }
 
-// Public API
-
+// The Samples class is deprecated and now used internally
 class Samples {
   constructor (input) {
     this.input = input
   }
 
-  get length () {
+  getLength () {
     const length = ref.alloc('double')
     const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
@@ -229,10 +291,8 @@ class Samples {
   }
 
   getNumber (index, fieldName) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must be positive')
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
@@ -256,10 +316,8 @@ class Samples {
   }
 
   getBoolean (index, fieldName) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must positive')
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
@@ -284,10 +342,8 @@ class Samples {
   }
 
   getString (index, fieldName) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must positive')
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
@@ -310,10 +366,8 @@ class Samples {
   }
 
   getJson (index, memberName) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
@@ -352,10 +406,8 @@ class Samples {
   }
 
   getNative (index) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
@@ -367,12 +419,13 @@ class Samples {
   }
 }
 
+// The Infos class is deprecated and now used internally
 class Infos {
   constructor (input) {
     this.input = input
   }
 
-  get length () {
+  getLength () {
     const length = ref.alloc('double')
     const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
       this.input.connector.native,
@@ -383,10 +436,8 @@ class Infos {
   }
 
   isValid (index) {
-    if (!_isNumber(index)) {
+    if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
-    } else if (index < 0) {
-      throw new RangeError('index must be positive')
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
@@ -406,6 +457,8 @@ class Infos {
   }
 }
 
+// Public API
+
 /**
  * The type of :attr:`SampleIterator.info`
  */
@@ -415,6 +468,11 @@ class SampleInfo {
     this.index = index
   }
 
+  /**
+   * Type independent function to obtain any value from the SampleInfo structure.
+   * @param {string} fieldName - The value in the SampleInfo to obtain
+   * @returns The obtained value
+   */
   getValue (fieldName) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
@@ -449,38 +507,74 @@ class SampleIterator {
   }
 
   /**
-   * Returns whether or not this sample contains valid data.
+   * Whether or not this sample contains valid data.
    *
-   * If this returns ``false``, this object's getters should not be called.
-   * @throws {TypeError} index must be an integer
-   * @throws {RangeError} index must be positive
-   * @throws {Error} TimeoutError
-   * @throws {Error} DDS Error
+   * If ``false``, this object's getters should not be called.
+   * @type {boolean}
    */
   get validData () {
     return this.input.infos.isValid(this.index)
   }
 
+  /**
+   * Provides access to this sample's meta-data.
+   *
+   * @type {SampleInfo}
+   * @see :class:`SampleInfo`
+   */
   get info () {
     return new SampleInfo(this.input, this.index)
   }
 
+  /**
+   * Returns a JSON object with the values of all the fields of this sample.
+   *
+   * @param {string} [memberName] - The name of the complex member or field to obtain.
+   * @returns {JSON} The obtained JSON object.
+   * @see :ref:`Accessing the data`
+   */
   getJson (memberName) {
     return this.input.samples.getJson(this.index, memberName)
   }
 
+  /**
+   * Gets the value of a numeric field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {number} The numeric value of the field.
+   */
   getNumber (fieldName) {
     return this.input.samples.getNumber(this.index, fieldName)
   }
 
+  /**
+   * Gets the value of a boolean field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {boolean} The boolean value of the field.
+   */
   getBoolean (fieldName) {
     return this.input.samples.getBoolean(this.index, fieldName)
   }
 
+  /**
+   * Gets the value of a string field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {string} The string value of the field.
+   */
   getString (fieldName) {
     return this.input.samples.getString(this.index, fieldName)
   }
 
+  /**
+   * Get the value of a field within this sample.
+   *
+   * This API can be used to obtain strings, numbers, booleans and the JSON
+   * reprentation of complex members.
+   * @param {string} fieldName - The name of the field.
+   * @returns {number|string|boolean|JSON} The value of the field.
+   */
   getValue (fieldName) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
@@ -494,10 +588,21 @@ class SampleIterator {
     }
   }
 
+  /**
+   * The native pointer to the DynamicData sample.
+   *
+   * @type {pointer}
+   * @private
+   */
   get native () {
     return this.input.samples.getNative(this.index)
   }
 
+  /**
+   * The iterator logic
+   * @todo Confirm that it is possible to call SampleIterator.next outside of the context of a for loop
+   * @private
+   */
   [Symbol.iterator] () {
     return {
       next: () => {
@@ -512,6 +617,12 @@ class SampleIterator {
   }
 }
 
+/**
+ * Iterates and provides access to data samples with valid data.
+ *
+ * This iterator provides the same methods as {@link SampleIterator}.
+ * @link Input.validDataIterator
+ */
 class ValidSampleIterator extends SampleIterator {
   [Symbol.iterator] () {
     return {
@@ -530,6 +641,18 @@ class ValidSampleIterator extends SampleIterator {
   }
 }
 
+/**
+ * Allows reading data for a topic.
+ *
+ * To get an Input object, use {@link Connector.getInput}.
+ * @property {Connector} connector - The Connector creates this Input
+ * @property {string} name - The name of the Input (the name used in {@link Connector.getInput})
+ * @property {pointer} native - A native handle that allows accessing additional Connect DDS APIs in C.
+ * @property {JSON} matchedPublications - A JSON object containing information about all the publications currently matched with this Input.
+ * @property {number} sampleCount - The number of samples currently available on this Input.
+ * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
+ * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
+ */
 class Input {
   constructor (connector, name) {
     this.connector = connector
@@ -545,26 +668,39 @@ class Input {
     this.waitsetBusy = false
   }
 
-  get dataIterator () {
-    return new SampleIterator(this)
-  }
-
-  get validDataIterator () {
-    return new ValidSampleIterator(this)
-  }
-
+  /**
+   * Access the samples received by this Input.
+   *
+   * This operation performs the same operation as {@link Input.take} but the samples
+   * remain accessible (in the internal queue) after the operation has been called.
+   */
   read () {
     _checkRetcode(connectorBinding.api.RTI_Connector_read(
       this.connector.native,
       this.name))
   }
 
+  /**
+   * Access the samples receieved by this Input.
+   *
+   * After calling this method, the samples are accessible using {@link Input.dataIterator},
+   * {@link Input.validDataIterator} or {@link Input.getSample}.
+   */
   take () {
     _checkRetcode(connectorBinding.api.RTI_Connector_take(
       this.connector.native,
       this.name))
   }
 
+  /**
+   * Wait for this Input to receive data.
+   *
+   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
+   * for data to be received.
+   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} The operation timed out before data was received.
+   * @returns {Promise}
+   */
   wait (timeout) {
     return new Promise((resolve, reject) => {
       if (timeout === undefined) {
@@ -591,6 +727,15 @@ class Input {
     })
   }
 
+  /**
+   * Wait for this Input to match or unmatch a compatible DDS Subscription.
+   *
+   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
+   * for a match (or unmatch) to occur.
+   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} The operation timed out before data was received.
+   * @returns {Promise} Promise object resolving with the change in the current number of matched outputs. If this is a positive number, the input has matched with new publishers. If it is negative, the input has unmatched from an output. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the input matched the same number of outputs as it unmatched). 
+   */
   waitForPublications (timeout) {
     return new Promise((resolve, reject) => {
       if (timeout === undefined) {
@@ -619,6 +764,21 @@ class Input {
     })
   }
 
+  /**
+   * Returns information about matched publications.
+   *
+   * This property returns a JSON array with each element of the array containing
+   * information about a matched publication.
+   *
+   * Currently the only information contained in this JSON object is the publication name of
+   * the matched publication. If the matched publication doesn't have a name, the
+   * name for that specific publication will be null.
+   *
+   * Note that Connector Outputs are automatically assigned a name from the *data_writer name*
+   * element in the XML configuration.
+   *
+   * @type {JSON}
+   */
   get matchedPublications () {
     const cStr = ref.alloc('char *')
     const retcode = connectorBinding.api.RTI_Connector_get_matched_publications(
@@ -628,20 +788,84 @@ class Input {
     return JSON.parse(_moveCString(cStr.deref()))
   }
 
+  /**
+   * Returns the number of samples available.
+   *
+   * @type {number} The number of samples available since the last time read/take was called.
+   */
   get sampleCount () {
-    return this.samples.length
+    return this.samples.length()
   }
 
+  /**
+   * Returns an iterator to the sample in a given index.
+   *
+   * Important: Calling {@link Input.read} or {@link Input.take} invalidates
+   * all iterators previously returned.
+   *
+   * @param {number} index - A zero-based index, less than {@link Input.sampleCount}.
+   * @returns {SampleIterator} An iterator that accesses the sample in the position indicated by index.
+   */
   getSample (index) {
     return new SampleIterator(this, index)
   }
+
+  /**
+   * Returns an iterator to the data samples.
+   *
+   * The iterator provides access to all the data samples retrieved by the most
+   * recent call to {@link Input.read} or {@link Input.take}.
+   *
+   * This iterator may return samples with invalid data (samples that only contain
+   * meta-data). Use {@link Input.validDataIterator} to avoid having to check {@link SampleIterator.validData}.
+   *
+   * @return {SampleIterator} An iterator to the samples.
+   */
+  get dataIterator () {
+    return new SampleIterator(this)
+  }
+
+  /**
+   * Returns an iterator to the data samples which contain valid data.
+   *
+   * The iterator provides access to all the data samples retrieved by the most
+   * recent call to {@link Input.read} or {@link Input.take}, and skips samples with
+   * invalid data (meta-data only).
+   *
+   * By using this iterator, it is not necessary to check if each sample contains
+   * valid data.
+   *
+   * @return {ValidSampleIterator} An iterator to the samples.
+   */
+  get validDataIterator () {
+    return new ValidSampleIterator(this)
+  }
 }
 
+/**
+ * A data sample.
+ *
+ * {@link Instance} is the type of {@link Output.instance} and is the object that
+ * is published by {@link Output.write}.
+ *
+ * An Instance has an associated DDS Type, specified in the XML configuration, and
+ * it allows setting the values for the fields of the DDS Type.
+ *
+ * @property {Output} output - The {@link Output} that owns this Instance.
+ * @property {pointer} native - The native C pointer to this instace.
+ */
 class Instance {
   constructor (output) {
     this.output = output
   }
 
+  /**
+   * Resets a member to its default value.
+   *
+   * The effect is the same as that of {@link Output.clearMembers}, except that only
+   * one member is cleared.
+   * @param {string} fieldName  - The name of the field. It can be a complex member or a primitive member.
+   */
   clearMember (fieldName) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
@@ -654,11 +878,21 @@ class Instance {
     }
   }
 
+  /**
+   * Sets a numeric field.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @param {number} value - A numeric value, or null, to unset an optional member.
+   */
   setNumber (fieldName, value) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else if (!_isNumber(value)) {
-      throw new TypeError('value must be a number')
+      if (value === null) {
+        this.clearMember(fieldName);
+      } else 
+        throw new TypeError('value must be a number')
+      }
     } else {
       const retcode = connectorBinding.api.RTI_Connector_set_number_into_samples(
         this.output.connector.native,
@@ -669,11 +903,21 @@ class Instance {
     }
   }
 
+  /**
+   * Sets a boolean field.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @param {number} value - A boolean value, or null, to unset an optional member.
+   */
   setBoolean (fieldName, value) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else if (typeof value !== 'boolean') {
-      throw new TypeError('value must be a boolean')
+      if (value === null) {
+        this.clearMember(fieldName)
+      } else {
+        throw new TypeError('value must be a boolean')
+      }
     } else {
       const retcode = connectorBinding.api.RTI_Connector_set_boolean_into_samples(
         this.output.connector.native,
@@ -684,11 +928,21 @@ class Instance {
     }
   }
 
+  /**
+   * Sets a string field.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @param {number} value - A string  value, or null, to unset an optional member.
+   */
   setString (fieldName, value) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else if (!_isString(value)) {
-      throw new TypeError('value must be a string')
+      if (value === null) {
+        this.clearMember(fieldName)
+      } else {
+        throw new TypeError('value must be a boolean')
+      }
     } else {
       const retcode = connectorBinding.api.RTI_Connector_set_string_into_samples(
         this.output.connector.native,
@@ -699,6 +953,22 @@ class Instance {
     }
   }
 
+  /**
+   * Set the member values speciifed in a JSON object.
+   *
+   * The keys in the JSON object are the member names of the DDS Type associated with the Output,
+   * and the values are the values to set for those members.
+   *
+   * This method sets the values of those members that are explicitly specified
+   * in the JSON object. Any member that is not specified in the JSON object will retain its previous
+   * value.
+   *
+   * To clear members that are not in the JSON object, call {@link Output.clearMembers} before this method.
+   * You can also explicitly set any value in the JSON object to *null* to reset that field
+   * to its default value.
+   * 
+   * @param {JSON} jsonObj - The JSON object containing the keys (field names) and values (values for the fields)
+   */
   setFromJson (jsonObj) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_json_instance(
       this.output.connector.native,
@@ -706,12 +976,45 @@ class Instance {
       JSON.stringify(jsonObj)))
   }
 
-  // Deprecated, use setFromJson
+  /**
+   * Depreacted, use setFromJson.
+   *
+   * This method is supplied for backwards compatibility.
+   * @private
+   */
   setFromJSON (jsonObj) {
     this.setFromJson(jsonObj)
   }
+
+  /**
+   * The native C object.
+   *
+   * This property allows accessing additional *Connext DDS* APIs in C.
+   * @type {pointer}
+   */
+  get native () {
+    const nativePointer = ref.alloc('pointer')
+    const retcode = connectorBinding.api.RTI_Connector_get_native_instance(
+      this.output.connector.native,
+      this.output.name,
+      nativePointer)
+    _checkRetcode(retcode)
+    return nativePointer.deref()
+  }
 }
 
+/**
+ * Allows writing data for a DDS Topic.
+ *
+ * @property {Instance} instance - The data that is written when {@link Output.write} is called.
+ * @property {Connector} connector - The Connector that created this object.
+ * @property {string} name - The name of this Output (the name used in {@link Connector.getOutput})
+ * @property {pointer} native - The native handle that allows accessing additional *Connext DDS* APIs in C.
+ * @property {JSON} matchedSubscriptions - Information about matched subscriptions.
+ *
+ * {@link Writing Data (Output)}
+ * @todo Check all these links actually work
+ */
 class Output {
   constructor (connector, name) {
     this.connector = connector
@@ -726,6 +1029,21 @@ class Output {
     this.waitsetBusy = false
   }
 
+  /**
+   * Publishes the values of the current Instance.
+   *
+   * Note that after writing it, Instance's values remain unchanges. If for the
+   * next write you need to start from scratch you must first call {@link Output.clearMembers}.
+   *
+   * This method accepts a number of optional parameters, a subset of those documented in
+   * the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t|Writing Data section of the *Connext DDS Core Libraries* User's Manual.}
+   *
+   * The support parameters are:
+   * @todo Implement write_w_params in Node.js binding. I don't think it works currently.
+   * 
+   * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
+   * If the blocking time exceeds the *max_blocking_time* this method throws {@link TimeoutError}.
+   */
   write (params) {
     var cStr
     if (params === undefined) {
@@ -738,13 +1056,34 @@ class Output {
       this.name,
       cStr))
   }
-
+/**
+ * Resets the values of the memers of this {@link Output.instance}
+ *
+ * If the members is defined with *default* attribute in the configuration file, it gets
+ * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
+ * are cleared and optional members are set to 'null'.
+ *
+ * For example, if this Output's type is *ShapeType*, then clearMembers sets:
+ *  color = 'RED'
+ *  shapesize = 30
+ *  x = 0
+ *  y = 0
+ */
   clearMembers () {
     _checkRetcode(connectorBinding.api.RTI_Connector_clear(
       this.connector.native,
       this.name))
   }
 
+  /**
+   * Waits until all matching reliable subscriptions have acknowledged all the samples
+   * that have currently been written.
+   *
+   * This method only waits if this Output is configured with a reliable QoS.
+   *
+   * @param {timeout} [timeout] The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} If the operation times out, it raises {@link TimeoutError}.
+   */
   wait (timeout) {
     return new Promise((resolve, reject) => {
       if (timeout === undefined) {
@@ -767,6 +1106,15 @@ class Output {
     })
   }
 
+  /**
+   * Wait for this Output to match or unmatch a compatible DDS Publication.
+   *
+   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
+   * for a match (or unmatch) to occur.
+   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} The operation timed out before data was received.
+   * @returns {Promise} Promise object resolving with the change in the current number of matched inputs. If this is a positive number, the output has matched with new subscribers. If it is negative, the output has unmatched from a subscription. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the output matched the same number of inputs as it unmatched). 
+   */
   waitForSubscriptions (timeout) {
     return new Promise((resolve, reject) => {
       if (timeout === undefined) {
@@ -795,6 +1143,21 @@ class Output {
     })
   }
 
+  /**
+   * Returns information about matched subscriptions.
+   *
+   * This property returns a JSON array with each element of the array containing
+   * information about a matched subscription.
+   *
+   * Currently the only information contained in this JSON object is the subscription name of
+   * the matched subscription. If the matched subscription doesn't have a name, the
+   * name for that specific subscription will be null.
+   *
+   * Note that Connector Inputs are automatically assigned a name from the *data_reader name*
+   * element in the XML configuration.
+   *
+   * @type {JSON}
+   */
   get matchedSubscriptions () {
     const cStr = ref.alloc('char *')
     const retcode = connectorBinding.api.RTI_Connector_get_matched_subscriptions(
@@ -810,6 +1173,22 @@ class Output {
   }
 }
 
+/**
+ * Loads a configuration and creates its Inputs and Outputs.
+ *
+ * A **Connector** instance loads a configuration file from an XML document. For example::
+ * const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
+ *
+ * After creating it, the Connector's Inputs can be used to read data, and the Outputs to write data.
+ * {@link Connector.getInput}
+ * {@link Connector.getInput}
+ *
+ * An application can create multiple **Connector** instances for the same of different configurations.
+ *
+ * @param {string} configName - The configuration to load. The configName format is 'LibraryName::ParticipantNAme', where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantNAme is the name attribute of a <domain_participant> tag inside that library.
+ * @param {string} url - A URL locating the XML document. The url can be a file path (e.g., '/tmp/my_dds_config.xml') or a string containing the full XML document with the following format: 'str://"<dds>...</dds>"
+ * @class
+ */
 class Connector extends EventEmitter {
   constructor (configName, url) {
     super()
@@ -828,18 +1207,81 @@ class Connector extends EventEmitter {
     this.onDataAvailableRun = false
   }
 
-  delete () {
+  /**
+   * Frees al the resources created by this Connector instance.
+   */
+  close () {
     connectorBinding.api.RTI_Connector_delete(this.native)
   }
 
+  /**
+   * Deprecated, use close()
+   * @private
+   */
+  delete () {
+    this.close()
+  }
+
+  /**
+   * Returns the {@link Input} named inputName.
+   *
+   * 'inputName' identifies a <data_reader> tag in the configuration loaded by the 'Connector'. For Example::
+   *
+   *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
+   *   connector.getInput('MySubscriber::MyReader')
+   *
+   * Loads the Input in this XML:
+   * 
+   *   <domain_participant_library name="MyParticipantLibrary">
+   *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
+   *       <subscriber name="MySubscriber">
+   *         <data_reader name="MyReader" topic_ref="MyTopic"/>
+   *         ...
+   *       </subscriber>
+   *       ...
+   *     </domain_participant>
+   *     ...
+   *   <domain_participant_library>
+   *
+   * @param {string} inputName - The name of the data_reader to load. With the format 'SubscriberName::DataReaderName'
+   * @returns {Input} The Input, if it exists.
+   */
   getInput (inputName) {
     return new Input(this, inputName)
   }
 
+  /**
+   * Returns the {@link Output} named outputName.
+   *
+   * 'outputName' identifies a <data_writer> tag in the configuration loaded by the 'Connector'. For Example::
+   *
+   *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
+   *   connector.getOutput('MyPublisher::MyWriter')
+   *
+   * Loads the Input in this XML:
+   * 
+   *   <domain_participant_library name="MyParticipantLibrary">
+   *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
+   *       <publisher name="MyPublisher">
+   *         <data_writer name="MyWriter" topic_ref="MyTopic"/>
+   *         ...
+   *       </publisher>
+   *       ...
+   *     </domain_participant>
+   *     ...
+   *   <domain_participant_library>
+   *
+   * @param {string} outputName - The name of the data_writer to load. With the format 'PublisherName::DataWriterName'
+   * @returns {Output} The Output, if it exists.
+   */
   getOutput (outputName) {
     return new Output(this, outputName)
   }
 
+  /**
+   * This is deprecated. Use waitForData.
+   * @private
+   */
   onDataAvailable () {
     // No need to cache return value. When using .async() the result
     // is passed as 'res' to the callback function.
@@ -871,6 +1313,9 @@ class Connector extends EventEmitter {
   // Since the onDataAvailable() function above is using an asynchronous function
   // and the Connector binding is not thread-safe we have to ensure it is not
   // called concurrently
+  /**
+   * @private
+   */
   newListenerCallBack (eventName, functionListener) {
     if (eventName === 'on_data_available') {
       if (this.onDataAvailableRun === false) {
@@ -880,12 +1325,22 @@ class Connector extends EventEmitter {
     }
   }
 
+  /**
+   * @private
+   */
   removeListenerCallBack (eventName, functionListener) {
     if (this.listenerCount(eventName) === 0) {
       this.onDataAvailableRun = false
     }
   }
 
+  /**
+   * Waits for data to be received on any Input.
+   *
+   * @param {number} timeout - The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} If the operation times out, it raises {@link TimeoutError}
+   * @returns {Promise} 
+   */
   waitForData (timeout) {
     return new Promise((resolve, reject) => {
       // timeout is defaulted to -1 (infinite) if not supplied
