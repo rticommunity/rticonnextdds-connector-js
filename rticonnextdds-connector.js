@@ -335,8 +335,10 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        // Convert the returned int to a boolean
-        return !!value.deref()
+        // For backwards compatibility, return as an int
+        // This function is used by the iterators, where we convert this to a bool
+        // but there may be some applications which still int an int.
+        return value.deref()
       }
     }
   }
@@ -554,7 +556,7 @@ class SampleIterator {
    * @returns {boolean} The boolean value of the field.
    */
   getBoolean (fieldName) {
-    return this.input.samples.getBoolean(this.index, fieldName)
+    return !!this.input.samples.getBoolean(this.index, fieldName)
   }
 
   /**
@@ -599,11 +601,13 @@ class SampleIterator {
   }
 
   /**
-   * The iterator logic
-   * @todo Confirm that it is possible to call SampleIterator.next outside of the context of a for loop
-   * @private
+   * The iterator generator (used by the iterable). This is exposed separately
+   * to make it possible to control the iterable outside of a for loop, e.g.:
+   * var iterator = input.validDataIterator[Symbol.iterator]()
+   * iterator = iterator.next()
+   * jsonDictionary = iterator.value.getJson()
    */
-  [Symbol.iterator] () {
+  * iterator () {
     return {
       next: () => {
         if ((this.index + 1) < this.length) {
@@ -615,6 +619,16 @@ class SampleIterator {
       }
     }
   }
+
+  /**
+   * Implementation of iterable logic. This allows for the following syntax:
+   * for (var sample of input.dataIterator) {
+   *  jsonDictionary = sample.getJson()
+   * }
+   */
+  [Symbol.iterator] () {
+    return this.iterator()
+  }
 }
 
 /**
@@ -624,7 +638,12 @@ class SampleIterator {
  * @link Input.validDataIterator
  */
 class ValidSampleIterator extends SampleIterator {
-  [Symbol.iterator] () {
+  /**
+   * Implementation of iterable logic, which only includes valid data.
+   * Since this class inherits from SampleIterator, we use the iterable from
+   * that class.
+   */
+  * iterator () {
     return {
       next: () => {
         while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
@@ -665,6 +684,12 @@ class Input {
     }
     this.samples = new Samples(this)
     this.infos = new Infos(this)
+    // Internally, we use a StatusCondition for the waitForData and for
+    // waitForPublications, making these operations not thread-safe (since each
+    // DataReader only has a single StatusCondition associated with it). Since both
+    // of these functions are async, we use use this boolean to ensure that they
+    // are not used concurrently. This works because the Node.js interpreter is
+    // single-threaded.
     this.waitsetBusy = false
   }
 
@@ -734,7 +759,7 @@ class Input {
    * for a match (or unmatch) to occur.
    * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
    * @throws {TimeoutError} The operation timed out before data was received.
-   * @returns {Promise} Promise object resolving with the change in the current number of matched outputs. If this is a positive number, the input has matched with new publishers. If it is negative, the input has unmatched from an output. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the input matched the same number of outputs as it unmatched). 
+   * @returns {Promise} Promise object resolving with the change in the current number of matched outputs. If this is a positive number, the input has matched with new publishers. If it is negative, the input has unmatched from an output. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the input matched the same number of outputs as it unmatched).
    */
   waitForPublications (timeout) {
     return new Promise((resolve, reject) => {
@@ -794,7 +819,7 @@ class Input {
    * @type {number} The number of samples available since the last time read/take was called.
    */
   get sampleCount () {
-    return this.samples.length()
+    return this.samples.getLength()
   }
 
   /**
@@ -889,8 +914,8 @@ class Instance {
       throw new TypeError('fieldName must be a string')
     } else if (!_isNumber(value)) {
       if (value === null) {
-        this.clearMember(fieldName);
-      } else 
+        this.clearMember(fieldName)
+      } else {
         throw new TypeError('value must be a number')
       }
     } else {
@@ -966,7 +991,7 @@ class Instance {
    * To clear members that are not in the JSON object, call {@link Output.clearMembers} before this method.
    * You can also explicitly set any value in the JSON object to *null* to reset that field
    * to its default value.
-   * 
+   *
    * @param {JSON} jsonObj - The JSON object containing the keys (field names) and values (values for the fields)
    */
   setFromJson (jsonObj) {
@@ -1040,7 +1065,7 @@ class Output {
    *
    * The support parameters are:
    * @todo Implement write_w_params in Node.js binding. I don't think it works currently.
-   * 
+   *
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
    * If the blocking time exceeds the *max_blocking_time* this method throws {@link TimeoutError}.
    */
@@ -1056,19 +1081,20 @@ class Output {
       this.name,
       cStr))
   }
-/**
- * Resets the values of the memers of this {@link Output.instance}
- *
- * If the members is defined with *default* attribute in the configuration file, it gets
- * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
- * are cleared and optional members are set to 'null'.
- *
- * For example, if this Output's type is *ShapeType*, then clearMembers sets:
- *  color = 'RED'
- *  shapesize = 30
- *  x = 0
- *  y = 0
- */
+
+  /**
+   * Resets the values of the memers of this {@link Output.instance}
+   *
+   * If the members is defined with *default* attribute in the configuration file, it gets
+   * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
+   * are cleared and optional members are set to 'null'.
+   *
+   * For example, if this Output's type is *ShapeType*, then clearMembers sets:
+   *  color = 'RED'
+   *  shapesize = 30
+   *  x = 0
+   *  y = 0
+   */
   clearMembers () {
     _checkRetcode(connectorBinding.api.RTI_Connector_clear(
       this.connector.native,
@@ -1113,7 +1139,7 @@ class Output {
    * for a match (or unmatch) to occur.
    * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
    * @throws {TimeoutError} The operation timed out before data was received.
-   * @returns {Promise} Promise object resolving with the change in the current number of matched inputs. If this is a positive number, the output has matched with new subscribers. If it is negative, the output has unmatched from a subscription. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the output matched the same number of inputs as it unmatched). 
+   * @returns {Promise} Promise object resolving with the change in the current number of matched inputs. If this is a positive number, the output has matched with new subscribers. If it is negative, the output has unmatched from a subscription. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the output matched the same number of inputs as it unmatched).
    */
   waitForSubscriptions (timeout) {
     return new Promise((resolve, reject) => {
@@ -1231,7 +1257,7 @@ class Connector extends EventEmitter {
    *   connector.getInput('MySubscriber::MyReader')
    *
    * Loads the Input in this XML:
-   * 
+   *
    *   <domain_participant_library name="MyParticipantLibrary">
    *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
    *       <subscriber name="MySubscriber">
@@ -1259,7 +1285,7 @@ class Connector extends EventEmitter {
    *   connector.getOutput('MyPublisher::MyWriter')
    *
    * Loads the Input in this XML:
-   * 
+   *
    *   <domain_participant_library name="MyParticipantLibrary">
    *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
    *       <publisher name="MyPublisher">
@@ -1339,7 +1365,7 @@ class Connector extends EventEmitter {
    *
    * @param {number} timeout - The maximum time to wait in milliseconds. By default, infinite.
    * @throws {TimeoutError} If the operation times out, it raises {@link TimeoutError}
-   * @returns {Promise} 
+   * @returns {Promise}
    */
   waitForData (timeout) {
     return new Promise((resolve, reject) => {

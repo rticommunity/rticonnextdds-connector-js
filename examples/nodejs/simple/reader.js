@@ -23,8 +23,11 @@ const printNewMatches = (input, newMatches) => {
 const printNewData = (input) => {
   for (var sample of input.validDataIterator) {
     console.log(JSON.stringify(sample.getJson()))
-    console.log(sample.getValue('x'))
-    console.log(sample.getValue('color'))
+  }
+  var iterator = input.validDataIterator[Symbol.iterator]()
+  for (var j = 0; j < input.sampleCount; j++) {
+    iterator = iterator.next()
+    console.log(JSON.stringify(iterator.value.getJson()))
   }
 }
 
