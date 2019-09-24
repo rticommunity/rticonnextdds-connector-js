@@ -106,7 +106,8 @@ class _ConnectorBinding {
       RTI_Connector_get_last_error_message: ['char *', []],
       RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
       RTI_Connector_free_string: ['void', ['char *']],
-      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
+      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']],
+      RTI_Connector_set_max_objects_per_thread: ['int', ['int']]
     })
   }
 }
@@ -1390,6 +1391,24 @@ class Connector extends EventEmitter {
           return resolve()
         })
     })
+  }
+
+  /**
+   * Allows increasing the number of Connector instances that can be created.
+   *
+   * The default value is 1024 (which allows for approximately 8 instances of Connector
+   * to be created in a single application). If you need to create more than 8
+   * instances of Connector you can increase the value from the default.
+   *
+   * This operation can only be called before creating any Connector instance.
+   *
+   * See {@link https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm|SYSTEM_RESOURCE_LIMITS QoS policy}
+   * in the *RTI Connext DDS* User's Manual.
+   *
+   * @param {number} value - the value for *max_objects_per_thread*
+   */
+  static setMaxObjectsPerThread (value) {
+    _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))
   }
 }
 
