@@ -57,32 +57,28 @@ describe('Output Tests', function () {
       expect(output.instance).to.exist
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setNumber on non-existent field should throw error and ' +
+    it('setNumber on non-existent field should throw error and ' +
       'subscriber should not get a message with default values', function () {
       expect(function () {
         output.instance.setNumber('invalid_field', 1)
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setString on non-existent field should throw error and ' +
+    it('setString on non-existent field should throw error and ' +
       'subscriber should not get a message with default values', function () {
       expect(function () {
         output.instance.setString('invalid_field', 'value')
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setBoolean on non-existent field should throw error and ' +
+    it('setBoolean on non-existent field should throw error and ' +
       'subscriber should not get a message with default values',function () {
       expect(function () {
         output.instance.setBoolean('invalid_field', true)
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setFromJSON should throw error for a JSON object ' +
+    it('setFromJSON should throw error for a JSON object ' +
       'with non-existent fields and subscriber should not get ' +
       'a message with default values', function () {
       expect(function () {
@@ -112,20 +108,22 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setNumber with string value should throw Error and' +
+    it('setNumber with string value should throw Error and' +
       'subscriber should not get a message with erroneous field data', function () {
       expect(function () {
-        var numberField = 'x'
+        const numberField = 'x'
         output.instance.setNumber(numberField, 'value')
       }).to.throw(Error)
     })
 
-    // un-implemented test
-    it('Note: implicit type-conversion for setNumber with boolean value')
+    it('Implicit type-conversion for setNumber with boolean value', function () {
+      expect(function () {
+        const numberField = 'x'
+        output.instance.setNumber(numberField, true)
+      }).to.throw(Error)
+    })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setNumber with dictionary value should throw Error and ' +
+    it('setNumber with dictionary value should throw Error and ' +
       'subscriber should not get a message with erroneous field data', function () {
       expect(function () {
         const numberField = 'x'
@@ -133,8 +131,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setBoolean with string value should throw Error and ' +
+    it('setBoolean with string value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
       expect(function () {
         const booleanField = 'z'
@@ -142,11 +139,14 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    // unimplemented test
-    it('Note: implicit type-conversion for setBoolean with number value')
+    it('Implicit type-conversion for setBoolean with number value', function () {
+      expect(function () {
+        const booleanField = 'z'
+        output.instance.setBoolean(booleanField, 1)
+      }).to.throw(Error)
+    })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setBoolean with dictionary value should throw Error and ' +
+    it('setBoolean with dictionary value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
       expect(function () {
         const booleanField = 'z'
@@ -154,8 +154,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    // skipped test: Condition being tested has not been accounted for yet
-    it.skip('setFromJSON for JSON object with incompatible value types ' +
+    it('setFromJSON for JSON object with incompatible value types ' +
     'should throw Error and subscriber should not get a message with ' +
     'erroneous field data', function () {
       expect(function () {
