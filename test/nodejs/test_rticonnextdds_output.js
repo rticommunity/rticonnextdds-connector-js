@@ -33,7 +33,7 @@ describe('Output Tests', function () {
   it('Output object should not get instantiated for invalid DataWriter', function () {
     const invalidDW = 'invalidDW'
     expect(function () {
-      connector.getWriter(invalidDW)
+      connector.getOutput(invalidDW)
     }).to.throw(Error)
   })
 
