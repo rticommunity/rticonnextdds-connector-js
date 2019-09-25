@@ -78,11 +78,11 @@ params.forEach((retrievalMethod) => {
 
     it('received fields of data should be the same as ' +
       'that of the JSON object sent', function () {
-      var x = input.samples.getNumber(0, 'x')
-      var y = input.samples.getNumber(0, 'y')
-      var z = input.samples.getBoolean(0, 'z')
-      var color = input.samples.getString(0, 'color')
-      var shapesize = input.samples.getNumber(0, 'shapesize')
+      const x = input.samples.getNumber(0, 'x')
+      const y = input.samples.getNumber(0, 'y')
+      const z = input.samples.getBoolean(0, 'z')
+      const color = input.samples.getString(0, 'color')
+      const shapesize = input.samples.getNumber(0, 'shapesize')
 
       expect(x).to.equal(testMsg.x)
       expect(y).to.equal(testMsg.y)
@@ -92,9 +92,42 @@ params.forEach((retrievalMethod) => {
       expect(color).to.equal(testMsg.color)
     })
 
-    // Unimplemented tests
-    it('Behavior of getBoolean on String or Number fields should be considered')
-    it('Behavior of getString on Number or Boolean fields should be considered')
-    it('Behavior of getNumber on String or Boolean fields should be considered')
+    it('getting a number or string field as a boolean should fail in the core', () => {
+      const numberField = 'x'
+      const stringField = 'color'
+      expect(() => {
+        input.samples.getBoolean(0, numberField)
+      }).to.throw(rti.DDSError)
+
+      expect(() => {
+        input.samples.getBoolean(0, stringField)
+      }).to.throw(rti.DDSError)
+    })
+
+    it('should be possible to obtain a number as a string', () => {
+      const numberField = 'x'
+      const numberAsString = input.samples.getString(0, numberField)
+      expect(numberAsString).to.equal('1')
+    })
+
+    it('should not be possible to obtain a boolean as a string', () => {
+      const booleanField = 'z'
+      expect(() => {
+        input.samples.getString(0, booleanField)
+      }).to.throw(rti.DDSError)
+    })
+
+    it('should be possible to get a boolean field as a number', () => {
+      const booleanField = 'z'
+      const booleanAsNumber = input.samples.getNumber(0, booleanField)
+      expect(booleanAsNumber).to.equal(1)
+    })
+
+    it('should not be possible to get a string field as a number', () => {
+      const stringField = 'color'
+      expect(() => {
+        input.samples.getNumber(0, stringField)
+      }).to.throw(rti.DDSError)
+    })
   })
 })

@@ -7,7 +7,13 @@
 ******************************************************************************/
 
 var path = require('path')
-var expect = require('chai').expect
+var os = require('os')
+var ffi = require('ffi')
+var chai = require('chai')
+var chaiAsPromised = require('chai-as-promised')
+var expect = chai.expect
+chai.config.includeStack = true
+chai.use(chaiAsPromised)
 var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
@@ -20,7 +26,7 @@ describe('Input Tests', function () {
   // Initialization before all tests are executed
   before(function () {
     const participantProfile = 'MyParticipantLibrary::Zero'
-    var xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
   })
 
@@ -45,4 +51,55 @@ describe('Input Tests', function () {
     expect(input.name).to.equal(validDR)
     expect(input.connector).to.equal(connector)
   })
+})
+
+describe('Subscriber not automatically enabled tests', () => {
+  let connector = null
+
+  before(() => {
+    const participantProfile = 'MyParticipantLibrary::TestNoAutoenableSubscriber'
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    connector = new rti.Connector(participantProfile, xmlProfile)
+    expect(connector).to.exist.and.to.be.instanceOf(rti.Connector)
+  })
+
+  after(() => {
+    connector.close()
+  })
+
+  it('Entities should not auto-discover each other if QoS is set appropriately', () => {
+    const output = connector.getOutput('TestPublisher::TestWriter')
+    expect(output).to.exist
+    // The input is not automatically enabled in this QoS profile, meaning the
+    // output should not match with it
+    return expect(output.waitForSubscriptions(200)).to.be.rejectedWith(rti.TimeoutError)
+  })
+
+  it('Calling getInput should enable the input', (done) => {
+    const output = connector.getOutput('TestPublisher::TestWriter')
+    expect(output).to.exist
+    connector.getInput('TestSubscriber::TestReader')
+
+    expect(output.waitForSubscriptions(2000)).to.eventually.become(1).notify(done)
+  })
+})
+
+describe('Native call on a DataReader', () => {
+  // We do not run these tests on Windows since the symbols are not exported in the DLL
+  if (os.platform() !== 'win32') {
+    it('Should be possible to call an API in the Connector library which is not in the binding ', () => {
+      const participantProfile = 'MyParticipantLibrary::Zero'
+      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+      const connector = new rti.Connector(participantProfile, xmlProfile)
+      const input = connector.getInput('MySubscriber::MySquareReader')
+      additionalApi = ffi.Library(rti.connectorBinding.library, {
+        DDS_DataReader_get_topicdescription: ['pointer', ['pointer']],
+        DDS_TopicDescription_get_name: ['string', ['pointer']]
+      })
+      const topic = additionalApi.DDS_DataReader_get_topicdescription(input.native)
+      expect(topic).not.to.be.null
+      const topicName = additionalApi.DDS_TopicDescription_get_name(topic)
+      expect(topicName).to.equal('Square')
+    })
+  }
 })

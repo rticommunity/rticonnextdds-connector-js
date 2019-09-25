@@ -39,6 +39,7 @@ class _ConnectorBinding {
           libArch = 'x64Linux2.6gcc4.4.5'
           libName = 'librtiddsconnector.so'
           break
+        // Windows returns win32 even on 64-bit platforms
         case 'win32':
           libArch = 'x64Win64VS2013'
           libName = 'rtiddsconnector.dll'
@@ -516,7 +517,7 @@ class SampleIterator {
    * @type {boolean}
    */
   get validData () {
-    return this.input.infos.isValid(this.index)
+    return !!this.input.infos.isValid(this.index)
   }
 
   /**
@@ -1160,10 +1161,15 @@ class Output {
           (err, res) => {
             this.waitsetBusy = false
             if (err) {
-              reject(err)
+              return reject(err)
             }
-            _checkRetcode(res)
-            resolve(currentChangeCount.deref())
+            if (res === _ReturnCodes.ok) {
+              return resolve(currentChangeCount.deref())
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('DDS error'))
+            }
           }
         )
       }
@@ -1413,3 +1419,6 @@ class Connector extends EventEmitter {
 }
 
 module.exports.Connector = Connector
+module.exports.connectorBinding = connectorBinding
+module.exports.TimeoutError = TimeoutError
+module.exports.DDSError = DDSError

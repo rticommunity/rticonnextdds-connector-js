@@ -92,6 +92,5 @@ describe('Connector Tests', function () {
       output.instance.setFromJson(JSON.parse(testMsg))
       output.write()
     })
-
   })
 })
