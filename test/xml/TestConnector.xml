@@ -51,6 +51,11 @@ This code contains trade secrets of Real-Time Innovations, Inc.
                     <kind> TRANSIENT_LOCAL_DURABILITY_QOS </kind>
                 </durability>
             </datareader_qos>
+            <participant_factory_qos>
+                <logging>
+                    <!-- <verbosity>LOCAL</verbosity> -->
+                </logging>
+            </participant_factory_qos>
         </qos_profile>
     </qos_library>
 

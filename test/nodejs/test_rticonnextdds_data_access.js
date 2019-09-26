@@ -7,11 +7,14 @@
 ******************************************************************************/
 
 var path = require('path')
+var os = require('os')
+var ffi = require('ffi')
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
 var expect = chai.expect
 chai.config.includeStack = true
 chai.use(chaiAsPromised)
+var should = chai.should
 var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
@@ -160,58 +163,519 @@ describe('Data access tests with a pre-populated input', function () {
   //   expect(sample.getString('my_optional_long')).to.deep.equals(null)
   // })
 
-  it('obtain an unset optional complex member', () => {
-    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+  // it('obtain an unset optional complex member', () => {
+  //   expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+  // })
+
+  // it('unset optional members should not be in JSON objects returned by getJSON', () => {
+  //   // expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+  //   const jsonObj = sample.getJson()
+  //   expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
+  // })
+
+  // it('get non-existent member with getJson', () => {
+  //   expect(() => {
+  //     sample.getJson('IDoNotExist')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('attempt to get non-complex members with getJson', () => {
+  //   expect(() => {
+  //     sample.getJson('my_long')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_double')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_optional_bool')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_optional_long')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_string')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_enum')
+  //   }).to.throw(rti.DDSError)
+  //   expect(() => {
+  //     sample.getJson('my_point.x')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('get complex members using getJson', () => {
+  //   const thePoint = sample.getJson('my_point')
+  //   expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
+  //   expect(thePoint.x).to.deep.equals(3).and.is.a('number')
+  //   expect(thePoint.y).to.deep.equals(4).and.is.a('number')
+
+  //   const thePointAlias = sample.getJson('my_point_alias')
+  //   expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
+  //   expect(thePointAlias.x).to.deep.equals(30).and.is.a('number')
+  //   expect(thePointAlias.y).to.deep.equals(40).and.is.a('number')
+
+  //   theUnion = sample.getJson('my_union')
+  //   expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
+  //   expect(theUnion.my_int_sequence).to.be.an.instanceof([].constructor)
+  //     .and.to.deep.equals([10, 20, 30])
+
+  //   thePointSequence = sample.getJson('my_point_sequence')
+  //   expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
+  //   expect(thePointSequence).to.be.an.instanceof([].constructor)
+  //     .and.to.deep.equals([{ x: 10, y: 20 }, { x: 11, y: 21 }])
+
+  //   thePointSequence0 = sample.getJson('my_point_sequence[0]')
+  //   expect(JSON.parse(JSON.stringify(thePointSequence0))).to.deep.equals(thePointSequence0)
+  //   expect(thePointSequence0.x).to.deep.equals(10)
+  //   expect(thePointSequence0.y).to.deep.equals(20)
+
+  //   theArray = sample.getJson('my_point_array')
+  //   expect(JSON.parse(JSON.stringify(theArray))).to.deep.equals(theArray)
+
+  //   theArray0 = sample.getJson('my_point_array[0]')
+  //   expect(JSON.parse(JSON.stringify(theArray0))).to.deep.equals(theArray0)
+  //   expect(theArray0.x).to.deep.equals(0)
+  //   expect(theArray0.y).to.deep.equals(0)
+  // })
+
+  // it('get an unset optional complex member using getJson', () => {
+  //   unsetOptionalComplex = sample.getJson('my_optional_point')
+  //   expect(unsetOptionalComplex).to.deep.equals(null)
+  // })
+
+  // // We do not run these tests on Windows since the symbols are not exported in the DLL
+  // if (os.platform() !== 'win32') {
+  //   it('access native dynamic data pointer', () => {
+  //     const additionalApi = ffi.Library(rti.connectorBinding.library, {
+  //       DDS_DynamicData_get_member_count: ['uint', ['pointer']]
+  //     })
+  //     const memberCount = additionalApi.DDS_DynamicData_get_member_count(sample.native)
+  //     expect(memberCount).to.be.greaterThan(0)
+  //   })
+  // }
+
+  // it('get complex members using getValue', () => {
+  //   const thePoint = sample.getValue('my_point')
+  //   // Since my_point is a struct it should have been converted to a JSON object
+  //   expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
+  //   expect(thePoint.x).to.deep.equals(3)
+  //   expect(thePoint.y).to.deep.equals(4)
+
+  //   const thePointSequence = sample.getValue('my_point_sequence')
+  //   expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
+  //   expect(thePointSequence).to.be.an.instanceof([].constructor)
+  //   expect(thePointSequence[0]).to.deep.equals({ x: 10, y: 20 })
+  //   expect(thePointSequence[1]).to.deep.equals({ x: 11, y: 21 })
+
+  //   const thePointArray = sample.getValue('my_point_array')
+  //   expect(JSON.parse(JSON.stringify(thePointArray))).to.deep.equals(thePointArray)
+  //   expect(thePointArray).to.be.an.instanceof([].constructor)
+  //   expect(thePointArray[0]).to.deep.equals({ x: 0, y: 0 })
+  //   expect(thePointArray[4]).to.deep.equals({ x: 5, y: 15 })
+
+  //   const thePointAlias = sample.getValue('my_point_alias')
+  //   // Alias should be resolved so we now have a JSON object
+  //   expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
+  //   expect(thePointAlias.x).to.deep.equals(30)
+  //   expect(thePointAlias.y).to.deep.equals(40)
+
+  //   const theOptionalPoint = sample.getValue('my_optional_point')
+  //   // Unset optional should return null
+  //   expect(theOptionalPoint).to.deep.equals(null)
+
+  //   const theUnion = sample.getValue('my_union')
+  //   // Since no trailing '#' was supplied we should now have the JSON object
+  //   expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
+  //   expect(theUnion).to.deep.equals({ my_int_sequence: [10, 20, 30] })
+  // })
+
+  // it('Try to obtain complex members with getNumber', () => {
+  //   expect(() => {
+  //     sample.getNumber('my_point')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('Try to obtain complex members with getBoolean', () => {
+  //   expect(() => {
+  //     sample.getBoolean('my_point')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('Try to obtain complex members with getString', () => {
+  //   // It should be possible to complex members with getString, but the returned
+  //   // object will have a type of 'string', not a JSON object
+  //   const complexString = sample.getString('my_point')
+  //   expect(complexString).to.be.a('string')
+  //   // The string should be parsable by JSON
+  //   const complexJson = JSON.parse(complexString)
+  //   expect(complexJson).to.be.an.instanceof({}.constructor)
+  //   expect(complexJson.x).to.deep.equals(3)
+  // })
+
+  // it('Try to obtain complex arrays with getString', () => {
+  //   // It should be possible to complex members with getString, but the returned
+  //   // object will have a type of 'string', not a JSON object
+  //   const complexString = sample.getString('my_point_array')
+  //   expect(complexString).to.be.a('string')
+  //   // The string should be parsable by JSON
+  //   const complexJson = JSON.parse(complexString)
+  //   expect(complexJson).to.be.an.instanceof([].constructor)
+  //   expect(complexJson[0].x).to.deep.equals(0)
+  // })
+})
+
+describe('Tests with a testOutput and testInput', () => {
+  let connector = null
+  let testOutput = null
+  let testInput = null
+  const testJsonObject = {
+    my_long: 10,
+    my_double: 3.3,
+    my_optional_bool: true,
+    my_enum: 1,
+    my_string: 'hello',
+    my_point: { x: 3, y: 4 },
+    my_point_alias: { x: 30, y: 40 },
+    my_union: { my_int_sequence: [10, 20, 30] },
+    my_int_union: { my_long: 222 },
+    my_point_sequence: [{ x: 10, y: 20 }, { x: 11, y: 21 }],
+    my_int_sequence: [1, 2, 3],
+    my_point_array: [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, {x: 5, y: 15 }],
+    my_boolean: false,
+    my_int64: -18014398509481984,
+    my_uint64: 18014398509481984
+  }
+
+  beforeEach(() => {
+    const participantProfile = 'MyParticipantLibrary::DataAccessTest'
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    connector = new rti.Connector(participantProfile, xmlProfile)
+    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    testInput = connector.getInput('TestSubscriber::TestReader2')
+    expect(testInput).to.exist
+    testOutput = connector.getOutput('TestPublisher::TestWriter2')
+    expect(testOutput).to.exist
+
+    // Wait for the input and output to dicovery each other
+    expect(testOutput.waitForSubscriptions(2000)).to.eventually.become(1)
   })
 
-  it('unset optional members should not be in JSON objects returned by getJSON', () => {
-    // expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
-    const jsonObj = sample.getJson()
-    console.log(jsonObj)
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
+  afterEach(() => {
+    // Take all samples here to ensure that next test case has a clean input
+    testInput.take()
+    connector.close()
   })
 
-  // def test_unset_complex_optional_dict2(self, populated_input):
-  //   sample = populated_input[0]
-  //   assert sample.get_number("my_optional_point.x") is None
-  //   dictionary = sample.get_dictionary()
-  //   assert not "my_optional_point" in dictionary
+  // if (os.platform() !== 'win32') {
+  //   it('test native API on output', () => {
+  //     const additionalApi = ffi.Library(rti.connectorBinding.library, {
+  //       DDS_DynamicData_get_member_count: ['uint', ['pointer']]
+  //     })
+  //     const memberCount = additionalApi.DDS_DynamicData_get_member_count(testOutput.instance.native)
+  //     expect(memberCount).to.be.greaterThan(0)
+  //   })
+  // }
 
-  // def test_reset_optional_number(self, test_output, test_input):
-  //   test_output.instance.set_number("my_optional_long", 33)
-  //   test_output.instance.set_number("my_optional_long", None)
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   assert test_input[0].get_number("my_optional_long") is None
-  //   assert not "my_optional_long" in test_input[0].get_dictionary()
+  // it('pass null as field name to setX APIs on output', () => {
+  //   expect(() => {
+  //     testOutput.instance.setBoolean(null, true)
+  //   }).to.throw(TypeError)
 
-  // def test_reset_optional_boolean(self, test_output, test_input):
-  //   test_output.instance.set_boolean("my_optional_bool", True)
-  //   test_output.instance.set_boolean("my_optional_bool", None)
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   sample = test_input[0]
-  //   assert sample.get_boolean("my_optional_bool") is None
-  //   assert sample["my_optional_bool"] is None
-  //   assert not "my_optional_bool" in sample.get_dictionary()
+  //   expect(() => {
+  //     testOutput.instance.setNumber(null, 1)
+  //   }).to.throw(TypeError)
 
-  // def test_reset_complex_optional(self, test_output, test_input):
-  //   test_output.instance.set_number("my_optional_point.x", 44)
-  //   test_output.instance.set_number("my_point_alias.x", 55)
-  //   test_output.instance.clear_member("my_optional_point")
-  //   test_output.instance.clear_member("my_point_alias")
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   assert test_input[0].get_number("my_optional_point.x") is None
-  //   assert test_input[0].get_number("my_point_alias.x") is None
-  //   assert test_input[0]["my_optional_point.x"] is None
+  //   expect(() => {
+  //     testOutput.instance.setString(null, 'hello')
+  //   }).to.throw(TypeError)
+  // })
 
-  // def test_clear_complex_member(self, test_output, test_input):
-  //   test_output.instance.set_number("my_point.x", 44)
-  //   test_output.instance.clear_member("my_point")
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   assert test_input[0].get_number("my_point.x") == 0
+  // it('try to set a number with a string', () => {
+  //   expect(() => {
+  //     testOutput.instance.setNumber('my_long', 'hello')
+  //   }).to.throw(TypeError)
+  // })
+
+  // it('try to set a boolean with a string', () => {
+  //   expect(() => {
+  //     testOutput.instance.setBoolean('my_optional_bool', 'hello')
+  //   }).to.throw(TypeError)
+  // })
+
+  // it('try to set non-existent field names', () => {
+  //   expect(() => {
+  //     testOutput.instance.setNumber('NonExistent', 1)
+  //   }).to.throw(rti.DDSError)
+
+  //   expect(() => {
+  //     testOutput.instance.setBoolean('NonExistent', false)
+  //   }).to.throw(rti.DDSError)
+
+  //   expect(() => {
+  //     testOutput.instance.setString('NonExistent', 'hello')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('Supply a JSON object where everything is a string', () => {
+  //   testOutput.instance.setFromJson({
+  //     my_long: '10',
+  //     my_double: '3.3',
+  //     my_optional_bool: true,
+  //     my_enum: '1',
+  //     my_string: 'hello',
+  //     my_point: { x: '3', y: '4' },
+  //     my_point_alias: { x: '30', y: '40' },
+  //     my_union: { my_int_sequence: ['10', '20', '30'] },
+  //     my_int_union: { my_long: '222' },
+  //     my_point_sequence: [{ x: '10', y: '20' }, { x: '11', y: '21' }],
+  //     my_int_sequence: ['1', '2', '3'],
+  //     my_point_array: [{ x: '0', y: '0' }, { x: '0', y: '0' }, { x: '0', y: '0' }, { x: '0', y: '0' }, { x: '5', y: '15' }],
+  //     my_boolean: false,
+  //     my_int64: '-18014398509481984',
+  //     my_uint64: '18014398509481984'
+  //   })
+  //   testOutput.write()
+  //   testInput.wait(2000).then(() => {
+  //     testInput.take()
+  //     const receivedJsonObject = testInput.getSample(0).getJson()
+  //     expect(receivedJsonObject).deep.equals(testJsonObject)
+  //   }).catch(() => {
+  //     // Fail the test
+  //     expect(false).to.deep.equals(true)
+  //   })
+  // })
+
+  // it('Bad conversion from string in JSON object', () => {
+  //   // For each numeric field, test that setFromJson fails when the value we provide
+  //   // does not represent a number
+  //   const fieldNames = [
+  //     'my_long',
+  //     'my_int64',
+  //     'my_double',
+  //     'my_point_array[1]',
+  //     'my_int_sequence[1]',
+  //     'my_enum',
+  //     'my_uint64']
+  //   for (field of fieldNames) {
+  //     expect(() => {
+  //       testOutput.instance.setFromJson({ field: 'this is not a number' })
+  //       console.log(field + ' did not raise an exception')
+  //     }).to.throw(rti.DDSError)
+  //   }
+  // })
+
+  // it('Attempt to access past the end of a sequence using setFromJson', () => {
+  //   expect(() => {
+  //     // my_int_sequence has a bound of 10 and we are supplying 11 elements
+  //     testOutput.instance.setFromJson({ my_int_sequence: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] })
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('Set a boolean field using setNumber and check the resultant value on an input', () => {
+  //   testOutput.instance.setNumber('my_optional_bool', 1)
+  //   testOutput.write()
+  //   testInput.wait(1000).then(() => {
+  //     testInput.take()
+  //     const theOptionalBool = testInput.getSample(0).getValue('my_optional_bool')
+  //     expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
+  //   }).catch(() => {
+  //     // Fail the test
+  //     expect(false).to.deep.equals(true)
+  //   })
+  // })
+
+  // it('Set a string with a number and check the resultant value on an input', () => {
+  //   testOutput.instance.setString('my_string', '1234')
+  //   testOutput.write()
+  //   testInput.wait(1000).then(() => {
+  //     testInput.take()
+  //     const theNumericString = testInput.getSample(0).getValue('my_string')
+  //     // Due to CON-139 getValue returns strings as numbers if they represent a number
+  //     expect(theNumericString).to.be.a('number').and.deep.equals(1234)
+  //   }).catch(() => {
+  //     // Fail the test
+  //     expect(false).to.deep.equals(true)
+  //   })
+  // })
+
+  // it('Test output sequences', () => {
+  //   testOutput.instance.setNumber('my_point_sequence[0].y', 20)
+  //   testOutput.instance.setNumber('my_int_sequence[1]', 2)
+  //   testOutput.instance.setNumber('my_point_array[4].x', 5)
+  //   testOutput.write()
+  //   testInput.wait(2000).then(() => {
+  //     testInput.take()
+  //     const sample = testInput.getSample(0)
+  //     expect(sample.getValue('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
+  //     expect(sample.getValue('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
+  //     expect(sample.getValue('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
+  //     expect(sample.getValue('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
+  //     expect(sample.getValue('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
+  //   }).catch(() => {
+  //     // Fail the test
+  //     expect(false).to.deep.equals(true)
+  //   })
+  // })
+
+  // it('Change union members', (done) => {
+  //   testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
+  //   testOutput.write()
+  //   testInput.wait(2000).then(() => {
+  //     testInput.take()
+  //     let sample = testInput.getSample(0)
+  //     expect(sample.getString('my_union#')).to.be.a('string').that.deep.equals('my_int_sequence')
+
+  //     // Change the union to long
+  //     testOutput.instance.setNumber('my_union.my_long', 3)
+  //     testOutput.write()
+  //     testInput.wait(2000).then(() => {
+  //       testInput.take()
+  //       sample = testInput.getSample(0)
+  //       expect(sample.getString('my_union#')).to.be.a('string').that.deep.equals('my_long')
+  //       expect(sample.getNumber('my_union.my_long')).to.be.a('number').that.deep.equals(3).notify(done)
+  //     }).catch(() => {
+  //       // Fail the test
+  //       expect(false).to.deep.equals(true).notify(done)
+  //     })
+  //   })
+  // })
+
+  // it('Change union members', async () => {
+  //   testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     let sample = testInput.getSample(0)
+  //     expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence')
+  //       .and.is.a('string')
+  //     // Change the union
+  //     testOutput.instance.setNumber('my_union.my_long', 3)
+  //     testOutput.write()
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     sample = testInput.getSample(0)
+  //     expect(sample.getString('my_union#')).to.deep.equals('my_long')
+  //       .and.is.a('string')
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  // it('Set an optional', async () => {
+  //   testOutput.instance.setNumber('my_optional_point.x', 101)
+  //   testOutput.instance.setNumber('my_point_alias.x', 202)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(0)
+  //     const sample = testInput.getSample(0)
+  //     expect(sample.getNumber('my_optional_point.x')).to.deep.equals(101)
+  //       .and.is.a('number')
+  //     expect(sample.getNumber('my_point_alias.x')).to.deep.equals(202)
+  //       .and.is.a('number')
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  // it('Get an unset optional boolean', async () => {
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     const unsetOptional = testInput.getSample(0).getBoolean('my_optional_bool')
+  //     expect(unsetOptional).to.deep.equals(null)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  // it('Reset an optional number', async () => {
+  //   testOutput.instance.setNumber('my_optional_long', 33)
+  //   testOutput.instance.setNumber('my_optional_long', null)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     const sample = testInput.getSample(0)
+  //     expect(sample.getNumber('my_optional_long'))
+  //       .to.deep.equals(null)
+  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_long'))
+  //       .to.be.false
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  // it('Reset an optional bool', async () => {
+  //   testOutput.instance.setBoolean('my_optional_bool', true)
+  //   testOutput.instance.setBoolean('my_optional_bool', null)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     const sample = testInput.getSample(0)
+  //     expect(sample.getNumber('my_optional_bool'))
+  //       .to.deep.equals(null)
+  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_bool'))
+  //       .to.be.false
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  // it('Reset an optional complex', async () => {
+  //   testOutput.instance.setNumber('my_optional_point.x', 44)
+  //   testOutput.instance.setNumber('my_point_alias.x', 55)
+  //   testOutput.instance.clearMember('my_optional_point')
+  //   testOutput.instance.clearMember('my_point_alias')
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //     testInput.take()
+  //     const sample = testInput.getSample(0)
+  //     expect(sample.getNumber('my_optional_point.x'))
+  //       .to.deep.equals(null)
+  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_point'))
+  //       .to.be.false
+  //     expect(sample.getNumber('my_point_alias.x'))
+  //       .to.deep.equals(null)
+  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_point_alias'))
+  //       .to.be.false
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  // })
+
+  it('Clear a sequence', async () => {
+    testOutput.instance.setNumber('my_union.my_int_sequence[2]', 10)
+    testOutput.instance.setNumber('my_point.x', 3)
+    testOutput.instance.clearMember('my_union.my_int_sequence')
+    testOutput.write()
+    try {
+      await testInput.wait(2000)
+      testInput.take()
+      const sample = testInput.getSample(0)
+      expect(sample.getNumber('my_union.my_int_sequence#'))
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+  })
+})
 
   // def test_clear_sequence(self, test_output, test_input):
   //   test_output.instance.set_number("my_union.my_int_sequence[2]", 10)
@@ -290,50 +754,6 @@ describe('Data access tests with a pre-populated input', function () {
   //   assert sample.get_number("my_point.x") == 3
   //   assert sample.get_number("my_point_sequence#") == 2
 
-  // def test_get_dictionary(self, populated_input):
-  //   # populated_input[0] contains test_dictionary
-  //   sample = populated_input[0]
-
-  //   # Attempt to get_dictionary for non existent member
-  //   with pytest.raises(rti.Error, match=r".*Cannot find.*IDoNotExist.*") as excinfo:
-  //     sample.get_dictionary("IDoNotExist")
-
-  //   # Attempt to get_dictionary for non-complex members
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_long")
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_double")
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_optional_bool")
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_optional_long")
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_string")
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_enum")
-  //   # It is possible to use get_dictionary to access nested members, but the nested
-  //   # member must be a complex type
-  //   with pytest.raises(rti.Error, match=r".*TypeCodeKind must be one of the following.*") as excinfo:
-  //     sample.get_dictionary("my_point.x")
-
-  //   # Valid values for member_name
-  //   the_point = sample.get_dictionary("my_point")
-  //   assert the_point['x'] == 3 and the_point['y'] == 4
-  //   the_point_alias = sample.get_dictionary("my_point_alias")
-  //   assert the_point_alias['x'] == 30 and the_point_alias['y'] == 40
-  //   the_union = sample.get_dictionary("my_union")
-  //   assert the_union['my_int_sequence'] == [10, 20, 30]
-  //   the_point_sequence = sample.get_dictionary("my_point_sequence")
-  //   assert the_point_sequence == [{'x': 10, 'y': 20}, {'x': 11, 'y': 21}]
-  //   the_point_sequence_0 = sample.get_dictionary("my_point_sequence[0]")
-  //   assert the_point_sequence_0 == {'x': 10, 'y': 20}
-  //   the_array = sample.get_dictionary("my_point_array")
-  //   the_array_0 = sample.get_dictionary("my_point_array[0]")
-  //   assert the_array_0 == {'x': 0, 'y': 0}
-
-  //   # Test get_dictionary with an unset optional
-  //   unset_optional = sample.get_dictionary("my_optional_point")
-  //   assert unset_optional is None
 
   // def test_shrink_sequence(self, test_output, test_input, test_dictionary):
   //   """Tests that set_dictionary shrinks sequences when it receives a smaller one"""
@@ -413,281 +833,77 @@ describe('Data access tests with a pre-populated input', function () {
   //   # largest long long
   //   self.verify_large_integer(test_output, test_input, 2**63 - 1)
 
-  // @pytest.mark.xfail(sys.platform.startswith("win"), reason="symbols not exported")
-  // def test_access_input_native_dynamic_data(self, populated_input):
-  //   get_member_count = rti.connector_binding.library.DDS_DynamicData_get_member_count
-  //   get_member_count.restype = ctypes.c_uint
-  //   get_member_count.argtypes = [ctypes.c_void_p]
-  //   count = get_member_count(populated_input[0].native)
-  //   assert count > 0
-
-  // @pytest.mark.xfail(sys.platform.startswith("win"), reason="symbols not exported")
-  // def test_access_output_native_dynamic_data(self, test_output, test_dictionary):
-  //   test_output.instance.set_dictionary(test_dictionary)
-  //   get_member_count = rti.connector_binding.library.DDS_DynamicData_get_member_count
-  //   get_member_count.restype = ctypes.c_uint
-  //   get_member_count.argtypes = [ctypes.c_void_p]
-  //   count = get_member_count(test_output.instance.native)
-  //   assert count > 0
-
-  // def test_input_performance(self, populated_input):
-  //   num_iter = 1000
-  //   sample = populated_input[0]
-
-  //   start = time.time()
-  //   for i in range (1, num_iter):
-  //     v = sample.get_number("my_long")
-  //   end = time.time()
-  //   get_number_duration = end - start
-
-  //   start = time.time()
-  //   for i in range (1, num_iter):
-  //     v = sample["my_long"]
-  //   end = time.time()
-  //   get_item_duration = end - start
-
-  //   print("__getitem__ is {:2.2%} slower than get_number".format(
-  //     (get_item_duration - get_number_duration) / get_number_duration))
-
-  // def test_output_performance(self, test_output):
-  //   num_iter = 1000
-  //   sample = test_output.instance
-
-  //   start = time.time()
-  //   for i in range (1, num_iter):
-  //     sample.set_number("my_long", 10)
-  //   end = time.time()
-  //   get_number_duration = end - start
-
-  //   start = time.time()
-  //   for i in range (1, num_iter):
-  //     sample["my_long"] = 10
-  //   end = time.time()
-  //   get_item_duration = end - start
-
-  //   print("__setitem__ is {:2.2%} slower than set_number".format(
-  //     (get_item_duration - get_number_duration) / get_number_duration))
-
-  // def test_set_into_samples(self, test_output):
-  //   """
-  //   Test that the APIs to set data into samples behave as expected and raise the
-  //   appropriate exceptions.
-  //   """
-  //   # Pass None as the field_name
-  //   with pytest.raises(AttributeError) as excinfo:
-  //     test_output.instance[None] = 5
-  //   with pytest.raises(AttributeError) as excinfo:
-  //     test_output.instance.set_boolean(None, True)
-  //   with pytest.raises(AttributeError) as excinfo:
-  //     test_output.instance.set_number(None, 42)
-  //   with pytest.raises(AttributeError) as excinfo:
-  //     test_output.instance.set_string(None, "Hello")
-
-  //   # Try to set a number with a string
-  //   with pytest.raises(TypeError) as excinfo:
-  //     test_output.instance.set_number("my_long", "hihewrke")
-  //   # Try to set a boolean with a string
-  //   with pytest.raises(TypeError) as excinfo:
-  //     test_output.instance.set_boolean("my_optional_bool", "hihewrke")
-
-  //   # Pass non-existent field names
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     test_output.instance["NonExistent"] = 1
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     test_output.instance.set_number("NonExistent", 1)
-  //   with pytest.raises(TypeError) as excinfo:
-  //     test_output.instance.set_string("NonExistent", 1)
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     test_output.instance.set_boolean("NonExistent", 1)
-
-  // def test_get_complex_with_getitem(self, populated_input):
-  //   sample = populated_input[0]
-
-  //   point = sample["my_point"]
-  //   # Structs converted to dict
-  //   assert isinstance(point, dict)
-  //   assert point['x'] == 3
-  //   assert point['y'] == 4
-
-  //   point_sequence = sample["my_point_sequence"]
-  //   # Sequences converted to list
-  //   assert isinstance(point_sequence, list)
-  //   assert point_sequence[0] == {'x': 10, 'y': 20}
-  //   assert point_sequence[1] == {'x': 11, 'y': 21}
-
-  //   point_array = sample["my_point_array"]
-  //   # Arrays converted to list
-  //   assert isinstance(point_array, list)
-  //   assert point_array[0] == {'x': 0, 'y': 0}
-  //   assert point_array[4] == {'x': 5, 'y': 15}
-
-  //   point_alias = sample["my_point_alias"]
-  //   # Alias should be resolved (so in this case become a struct -> dict)
-  //   assert isinstance(point_alias, dict)
-  //   assert point_alias['x'] == 30
-  //   assert point_alias['y'] == 40
-
-  //   optional_point = sample["my_optional_point"]
-  //   # Unset optional should return None
-  //   assert optional_point is None
-
-  //   union = sample["my_union"]
-  //   # If no trailing '#' is supplied should obtain the union as a struct -> dict
-  //   assert isinstance(union, dict)
-  //   assert union == {'my_int_sequence': [10, 20, 30]}
-
-  //   # It should not be possible to obtain complex members with get_number API,
-  //   # though this should work with __getitem__ as shown above
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     sample.get_number("my_point")
-  //   # Test the same thing with get_boolean
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     sample.get_boolean("my_point")
-  //   # It should be possible to obtain complex members using get_string, but doing
-  //   # this they will be of type 'str' as opposed to 'list' and 'dict'. They should
-  //   # be in such a format that it is possible to convert them at a later point.
-  //   point_str = sample.get_string("my_point")
-  //   assert isinstance(point_str, str)
-  //   assert isinstance(json.loads(point_str), dict)
-  //   point_array_str = sample.get_string("my_point_array")
-  //   assert isinstance(point_array_str, str)
-  //   assert isinstance(json.loads(point_array_str), list)
-
-  // # Using the test_connector fixture as we want to get all 4 entities contained
-  // # within it
-  // def test_wait_for_data(self, test_connector):
-  //   input1 = test_connector.get_input("TestSubscriber::TestReader")
-  //   input2 = test_connector.get_input("TestSubscriber::TestReader2")
-  //   output1 = test_connector.get_output("TestPublisher::TestWriter")
-  //   output2 = test_connector.get_output("TestPublisher::TestWriter2")
-
-  //   # Ensure matching between all entities occurs
-  //   # TODO after merging CON-108
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     input2.wait(2000)
-
-  //   # All variations of wait_for_data will timeout
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     test_connector.wait(500)
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     input1.wait(500)
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     input2.wait(500)
-
-  //   # Now we write some data using output1 (which is matched with input1)
-  //   output1.write()
-  //   # Both the Connector-level wait and a wait on input1 should return
-  //   test_connector.wait(5000)
-  //   input1.wait(5000)
-  //   # But a wait on input2 should timeout
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     input2.wait(500)
-  //   # Take the sample
-  //   input1.take()
-
-  //   # Now the same with output2
-  //   output2.write()
-  //   # Both the Connector-level wait and a wait on input2 should return
-  //   test_connector.wait(-1)
-  //   input2.wait(5000)
-  //   # But a wait on input1 should timeout
-  //   with pytest.raises(rti.TimeoutError) as excinfo:
-  //     input1.wait(500)
-  //   # Take the sample
-  //   input2.take()
-
-  // def test_convert_from_string_in_dict(self, test_output, test_input, test_dictionary):
-  //   test_output.instance.set_dictionary({
-  //     'my_long': "10",
-  //     'my_double': "3.3",
-  //     'my_optional_bool':True,
-  //     'my_enum': "1",
-  //     'my_string': 'hello',
-  //     'my_point': {'x': "3", 'y': "4"},
-  //     'my_point_alias': {'x': "30", 'y': "40"},
-  //     'my_union': {'my_int_sequence': ["10", "20", "30"]},
-  //     'my_int_union': {'my_long': "222"},
-  //     'my_point_sequence': [{'x': "10", 'y': 20}, {'x': "11", 'y': "21"}],
-  //     'my_int_sequence': ["1", 2, 3],
-  //     'my_point_array': [{'x': "0", 'y': 0}, {'x': 0, 'y': "0"}, {'x': 0, 'y': 0}, {'x': 0, 'y': 0}, {'x': 5, 'y': 15}],
-  //     'my_boolean': False,
-  //     'my_int64': "-18014398509481984",
-  //     'my_uint64': "18014398509481984"
-  //   })
-  //   sample = send_data(test_output, test_input)
-  //   assert sample.get_dictionary() == test_dictionary
-
-  // def test_bad_conversion_from_string_in_dict(self, test_output, test_dictionary):
-  //   # For each numeric field, test that set_dictionary fails when the value we
-  //   # try to set is a string that doesn't represent a number
-  //   field_names = ["my_long", "my_int64", "my_double",
-  //     "my_point_array[1].x", "my_int_sequence[1], my_enum"] # TODO: add "my_uint64" when CORE-9768 is fixed
-  //   for name in field_names:
-  //       with pytest.raises(rti.Error, match=r".*cannot convert field to string.*") as excinfo:
-  //         test_output.instance.set_dictionary({name:"not a number"})
-  //         print("Field " + name + " did not raise an exception")
-
-  // def test_error_in_dictionary(self, test_output):
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     # sequence max length is 10
-  //     test_output.instance.set_dictionary({"my_int_sequence":[10] * 11})
-
-//   def test_set_boolean_as_number(self, test_output, test_input):
-//   test_output.instance.set_number("my_optional_bool", 1)
-//   test_output.write()
-//   wait_for_data(test_input)
-//   assert test_input[0]["my_optional_bool"] == True
-
-// def test_numeric_string(self, test_output, test_input):
-//   test_output.instance["my_string"] = "1234"
-//   sample = send_data(test_output, test_input)
-//   # A side effect of CON-139: __getitem__ automatically parses strings and
-//   # returns them as numbers if they represent a number
-//   assert sample["my_string"] == 1234
 
 
-  // def test_output_sequences(self, test_output, test_input):
-  //   test_output.instance.set_number("my_point_sequence[0].y", 20)
-  //   test_output.instance["my_int_sequence[1]"] = 2
-  //   test_output.instance["my_point_array[4].x"] = 5
-  //   test_output.write()
-  //   wait_for_data(test_input)
+// describe('Tests with two readers and two writers', () => {
+//   let connector = null
+//   let testOutput1 = null
+//   let testInput1 = null
+//   let testOutput2 = null
+//   let testInput2 = null
 
-  //   sample = test_input[0]
-  //   assert sample["my_point_sequence[0].y"] == 20
-  //   assert sample["my_int_sequence[1]"] == 2
-  //   assert sample["my_point_sequence#"] == 1
-  //   assert sample["my_int_sequence#"] == 2
-  //   assert sample["my_point_array[4].x"] == 5
+//   beforeEach(() => {
+//     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
+//     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+//     connector = new rti.Connector(participantProfile, xmlProfile)
+//     expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+//     testInput1 = connector.getInput('TestSubscriber::TestReader')
+//     expect(testInput1).to.exist
+//     testOutput1 = connector.getOutput('TestPublisher::TestWriter')
+//     expect(testOutput1).to.exist
+//     testInput2 = connector.getInput('TestSubscriber::TestReader2')
+//     expect(testInput2).to.exist
+//     testOutput2 = connector.getOutput('TestPublisher::TestWriter2')
+//     expect(testOutput2).to.exist
 
+//     // Wait for the input and output to dicovery each other
+//     expect(testOutput1.waitForSubscriptions(2000)).to.eventually.become(1)
+//     expect(testOutput2.waitForSubscriptions(2000)).to.eventually.become(1)
+//   })
 
-  // def test_change_union_member(self, test_output, test_input):
-  //   test_output.instance.set_number("my_union.my_int_sequence[1]", 3)
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   sample = test_input[0]
-  //   assert sample.get_string("my_union#") == "my_int_sequence"
+//   afterEach(() => {
+//     connector.close()
+//   })
 
-  //   test_output.instance.set_number("my_union.my_long", 3)
-  //   test_output.write()
-  //   wait_for_data(test_input)
+//   Since we have not written any data, all different forms of wait for data
+//   should timeout
+//   it('waiting for data on connector should timeout', () => {
+//     return expect(connector.waitForData(500)).to.be.rejectedWith(rti.TimeoutError)
+//   })
+//   it('waiting for data on testInput should timeout', () => {
+//     return expect(testInput1.wait(500)).to.be.rejectedWith(rti.TimeoutError)
+//   })
+//   it('waiting for data on testInput2 should timeout', () => {
+//     return expect(testInput2.wait(500)).to.be.rejectedWith(rti.TimeoutError)
+//   })
 
-  //   sample = test_input[0]
-  //   assert sample.get_string("my_union#") == "my_long"
-  //   assert sample.get_number("my_union.my_long") == 3
+//   it('Writing data on a testOutput1 should wake up connector.waitForData', () => {
+//     testOutput1.write()
+//     return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+//   })
 
-  // def test_set_optional(self, test_output, test_input):
-  //   test_output.instance.set_number("my_optional_point.x", 101)
-  //   test_output.instance["my_point_alias.x"] = 202
-  //   test_output.write()
-  //   wait_for_data(test_input)
+//   it('Writing data on a testOutput1 should wake up testInput1.wait', () => {
+//     testOutput1.write()
+//     return expect(testInput1.wait(500)).to.eventually.be.fulfilled
+//   })
 
-  //   sample = test_input[0]
-  //   assert sample.get_number("my_optional_point.x") == 101
-  //   assert sample.get_number("my_point_alias.x") == 202
+//   it('Writing data on a testOutput1 should not wake up testInput2.wait', () => {
+//     testOutput1.write()
+//     return expect(testInput2.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+//   })
 
-  // def test_unset_optional_boolean(self, test_output, test_input):
-  //   test_output.write()
-  //   wait_for_data(test_input)
-  //   assert test_input[0].get_boolean("my_optional_bool") is None
-})
+//   it('Writing data on a testOutput2 should wake up connector.waitForData', () => {
+//     testOutput2.write()
+//     return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+//   })
+
+//   it('Writing data on a testOutput2 should wake up testInput2.wait', () => {
+//     testOutput2.write()
+//     return expect(testInput2.wait(500)).to.eventually.be.fulfilled
+//   })
+
+//   it('Writing data on a testOutput2 should not wake up testInput1.wait', () => {
+//     testOutput2.write()
+//     return expect(testInput1.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+//   })
+// })

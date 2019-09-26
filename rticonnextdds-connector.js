@@ -269,7 +269,13 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
   } else if (selection === _AnyValueKind.connector_boolean) {
     return !!boolVal.deref()
   } else if (selection === _AnyValueKind.connector_string) {
-    return _moveCString(stringVal.deref())
+    const nodeStr = _moveCString(stringVal.deref())
+    // Try to convert the returned string to a JSON object
+    try {
+      return JSON.parse(nodeStr)
+    } catch (err) {
+      return nodeStr
+    }
   } else {
     // This shouldn't happen
     throw new Error('Unexpected type returned by ' + getter.name)
@@ -387,6 +393,7 @@ class Samples {
             this.input.connector.native,
             this.input.name,
             index,
+            memberName,
             cStr)
         }
       } else {
@@ -744,10 +751,14 @@ class Input {
           (err, res) => {
             this.waitsetBusy = false
             if (err) {
-              reject(err)
+              return reject(err)
+            } else if (res === _ReturnCodes.ok) {
+              return resolve()
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('DDS error'))
             }
-            _checkRetcode(res)
-            resolve()
           }
         )
       }
@@ -1162,8 +1173,7 @@ class Output {
             this.waitsetBusy = false
             if (err) {
               return reject(err)
-            }
-            if (res === _ReturnCodes.ok) {
+            } else if (res === _ReturnCodes.ok) {
               return resolve(currentChangeCount.deref())
             } else if (res === _ReturnCodes.timeout) {
               return reject(new TimeoutError('Timeout error'))
@@ -1392,9 +1402,13 @@ class Connector extends EventEmitter {
           this.onDataAvailableRun = false
           if (err) {
             return reject(err)
+          } else if (res === _ReturnCodes.ok) {
+            return resolve()
+          } else if (res === _ReturnCodes.timeout) {
+            return reject(new TimeoutError('Timeout error'))
+          } else {
+            return reject(new DDSError('DDS error'))
           }
-          _checkRetcode(res)
-          return resolve()
         })
     })
   }
@@ -1418,7 +1432,10 @@ class Connector extends EventEmitter {
   }
 }
 
+// Export the API
 module.exports.Connector = Connector
+// Export the binding, so that the customer has access to the library if desired
 module.exports.connectorBinding = connectorBinding
+// Export the Error types so the customer can handle them explicitly
 module.exports.TimeoutError = TimeoutError
 module.exports.DDSError = DDSError

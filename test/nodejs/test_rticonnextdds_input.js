@@ -92,7 +92,7 @@ describe('Native call on a DataReader', () => {
       const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
       const connector = new rti.Connector(participantProfile, xmlProfile)
       const input = connector.getInput('MySubscriber::MySquareReader')
-      additionalApi = ffi.Library(rti.connectorBinding.library, {
+      const additionalApi = ffi.Library(rti.connectorBinding.library, {
         DDS_DataReader_get_topicdescription: ['pointer', ['pointer']],
         DDS_TopicDescription_get_name: ['string', ['pointer']]
       })
