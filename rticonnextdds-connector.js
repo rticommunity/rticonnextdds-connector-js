@@ -282,8 +282,8 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
   }
 }
 
-// The Samples class is deprecated and now used internally
-class Samples {
+// The Infos class is deprecated and now used internally
+class Infos {
   constructor (input) {
     this.input = input
   }
@@ -296,6 +296,124 @@ class Samples {
       length)
     _checkRetcode(retcode)
     return length.deref()
+  }
+
+  isValid (index) {
+    if (!_isValidIndex(index)) {
+      throw new TypeError('index must be an integer')
+    } else {
+      // Increment index since Lua arrays are 1-indexed
+      index += 1
+      const value = ref.alloc('int')
+      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_infos(
+        this.input.connector.native,
+        value,
+        this.input.name,
+        index,
+        'valid_data')
+      _checkRetcode(retcode)
+      if (retcode === _ReturnCodes.noData) {
+        return null
+      }
+      return value.deref()
+    }
+  }
+}
+
+// Public API
+
+/**
+ * Provide access to the data samples read by an Input ({@link Input#samples}).
+ *
+ * This class p...
+ *
+ * The default iterator provides access to all of the data samples retrieved by
+ * most-recent call to {@link Input#read} or {@link Input#take}. Use {@link validDataIterator}
+ * to access only samples with valid data.
+ *
+ * ``Samples`` is the type of the property {@link Input#samples}.
+ *
+ * For more information and examples see {@link `Accessing the data samples`}.
+ *
+ * @property {number} sampleCount - The number of samples currently available on this Input.
+ * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
+ * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
+ */
+class Samples {
+  constructor (input) {
+    this.input = input
+  }
+
+  /**
+   * Returns an iterator to the data samples.
+   *
+   * The iterator provides access to all the data samples retrieved by the most
+   * recent call to {@link Input#read} or {@link Input#take}.
+   *
+   * This iterator may return samples with invalid data (samples that only contain
+   * meta-data). Use {@link Input#validDataIterator} to avoid having to check {@link SampleIterator#validData}.
+   *
+   * @return {SampleIterator} An iterator to the samples.
+   */
+  get (index) {
+    return new SampleIterator(this.input, index)
+  }
+
+  /**
+   * Returns an iterator to the sample in a given index.
+   *
+   * Important: Calling {@link Input.read} or {@link Input#take} invalidates
+   * all iterators previously returned.
+   *
+   * @param {number} index - A zero-based index, less than {@link Input#sampleCount}.
+   * @returns {SampleIterator} An iterator that accesses the sample in the position indicated by index.
+   * @todo Work out how to make this possible doing input.samples[i]
+   */
+  getSample (index) {
+    return new SampleIterator(this.input, index)
+  }
+
+  /**
+   * Returns the number of samples available.
+   *
+   * @type {number} The number of samples available since the last time read/take was called.
+   */
+  get length () {
+    return this.input.samples.getLength()
+  }
+
+  /**
+   * Returns an iterator to the data samples which contain valid data.
+   *
+   * The iterator provides access to all the data samples retrieved by the most
+   * recent call to {@link Input.read} or {@link Input.take}, and skips samples with
+   * invalid data (meta-data only).
+   *
+   * By using this iterator, it is not necessary to check if each sample contains
+   * valid data.
+   *
+   * @return {ValidSampleIterator} An iterator to the samples.
+   */
+  get validDataIterator () {
+    return new ValidSampleIterator(this.input)
+  }
+
+  /**
+   * Returns the number of samples available.
+   *
+   * @see Samples#length
+   */
+  getLength () {
+    const length = ref.alloc('double')
+    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
+      this.input.connector.native,
+      this.input.name,
+      length)
+    _checkRetcode(retcode)
+    // We use ~~ to convert from double -> int. This is required to allow:
+    // for (var i =0; i < input.samples.getLength(); ++i)
+    // It works since the we are doing a bitwise complement (double not)
+    return ~~length.deref()
   }
 
   getNumber (index, fieldName) {
@@ -343,10 +461,7 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        // For backwards compatibility, return as an int
-        // This function is used by the iterators, where we convert this to a bool
-        // but there may be some applications which still int an int.
-        return value.deref()
+        return !!value.deref()
       }
     }
   }
@@ -411,11 +526,6 @@ class Samples {
     }
   }
 
-  // Deprecated, use getJson
-  getJSON (index, memberName) {
-    return this.getJson(index, memberName)
-  }
-
   getNative (index) {
     if (!_isValidIndex(index)) {
       throw new TypeError('index must be an integer')
@@ -428,47 +538,12 @@ class Samples {
         index)
     }
   }
-}
 
-// The Infos class is deprecated and now used internally
-class Infos {
-  constructor (input) {
-    this.input = input
-  }
-
-  getLength () {
-    const length = ref.alloc('double')
-    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
-      this.input.connector.native,
-      this.input.name,
-      length)
-    _checkRetcode(retcode)
-    return length.deref()
-  }
-
-  isValid (index) {
-    if (!_isValidIndex(index)) {
-      throw new TypeError('index must be an integer')
-    } else {
-      // Increment index since Lua arrays are 1-indexed
-      index += 1
-      const value = ref.alloc('int')
-      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_infos(
-        this.input.connector.native,
-        value,
-        this.input.name,
-        index,
-        'valid_data')
-      _checkRetcode(retcode)
-      if (retcode === _ReturnCodes.noData) {
-        return null
-      }
-      return value.deref()
-    }
+  // Deprecated, use getJson
+  getJSON (index, memberName) {
+    return this.getJson(index, memberName)
   }
 }
-
-// Public API
 
 /**
  * The type of :attr:`SampleIterator.info`
@@ -501,9 +576,10 @@ class SampleInfo {
 /**
  * Iterates and provides access to a data sample.
  *
- * A SampleIterator provides access to the data recived by an :class:`Input`.
- * SampleIterators are accessed using :meth:`Input.dataIterator` and :meth:`Input.get_sample()`,
- * :meth:`Input.validDataIterator` returns a subclass; :class:`ValidSampleIterator`.
+ * A SampleIterator provides access to the data receieved by a {@link Input}.
+ * SampleIterators are accessed using {@link Input#samples#dataIterator}
+ * and {@link Input#samples#getSample}.
+ * {@link Input#samples#validDataIterator} returns a subclass; {@link ValidDataIterator}
  *
  * @see :ref:`Reading data (Input)`.
  */
@@ -514,7 +590,7 @@ class SampleIterator {
       index = -1
     }
     this.index = index
-    this.length = input.sampleCount
+    this.length = input.samples.getLength()
   }
 
   /**
@@ -645,6 +721,7 @@ class SampleIterator {
  *
  * This iterator provides the same methods as {@link SampleIterator}.
  * @link Input.validDataIterator
+ * @extends SampleIterator
  */
 class ValidSampleIterator extends SampleIterator {
   /**
@@ -677,9 +754,6 @@ class ValidSampleIterator extends SampleIterator {
  * @property {string} name - The name of the Input (the name used in {@link Connector.getInput})
  * @property {pointer} native - A native handle that allows accessing additional Connect DDS APIs in C.
  * @property {JSON} matchedPublications - A JSON object containing information about all the publications currently matched with this Input.
- * @property {number} sampleCount - The number of samples currently available on this Input.
- * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
- * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
  */
 class Input {
   constructor (connector, name) {
@@ -691,7 +765,9 @@ class Input {
     if (this.native.isNull()) {
       throw new Error('Invalid Subscription::DataReader name')
     }
-    this.samples = new Samples(this)
+    // We use the '_' since samples is the name of the property and we want
+    // input.samples to call the getter, not access the internal variable
+    this._samples = new Samples(this)
     this.infos = new Infos(this)
     // Internally, we use a StatusCondition for the waitForData and for
     // waitForPublications, making these operations not thread-safe (since each
@@ -717,13 +793,22 @@ class Input {
   /**
    * Access the samples receieved by this Input.
    *
-   * After calling this method, the samples are accessible using {@link Input.dataIterator},
-   * {@link Input.validDataIterator} or {@link Input.getSample}.
+   * After calling this method, the samples are accessible using {@link Input.samples}.
    */
   take () {
     _checkRetcode(connectorBinding.api.RTI_Connector_take(
       this.connector.native,
       this.name))
+  }
+
+  /**
+   * Allows iterating over the samples returned by this input.
+   *
+   * This container provides iterators to access the data samples retrieved by
+   * the most-recent call to ${@link Input.take} and ${@link Input.read}.
+   */
+  get samples () {
+    return this._samples
   }
 
   /**
@@ -824,59 +909,6 @@ class Input {
       cStr)
     _checkRetcode(retcode)
     return JSON.parse(_moveCString(cStr.deref()))
-  }
-
-  /**
-   * Returns the number of samples available.
-   *
-   * @type {number} The number of samples available since the last time read/take was called.
-   */
-  get sampleCount () {
-    return this.samples.getLength()
-  }
-
-  /**
-   * Returns an iterator to the sample in a given index.
-   *
-   * Important: Calling {@link Input.read} or {@link Input.take} invalidates
-   * all iterators previously returned.
-   *
-   * @param {number} index - A zero-based index, less than {@link Input.sampleCount}.
-   * @returns {SampleIterator} An iterator that accesses the sample in the position indicated by index.
-   */
-  getSample (index) {
-    return new SampleIterator(this, index)
-  }
-
-  /**
-   * Returns an iterator to the data samples.
-   *
-   * The iterator provides access to all the data samples retrieved by the most
-   * recent call to {@link Input.read} or {@link Input.take}.
-   *
-   * This iterator may return samples with invalid data (samples that only contain
-   * meta-data). Use {@link Input.validDataIterator} to avoid having to check {@link SampleIterator.validData}.
-   *
-   * @return {SampleIterator} An iterator to the samples.
-   */
-  get dataIterator () {
-    return new SampleIterator(this)
-  }
-
-  /**
-   * Returns an iterator to the data samples which contain valid data.
-   *
-   * The iterator provides access to all the data samples retrieved by the most
-   * recent call to {@link Input.read} or {@link Input.take}, and skips samples with
-   * invalid data (meta-data only).
-   *
-   * By using this iterator, it is not necessary to check if each sample contains
-   * valid data.
-   *
-   * @return {ValidSampleIterator} An iterator to the samples.
-   */
-  get validDataIterator () {
-    return new ValidSampleIterator(this)
   }
 }
 

@@ -14,20 +14,16 @@ const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
 const input = connector.getInput('MySubscriber::MySquareReader')
 
 const printNewMatches = (input, newMatches) => {
-  console.log('Matched with ' + newMatches + ' publications:')
+  console.log('Matched with ' + newMatches + ' publication(s):')
   input.matchedPublications.forEach((match) => {
     console.log(match.name)
   })
 }
 
 const printNewData = (input) => {
-  for (var sample of input.validDataIterator) {
+  for (let i = 0; i < input.samples.length; i++) {
+    const sample = input.samples.get(i)
     console.log(JSON.stringify(sample.getJson()))
-  }
-  var iterator = input.validDataIterator[Symbol.iterator]()
-  for (var j = 0; j < input.sampleCount; j++) {
-    iterator = iterator.next()
-    console.log(JSON.stringify(iterator.value.getJson()))
   }
 }
 
@@ -52,6 +48,7 @@ const getData = async (input) => {
 
 const run = async (input) => {
   try {
+    await waitForDiscovery(input)
     await waitForDiscovery(input)
     for (;;) {
       await getData(input)
