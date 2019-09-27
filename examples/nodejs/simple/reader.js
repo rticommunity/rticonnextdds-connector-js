@@ -21,9 +21,8 @@ const printNewMatches = (input, newMatches) => {
 }
 
 const printNewData = (input) => {
-  for (let i = 0; i < input.samples.length; i++) {
-    const sample = input.samples.get(i)
-    console.log(JSON.stringify(sample.getJson()))
+  for (var sample1 of input.samples.validDataIterator) {
+    console.log(JSON.stringify(sample1.getJson()))
   }
 }
 
@@ -48,7 +47,6 @@ const getData = async (input) => {
 
 const run = async (input) => {
   try {
-    await waitForDiscovery(input)
     await waitForDiscovery(input)
     for (;;) {
       await getData(input)

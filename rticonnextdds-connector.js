@@ -693,15 +693,9 @@ class SampleIterator {
    * jsonDictionary = iterator.value.getJson()
    */
   * iterator () {
-    return {
-      next: () => {
-        if ((this.index + 1) < this.length) {
-          this.index += 1
-          return { value: this, done: false }
-        } else {
-          return { value: null, done: true }
-        }
-      }
+    if ((this.index + 1) < this.length) {
+      this.index += 1
+      yield this
     }
   }
 
@@ -730,18 +724,12 @@ class ValidSampleIterator extends SampleIterator {
    * that class.
    */
   * iterator () {
-    return {
-      next: () => {
-        while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
-          this.index += 1
-        }
-        if ((this.index + 1) < this.length) {
-          this.index += 1
-          return { value: this, done: false }
-        } else {
-          return { value: null, done: true }
-        }
+    if ((this.index + 1) < this.length) {
+      while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
+        this.index += 1
       }
+      this.index += 1
+      yield this
     }
   }
 }
