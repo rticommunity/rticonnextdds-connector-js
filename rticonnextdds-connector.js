@@ -852,10 +852,14 @@ class Input {
           (err, res) => {
             this.waitsetBusy = false
             if (err) {
-              reject(err)
+              return reject(err)
+            } else if (res === _ReturnCodes.ok) {
+              return resolve(currentChangeCount.deref())
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('DDS error'))
             }
-            _checkRetcode(res)
-            resolve(currentChangeCount.deref())
           }
         )
       }

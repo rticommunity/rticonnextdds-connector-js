@@ -47,8 +47,8 @@ describe('Data access tests with a pre-populated input', function () {
 
   beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-    connector = new rti.Connector(participantProfile, xmlProfile)
+    const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
+    connector = new rti.Connector(participantProfile, xmlPath)
     expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
     prepopulatedInput = connector.getInput('TestSubscriber::TestReader2')
     expect(prepopulatedInput).to.exist
