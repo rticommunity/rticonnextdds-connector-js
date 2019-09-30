@@ -21,8 +21,14 @@ const printNewMatches = (input, newMatches) => {
 }
 
 const printNewData = (input) => {
-  for (var sample1 of input.samples.validDataIterator) {
-    console.log(JSON.stringify(sample1.getJson()))
+  for (var sample of input.samples.validDataIterator) {
+    console.log(JSON.stringify(sample.getJson()))
+  }
+  const otherSample = input.samples.validDataIterator.iterator()
+  for (var i = 0; i < input.samples.length; i++) {
+    console.log('otherSample: ' + otherSample)
+    console.log(JSON.stringify(sample.getJson()))
+    otherSample.next()
   }
 }
 

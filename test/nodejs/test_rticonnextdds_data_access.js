@@ -545,23 +545,23 @@ describe('Tests with a testOutput and testInput', () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(2000)
-  //     testInput.take()
-  //     let sample = testInput.getSample(0)
-  //     expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence')
-  //       .and.is.a('string')
-  //     // Change the union
-  //     testOutput.instance.setNumber('my_union.my_long', 3)
-  //     testOutput.write()
-  //     await testInput.wait(2000)
-  //     testInput.take()
-  //     sample = testInput.getSample(0)
-  //     expect(sample.getString('my_union#')).to.deep.equals('my_long')
-  //       .and.is.a('string')
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   let sample = testInput.getSample(0)
+  //   expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence')
+  //     .and.is.a('string')
+  //   // Change the union
+  //   testOutput.instance.setNumber('my_union.my_long', 3)
+  //   testOutput.write()
+  //   await testInput.wait(2000)
+  //   testInput.take()
+  //   sample = testInput.getSample(0)
+  //   expect(sample.getString('my_union#')).to.deep.equals('my_long')
+  //     .and.is.a('string')
   // })
 
   // it('Set an optional', async () => {
@@ -570,30 +570,31 @@ describe('Tests with a testOutput and testInput', () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(0)
-  //     const sample = testInput.getSample(0)
-  //     expect(sample.getNumber('my_optional_point.x')).to.deep.equals(101)
-  //       .and.is.a('number')
-  //     expect(sample.getNumber('my_point_alias.x')).to.deep.equals(202)
-  //       .and.is.a('number')
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   const sample = testInput.getSample(0)
+  //   expect(sample.getNumber('my_optional_point.x')).to.deep.equals(101)
+  //     .and.is.a('number')
+  //   expect(sample.getNumber('my_point_alias.x')).to.deep.equals(202)
+  //     .and.is.a('number')
   // })
 
   // it('Get an unset optional boolean', async () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(2000)
-  //     testInput.take()
-  //     const unsetOptional = testInput.getSample(0).getBoolean('my_optional_bool')
-  //     expect(unsetOptional).to.deep.equals(null)
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   const unsetOptional = testInput.getSample(0).getBoolean('my_optional_bool')
+  //   expect(unsetOptional).to.deep.equals(null)
   // })
 
   // it('Reset an optional number', async () => {
@@ -602,17 +603,17 @@ describe('Tests with a testOutput and testInput', () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(2000)
-  //     testInput.take()
-  //     const sample = testInput.getSample(0)
-  //     expect(sample.getNumber('my_optional_long'))
-  //       .to.deep.equals(null)
-  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_long'))
-  //       .to.be.false
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   const sample = testInput.getSample(0)
+  //   expect(sample.getNumber('my_optional_long'))
+  //     .to.deep.equals(null)
+  //   expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_long'))
+  //     .to.be.false
   // })
 
   // it('Reset an optional bool', async () => {
@@ -621,17 +622,17 @@ describe('Tests with a testOutput and testInput', () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(2000)
-  //     testInput.take()
-  //     const sample = testInput.getSample(0)
-  //     expect(sample.getNumber('my_optional_bool'))
-  //       .to.deep.equals(null)
-  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_bool'))
-  //       .to.be.false
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   const sample = testInput.getSample(0)
+  //   expect(sample.getNumber('my_optional_bool'))
+  //     .to.deep.equals(null)
+  //   expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_bool'))
+  //     .to.be.false
   // })
 
   // it('Reset an optional complex', async () => {
@@ -642,152 +643,199 @@ describe('Tests with a testOutput and testInput', () => {
   //   testOutput.write()
   //   try {
   //     await testInput.wait(2000)
-  //     testInput.take()
-  //     const sample = testInput.getSample(0)
-  //     expect(sample.getNumber('my_optional_point.x'))
-  //       .to.deep.equals(null)
-  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_point'))
-  //       .to.be.false
-  //     expect(sample.getNumber('my_point_alias.x'))
-  //       .to.deep.equals(null)
-  //     expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_point_alias'))
-  //       .to.be.false
   //   } catch (err) {
   //     // Fail the test
   //     console.log('Error caught: ' + err)
   //     expect(false).to.deep.equals(true)
   //   }
+  //   testInput.take()
+  //   const sample = testInput.getSample(0)
+  //   expect(sample.getNumber('my_optional_point.x'))
+  //     .to.deep.equals(null)
+  //   expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_point'))
+  //     .to.be.false
+  //   expect(sample.getNumber('my_point_alias.x'))
+  //     .to.deep.equals(null)
+  //   expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_point_alias'))
+  //     .to.be.false
   // })
 
-  it('Clear a sequence', async () => {
-    testOutput.instance.setNumber('my_union.my_int_sequence[2]', 10)
-    testOutput.instance.setNumber('my_point.x', 3)
-    testOutput.instance.clearMember('my_union.my_int_sequence')
-    testOutput.write()
+  // it('Clear a sequence', async () => {
+  //   testOutput.instance.setNumber('my_union.my_int_sequence[2]', 10)
+  //   testOutput.instance.setNumber('my_point.x', 3)
+  //   testOutput.instance.clearMember('my_union.my_int_sequence')
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  //   testInput.take()
+  //   const sample = testInput.samples.get(0)
+  //   expect(sample.getNumber('my_union.my_int_sequence#')).to.deep.equals(0)
+  //   expect(sample.getNumber('my_point.x')).to.deep.equals(3)
+  // })
+
+  // it('Clear a sequence with a dictionary', async () => {
+  //   // Set the non-default values
+  //   testOutput.instance.setFromJson(testJsonObject)
+  //   testOutput.instance.setBoolean('my_optional_bool', true)
+  //   // Reset members using null in a JSON object. Optional members are set to null,
+  //   // other members are initialized to their default value
+  //   testOutput.instance.setFromJson({
+  //     my_optional_point: null,
+  //     my_optional_long: null,
+  //     my_point: null,
+  //     my_point_alias: null,
+  //     my_long: null,
+  //     my_optional_bool: null,
+  //     my_point_sequence: null,
+  //     my_string: null,
+  //     my_union: null,
+  //     my_enum: null
+  //   })
+  //   console.log('output.instance: ' + testOutput.instance)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  //   testInput.take()
+  //   const sample = testInput.samples.get(0)
+  //   expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+  //   expect(sample.getNumber('my_optional_long')).to.deep.equals(null)
+  //   expect(sample.getNumber('my_point.x')).to.deep.equals(0)
+  //   expect(sample.getNumber('my_point.y')).to.deep.equals(0)
+  //   expect(sample.getNumber('my_point_alias.y')).to.deep.equals(null)
+  //   expect(sample.getNumber('my_long')).to.deep.equals(0)
+  //   expect(sample.getBoolean('my_optional_bool')).to.deep.equals(null)
+  //   expect(sample.getNumber('my_point_sequence#')).to.deep.equals(0)
+  //   expect(sample.getString('my_string')).to.deep.equals('')
+  //   expect(sample.getString('my_union#')).to.deep.equals('point')
+  //   expect(sample.getNumber('my_enum')).to.deep.equals(2)
+  //   const jsonObj = sample.getJson()
+  //   expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_bool')).to.be.false
+  //   expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_long')).to.be.false
+  //   expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_point_alias')).to.be.false
+  //   expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
+  // })
+
+  // it('Clear a non-existent member', () => {
+  //   expect(() => {
+  //     testOutput.instance.clearMember('nonexistent_member')
+  //   }).to.throw(rti.DDSError)
+  // })
+
+  // it('Reset a sequence', async () => {
+  //   testOutput.instance.setNumber('my_union.my_int_sequence[2]', 10)
+  //   testOutput.instance.setNumber('my_point.x', 3)
+  //   testOutput.instance.setNumber('my_point_sequence[1].x', 44)
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  //   testInput.take()
+  //   let sample = testInput.samples.get(0)
+  //   expect(sample.getNumber('my_union.my_int_sequence#')).to.deep.equals(3)
+  //   expect(sample.getNumber('my_point.x')).to.deep.equals(3)
+  //   expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2)
+
+  //   testOutput.instance.setFromJson({ my_int_sequence: [] })
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  //   testInput.take()
+  //   sample = testInput.samples.get(0)
+  //   expect(sample.getNumber('my_int_sequence#')).to.deep.equals(0)
+  //   // The other fields are unchanged
+  //   expect(sample.getNumber('my_point.x')).to.deep.equals(3)
+  //   expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2)
+  // })
+
+  // it('Check that setFromJson shrinks a sequence when it receives a smaller one', async () => {
+  //   // Set the length to 3
+  //   testOutput.instance.setNumber('my_int_sequence[2]', 10)
+  //   testOutput.instance.setNumber('my_point_sequence[0].x', 11)
+  //   testOutput.instance.setNumber('my_point_sequence[0].y', 12)
+  //   testOutput.instance.setNumber('my_point_sequence[2].x', 10)
+  //   testOutput.instance.setFromJson({
+  //     my_point_array: [
+  //       { x: 10, y: 20 },
+  //       { x: 11, y: 21 },
+  //       { x: 12, y: 22 },
+  //       { x: 13, y: 23 },
+  //       { x: 14, y: 24 }]
+  //   })
+  //   // Reduce sequences to a length of 1 (arrays should retain existing values)
+  //   testOutput.instance.setFromJson({
+  //     my_int_sequence: [40],
+  //     my_point_sequence: [{ y: 2 }],
+  //     my_point_array: [{ x: 100, y: 200 }]
+  //   })
+  //   testOutput.write()
+  //   try {
+  //     await testInput.wait(2000)
+  //   } catch (err) {
+  //     // Fail the test
+  //     console.log('Error caught: ' + err)
+  //     expect(false).to.deep.equals(true)
+  //   }
+  //   testInput.take()
+  //   const sample = testInput.samples.get(0)
+  //   expect(sample.getNumber('my_int_sequence#')).to.deep.equals(1)
+  //   expect(sample.getNumber('my_point_sequence#')).to.deep.equals(1)
+  //   expect(sample.getNumber('my_int_sequence[0]')).to.deep.equals(40)
+  //   expect(sample.getNumber('my_point_sequence[0].y')).to.deep.equals(2)
+  //   expect(sample.getNumber('my_point_sequence[0].x')).to.deep.equals(0)
+  //   expect(sample.getNumber('my_point_array[0].x')).to.deep.equals(100)
+  //   expect(sample.getNumber('my_point_array[0].y')).to.deep.equals(20)
+  //   expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(14)
+  // })
+
+  it('Try to set a value which is too large using setNumber', () => {
+    expect(() => {
+      testOutput.instance.setNumber('my_uint64', 9007199254740992)
+    }).to.throw(rti.DDSError)
+    expect(() => {
+      testOutput.instance.setNumber('my_int64', 9007199254740992)
+    }).to.throw(rti.DDSError)
+  })
+
+  it('test', async () => {
+    testOutput.instance.setFromJson(testJsonObject)
+    testOutput.write({ source_timestamp: 2 })
     try {
       await testInput.wait(2000)
-      testInput.take()
-      const sample = testInput.getSample(0)
-      expect(sample.getNumber('my_union.my_int_sequence#'))
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
       expect(false).to.deep.equals(true)
     }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    console.log('sample: ' + sample.getJson())
+    console.log('source_timestamp: ' + sample.info.getValue('source_timestamp'))
+    console.log('reception_timestamp: ' + sample.info.getValue('reception_timestamp'))
   })
+
+  // verifyLargeInteger (output, input, number) => {
+  //   console.log('hello')
+  // }
 })
-
-  // def test_clear_sequence(self, test_output, test_input):
-  //   test_output.instance.set_number("my_union.my_int_sequence[2]", 10)
-  //   test_output.instance.set_number("my_point.x", 3)
-  //   test_output.instance.clear_member("my_union.my_int_sequence")
-  //   test_output.write()
-
-  //   wait_for_data(test_input)
-  //   assert test_input[0].get_number("my_union.my_int_sequence#") == 0
-  //   assert test_input[0].get_number("my_point.x") == 3
-
-  // def test_clear_with_dictionary(self, test_dictionary, test_output, test_input):
-  //   """Tests using None in a dictionary to clear a member"""
-
-  //   # Set non-default values
-  //   test_output.instance.set_dictionary(test_dictionary)
-  //   test_output.instance.set_boolean("my_optional_bool", True)
-
-  //   # Reset members using None in a dictionary--optional members are set to None,
-  //   # other members are initialized to their default value
-  //   test_output.instance.set_dictionary({
-  //     'my_optional_point': None,
-  //     'my_optional_long': None,
-  //     'my_point': None,
-  //     'my_point_alias': None,
-  //     'my_long': None,
-  //     'my_optional_bool': None,
-  //     'my_point_sequence': None,
-  //     'my_string': None,
-  //     'my_union': None,
-  //     'my_enum': None,
-  //   })
-  //   test_output.write()
-  //   wait_for_data(test_input)
-
-  //   sample = test_input[0]
-  //   assert sample.get_number("my_optional_point.x") is None
-  //   assert sample.get_number("my_optional_long") is None
-  //   assert sample.get_number("my_point.x") == 0
-  //   assert sample.get_number("my_point.y") == 0
-  //   assert sample.get_number("my_point_alias.x") is None
-  //   assert sample.get_number("my_long") == 0
-  //   assert sample.get_boolean("my_optional_bool") is None
-  //   assert sample.get_number("my_point_sequence#") == 0
-  //   assert sample.get_string("my_string") == ""
-  //   assert sample["my_string"] == ""
-  //   assert sample.get_string("my_union#") == "point"
-  //   assert sample.get_number("my_enum") == 2
-  //   assert sample.get_number("my_double") == test_dictionary['my_double']
-  //   dictionary = sample.get_dictionary()
-
-  //   assert not "my_optional_bool" in dictionary
-  //   assert not "my_optional_long" in dictionary
-  //   assert not "my_point_alias" in dictionary
-  //   assert not "my_optional_point" in dictionary
-
-  // def test_bad_clear_member(self, test_output):
-  //   with pytest.raises(rti.Error) as excinfo:
-  //     test_output.instance.clear_member("my_nonexistent_member")
-
-  // def test_reset_sequence(self, test_output, test_input):
-  //   test_output.instance.set_number("my_union.my_int_sequence[2]", 10)
-  //   test_output.instance.set_number("my_point.x", 3)
-  //   test_output.instance["my_point_sequence[1].x"] = 44
-
-  //   sample = send_data(test_output, test_input)
-  //   assert sample.get_number("my_point.x") == 3
-  //   assert sample.get_number("my_union.my_int_sequence#") == 3
-  //   assert sample.get_number("my_point_sequence#") == 2
-
-  //   test_output.instance.set_dictionary({'my_int_sequence':[]})
-
-  //   sample = send_data(test_output, test_input)
-  //   assert sample.get_number("my_int_sequence#") == 0
-  //   # The other fields are unchanged:
-  //   assert sample.get_number("my_point.x") == 3
-  //   assert sample.get_number("my_point_sequence#") == 2
-
-
-  // def test_shrink_sequence(self, test_output, test_input, test_dictionary):
-  //   """Tests that set_dictionary shrinks sequences when it receives a smaller one"""
-
-  //   test_output.instance.set_number("my_int_sequence[2]", 10) # set length to 3
-  //   test_output.instance.set_number("my_point_sequence[0].x", 11)
-  //   test_output.instance.set_number("my_point_sequence[0].y", 12)
-  //   test_output.instance.set_number("my_point_sequence[2].x", 10)
-  //   test_output.instance.set_dictionary(
-  //     {"my_point_array":[{'x': 10, 'y': 20}, {'x': 11, 'y': 21}, {'x': 12, 'y': 22}, {'x': 13, 'y': 23}, {'x': 14, 'y': 24}]})
-
-  //   # Reduce sequences to 1, while arrays retain exiting values
-  //   test_output.instance.set_dictionary({
-  //     "my_int_sequence":[40],
-  //     "my_point_sequence":[{"y":2}],
-  //     "my_point_array":[{"x":100}, {"y":200}]})
-  //   test_output.write()
-  //   wait_for_data(test_input)
-
-  //   sample = test_input[0]
-  //   assert sample["my_int_sequence#"] == 1 # Length reduced
-  //   assert sample["my_point_sequence#"] == 1 # Length reduced
-  //   assert sample["my_int_sequence[0]"] == 40 # New value
-  //   assert sample["my_point_sequence[0].y"] == 2 # New value
-  //   assert sample["my_point_sequence[0].x"] == 0 # Doesn't retain previous value
-  //   assert sample["my_point_array[0].x"] == 100 # New value
-  //   assert sample["my_point_array[0].y"] == 20 # Retains value
-  //   assert sample["my_point_array[4].x"] == 14 # Retains value
-
-  // def test_too_large_uint64_output(self, test_output):
-  //   with pytest.raises(rti.Error, match=r".*value of my_uint64 is too large.*") as execinfo:
-  //     test_output.instance.set_number("my_uint64", 9007199254740992)
-  //   with pytest.raises(rti.Error, match=r".*value of my_int64 is too large.*") as execinfo:
-  //     test_output.instance.set_number("my_int64", -9007199254740992)
 
   // def verify_large_integer(self, output, input, number):
   //   with pytest.raises(rti.Error, match=r".*value of my_uint64 is too large.*") as execinfo:

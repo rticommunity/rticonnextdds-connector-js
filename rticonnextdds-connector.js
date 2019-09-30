@@ -356,20 +356,7 @@ class Samples {
    * @return {SampleIterator} An iterator to the samples.
    */
   get (index) {
-    return new SampleIterator(this.input, index)
-  }
-
-  /**
-   * Returns an iterator to the sample in a given index.
-   *
-   * Important: Calling {@link Input.read} or {@link Input#take} invalidates
-   * all iterators previously returned.
-   *
-   * @param {number} index - A zero-based index, less than {@link Input#sampleCount}.
-   * @returns {SampleIterator} An iterator that accesses the sample in the position indicated by index.
-   * @todo Work out how to make this possible doing input.samples[i]
-   */
-  getSample (index) {
+    // TODO make index optional
     return new SampleIterator(this.input, index)
   }
 
@@ -1097,7 +1084,6 @@ class Output {
    * the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t|Writing Data section of the *Connext DDS Core Libraries* User's Manual.}
    *
    * The support parameters are:
-   * @todo Implement write_w_params in Node.js binding. I don't think it works currently.
    *
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
    * If the blocking time exceeds the *max_blocking_time* this method throws {@link TimeoutError}.
@@ -1107,6 +1093,10 @@ class Output {
     if (params === undefined) {
       cStr = null
     } else {
+      // TODO: Check if there is an equivalent to Python's **kwargs
+      //       Add unit tedsts
+      //       Add docs
+      //       (Maybe fix this if it doesn't work)
       cStr = JSON.stringify(params)
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_write(
