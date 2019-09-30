@@ -628,7 +628,7 @@ class SampleIterator {
    * @returns {boolean} The boolean value of the field.
    */
   getBoolean (fieldName) {
-    return !!this.input.samples.getBoolean(this.index, fieldName)
+    return this.input.samples.getBoolean(this.index, fieldName)
   }
 
   /**
