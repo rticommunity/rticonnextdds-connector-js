@@ -345,6 +345,24 @@ class Samples {
   }
 
   /**
+   * Returns an iterator to the data samples, starting at the index specified.
+   *
+   *
+   * The iterator provides access to all the data samples retrieved by the most
+   * recent call to {@link Input#read} or {@link Input#take}.
+   *
+   * This iterator may return samples with invalid data (samples that only contain
+   * meta-data). Use {@link Input#validDataIterator} to avoid having to check {@link SampleIterator#validData}.
+   *
+   * @param {number} [index] The index of the sample from which the iteration should begin
+   *
+   * @return {SampleIterator} An iterator to the samples.
+   */
+  get (index) {
+    return new SampleIterator(this.input, index)
+  }
+
+  /**
    * Returns an iterator to the data samples.
    *
    * The iterator provides access to all the data samples retrieved by the most
@@ -355,9 +373,8 @@ class Samples {
    *
    * @return {SampleIterator} An iterator to the samples.
    */
-  get (index) {
-    // TODO make index optional
-    return new SampleIterator(this.input, index)
+  get dataIterator () {
+    return new SampleIterator(this.input)
   }
 
   /**
@@ -680,7 +697,7 @@ class SampleIterator {
    * jsonDictionary = iterator.value.getJson()
    */
   * iterator () {
-    if ((this.index + 1) < this.length) {
+    while ((this.index + 1) < this.length) {
       this.index += 1
       yield this
     }
@@ -710,13 +727,22 @@ class ValidSampleIterator extends SampleIterator {
    * Since this class inherits from SampleIterator, we use the iterable from
    * that class.
    */
+  // * iterator () {
+  //   while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
+  //     this.index += 1
+  //   }
+  //   this.index += 1
+  //   yield this
+  // }
   * iterator () {
-    if ((this.index + 1) < this.length) {
-      while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
+    while ((this.index + 1) < this.length) {
+      while (((this.index + 1) < this.length) && !this.input.infos.isValid(this.index + 1)) {
         this.index += 1
       }
-      this.index += 1
-      yield this
+      if ((this.index + 1) < this.length) {
+        this.index += 1
+        yield this
+      }
     }
   }
 }
