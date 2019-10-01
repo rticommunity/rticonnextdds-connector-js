@@ -80,7 +80,7 @@ describe('Data access tests with a pre-populated input', function () {
     expect(sample.validData).to.be.true
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take all samples here to ensure that next test case has a clean input
     prepopulatedInput.take()
     connector.close()
@@ -370,7 +370,7 @@ describe('Tests with a testOutput and testInput', () => {
     expect(testOutput.waitForSubscriptions(2000)).to.eventually.become(1)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take all samples here to ensure that next test case has a clean input
     testInput.take()
     connector.close()
@@ -426,7 +426,7 @@ describe('Tests with a testOutput and testInput', () => {
     }).to.throw(rti.DDSError)
   })
 
-  it('Supply a JSON object where everything is a string', () => {
+  it('Supply a JSON object where everything is a string', async () => {
     testOutput.instance.setFromJson({
       my_long: '10',
       my_double: '3.3',
@@ -445,14 +445,15 @@ describe('Tests with a testOutput and testInput', () => {
       my_uint64: '18014398509481984'
     })
     testOutput.write()
-    testInput.wait(2000).then(() => {
-      testInput.take()
-      const receivedJsonObject = testInput.samples.get(0).getJson()
-      expect(receivedJsonObject).deep.equals(testJsonObject)
-    }).catch(() => {
+    try {
+      await testInput.wait(2000)
+    } catch (err) {
       // Fail the test
       expect(false).to.deep.equals(true)
-    })
+    }
+    testInput.take()
+    const receivedJsonObject = testInput.samples.get(0).getJson()
+    expect(receivedJsonObject).deep.equals(testJsonObject)
   })
 
   it('Bad conversion from string in JSON object', () => {
@@ -481,31 +482,33 @@ describe('Tests with a testOutput and testInput', () => {
     }).to.throw(rti.DDSError)
   })
 
-  it('Set a boolean field using setNumber and check the resultant value on an input', () => {
+  it('Set a boolean field using setNumber and check the resultant value on an input', async () => {
     testOutput.instance.setNumber('my_optional_bool', 1)
     testOutput.write()
-    testInput.wait(1000).then(() => {
-      testInput.take()
-      const theOptionalBool = testInput.samples.get(0).getValue('my_optional_bool')
-      expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
-    }).catch(() => {
+    try {
+      await testInput.wait(2000)
+    } catch (err) {
       // Fail the test
       expect(false).to.deep.equals(true)
-    })
+    }
+    testInput.take()
+    const theOptionalBool = testInput.samples.get(0).getValue('my_optional_bool')
+    expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
   })
 
-  it('Set a string with a number and check the resultant value on an input', () => {
+  it('Set a string with a number and check the resultant value on an input', async () => {
     testOutput.instance.setString('my_string', '1234')
     testOutput.write()
-    testInput.wait(1000).then(() => {
-      testInput.take()
-      const theNumericString = testInput.samples.get(0).getValue('my_string')
-      // Due to CON-139 getValue returns strings as numbers if they represent a number
-      expect(theNumericString).to.be.a('number').and.deep.equals(1234)
-    }).catch(() => {
+    try {
+      await testInput.wait(2000)
+    } catch (err) {
       // Fail the test
       expect(false).to.deep.equals(true)
-    })
+    }
+    testInput.take()
+    const theNumericString = testInput.samples.get(0).getValue('my_string')
+    // Due to CON-139 getValue returns strings as numbers if they represent a number
+    expect(theNumericString).to.be.a('number').and.deep.equals(1234)
   })
 
   it('Test output sequences', () => {
@@ -819,97 +822,6 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point_array[0].y')).to.deep.equals(20)
     expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(14)
   })
-
-  it('Try to set a value which is too large using setNumber', () => {
-    expect(() => {
-      testOutput.instance.setNumber('my_uint64', 9007199254740992)
-    }).to.throw(rti.DDSError)
-    expect(() => {
-      testOutput.instance.setNumber('my_int64', 9007199254740992)
-    }).to.throw(rti.DDSError)
-  })
-
-  // This function is called various times to check the use of large integers
-  const verifyLargeInteger = async (output, input, number) => {
-    expect(() => {
-      output.instance.setNumber('my_uint64', number)
-    }).to.throw(rti.DDSError)
-    expect(() => {
-      output.instance.setNumber('my_int64', -number)
-    }).to.throw(rti.DDSError)
-
-    output.instance.setFromJson({
-      my_uint64: number,
-      my_int64: -number
-    })
-    output.write()
-    try {
-      await input.wait(2000)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
-    input.take()
-    const sample = input.samples.get(0)
-    const jsonObj = sample.getJson()
-    expect(jsonObj.my_uint64).to.deep.equals(number)
-    expect(jsonObj.my_int64).to.deep.equals(-number)
-    expect(() => {
-      sample.getNumber('my_uint64')
-      console.log('number :' + number + ' sample.getNumber(my_uint64): ' + sample.getNumber('my_uint64'))
-    }).to.throw(rti.DDSError)
-    expect(() => {
-      sample.getNumber('my_int64')
-    }).to.throw(rti.DDSError)
-  }
-
-  // This is skipped until we come up with a solution...
-  // Number.MAX_SAFE_INTEGER = 9007199254740991
-  it.skip('Largest ints that can be set and get', async () => {
-    const maxIntGet = 9007199254740992
-    const maxIntSet = 2 ** 53 - 1
-    console.log('Number.MAX_SAFE_INTEGER: ' + Number.MAX_SAFE_INTEGER)
-
-    // Largest integer alowwed by setNumber
-    testOutput.instance.setNumber('my_uint64', maxIntSet)
-    testOutput.instance.setNumber('my_int64', -maxIntSet)
-    testOutput.write()
-    try {
-      await testInput.wait(2000)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
-    testInput.take()
-    let sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_uint64')).to.deep.equals(maxIntSet)
-    expect(sample.getNumber('my_int64')).to.deep.equals(-maxIntSet)
-
-    // Largest integer allowed by getNumber (have to set via setFromJson)
-    testOutput.instance.setFromJson({ my_uint64: maxIntGet })
-    testOutput.instance.setFromJson({ my_int64: -maxIntGet })
-    testOutput.write()
-    try {
-      await testInput.wait(2000)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
-    testInput.take()
-    sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_uint64')).to.deep.equals(maxIntGet)
-    expect(sample.getNumber('my_int64')).to.deep.equals(-maxIntGet)
-
-    // Too large for getNumber, OK for getJson
-    await verifyLargeInteger(testOutput, testInput, 9007199254740992)
-    // 9007199254740999 -> 9007199254741000.0
-    await verifyLargeInteger(testOutput, testInput, 9007199254740999)
-    // Largest long long
-    await verifyLargeInteger(testOutput, testInput, (2 ** 63 - 1))
-  })
 })
 
 describe('Tests with two readers and two writers', () => {
@@ -938,7 +850,10 @@ describe('Tests with two readers and two writers', () => {
     expect(testOutput2.waitForSubscriptions(2000)).to.eventually.become(1)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Take any data
+    testInput1.take()
+    testInput2.take()
     connector.close()
   })
 

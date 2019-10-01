@@ -20,7 +20,7 @@ var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-undef */
 
 describe('Test the iteration of Input Samples', () => {
-  const expectedSampleCount = 4
+  const expectedSampleCount = 4 // one of which is a dispose
   const expectedData = [
     {
       x: 1,
@@ -62,10 +62,10 @@ describe('Test the iteration of Input Samples', () => {
     // Wait for the entities to match
     try {
       const newMatches = await input.waitForPublications(2000)
-      expect(newMatches).to.deep.equal(1)
+      expect(newMatches).to.be.at.least(1)
     } catch (err) {
       // Fail the test
-      expect(true).to.deep.equal(false)
+      expect(true).to.be.false
     }
 
     // Populate the input with data from the output
@@ -81,7 +81,7 @@ describe('Test the iteration of Input Samples', () => {
       try {
         await input.wait(500)
         input.read()
-        if (input.samples.length === 4) {
+        if (input.samples.length === expectedSampleCount) {
           break
         }
       } catch (err) {
@@ -96,21 +96,21 @@ describe('Test the iteration of Input Samples', () => {
     connector.close()
   })
 
-  it('Check sample iterator', () => {
+  it('Check sample iterator and iterable', () => {
     expect(input.samples.length).to.deep.equals(expectedSampleCount)
 
     // Check that it is possible to use the iterable object
     let count = 0
     for (const sample of input.samples.dataIterator) {
-      if (count <= 2) {
+      if (count === 3) {
+        expect(sample.validData).to.deep.equals(false)
+      } else {
         expect(sample.validData).to.deep.equals(true)
         expect(sample.getNumber('x')).to.deep.equals(expectedData[count].x)
         expect(sample.getNumber('y')).to.deep.equals(expectedData[count].y)
         expect(sample.getBoolean('z')).to.deep.equals(expectedData[count].z)
         expect(sample.getString('color')).to.deep.equals(expectedData[count].color)
         expect(sample.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
-      } else {
-        expect(sample.validData).to.deep.equals(false)
       }
       count++
     }
@@ -139,7 +139,7 @@ describe('Test the iteration of Input Samples', () => {
     }
   })
 
-  it('Check valid data sample iterator', () => {
+  it('Check valid data sample iterator and iterable', () => {
     expect(input.samples.length).to.deep.equals(expectedSampleCount)
 
     let count = 0
@@ -154,5 +154,23 @@ describe('Test the iteration of Input Samples', () => {
 
     // We should have iterated over all but the last (dispose) sample
     expect(count).to.deep.equals(expectedSampleCount - 1)
+
+    // Manually incrementing the iterator
+    const iterator = input.samples.validDataIterator.iterator()
+    count = 0
+    while (count < input.samples.length) {
+      const singleSample = iterator.next()
+      if (count < input.samples.length - 1) {
+        expect(singleSample.value.validData).to.deep.equals(true)
+        expect(singleSample.value.getNumber('x')).to.deep.equals(expectedData[count].x)
+        expect(singleSample.value.getNumber('y')).to.deep.equals(expectedData[count].y)
+        expect(singleSample.value.getBoolean('z')).to.deep.equals(expectedData[count].z)
+        expect(singleSample.value.getString('color')).to.deep.equals(expectedData[count].color)
+        expect(singleSample.value.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
+      } else {
+        expect(singleSample.done).to.be.true
+      }
+      count++
+    }
   })
 })

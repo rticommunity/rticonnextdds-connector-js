@@ -727,15 +727,9 @@ class ValidSampleIterator extends SampleIterator {
    * Since this class inherits from SampleIterator, we use the iterable from
    * that class.
    */
-  // * iterator () {
-  //   while (((this.index + 1) < this.length) && !(this.input.infos.isValid(this.index + 1))) {
-  //     this.index += 1
-  //   }
-  //   this.index += 1
-  //   yield this
-  // }
   * iterator () {
     while ((this.index + 1) < this.length) {
+      // Increment the sample to the next one with valid
       while (((this.index + 1) < this.length) && !this.input.infos.isValid(this.index + 1)) {
         this.index += 1
       }
@@ -969,12 +963,11 @@ class Instance {
         throw new TypeError('value must be a number')
       }
     } else {
-      const retcode = connectorBinding.api.RTI_Connector_set_number_into_samples(
+      _checkRetcode(connectorBinding.api.RTI_Connector_set_number_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
-        value)
-      _checkRetcode(retcode)
+        value))
     }
   }
 
