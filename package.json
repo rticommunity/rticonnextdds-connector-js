@@ -21,6 +21,7 @@
     "chai-as-promised": "^7.1.1",
     "events": "*",
     "ffi": "*",
+    "mocha": "^6.2.1",
     "ref": "*",
     "rticonnextdds-connector": "^0.4.3",
     "sinon": "^7.4.2",
@@ -38,7 +39,7 @@
     "pub-sub"
   ],
   "author": "Gianpiero Napoli <gianpiero@rti.com>",
-  "license": "See License File",
+  "license": "SEE LICENSE IN LICENSE.pdf",
   "bugs": {
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js/issues"
   },
