@@ -1116,10 +1116,8 @@ class Output {
     if (params === undefined) {
       cStr = null
     } else {
-      // TODO: Check if there is an equivalent to Python's **kwargs
-      //       Add unit tedsts
+      // TODO:
       //       Add docs
-      //       (Maybe fix this if it doesn't work)
       cStr = JSON.stringify(params)
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_write(
