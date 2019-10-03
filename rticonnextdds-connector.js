@@ -291,7 +291,7 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
  * Provide access to the metadata contained in samples read by an input.
  *
  * Note: The Infos class is deprecated and should not be used directly. Instead,
- * use {@link SampleIterator#info}.
+ * use :meth:`SampleIterator.info`.
  *
  * @private
  */
@@ -301,7 +301,7 @@ class Infos {
   }
 
   /**
-   * Obtain the number of samples in the related {@link Input}'s queue.
+   * Obtain the number of samples in the related :class:`Input`'s queue.
    * @private
    */
   getLength () {
@@ -317,7 +317,7 @@ class Infos {
   /**
    * Checks if the sample at the given index contains valid data.
    *
-   * @param {number} index - The index of the sample in the {@link Input}'s queue
+   * @param {number} index - The index of the sample in the :class:`Input`'s queue
    * to check for valid data.
    * @returns{boolean} True if the sample contains valid data
    * @private
@@ -347,25 +347,26 @@ class Infos {
 // Public API
 
 /**
- * Provide access to the data samples read by an {@link Input}.
- *
- * This class provides access to data samples read by an {@link Input}.
- *
- * The methods {@link Samples#get} and {@link Samples#dataIterator} return
- * a {@link SampleIterator} which implements iterable and iterator logic, allowing
- * the caller to iterate through all available samples. The samples returned by these
- * methods may contain only meta-data. The {@link Samples#validDataIterator}
- * only iterates over samples that contain valid data.
- *
- * ``Samples`` is the type of the property {@link Input#samples}.
- *
- * For more information and examples see :ref:`Accessing the data samples`.
- *
- * @property {number} length - The number of samples currently available on this Input.
- * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
- * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
+ * Provide access to the data samples read by an :class:`Input`.
  */
 class Samples {
+  /**
+   * This class provides access to data samples read by an :class:`Input`.
+   *
+   * The methods :meth:`Samples.get` and :func:`Samples.dataIterator` return
+   * a :class:`SampleIterator` which implements iterable and iterator logic, allowing
+   * the caller to iterate through all available samples. The samples returned by these
+   * methods may contain only meta-data. The :meth:`Samples.validDataIterator`
+   * only iterates over samples that contain valid data.
+   *
+   * ``Samples`` is the type of the property :meth:`Input.samples`.
+   *
+   * For more information and examples see :ref:`Accessing the data samples`.
+   *
+   * @property {number} length - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
+   * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
+   * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
+   */
   constructor (input) {
     this.input = input
   }
@@ -374,11 +375,11 @@ class Samples {
    * Returns an iterator to the data samples, starting at the index specified.
    *
    * The iterator provides access to all the data samples retrieved by the most
-   * recent call to {@link Input#read} or {@link Input#take}.
+   * recent call to :meth:`Input.read` or :meth:`Input.take`.
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use {@link Input#validDataIterator} to avoid having to check {@link SampleIterator#validData}.
+   * Use :meth:`Input.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
    *
    * @param {number} [index] The index of the sample from which the iteration should begin. By default, the iterator begins with the first sample.
    *
@@ -392,11 +393,11 @@ class Samples {
    * Returns an iterator to the data samples.
    *
    * The iterator provides access to all the data samples retrieved by the most
-   * recent call to {@link Input#read} or {@link Input#take}.
+   * recent call to :meth:`Input.read` or :meth:`Input.take`.
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use {@link Input#validDataIterator} to avoid having to check {@link SampleIterator#validData}.
+   * Use :meth:`Input.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
    *
    * @returns {SampleIterator} An iterator to the samples.
    */
@@ -408,7 +409,7 @@ class Samples {
    * Returns an iterator to the data samples which contain valid data.
    *
    * The iterator provides access to all the data samples retrieved by the most
-   * recent call to {@link Input#read} or {@link Input#take}, and skips samples with
+   * recent call to :meth:`Input.read` or :meth:`Input.take`, and skips samples with
    * invalid data (meta-data only).
    *
    * By using this iterator, it is not necessary to check if each sample contains
@@ -422,8 +423,6 @@ class Samples {
 
   /**
    * The number of samples available.
-   *
-   * @type {number} The number of samples available since the last time {@link Input#read} or {@link Input#take} was called.
    */
   get length () {
     return this.input.samples.getLength()
@@ -432,7 +431,8 @@ class Samples {
   /**
    * Returns the number of samples available.
    *
-   * @see Samples#length
+   * This methos is deprecated , use the getter :meth:`Samples.length`
+   * @private
    */
   getLength () {
     const length = ref.alloc('double')
@@ -609,7 +609,7 @@ class Samples {
   }
 
   /**
-   * This method is deprecated, use {@link Samples#getJson}.
+   * This method is deprecated, use :meth:`Samples.getJson`.
    *
    * @param {number} index - The index of the sample for which to obtain the JSON object.
    * @param {string} [memberName] - The name of the complex member for which to obtain the JSON object.
@@ -622,7 +622,7 @@ class Samples {
 }
 
 /**
- * The type of {@link SampleIterator#info}.
+ * The type returned by the property :meth:`SampleIterator.info`.
  *
  * This class provides a way to access the SampleInfo of a recieved data sample.
  */
@@ -639,9 +639,9 @@ class SampleInfo {
    * are sent within samples. The supported fieldNames are:
    * * ``"source_timestamp"``, returns an integer representing nanoseconds
    * * ``"reception_timestamp"``, returns an integer representing nanoseconds
-   * * ``"sample_identity"``, or ``"identity"``, returns a JSON object (see {@link Output#write})
-   * * ``"related_sample_identity"``, returns a JSON object (see {@link Output#write})
-   * * ``"valid_data"``, returns a boolean (equivalent to {@link SampleIterator#validData})
+   * * ``"sample_identity"``, or ``"identity"``, returns a JSON object (see :meth:`Output.write`)
+   * * ``"related_sample_identity"``, returns a JSON object (see :meth:`Output.write`)
+   * * ``"valid_data"``, returns a boolean (equivalent to :meth:`SampleIterator.validData`)
    *
    * All of these fields are documented in the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0|SampleInfo Structure} section of the *Connext DDS Core Libraries User's Manual*.
    *
@@ -665,25 +665,27 @@ class SampleInfo {
 
 /**
  * Iterates and provides access to a data sample.
- *
- * A SampleIterator provides access to the data receieved by a {@link Input}.
- * SampleIterators are accessed using {@link Input#samples#dataIterator}
- * and {@link Input#samples#get()}.
- *
- * @see {@link Samples#dataIterator}
- *
- * @property {boolean} validData - Whether or not the current sample contains valid data.
- * @property {SampleInfo} infos - The meta data associated with the current sample
- * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C
- *
- * This class provides both an iterator and iterable, meaning there are the following
- * options to use it:
- *
- * @example for (let sample of input.samples.dataIterator)
- * @example const iterator = input.samples.dataIterator.iterator()
- * @example const individualSample = input.samples.get()
  */
 class SampleIterator {
+  /**
+   * A SampleIterator provides access to the data receieved by an :class:`Input`.
+   * SampleIterators are accessed using :meth:`Input.samples.dataIterator`
+   * and :meth:`Input.samples.get`.
+   *
+   * see :meth:`Samples.dataIterator`
+   * see :class:`ValidSampleIterator`
+   *
+   * @property {boolean} validData - Whether or not the current sample contains valid data.
+   * @property {SampleInfo} infos - The meta data associated with the current sample
+   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C
+   *
+   * This class provides both an iterator and iterable, meaning there are the following
+   * options to use it::
+   *
+   *   for (let sample of input.samples.dataIterator)
+   *   const iterator = input.samples.dataIterator.iterator()
+   *   const individualSample = input.samples.get()
+   */
   constructor (input, index) {
     this.input = input
     if (index === undefined) {
@@ -696,9 +698,9 @@ class SampleIterator {
   /**
    * Whether or not this sample contains valid data.
    *
-   * If ``false``, this methods to obtain values of the samples (e.g., {@link SampleIterator#getNumber},
-   * {@link SampleIterator#getBoolean}, {@link SampleIterator#getJson}, {@link SampleIterator#getString})
-   * should not be called. To avoid this restraint, use an {@link ValidSampleIterator}.
+   * If ``false``, this methods to obtain values of the samples (e.g., :meth:`SampleIterator.getNumber`,
+   * :meth:`SampleIterator.getBoolean`, :meth:`SampleIterator.getJson`, :meth:`SampleIterator.getString`)
+   * should not be called. To avoid this restraint, use an :class:`ValidSampleIterator`.
    * @type {boolean}
    */
   get validData () {
@@ -709,7 +711,7 @@ class SampleIterator {
    * Provides access to this sample's meta-data.
    *
    * @type {SampleInfo}
-   * @see {@link SampleInfo}
+   * see :class:`SampleInfo`
    */
   get info () {
     return new SampleInfo(this.input, this.index)
@@ -720,7 +722,7 @@ class SampleIterator {
    *
    * @param {string} [memberName] - The name of the complex member or field to obtain.
    * @returns {JSON} The obtained JSON object.
-   * @see :ref:`Accessing the data`
+   * see :ref:`Accessing the data samples`
    */
   getJson (memberName) {
     return this.input.samples.getJson(this.index, memberName)
@@ -790,11 +792,9 @@ class SampleIterator {
   /**
    * The iterator generator (used by the iterable).
    *
-   * Using this method it is possible to create your own iterable:
-   * <pre><code>
-   * const iterator = input.samples.dataIterator.iterator()
-   * const singleSample = iterator.next().value
-   * </code></pre>
+   * Using this method it is possible to create your own iterable::
+   *   const iterator = input.samples.dataIterator.iterator()
+   *   const singleSample = iterator.next().value
    *
    * @generator
    * @yields {SampleIterator} The next sample in the queue
@@ -807,12 +807,10 @@ class SampleIterator {
   }
 
   /**
-   * Implementation of iterable logic. This allows for the following syntax:
-   * <pre><code>
-   * for (let sample of input.dataIterator) {
-   *  jsonDictionary = sample.getJson()
-   * }
-   * </code></pre>
+   * Implementation of iterable logic. This allows for the following syntax::
+   *   for (let sample of input.dataIterator) {
+   *    jsonDictionary = sample.getJson()
+   *   }
    */
   [Symbol.iterator] () {
     return this.iterator()
@@ -822,25 +820,22 @@ class SampleIterator {
 /**
  * Iterates and provides access to data samples with valid data.
  *
- * This iterator provides the same methods as {@link SampleIterator}.
- * {@link Input#validDataIterator}
+ * This iterator provides the same methods as :class:`SampleIterator`. It can be
+ * obtained using :meth:`Input.validDataIterator`.
  * @extends SampleIterator
  *
- * <pre><code>
- * for (let sample of input.samples.validDataIterator) {
- *  console.log(JSON.stringify(sample.getJson()))
- * }
- * </code></pre>
+ * Using this class it is possible to iterator through all valid data samples::
+ *   for (let sample of input.samples.validDataIterator) {
+ *    console.log(JSON.stringify(sample.getJson()))
+ *   }
  */
 class ValidSampleIterator extends SampleIterator {
   /**
    * The iterator generator (used by the iterable).
    *
-   * Using this method it is possible to create your own iterable:
-   * <pre><code>
-   * const iterator = input.samples.validDataIterator.iterator()
-   * const singleSample = iterator.next().value
-   * </code></pre>
+   * Using this method it is possible to create your own iterable::
+   *   const iterator = input.samples.validDataIterator.iterator()
+   *   const singleSample = iterator.next().value
    *
    * @generator
    * @yields {ValidSampleIterator} The next sample in the queue with valid data
@@ -860,15 +855,19 @@ class ValidSampleIterator extends SampleIterator {
 }
 
 /**
- * Allows reading data for a topic.
- *
- * To get an Input object, use {@link Connector#getInput}.
- * @property {Connector} connector - The Connector creates this Input
- * @property {string} name - The name of the Input (the name used in {@link Connector#getInput})
- * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
- * @property {JSON} matchedPublications - A JSON object containing information about all the publications currently matched with this Input.
+ * Allows reading data for a DDS Topic.
  */
 class Input {
+  /**
+   * This class is used to subscribe to a specific DDS Topic.
+   *
+   * To get an Input object, use :meth:`Connector.getInput`.
+   *
+   * @property {Connector} connector - The Connector creates this Input
+   * @property {string} name - The name of the Input (the name used in :meth:`Connector.getInput`)
+   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
+   * @property {JSON} matchedPublications - A JSON object containing information about all the publications currently matched with this Input.
+   */
   constructor (connector, name) {
     this.connector = connector
     this.name = name
@@ -894,7 +893,7 @@ class Input {
   /**
    * Access the samples received by this Input.
    *
-   * This operation performs the same operation as {@link Input#take} but the samples
+   * This operation performs the same operation as :meth:`Input.take` but the samples
    * remain accessible (in the internal queue) after the operation has been called.
    */
   read () {
@@ -906,7 +905,7 @@ class Input {
   /**
    * Access the samples receieved by this Input.
    *
-   * After calling this method, the samples are accessible using {@link Input#samples}.
+   * After calling this method, the samples are accessible using :meth:`Input.samples`.
    */
   take () {
     _checkRetcode(connectorBinding.api.RTI_Connector_take(
@@ -918,7 +917,7 @@ class Input {
    * Allows iterating over the samples returned by this input.
    *
    * This container provides iterators to access the data samples retrieved by
-   * the most-recent call to ${@link Input#take} and ${@link Input#read}.
+   * the most-recent call to :meth:`Input.take` and :meth:`Input.read`.
    */
   get samples () {
     return this._samples
@@ -1029,19 +1028,19 @@ class Input {
   }
 }
 
-/**
- * A data sample.
- *
- * {@link Instance} is the type of {@link Output#instance} and is the object that
- * is published by {@link Output#write}.
- *
- * An Instance has an associated DDS Type, specified in the XML configuration, and
- * it allows setting the values for the fields of the DDS Type.
- *
- * @property {Output} output - The {@link Output} that owns this Instance.
- * @property {pointer} native - The native C pointer to this instace.
- */
 class Instance {
+  /**
+   * A data sample.
+   *
+   * :class:`Instance` is the type returned by :meth:`Output.instance` and is the object that
+   * is published by :meth:`Output.writ`}.
+   *
+   * An Instance has an associated DDS Type, specified in the XML configuration, and
+   * it allows setting the values for the fields of the DDS Type.
+   *
+   * @property {Output} output - The :class:`Output` that owns this Instance.
+   * @property {pointer} native - The native C pointer to this instace.
+   */
   constructor (output) {
     this.output = output
   }
@@ -1049,7 +1048,7 @@ class Instance {
   /**
    * Resets a member to its default value.
    *
-   * The effect is the same as that of {@link Output#clearMembers}, except that only
+   * The effect is the same as that of :meth:`Output.clearMembers`, except that only
    * one member is cleared.
    * @param {string} fieldName  - The name of the field. It can be a complex member or a primitive member.
    */
@@ -1149,7 +1148,7 @@ class Instance {
    * in the JSON object. Any member that is not specified in the JSON object will retain its previous
    * value.
    *
-   * To clear members that are not in the JSON object, call {@link Output#clearMembers} before this method.
+   * To clear members that are not in the JSON object, call :meth:`Output.clearMembers` before this method.
    * You can also explicitly set any value in the JSON object to *null* to reset that field
    * to its default value.
    *
@@ -1191,16 +1190,19 @@ class Instance {
 
 /**
  * Allows writing data for a DDS Topic.
- *
- * @property {Instance} instance - The data that is written when {@link Output#write} is called.
- * @property {Connector} connector - The Connector that created this object.
- * @property {string} name - The name of this Output (the name used in {@link Connector#getOutput})
- * @property {pointer} native - The native handle that allows accessing additional *Connext DDS* APIs in C.
- * @property {JSON} matchedSubscriptions - Information about matched subscriptions.
- *
- * {@link Writing Data (Output)}
  */
 class Output {
+  /**
+   * This class is used to publish data for a DDS Topic.
+   *
+   * To get an Output object, use :meth:`Connector.getOutput`.
+   *
+   * @property {Instance} instance - The data that is written when :meth:`Output.write` is called.
+   * @property {Connector} connector - The Connector that created this object.
+   * @property {string} name - The name of this Output (the name used in :meth:`Connector.getOutput`)
+   * @property {pointer} native - The native handle that allows accessing additional *Connext DDS* APIs in C.
+   * @property {JSON} matchedSubscriptions - Information about matched subscriptions.
+   */
   constructor (connector, name) {
     this.connector = connector
     this.name = name
@@ -1218,7 +1220,7 @@ class Output {
    * Publishes the values of the current Instance.
    *
    * Note that after writing it, Instance's values remain unchanges. If for the
-   * next write you need to start from scratch you must first call {@link Output#clearMembers}.
+   * next write you need to start from scratch you must first call :meth:`Output.clearMembers`.
    *
    * This method accepts a number of optional parameters, a subset of those documented in
    * the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t|Writing Data section of the *Connext DDS Core Libraries* User's Manual.}
@@ -1226,7 +1228,7 @@ class Output {
    * The support parameters are:
    *
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
-   * If the blocking time exceeds the *max_blocking_time* this method throws {@link TimeoutError}.
+   * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
    */
   write (params) {
     var cStr
@@ -1246,7 +1248,7 @@ class Output {
   }
 
   /**
-   * Resets the values of the memers of this {@link Output#instance}
+   * Resets the values of the memers of this :class:`Instance`.
    *
    * If the members is defined with *default* attribute in the configuration file, it gets
    * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
@@ -1271,7 +1273,7 @@ class Output {
    * This method only waits if this Output is configured with a reliable QoS.
    *
    * @param {timeout} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} If the operation times out, it raises {@link TimeoutError}.
+   * @throws {TimeoutError} If the operation times out, it raises :class:`TimeoutError`.
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1369,20 +1371,21 @@ class Output {
 /**
  * Loads a configuration and creates its Inputs and Outputs.
  *
- * A **Connector** instance loads a configuration file from an XML document. For example::
- * const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
+ * A **Connector** instance loads a configuration file from an XML document.
+ * For example::
+ *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
  *
  * After creating it, the Connector's Inputs can be used to read data, and the Outputs to write data.
- * {@link Connector#getInput}
- * {@link Connector#getInput}
+ * The methods :meth:`Connector.getOutput` and :meth:`Connector.getInput` return the :class:`Input` and
+ * :class:`Output`.
  *
  * An application can create multiple **Connector** instances for the same of different configurations.
- *
- * @param {string} configName - The configuration to load. The configName format is 'LibraryName::ParticipantNAme', where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantNAme is the name attribute of a <domain_participant> tag inside that library.
- * @param {string} url - A URL locating the XML document. The url can be a file path (e.g., '/tmp/my_dds_config.xml') or a string containing the full XML document with the following format: 'str://"<dds>...</dds>"
- * @class
  */
 class Connector extends EventEmitter {
+  /**
+   * @arg {string} configName - The configuration to load. The configName format is 'LibraryName::ParticipantName', where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantNAme is the name attribute of a <domain_participant> tag inside that library.
+   * @arg {string} url - A URL locating the XML document. The url can be a file path (e.g., '/tmp/my_dds_config.xml') or a string containing the full XML document with the following format: 'str://"<dds>...</dds>"
+   */
   constructor (configName, url) {
     super()
     const options = new _ConnectorOptions()
@@ -1416,27 +1419,27 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Returns the {@link Input} named inputName.
+   * Returns the :class:`Input` named inputName.
    *
-   * 'inputName' identifies a <data_reader> tag in the configuration loaded by the 'Connector'. For Example::
+   * ``inputName`` identifies a `<data_reader>` tag in the configuration loaded by the :class:`Connector`. For Example::
    *
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getInput('MySubscriber::MyReader')
    *
-   * Loads the Input in this XML:
+   * Loads the Input in this XML::
    *
-   *   <domain_participant_library name="MyParticipantLibrary">
-   *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
-   *       <subscriber name="MySubscriber">
-   *         <data_reader name="MyReader" topic_ref="MyTopic"/>
+   *     <domain_participant_library name="MyParticipantLibrary">
+   *       <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
+   *         <subscriber name="MySubscriber">
+   *           <data_reader name="MyReader" topic_ref="MyTopic"/>
+   *           ...
+   *         </subscriber>
    *         ...
-   *       </subscriber>
+   *       </domain_participant>
    *       ...
-   *     </domain_participant>
-   *     ...
-   *   <domain_participant_library>
+   *     <domain_participant_library>
    *
-   * @param {string} inputName - The name of the data_reader to load. With the format 'SubscriberName::DataReaderName'
+   * @param {string} inputName - The name of the `data_reader` to load. With the format `SubscriberName::DataReaderName`
    * @returns {Input} The Input, if it exists.
    */
   getInput (inputName) {
@@ -1444,27 +1447,27 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Returns the {@link Output} named outputName.
+   * Returns the :class:`Output` named outputName.
    *
-   * 'outputName' identifies a <data_writer> tag in the configuration loaded by the 'Connector'. For Example::
+   * ``outputName`` identifies a <data_writer> tag in the configuration loaded by the :class:`Connector`. For Example::
    *
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getOutput('MyPublisher::MyWriter')
    *
-   * Loads the Input in this XML:
+   * Loads the Input in this XML::
    *
-   *   <domain_participant_library name="MyParticipantLibrary">
-   *     <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
-   *       <publisher name="MyPublisher">
-   *         <data_writer name="MyWriter" topic_ref="MyTopic"/>
+   *     <domain_participant_library name="MyParticipantLibrary">
+   *       <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
+   *         <publisher name="MyPublisher">
+   *           <data_writer name="MyWriter" topic_ref="MyTopic"/>
+   *           ...
+   *         </publisher>
    *         ...
-   *       </publisher>
+   *       </domain_participant>
    *       ...
-   *     </domain_participant>
-   *     ...
-   *   <domain_participant_library>
+   *     <domain_participant_library>
    *
-   * @param {string} outputName - The name of the data_writer to load. With the format 'PublisherName::DataWriterName'
+   * @param {string} outputName - The name of the data_writer to load. With the format `PublisherName::DataWriterName`
    * @returns {Output} The Output, if it exists.
    */
   getOutput (outputName) {
@@ -1531,8 +1534,8 @@ class Connector extends EventEmitter {
    * Waits for data to be received on any Input.
    *
    * @param {number} timeout - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} If the operation times out, it raises {@link TimeoutError}
-   * @returns {Promise}
+   * @throws {TimeoutError} If the operation times out, it throws :class:`TimeoutError`
+   * @returns {Promise} A promise object which is resolved once data is available (or rejected once the timeout expires)
    */
   waitForData (timeout) {
     return new Promise((resolve, reject) => {

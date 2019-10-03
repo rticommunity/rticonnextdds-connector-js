@@ -38,7 +38,7 @@
     "sub",
     "pub-sub"
   ],
-  "author": "Gianpiero Napoli <gianpiero@rti.com>",
+  "author": "Real-Time Innovations, Inc.",
   "license": "SEE LICENSE IN LICENSE.pdf",
   "bugs": {
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js/issues"
