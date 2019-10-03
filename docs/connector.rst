@@ -35,7 +35,7 @@ file ShapeExample.xml::
 
 See the full file here: `ShapeExample.xml <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/ShapeExample.xml>`__.
 
-When you create a ``Connector``, the DDS *DomainParticipant* that you selected
+When you create a :class:`Connector`, the DDS *DomainParticipant* that you selected
 and all its contained entities (*Topics*, *Subscribers*, *DataReaders*,
 *Publishers*, *DataWriters*) are created.
 
@@ -44,7 +44,7 @@ from the *RTI Connext DDS Core Libraries User's Manual*.
 
 .. note::
 
-  Operations on the same ``Connector`` instance or its contained entities are
+  Operations on the same :class:`Connector` instance or its contained entities are
   not protected for multi-threaded access. See :ref:`Threading model` for more
   information.
 
@@ -63,7 +63,7 @@ created, call :meth:`Connector.close()`:
 Getting the Inputs and Outputs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have created a ``Connector`` instance, :meth:`Connector.getOutput()`
+Once you have created a :class:`Connector` instance, :meth:`Connector.getOutput()`
 returns the :class:`Output` that allows writing data, and :meth:`Connector.getInput()`
 returns the :class:`Input` that allows reading data.
 

@@ -3,8 +3,8 @@ Writing data (Output)
 
 .. testsetup:: *
 
-   import rticonnextdds_connector as rti
-   connector = rti.Connector("MyParticipantLibrary::MyParticipant", "ShapeExample.xml")
+   var rti = require('rticonnextdds_connector')
+   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
 
 Getting the Output
 ~~~~~~~~~~~~~~~~~~
@@ -13,9 +13,9 @@ To write a data sample, first look up an output:
 
 .. testcode::
 
-   output = connector.get_output("MyPublisher::MySquareWriter")
+   output = connector.getOutput('MyPublisher::MySquareWriter')
 
-:meth:`Connector.get_output()` returns an :class:`Output` object. This example,
+:meth:`Connector.getOutput()` returns an :class:`Output` object. This example,
 obtains the output defined by the *data_writer* named *MySquareWriter* within
 the *publisher* named *MyPublisher*::
 
@@ -33,16 +33,16 @@ Then set the ``Output.instance`` fields. You can set them member by member:
 
 .. testcode::
 
-   output.instance.set_number("x", 1)
-   output.instance.set_number("y", 2)
-   output.instance.set_number("shapesize", 30)
-   output.instance.set_string("color", "BLUE")
+   output.instance.setNumber('x', 1)
+   output.instance.setNumber('y', 2)
+   output.instance.setNumber('shapesize', 30)
+   output.instance.setString('color', 'BLUE')
 
-Or using a dictionary:
+Or using a JSON object:
 
 .. testcode::
 
-   output.instance.set_dictionary({"x":1, "y":2, "shapesize":30, "color":"BLUE"})
+   output.instance.setFromJson({ x: 1, y: 2, shapesize: 30, color: 'BLUE' })
 
 The name of each member corresponds to the type assigned to this output in XML.
 For example::
@@ -69,42 +69,55 @@ data sample::
 
     output.wait()
 
-The write method can receive several options. For example, to
+The write method can also receive a JSON object specifing several options. For example, to
 write with a specific timestamp:
 
 .. testcode::
 
-  output.write(source_timestamp=100000)
+  output.write({ source_timestamp: 100000 })
 
 It is also possible to dispose or unregister an instance:
 
+
 .. testcode::
 
-  output.write(action="dispose")
-  output.write(action="unregister")
+  output.write({ action: 'dispose' })
+  output.write({ action: 'unregister' })
 
 In these two cases, only the *key* fields in the ``Output.instance`` are relevant.
 
 Matching with a Subscription
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before writing, the method :meth:`Output.wait_for_subscriptions()` can be used to
+Before writing, the method :meth:`Output.waitForSubscriptions()` can be used to
 detect when a compatible DDS subscription is matched or stops matching. It returns
-the change in the number of matched subscriptions since the last time it was called::
+a ``Promise`` that will resolve to the change in the number of matched subscriptions
+since the last time it was called::
 
-   change_in_matches = output.wait_for_subscriptions()
+   // Using async/await
+   const waitForMatches = async () => {
+     let changeInMatches = await output.waitForSubscriptions()
+   }
+
+   // Using traditional Promises
+   output.waitForSubscriptions(1000).then((res) => {
+     // The Promise resolved successfully
+     let changesInMatches = res
+   }).catch((err) => {
+     // Handle the error
+   }
 
 For example, if a new compatible subscription is discovered within the specified
 ``timeout``, the function returns 1.
 
 You can obtain information about the existing matched subscriptions with
-:attr:`Output.matched_subscriptions`:
+:attr:`Output.matchedSubscriptions`:
 
-.. testcode::
+.. testcode:: node
 
-   matched_subs = output.matched_subscriptions
-   for sub_info in matched_subs:
-    sub_name = sub_info['name']
+   output.matchedSubscriptions.forEach((match) => {
+    subName = match.name
+   }
 
 Class reference: Output, Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

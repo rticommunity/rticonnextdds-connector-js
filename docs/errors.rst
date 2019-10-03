@@ -19,12 +19,12 @@ Class reference: Error, TimeoutError
 Error class
 ^^^^^^^^^^^
 
-.. :autoclass:: DDSError
+.. autoclass:: DDSError
    :members:
 
 
 TimeoutError class
 ^^^^^^^^^^^^^^^^^^
 
-.. :autoclass:: TimeoutError
+.. autoclass:: TimeoutError
    :members:

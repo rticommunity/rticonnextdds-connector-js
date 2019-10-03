@@ -171,6 +171,10 @@ Object.freeze(_AnyValueKind)
  * A timeout error thrown by operations that can block
  */
 class TimeoutError extends Error {
+  /**
+   * This error is thrown when blocking errors timeout.
+   * @private
+   */
   constructor (message, extra) {
     super()
     Error.captureStackTrace(this, this.constructor)
@@ -184,6 +188,11 @@ class TimeoutError extends Error {
  * An error originating from the RTI Connext DDS Core
  */
 class DDSError extends Error {
+  /**
+   * This error is thrown when an error is encountered from within one of the APIs
+   * within the RTI Connext DDS Core.
+   * @private
+   */
   constructor (message, extra) {
     super()
     Error.captureStackTrace(this, this.constructor)
@@ -379,7 +388,7 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :meth:`Input.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
+   * Use :meth:`Samples.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
    *
    * @param {number} [index] The index of the sample from which the iteration should begin. By default, the iterator begins with the first sample.
    *
@@ -397,7 +406,7 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :meth:`Input.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
+   * Use :func:`Samples.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
    *
    * @returns {SampleIterator} An iterator to the samples.
    */
@@ -546,6 +555,27 @@ class Samples {
   }
 
   /**
+   * Get the value of a field within this sample.
+   *
+   * This API can be used to obtain strings, numbers, booleans and the JSON
+   * reprentation of complex members.
+   * @param {string} fieldName - The name of the field.
+   * @returns {number|string|boolean|JSON} The value of the field.
+   */
+  getValue (index, fieldName) {
+    if (!_isString(fieldName)) {
+      throw new TypeError('fieldName must be a string')
+    } else {
+      return _getAnyValue(
+        connectorBinding.api.RTI_Connector_get_any_from_sample,
+        this.input.connector.native,
+        this.input.name,
+        this.index,
+        fieldName)
+    }
+  }
+
+  /**
    * Gets a JSON object with the values of all the fields of this sample.
    *
    * @param {number} index The index of the sample
@@ -643,7 +673,8 @@ class SampleInfo {
    * * ``"related_sample_identity"``, returns a JSON object (see :meth:`Output.write`)
    * * ``"valid_data"``, returns a boolean (equivalent to :meth:`SampleIterator.validData`)
    *
-   * All of these fields are documented in the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0|SampleInfo Structure} section of the *Connext DDS Core Libraries User's Manual*.
+   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
+   * section in the *Connext DDS Core Libraries User's Manual*.
    *
    * @param {string} fieldName - The value in the SampleInfo to obtain
    * @returns The obtained value
@@ -710,8 +741,9 @@ class SampleIterator {
   /**
    * Provides access to this sample's meta-data.
    *
-   * @type {SampleInfo}
    * see :class:`SampleInfo`
+   *
+   * @type {SampleInfo}
    */
   get info () {
     return new SampleInfo(this.input, this.index)
@@ -767,16 +799,7 @@ class SampleIterator {
    * @returns {number|string|boolean|JSON} The value of the field.
    */
   getValue (fieldName) {
-    if (!_isString(fieldName)) {
-      throw new TypeError('fieldName must be a string')
-    } else {
-      return _getAnyValue(
-        connectorBinding.api.RTI_Connector_get_any_from_sample,
-        this.input.connector.native,
-        this.input.name,
-        this.index,
-        fieldName)
-    }
+    return this.input.samples.getValue(this.index, fieldName)
   }
 
   /**
@@ -821,7 +844,7 @@ class SampleIterator {
  * Iterates and provides access to data samples with valid data.
  *
  * This iterator provides the same methods as :class:`SampleIterator`. It can be
- * obtained using :meth:`Input.validDataIterator`.
+ * obtained using :meth:`Input.samples.validDataIterator`.
  * @extends SampleIterator
  *
  * Using this class it is possible to iterator through all valid data samples::
@@ -926,10 +949,13 @@ class Input {
   /**
    * Wait for this Input to receive data.
    *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
    * for data to be received.
-   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} The operation timed out before data was received.
+   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
    * @returns {Promise}
    */
   wait (timeout) {
@@ -965,10 +991,13 @@ class Input {
   /**
    * Wait for this Input to match or unmatch a compatible DDS Subscription.
    *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
    * for a match (or unmatch) to occur.
-   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} The operation timed out before data was received.
+   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before any publications are matched
    * @returns {Promise} Promise object resolving with the change in the current number of matched outputs. If this is a positive number, the input has matched with new publishers. If it is negative, the input has unmatched from an output. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the input matched the same number of outputs as it unmatched).
    */
   waitForPublications (timeout) {
@@ -1032,14 +1061,15 @@ class Instance {
   /**
    * A data sample.
    *
-   * :class:`Instance` is the type returned by :meth:`Output.instance` and is the object that
-   * is published by :meth:`Output.writ`}.
+   * :class:`Instance` is the type obtained through ``Output.instance`` and is the object that
+   * is published by :meth:`Output.write`.
    *
    * An Instance has an associated DDS Type, specified in the XML configuration, and
    * it allows setting the values for the fields of the DDS Type.
    *
-   * @property {Output} output - The :class:`Output` that owns this Instance.
-   * @property {pointer} native - The native C pointer to this instace.
+   * Attributes:
+   *  * output (:class:`Output`) - The :class:`Output` that owns this Instance.
+   *  * native (pointer) - Native handle to this Instance that allows for additional *Connext DDS Pro* C APIs to be called.
    */
   constructor (output) {
     this.output = output
@@ -1197,11 +1227,12 @@ class Output {
    *
    * To get an Output object, use :meth:`Connector.getOutput`.
    *
-   * @property {Instance} instance - The data that is written when :meth:`Output.write` is called.
-   * @property {Connector} connector - The Connector that created this object.
-   * @property {string} name - The name of this Output (the name used in :meth:`Connector.getOutput`)
-   * @property {pointer} native - The native handle that allows accessing additional *Connext DDS* APIs in C.
-   * @property {JSON} matchedSubscriptions - Information about matched subscriptions.
+   * Attributes:
+   *  * ``instance`` (:class:`Instance`) - The data that is written when :meth:`Output.write` is called.
+   *  * ``connector`` ():class:`Connector`) - The Connector that created this object.
+   *  * ``string`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`)
+   *  * ``native`` (pointer) - The native handle that allows accessing additional *Connext DDS* APIs in C.
+   *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions.
    */
   constructor (connector, name) {
     this.connector = connector
@@ -1222,10 +1253,12 @@ class Output {
    * Note that after writing it, Instance's values remain unchanges. If for the
    * next write you need to start from scratch you must first call :meth:`Output.clearMembers`.
    *
-   * This method accepts a number of optional parameters, a subset of those documented in
-   * the {@link https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t|Writing Data section of the *Connext DDS Core Libraries* User's Manual.}
+   * This method accepts an optional JSON object as a parameter, that may specify the
+   * parameters to use in the `write` call.
+   * The supported parameters are a subset of those  documented in the `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__.
+   * of the *Connext DDS Core Libraries* User's Manual.
    *
-   * The support parameters are:
+   * @param {JSON} [params] The Write Parameters to use in the `write` call.
    *
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
    * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
@@ -1253,8 +1286,7 @@ class Output {
    * If the members is defined with *default* attribute in the configuration file, it gets
    * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
    * are cleared and optional members are set to 'null'.
-   *
-   * For example, if this Output's type is *ShapeType*, then clearMembers sets:
+   * For example, if this Output's type is *ShapeType*, then clearMembers sets::
    *  color = 'RED'
    *  shapesize = 30
    *  x = 0
@@ -1272,8 +1304,11 @@ class Output {
    *
    * This method only waits if this Output is configured with a reliable QoS.
    *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * @param {timeout} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} If the operation times out, it raises :class:`TimeoutError`.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before all matching reliable subscriptions acknowledge all the samples
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1302,8 +1337,12 @@ class Output {
    *
    * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
    * for a match (or unmatch) to occur.
+   *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} The operation timed out before data was received.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before a subscription is matched
    * @returns {Promise} Promise object resolving with the change in the current number of matched inputs. If this is a positive number, the output has matched with new subscribers. If it is negative, the output has unmatched from a subscription. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the output matched the same number of inputs as it unmatched).
    */
   waitForSubscriptions (timeout) {
@@ -1339,7 +1378,7 @@ class Output {
   }
 
   /**
-   * Returns information about matched subscriptions.
+   * Provides information about matched subscriptions.
    *
    * This property returns a JSON array with each element of the array containing
    * information about a matched subscription.
@@ -1376,15 +1415,15 @@ class Output {
  *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
  *
  * After creating it, the Connector's Inputs can be used to read data, and the Outputs to write data.
- * The methods :meth:`Connector.getOutput` and :meth:`Connector.getInput` return the :class:`Input` and
- * :class:`Output`.
+ * The methods :meth:`Connector.getOutput` and :meth:`Connector.getInput` return an :class:`Input` and
+ * :class:`Output` respectively.
  *
  * An application can create multiple **Connector** instances for the same of different configurations.
  */
 class Connector extends EventEmitter {
   /**
-   * @arg {string} configName - The configuration to load. The configName format is 'LibraryName::ParticipantName', where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantNAme is the name attribute of a <domain_participant> tag inside that library.
-   * @arg {string} url - A URL locating the XML document. The url can be a file path (e.g., '/tmp/my_dds_config.xml') or a string containing the full XML document with the following format: 'str://"<dds>...</dds>"
+   * @arg {string} configName - The configuration to load. The configName format is `LibraryName::ParticipantName`, where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantName is the name attribute of a <domain_participant> tag inside that library.
+   * @arg {string} url - A URL locating the XML document. The url can be a file path (e.g., `/tmp/my_dds_config.xml`) or a string containing the full XML document with the following format: `str://"<dds>...</dds>"`
    */
   constructor (configName, url) {
     super()
@@ -1476,6 +1515,10 @@ class Connector extends EventEmitter {
 
   /**
    * This is deprecated. Use waitForData.
+   *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * @private
    */
   onDataAvailable () {
@@ -1533,9 +1576,12 @@ class Connector extends EventEmitter {
   /**
    * Waits for data to be received on any Input.
    *
+   * .. note::
+   *   This operation is asynchronous
+   *
    * @param {number} timeout - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} If the operation times out, it throws :class:`TimeoutError`
-   * @returns {Promise} A promise object which is resolved once data is available (or rejected once the timeout expires)
+   * @throws {TimeoutError} - :class:`TimeoutError` will be thrown if the timeout expires before data is received
+   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
    */
   waitForData (timeout) {
     return new Promise((resolve, reject) => {
@@ -1573,9 +1619,10 @@ class Connector extends EventEmitter {
    * to be created in a single application). If you need to create more than 8
    * instances of Connector you can increase the value from the default.
    *
-   * This operation can only be called before creating any Connector instance.
+   * .. note::
+   *   This is a static method. It can only be called before creating any Connector instance.
    *
-   * See {@link https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm|SYSTEM_RESOURCE_LIMITS QoS policy}
+   * See `SYSTEM_RESOURCE_LIMITS QoS Policy <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
    * in the *RTI Connext DDS* User's Manual.
    *
    * @param {number} value - the value for *max_objects_per_thread*
