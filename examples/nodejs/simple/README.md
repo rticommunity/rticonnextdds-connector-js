@@ -8,8 +8,9 @@ that it receives.
 ## Running the example
 Run the following command in different shells
 
-  $ node reader.js
-  $ node writer.js
+  `$ node reader.js`
+
+  `$ node writer.js`
 
 You can run these commands in any order, and you can run multiple instances of
 the publisher and/or the reader.
