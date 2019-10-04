@@ -161,13 +161,13 @@ The method :meth:`Input.waitForPublications()` can be used to detect when a comp
 DDS publication is matched or stops matching. It returns a promise which resolves to
 the change in the number of matched publications since the last time it was called::
 
-   let changeInMatches = await input.wait_for_publications()
+   let changeInMatches = await input.waitForPublications()
 
 For example, if a new compatible publication is discovered within the specified
 ``timeout``, the promise will resolve to 1.
 
 You can obtain information about the existing matched publications with
-:attr:`Input.matchedPublication`:
+:attr:`Input.matchedPublications`:
 
 .. testcode::
 

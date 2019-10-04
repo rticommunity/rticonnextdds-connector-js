@@ -362,19 +362,20 @@ class Samples {
   /**
    * This class provides access to data samples read by an :class:`Input`.
    *
-   * The methods :meth:`Samples.get` and :func:`Samples.dataIterator` return
+   * The methods :meth:`Samples.get` and :attr:`Samples.dataIterator` return
    * a :class:`SampleIterator` which implements iterable and iterator logic, allowing
    * the caller to iterate through all available samples. The samples returned by these
-   * methods may contain only meta-data. The :meth:`Samples.validDataIterator`
+   * methods may contain only meta-data. The :attr:`Samples.validDataIterator`
    * only iterates over samples that contain valid data.
    *
    * ``Samples`` is the type of the property :meth:`Input.samples`.
    *
    * For more information and examples see :ref:`Accessing the data samples`.
    *
-   * @property {number} length - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
-   * @property {SampleIterator} dataIterator - The class used to iterate through the available samples
-   * @property {ValidSampleIterator} validDataIterator - The class used to iterate through the available samples which have valid data.
+   * Attributes:
+   *  * length (number) - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
+   *  * dataIterator (:class:`SampleIterator`) - The class used to iterate through the available samples
+   *  * validDataIterator (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
    */
   constructor (input) {
     this.input = input
@@ -388,11 +389,11 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :meth:`Samples.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
+   * Use :attr:`Samples.validDataIterator` to avoid having to check :attr:`SampleIterator.validData`.
    *
    * @param {number} [index] The index of the sample from which the iteration should begin. By default, the iterator begins with the first sample.
    *
-   * @returns {SampleIterator} An iterator to the samples (which implements both iterable and iterator logic).
+   * @returns :class:`SampleIterator` - An iterator to the samples (which implements both iterable and iterator logic).
    */
   get (index) {
     return new SampleIterator(this.input, index)
@@ -406,9 +407,9 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :func:`Samples.validDataIterator` to avoid having to check :meth:`SampleIterator.validData`.
+   * Use :attr:`Samples.validDataIterator` to avoid having to check :attr:`SampleIterator.validData`.
    *
-   * @returns {SampleIterator} An iterator to the samples.
+   * @returns :class:`SampleIterator` An iterator to the samples.
    */
   get dataIterator () {
     return new SampleIterator(this.input)
@@ -700,10 +701,10 @@ class SampleInfo {
 class SampleIterator {
   /**
    * A SampleIterator provides access to the data receieved by an :class:`Input`.
-   * SampleIterators are accessed using :meth:`Input.samples.dataIterator`
+   * SampleIterators are accessed using :attr:`Input.samples.dataIterator`
    * and :meth:`Input.samples.get`.
    *
-   * see :meth:`Samples.dataIterator`
+   * see :attr:`Samples.dataIterator`
    * see :class:`ValidSampleIterator`
    *
    * @property {boolean} validData - Whether or not the current sample contains valid data.
@@ -844,7 +845,7 @@ class SampleIterator {
  * Iterates and provides access to data samples with valid data.
  *
  * This iterator provides the same methods as :class:`SampleIterator`. It can be
- * obtained using :meth:`Input.samples.validDataIterator`.
+ * obtained using :attr:`Input.samples.validDataIterator`.
  * @extends SampleIterator
  *
  * Using this class it is possible to iterator through all valid data samples::
@@ -886,10 +887,11 @@ class Input {
    *
    * To get an Input object, use :meth:`Connector.getInput`.
    *
-   * @property {Connector} connector - The Connector creates this Input
-   * @property {string} name - The name of the Input (the name used in :meth:`Connector.getInput`)
-   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
-   * @property {JSON} matchedPublications - A JSON object containing information about all the publications currently matched with this Input.
+   * Attributes:
+   *  * connector (:class:`Connector`) - The Connector creates this Input
+   *  * name (string) - The name of the Input (the name used in :meth:`Connector.getInput`)
+   *  * native (pointer) - A native handle that allows accessing additional *Connext DDS* APIs in C.
+   *  * matchedPublications (JSON) - A JSON object containing information about all the publications currently matched with this Input.
    */
   constructor (connector, name) {
     this.connector = connector
@@ -941,6 +943,8 @@ class Input {
    *
    * This container provides iterators to access the data samples retrieved by
    * the most-recent call to :meth:`Input.take` and :meth:`Input.read`.
+   *
+   * @type {Samples}
    */
   get samples () {
     return this._samples
@@ -954,9 +958,10 @@ class Input {
    *
    * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
    * for data to be received.
+   *
    * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
-   * @returns {Promise}
+   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected if the timeout expires
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
