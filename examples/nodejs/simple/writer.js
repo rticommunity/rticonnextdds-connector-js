@@ -12,7 +12,7 @@ var path = require('path')
 var fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
+  const connector = new rti.Connector('MyParticipantLibrary::MyPubParticipant', fullpath)
   const output = connector.getOutput('MyPublisher::MySquareWriter')
   try {
     console.log('Waiting for subscriptions...')

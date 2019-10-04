@@ -11,7 +11,7 @@ var path = require('path')
 const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
+  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
   const input = connector.getInput('MySubscriber::MySquareReader')
   try {
     console.log('Waiting for publications...')
