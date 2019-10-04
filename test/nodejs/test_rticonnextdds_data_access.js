@@ -87,9 +87,8 @@ describe('Data access tests with a pre-populated input', function () {
   })
 
   it('getNumber should return a number', () => {
-    console.log('myLong: ' + sample.getValue('my_long'))
     expect(sample.getNumber('my_long')).to.deep.equals(10).and.is.a('number')
-    // expect(sample.getValue('my_long')).to.deep.equals(10).and.is.a('number')
+    expect(sample.getValue('my_long')).to.deep.equals(10).and.is.a('number')
   })
 
   it('getString on a number field should return a string', () => {
@@ -179,7 +178,7 @@ describe('Data access tests with a pre-populated input', function () {
   })
 
   it('unset optional members should not be in JSON objects returned by getJSON', () => {
-    // expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
     const jsonObj = sample.getJson()
     expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
   })

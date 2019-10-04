@@ -3,14 +3,14 @@ Accessing the data
 
 .. testsetup:: *
 
-   import rticonnextdds_connector as rti, time
-   connector = rti.Connector("MyParticipantLibrary::DataAccessTest", "../test/xml/TestConnector.xml")
-   output = connector.get_output("TestPublisher::TestWriter")
-   input = connector.get_input("TestSubscriber::TestReader")
-   output.instance.set_number("my_int_sequence[9]", 10)
-   output.instance.set_number("my_point_sequence[9].x", 10)
-   output.instance.set_number("my_optional_long", 10)
-   output.instance.set_number("my_optional_point.x", 10)
+   var rti = require('rticonnextdds_connector')
+   const connector = new rti.Connector("MyParticipantLibrary::DataAccessTest", "../test/xml/TestConnector.xml")
+   const output = connector.getOutput('TestPublisher::TestWriter')
+   const input = connector.getInput('TestSubscriber::TestReader')
+   output.instance.setNumber('my_int_sequence[9]', 10)
+   output.instance.setNumber('my_point_sequence[9].x', 10)
+   output.instance.setNumber('my_optional_long', 10)
+   output.instance.setNumber('my_optional_point.x', 10)
    output.write()
    input.wait(2000)
    input.take()
@@ -102,22 +102,22 @@ Which corresponds to the following IDL definition::
 We will refer to an ``Output`` named ``output`` and
 ``Input`` named ``input`` such that ``input.samples.length > 0``.
 
-Using dictionaries vs accessing individual members
+Using JSON objects vs accessing individual members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In an Input or an Output you can access the data all at once, using a dictionary,
-or member by member. Using a dictionary is usually more efficient if you intend
+In an Input or an Output you can access the data all at once, using a JSON object,
+or member by member. Using a JSON object is usually more efficient if you intend
 to access most or all of the data members of a large type.
 
-In an Output, :meth:`Instance.set_dictionary` receives a dictionary with all or
-some of the Output type members, and in an Input, :meth:`SampleIterator.get_dictionary`
-retrieves all the members.
+In an Output, :meth:`Instance.setFromJson` receives a JSON object with all, or
+some, of the Output type members, and in an Input, :meth:`SampleIterator.getJson`
+retrieves all of the members.
 
-It is also possible to provide a ``member_name`` to :meth:`SampleIterator.get_dictionary` to obtain
-a dictionary containing the fields of that nested member only.
+It is also possible to provide a ``memberName`` to :meth:`SampleIterator.getJson` to obtain
+a JSON object containing the fields of that nested member only.
 
 On the other hand the methods described in the following section receive a
-``field_name`` argument to get or set a specific member.
+``fieldName`` argument to get or set a specific member.
 
 Accessing basic members (numbers, strings and booleans)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -128,210 +128,200 @@ To set any numeric type, including enumerations:
 
 .. testcode::
 
-    output.instance.set_number("my_long", 2)
-    output.instance.set_number("my_double", 2.14)
-    output.instance.set_number("my_enum", 2)
+    output.instance.setNumber('my_long', 2)
+    output.instance.setNumber('my_double', 2.14)
+    output.instance.setNumber('my_enum', 2)
 
 .. warning::
     The range of values for a numeric field is determined by the type
-    used to define that field in the configuration file. However, ``set_number`` and
-    ``get_number`` can't handle 64-bit integers (*int64* and *uint64*)
+    used to define that field in the configuration file. However, ``setNumber`` and
+    ``getNumber`` can't handle 64-bit integers (*int64* and *uint64*)
     whose absolute values are larger than 2^53. This is a *Connector* limitation
-    due to the use of *double* as an intermediate representation. When ``set_number``
-    or ``get_number`` detect this situation, they raise an :class:`Error`.
-    ``get_dictionary`` and ``set_dictionary`` do not have this limitation and can
-    handle any 64-bit integer. ``Instance``'s ``__setitem__`` method doesn't have
-    this limitation either, but ``SampleIterator``'s ``__getitem__`` does.
+    due to the use of *double* as an intermediate representation. When ``setNumber``
+    or ``getNumber`` detect this situation, they raise an :class:`Error`.
+    ``getJson`` and ``setFromJson`` do not have this limitation and can
+    handle any 64-bit integer. ``Instance``'s ``setValue`` method doesn't have
+    this limitation either, but ``SampleIterator``'s ``getValue`` does.
 
 To set booleans:
 
 .. testcode::
 
-    output.instance.set_boolean("my_boolean", True)
+    output.instance.setBoolean('my_boolean', True)
 
 To set strings:
 
 .. testcode::
 
-    output.instance.set_string("my_string", "Hello, World!")
+    output.instance.setString('my_string', 'Hello, World!')
 
 
-As an alternative to the previous setters, the special method ``__setitem__``
+As an alternative to the previous setters, the special method ``setValue``
 can be used as follows:
 
 .. testcode::
 
-    output.instance["my_double"] = 2.14
-    output.instance["my_boolean"] = True
-    output.instance["my_string"] = "Hello, World!"
+    output.instance.setValue('my_double') = 2.14
+    output.instance.setValue('my_boolean') = true
+    output.instance.setValue('my_string') = 'Hello, World!'
 
 In all cases, the type of the assigned value must be consistent with the type
 of the field as defined in the configuration file.
 
 Similarly, to get a field in a :class:`Input` sample, use the appropriate
-getter: :meth:`SampleIterator.get_number()`, :meth:`SampleIterator.get_boolean()`,
-:meth:`SampleIterator.get_string()`, or ``__getitem__``. ``get_string`` also works
+getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
+:meth:`SampleIterator.getString()`, or :meth:`SampleIterator.getValue()`. ``getString`` also works
 with numeric fields, returning the number as a string. For example:
 
 .. testcode::
 
-    for sample in input.samples.valid_data_iter:
-        value = sample.get_number("my_double")
-        value = sample.get_boolean("my_boolean")
-        value = sample.get_string("my_string")
+    for (let sample of input.samples.validDataIterator) {
+        let value = sample.getNumber('my_double')
+        value = sample.getBoolean('my_boolean')
+        value = sample.getString('my_string')
 
         # or alternatively:
-        value = sample["my_double"]
-        value = sample["my_boolean"]
-        value = sample["my_string"]
+        value = sample.getValue('my_double')
+        value = sample.getValue('my_boolean')
+        value = sample.getValue('my_string')
 
         # get number as string:
-        value = sample.get_string("my_double")
+        value = sample.getString('my_double')
+    }
 
 
 .. note::
-    The typed getters and setters perform better than ``__setitem__``
-    and ``__getitem__`` in applications that write or read at high rates.
-    Also prefer ``get_dictionary`` or ``set_dictionary`` over ``__setitem__``
-    or ``__getitem__`` when accessing all or most of the fields of a sample
+    The typed getters and setters perform better than ``setValue``
+    and ``getVa;ue`` in applications that write or read at high rates.
+    Also prefer ``getJson`` and ``setFromJson`` over ``setValue``
+    and ``getValue`` when accessing all or most of the fields of a sample
     (see previous section).
 
 .. note::
     If a field *my_string*, defined as a string in the configuration file contains
-    a value that can be interpreted as a number, ``sample["my_string"]`` returns
+    a value that can be interpreted as a number, ``sample.getValue('my_string')`` returns
     a number, not a string.
 
 Accessing structs
 ^^^^^^^^^^^^^^^^^
 
-To access a nested member, use ``.`` to identify the fully-qualified ``field_name``
+To access a nested member, use ``.`` to identify the fully-qualified ``fieldName``
 and pass it to the corresponding setter or getter.
 
 .. testcode::
 
-    output.instance.set_number("my_point.x", 10)
-    output.instance.set_number("my_point.y", 20)
-
-    # alternatively:
-    output.instance["my_point.x"] = 10
-    output.instance["my_point.y"] = 20
+    output.instance.set_number('my_point.x', 10)
+    output.instance.set_number('my_point.y', 20)
 
 It is possible to reset the value of a complex member back to its default:
 
 .. testcode::
 
-    output.instance.clear_member("my_point") # x and y are now 0
+    output.instance.clearMember('my_point') # x and y are now 0
 
-Structs in dictionaries are set as follows:
+Structs are set via JSON objects as follows:
 
 .. testcode::
 
-    output.instance.set_dictionary({"my_point":{"x":10, "y":20}})
+    output.instance.setFromJson({ 'my_point': { 'x':10, 'y':20 } })
 
 When an member of a struct is not set, it retains its previous value. If we run
-the following code after the previous call to ``set_dictionary``:
+the following code after the previous call to ``setFromJson``:
 
 .. testcode::
 
-    output.instance.set_dictionary({"my_point":{"y":200}})
+    output.instance.setFromJson({ 'my_point': {' y': 200 } })
 
-The value of ``my_point`` is now ``{"x":10, "y":200}``
+The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``
 
-It is possible to obtain the dictionary of a nested struct using
-`SampleIterator.get_dictionary("member_name")`:
+It is possible to obtain the JSON object of a nested struct using
+`SampleIterator.getJson('memberName')`:
 
 .. testcode::
 
-   for sample in input.samples.valid_data_iter:
-      point = sample.get_dictionary("my_point")
+   for (let sample of input.samples.validDataIterator) {
+      let point = sample.getJson('my_point')
+   }
 
-``member_name`` must be one of the following types: array, sequence,
+``memberName`` must be one of the following types: array, sequence,
 struct, value or union. If not, the call to get_dictionary will fail:
 
 .. testcode::
 
-   # for sample in input.samples.valid_data_iter:
-      # long = sample.get_dictionary("my_long") # ERROR, the_long is a basic type
+   # for (let sample of input.samples.validDataIterator) {
+      # let long = sample.getJson('my_long') # ERROR, the_long is a basic type
+   }
 
-It is also possible to obtain the dictionary of a struct using the ``__getitem__``
-operator:
+It is also possible to obtain the dictionary of a struct using the :meth:`Sample.getValue`
+method:
 
 .. testcode::
 
-    for sample in input.samples.valid_data_iter:
-        point = sample["my_point"]
-        # point is a dict
+    for (let sample of input.samples.validDataIterator) {
+        let point = sample.getValue('my_point')
+        # point is a JSON object
+   }
 
 The same limitations described in :ref:`Accessing basic members (numbers, strings and booleans)`
-of using ``__getitem__`` apply here.
+of using :meth:`Sample.getValue` apply here.
 
 Accessing arrays and sequences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use ``"field_name[index]"`` to access an element of a sequence or array,
+Use ``"fieldName[index]"`` to access an element of a sequence or array,
 where ``0 <= index < length``:
 
 .. testcode::
 
-    value = input.samples[0].get_number("my_int_sequence[1]")
-    value = input.samples[0].get_number("my_point_sequence[2].y")
+    value = input.samples.get(0).getNumber('my_int_sequence[1]')
+    value = input.samples.get(0).getNumber('my_point_sequence[2].y')
 
-Another option is to use ``SampleIterator.get_dictionary("field_name")`` to obtain
-a dictionary containing all of the elements of the array or sequence with name ``field_name``:
+Another option is to use ``SampleIterator.getJson('fieldName')`` to obtain
+a JSON object containing all of the elements of the array or sequence with name ``fieldName``:
 
 .. testcode::
 
-    for sample in input.samples.valid_data_iter:
-        the_point_sequence = sample.get_dictionary("my_point_sequence")
+    for (let sample of input.samples.validDataIterator) {
+        let thePointSequence = sample.getJson('my_point_sequence')
+    }
 
-It is also possible to supply ``member_name`` as an element of an array (if the
+It is also possible to supply ``memberName`` as an element of an array (if the
 type of the array is complex):
 
 .. testcode::
 
-   for sample in input.samples.valid_data_iter:
-      point_element = sample.get_dictionary("my_point_sequence[1]")
-
-The ``__getitem__`` operator can be used to obtain arrays and sequences:
-
-.. testcode::
-
-    for sample in input.samples.valid_data_iter:
-        point_sequence = sample["my_point_sequence"]
-        # point is a list
-
-The type returned by the ``__getitem__`` operator is a list for arrays and sequences.
-
-The same limitations described in :ref:`Accessing basic members (numbers, strings and booleans)`
-of using ``__getitem__`` apply here.
+   for (let sample of input.samples.validDataIterator) {
+      let pointElement = sample.getJson('my_point_sequence[1]')
+   }
 
 In an Output, sequences are automatically resized:
 
 .. testcode::
 
-    output.instance.set_number("my_int_sequence[5]", 10) # length is now 6
-    output.instance.set_number("my_int_sequence[4]", 9) # length still 6
+    output.instance.setNumber('my_int_sequence[5]', 10) # length is now 6
+    output.instance.setNumber('my_int_sequence[4]', 9) # length still 6
 
 You can clear a sequence:
 
 .. testcode::
 
-    output.instance.clear_member("my_int_sequence") # my_int_sequence is now empty
+    output.instance.clearSequence('my_int_sequence') # my_int_sequence is now empty
 
 To get the length of a sequence in an Input sample:
 
 .. testcode::
 
-    length = input.samples[0].get_number("my_int_sequence#")
+    let length = input.samples[0].getNumber('my_int_sequence#')
 
 
-In dictionaries, sequences and arrays are represented as lists. For example:
+In JSON objects, sequences and arrays are represented as lists. For example:
 
 .. testcode::
 
-    output.instance.set_dictionary({
-        "my_int_sequence":[1, 2],
-        "my_point_sequence":[{"x":1, "y":1}, {"x":2, "y":2}]})
+    output.instance.setFromJson({
+        my_int_sequence: [1, 2],
+        my_point_sequence: [{ x: 1, y: 1 }, { x: 2, y: 2 }]
+        })
 
 Arrays have a constant length that can't be changed. When you don't set all the elements
 of an array, the remaining elements retain their previous value. However, sequences
@@ -339,51 +329,53 @@ are always overwritten. See the following example:
 
 .. testcode::
 
-    output.instance.set_dictionary({
-        "my_point_sequence":[{"x":1, "y":1}, {"x":2, "y":2}],
-        "my_point_array":[{"x":1, "y":1}, {"x":2, "y":2}, {"x":3, "y":3}]})
+    output.instance.setFromJson({
+        my_point_sequence: [{ x: 1, y: 1 }, { x: 2, y: 2 }],
+        my_point_array: [{ x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }] })
 
-    output.instance.set_dictionary({
-        "my_point_sequence":[{"x":100}],
-        "my_point_array":[{"x":100}, {"y":200}]})
+    output.instance.setFromJson({
+        my_point_sequence: [{ x: 100 }],
+        my_point_array: [{ x: 100}, { y: 200}] })
 
-After the second call to ``set_dictionary``, the contents of ``my_point_sequence``
-are ``[{"x":100, "y":0}]``, but the contents of ``my_point_array`` are:
-``[{"x":100, "y":1}, {"x":2, "y":200}, {"x":3, "y":3}]``.
+After the second call to ``setFromJson``, the contents of ``my_point_sequence``
+are ``[{ x: 100, y: 0 }]``, but the contents of ``my_point_array`` are:
+``[{ x: 100, y: 1 }, { x: 2, y: 200 }, {x: 3, y: 3 }]``.
 
 Accessing optional members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A optional member is a member that applications can decide to send or not as
 part of every published sample. Therefore, optional members may have a value or not.
-They are accessed the same way as non-optional members, except that ``None`` is
+They are accessed the same way as non-optional members, except that ``null`` is
 a possible value.
 
-On an Input, any of the getters may return ``None`` if the field is optional:
+On an Input, any of the getters may return ``null`` if the field is optional:
 
 .. testcode::
 
-    if input.samples[0].get_number("my_optional_long") is None:
-        print("my_optional_long not set")
+    if (input.samples.get(0).getNumber('my_optional_long') == null) {
+        console.log('my_optional_long not set')
+    }
 
-    if input.samples[0].get_number("my_optional_point.x") is None:
-        print("my_optional_point not set")
+    if (input.samples.get(0).getNumber('my_optional_point.x') == null) {
+        console.log('my_optional_point not set')
+    }
 
-:meth:`SampleIterator.get_dictionary()` returns a dictionary that doesn't include unset
+:meth:`SampleIterator.getJson()` returns a JSON object that doesn't include unset
 optional members.
 
 To set an optional member on an Output:
 
 .. testcode::
 
-    output.instance.set_number("my_optional_long", 10)
+    output.instance.setNumber('my_optional_long', 10)
 
 If the type of the optional member is not primitive, when any of its members is
 first set, the rest are initialized to their default values:
 
 .. testcode::
 
-    output.instance.set_number("my_optional_point.x", 10)
+    output.instance.setNumber('my_optional_point.x', 10)
 
 If ``my_optional_point`` was not previously set, the previous code also sets
 ``y`` to 0.
@@ -392,26 +384,26 @@ There are several ways to reset an optional member. If the type is primitive:
 
 .. testcode::
 
-    output.instance.set_number("my_optional_long", None) # Option 1
-    output.instance.clear_member("my_optional_long") # Option 2
+    output.instance.setNumber('my_optional_long', null) # Option 1
+    output.instance.clearMember('my_optional_long') # Option 2
 
 If the member type is complex:
 
 .. testcode::
 
-    output.instance.clear_member("my_optional_point")
+    output.instance.clearMember('my_optional_point')
 
-Note that :meth:`Instance.set_dictionary()` doesn't clear those members that are
+Note that :meth:`Instance.setFromJson()` doesn't clear those members that are
 not specified; their value remains. For example:
 
 .. testcode::
 
-    output.instance.set_number("my_optional_long", 5)
-    output.instance.set_dictionary({'my_double': 3.3, 'my_long': 4}) # my_optional_long is still 5
+    output.instance.setNumber('my_optional_long', 5)
+    output.instance.setFormJson({ my_double: 3.3, my_long: 4 }) # my_optional_long is still 5
 
-To clear a member, set it to ``None`` explicitly::
+To clear a member, set it to ``null`` explicitly::
 
-    output.instance.set_dictionary({'my_double': 3.3, 'my_long': 4, 'my_optional_long': None})
+    output.instance.setFromJson({ my_double: 3.3, my_long: 4, my_optional_long: null })
 
 
 For more information about optional members in DDS, see the *Getting Started Guide
@@ -425,28 +417,16 @@ In an Output the union member is automatically selected when you set it:
 
 .. testcode::
 
-    output.instance.set_number("my_union.point.x", 10)
+    output.instance.setNumber('my_union.point.x', 10)
 
 You can change it later:
 
 .. testcode::
 
-    output.instance.set_number("my_union.my_long", 10)
+    output.instance.setNumber('my_union.my_long', 10)
 
 In an Input, you can obtain the selected member as a string::
 
-    if input.samples[0].get_string("my_union#") == "point":
-        value = input.samples[0].get_number("my_union.point")
-
-The ``__getitem__`` operator can be used to obtain unions:
-
-.. testcode::
-
-    for sample in input.samples.valid_data_iter:
-        union = sample["my_union"]
-        # union is a dict
-
-The type returned by the operator is a dict for unions.
-
-The same limitations described in :ref:`Accessing basic members (numbers, strings and booleans)`
-of using ``__getitem__`` apply here.
+    if (input.samples.get(0).getString('my_union#') == 'point') {
+        value = input.samples.get(0).getNumber('my_union.point')
+    }
