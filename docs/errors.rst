@@ -7,24 +7,21 @@ Error Handling
 :class:`rticonnextdds_connector.DDSError`. This exception may contain a description
 of the error.
 
-A subclass, :class:`TimeoutError`, indicates that an operation that can block
+A subclass, :class:`rticonnextdds_connector.TimeoutError`, indicates that an operation that can block
 has timed out.
 
-Other errors may be raised as ``TypeError``, ``ValueError``, ``AttributeError``,
-or other built-in Python exceptions.
+Other errors may be raised as ``Error``, ``TypeError``, or other built-in Node.js exceptions.
 
-Class reference: Error, TimeoutError
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Class reference: DDSError, TimeoutError
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Error class
 ^^^^^^^^^^^
 
 .. autoclass:: DDSError
-   :members:
 
 
 TimeoutError class
 ^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: TimeoutError
-   :members:

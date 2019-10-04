@@ -249,7 +249,7 @@ struct, value or union. If not, the call to get_dictionary will fail:
 .. testcode::
 
    # for (let sample of input.samples.validDataIterator) {
-      # let long = sample.getJson('my_long') # ERROR, the_long is a basic type
+      # let long = sample.getJson('my_long') # ERROR, my_long is a basic type
    }
 
 It is also possible to obtain the dictionary of a struct using the :meth:`Sample.getValue`

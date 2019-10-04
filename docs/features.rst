@@ -44,11 +44,11 @@ General features
 
         * Batch - fully supported except that manual flushing is not available
         * Entity Factory - *autoenable_created_entities* can be set to *false* only for a *subscriber*, in
-          order to enable an `Input` only when :meth:`Connector.get_input` is called.
+          order to enable an `Input` only when :meth:`Connector.getInput` is called.
         * Property - Properties can be set in XML, but they can't be looked up in Connector
    * - `Entity Statuses <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Statuses.htm>`__
      - Partial
-     - Only :meth:`Input.wait` (data available), :meth:`Input.wait_for_publications`, :meth:`Output.wait_for_subscriptions` are supported
+     - Only :meth:`Input.wait` (data available), :meth:`Input.waitForPublications`, :meth:`Output.waitForSubscriptions` are supported
    * - `Managing Data Instances <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Managing_Data_Instances__Working_with_Ke.htm>`__
      - Partial
      - It is possible to dispose or unregister an instance (see :meth:`Output.write`), and instances are automatically registered when first written, but on the ``Input`` side, the instance status is not currently exposed. Instance handles are not exposed.
@@ -216,4 +216,3 @@ Features related to the type system
    * - `FlatData Language Binding <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SendingLDFlatData.htm%3FTocPath%3DPart%25203%253A%2520Advanced%2520Concepts%7C22.%2520Sending%2520Large%2520Data%7C22.4%2520FlatData%2520Language%2520Binding%7C_____0>`__
      - Not supported
      - However, an ``Input`` can receive data published by other *RTI Connext DDS* applications that use FlatData
-
