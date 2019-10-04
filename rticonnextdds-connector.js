@@ -564,14 +564,16 @@ class Samples {
    * @returns {number|string|boolean|JSON} The value of the field.
    */
   getValue (index, fieldName) {
-    if (!_isString(fieldName)) {
+    if (!_isValidIndex(index)) {
+      throw new TypeError('index must be an integer')
+    } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
       return _getAnyValue(
         connectorBinding.api.RTI_Connector_get_any_from_sample,
         this.input.connector.native,
         this.input.name,
-        this.index,
+        index,
         fieldName)
     }
   }
