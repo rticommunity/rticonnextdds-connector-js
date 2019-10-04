@@ -971,7 +971,8 @@ class Input {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
-      } else if (this.waitsetBusy) {
+      }
+      if (this.waitsetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitsetBusy = true
@@ -1013,7 +1014,8 @@ class Input {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
-      } else if (this.waitsetBusy) {
+      }
+      if (this.waitsetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitsetBusy = true
@@ -1323,19 +1325,18 @@ class Output {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
-      } else {
-        connectorBinding.api.RTI_Connector_wait_for_acknowledgments.async(
-          this.native,
-          timeout,
-          (err, res) => {
-            if (err) {
-              reject(err)
-            }
-            _checkRetcode(res)
-            resolve()
-          }
-        )
       }
+      connectorBinding.api.RTI_Connector_wait_for_acknowledgments.async(
+        this.native,
+        timeout,
+        (err, res) => {
+          if (err) {
+            reject(err)
+          }
+          _checkRetcode(res)
+          resolve()
+        }
+      )
     })
   }
 
@@ -1358,7 +1359,8 @@ class Output {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
-      } else if (this.waitsetBusy) {
+      }
+      if (this.waitsetBusy) {
         throw new Error('Can not concurrently wait on the same Output')
       } else {
         const currentChangeCount = ref.alloc('int')
@@ -1597,7 +1599,8 @@ class Connector extends EventEmitter {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
-      } else if (this.onDataAvailableRun) {
+      }
+      if (this.onDataAvailableRun) {
         throw new Error('Can not concurrently wait on the same Connector object')
       }
       this.onDataAvailableRun = true

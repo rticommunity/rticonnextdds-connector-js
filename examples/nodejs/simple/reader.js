@@ -8,59 +8,35 @@
 
 var rti = require('rticonnextdds-connector')
 var path = require('path')
-
 const fullpath = path.join(__dirname, '/../ShapeExample.xml')
+
 const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
 const input = connector.getInput('MySubscriber::MySquareReader')
 
-const printNewMatches = (input, newMatches) => {
-  console.log('Matched with ' + newMatches + ' publication(s):')
-  input.matchedPublications.forEach((match) => {
-    console.log(match.name)
-  })
-}
-
-const printNewData = (input) => {
-  for (var sample of input.samples.validDataIterator) {
-    console.log(JSON.stringify(sample.getJson()))
-  }
-  const otherSample = input.samples.validDataIterator.iterator()
-  for (var i = 0; i < input.samples.length; i++) {
-    console.log('otherSample: ' + otherSample)
-    console.log(JSON.stringify(sample.getJson()))
-    otherSample.next()
-  }
-}
-
-const waitForDiscovery = async (input) => {
+const run = async () => {
   try {
-    const newMatches = await input.waitForPublications(5000)
-    printNewMatches(input, newMatches)
-    return newMatches
-  } catch (err) {
-    console.log('Error whilst waiting for discovery: ' + err)
-  }
-}
+    console.log('Waiting for publications...')
+    await input.waitForPublications()
 
-const getData = async (input) => {
-  try {
-    await input.wait(5000)
-    input.take()
-  } catch (err) {
-    console.log('Error whilst waiting for data: ' + err)
-  }
-}
+    console.log('Waiting for data...')
+    for (let i = 0; i < 500; i++) {
+      await input.wait()
+      input.take()
+      for (const sample of input.samples.validDataIterator) {
+        // You can obtain all the fields as a JSON object
+        const data = sample.getJson()
+        const x = data.x
+        const y = data.y
+        // Or you can access each field individually
+        const size = sample.getNumber('shapesize')
+        const color = sample.getString('color')
 
-const run = async (input) => {
-  try {
-    await waitForDiscovery(input)
-    for (;;) {
-      await getData(input)
-      printNewData(input)
+        console.log('Received x: ' + x + ', y: ' + y + ', shapesize: ' + size + ', color: ' + color)
+      }
     }
   } catch (err) {
-    console.log('Caught error: ' + err)
+    console.log('Error encountered: ' + err)
   }
 }
 
-run(input)
+run()

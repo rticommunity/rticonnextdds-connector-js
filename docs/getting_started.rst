@@ -53,12 +53,12 @@ And, in another shell, run the writer:
 This is how ``reader.js`` looks like:
 
 .. literalinclude:: ../examples/nodejs/simple/reader.js
-    :lines: 13-
+    :lines: 17-39
 
 And this is ``writer.py``:
 
 .. literalinclude:: ../examples/nodejs/simple/writer.js
-    :lines: 13-
+    :lines: 18-38
 
 You can run the reader and the writer in any order, and you can run multiple
 instances of each at the same time. You can also run any other *DDS* application
