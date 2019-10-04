@@ -55,7 +55,7 @@ This is how ``reader.js`` looks like:
 .. literalinclude:: ../examples/nodejs/simple/reader.js
     :lines: 17-39
 
-And this is ``writer.py``:
+And this is ``writer.js``:
 
 .. literalinclude:: ../examples/nodejs/simple/writer.js
     :lines: 18-38

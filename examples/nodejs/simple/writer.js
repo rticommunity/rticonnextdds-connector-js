@@ -11,10 +11,9 @@ var rti = require('rticonnextdds-connector')
 var path = require('path')
 var fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
-const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
-const output = connector.getOutput('MyPublisher::MySquareWriter')
-
 const run = async () => {
+  const connector = new rti.Connector('MyParticipantLibrary::Zero', fullpath)
+  const output = connector.getOutput('MyPublisher::MySquareWriter')
   try {
     console.log('Waiting for subscriptions...')
     await output.waitForSubscriptions()
