@@ -252,7 +252,7 @@ describe('Discovery tests', () => {
     expect(matches.length).to.deep.equals(1)
     expect(matches).to.deep.include.members([{ name: 'TestReader' }])
     try {
-      changesInMatches = await input.waitForPublications(100)
+      changesInMatches = await input.waitForPublications(1000)
     } catch (err) {
       // Fail the test
       expect(false).to.deep.equals(true)
@@ -306,7 +306,7 @@ describe('Discovery tests', () => {
     expect(matches.length).to.deep.equals(1)
     expect(matches).to.deep.include.members([{ name: 'TestWriter' }])
     try {
-      changesInMatches = await output.waitForSubscriptions(100)
+      changesInMatches = await output.waitForSubscriptions(1000)
     } catch (err) {
       // Fail the test
       expect(false).to.deep.equals(true)
