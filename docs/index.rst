@@ -1,7 +1,6 @@
 .. rticonnextdds-connector-js
 
-.. image:: static/js-logo.png
-    :align: left
+.. Legal recommended not to include the Node.js logo in these docs (so we don't)
 
 Welcome to RTI Connector for Node.js!
 =====================================
