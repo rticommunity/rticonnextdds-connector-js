@@ -3,7 +3,7 @@ Writing data (Output)
 
 .. testsetup:: *
 
-   var rti = require('rticonnextdds_connector')
+   const rti = require('rticonnextdds_connector')
    const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
 
 Getting the Output

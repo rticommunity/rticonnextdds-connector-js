@@ -6,12 +6,12 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var os = require('os')
-var ref = require('ref')
-var ffi = require('ffi')
-var path = require('path')
-var StructType = require('ref-struct')
-var EventEmitter = require('events').EventEmitter
+const os = require('os')
+const ref = require('ref')
+const ffi = require('ffi')
+const path = require('path')
+const StructType = require('ref-struct')
+const EventEmitter = require('events').EventEmitter
 
 /**
  * The Node.js representation of the RTI_Connector_Options structure within

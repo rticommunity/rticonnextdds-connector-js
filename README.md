@@ -97,14 +97,14 @@ You can find several sets of examples in the [examples/nodejs](examples/nodejs) 
 To use `rticonnextdds-connector`, require it as follows:
 
 ```js
-var rti = require('rticonnextdds-connector');
+const rti = require('rticonnextdds-connector');
 ```
 
 #### instantiate a new *Connector*
 To create a new *Connector*, pass an XML file and a configuration name:    
 
 ```js
-var connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
+const connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
 ```
 For more information on
 the XML format, see the [XML-Based Application Creation Getting Started Guide](https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/xml_application_creation/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted.pdf) or
@@ -114,7 +114,7 @@ look at the [ShapeExample.xml](examples/nodejs/ShapeExample.xml) file included i
 To destroy all the DDS entities that belong to a *Connector* previously created, call the ```delete``` function:
 
 ```js
-var connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
+const connector = new rti.Connector("MyParticipantLibrary::Zero","./ShapeExample.xml");
 ...
 ...
 connector.delete();
@@ -124,7 +124,7 @@ connector.delete();
 To write a sample, first get a reference to the output port:
 
 ```js
-var output = connector.getOutput("MyPublisher::MySquareWriter");
+const output = connector.getOutput("MyPublisher::MySquareWriter");
 ```
 
 Then set the instance's fields:
@@ -169,7 +169,7 @@ output.setFromJSON(jsonObj)
 To read/take samples, first get a reference to the input port:
 
 ```js
-var input = connector.getInput("MySubscriber::MySquareReader");
+const input = connector.getInput("MySubscriber::MySquareReader");
 ```
 
 Then call the `read()` or `take()` API:

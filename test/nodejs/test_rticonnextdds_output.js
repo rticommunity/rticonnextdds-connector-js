@@ -6,9 +6,9 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var expect = require('chai').expect
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
+const path = require('path')
+const expect = require('chai').expect
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally

@@ -3,7 +3,7 @@ Accessing the data
 
 .. testsetup:: *
 
-   var rti = require('rticonnextdds_connector')
+   const rti = require('rticonnextdds_connector')
    const connector = new rti.Connector("MyParticipantLibrary::DataAccessTest", "../test/xml/TestConnector.xml")
    const output = connector.getOutput('TestPublisher::TestWriter')
    const input = connector.getInput('TestSubscriber::TestReader')

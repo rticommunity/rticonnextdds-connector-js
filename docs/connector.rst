@@ -9,7 +9,7 @@ To use the ``rticonnextdds_connector`` package, require it. For example:
 
 .. testcode::
 
-   var rti = require('rticonnextdds-connector')
+   const rti = require('rticonnextdds-connector')
 
 Creating a new Connector
 ~~~~~~~~~~~~~~~~~~~~~~~~
