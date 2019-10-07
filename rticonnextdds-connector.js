@@ -1264,11 +1264,15 @@ class Output {
    *
    * This method accepts an optional JSON object as a parameter, that may specify the
    * parameters to use in the `write` call.
-   * The supported parameters are a subset of those  documented in the `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__.
-   * of the *Connext DDS Core Libraries* User's Manual.
+   * The supported parameters are a subset of those documented in the `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
+   * of the *Connext DDS Core Libraries* User's Manual. These are:
    *
-   * @param {JSON} [params] The Write Parameters to use in the `write` call.
+   * * ``action`` – One of ``"write"`` (default), ``"dispose"`` or ``"unregister"``
+   * * ``source_timestamp`` – An integer representing the total number of nanoseconds
+   * * ``identity`` – A JSON object containing the fields ``"writer_guid"`` and ``"sequence_number"``
+   * * ``related_sample_identity`` – Used for request-reply communications. It has the same format as identity
    *
+   * @param {JSON} [params] [Optional] The Write Parameters to use in the `write` call. Filled in by Connector by default.
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
    * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
    */
