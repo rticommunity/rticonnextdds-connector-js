@@ -87,5 +87,4 @@ Class reference: Connector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: Connector
-
    :members:

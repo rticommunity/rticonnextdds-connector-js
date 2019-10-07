@@ -1238,7 +1238,7 @@ class Output {
    *
    * Attributes:
    *  * ``instance`` (:class:`Instance`) - The data that is written when :meth:`Output.write` is called.
-   *  * ``connector`` ():class:`Connector`) - The Connector that created this object.
+   *  * ``connector`` (:class:`Connector`) - The Connector that created this object.
    *  * ``string`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`)
    *  * ``native`` (pointer) - The native handle that allows accessing additional *Connext DDS* APIs in C.
    *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions.
