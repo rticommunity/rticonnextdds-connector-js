@@ -511,23 +511,25 @@ describe('Tests with a testOutput and testInput', () => {
     expect(theNumericString).to.be.a('number').and.deep.equals(1234)
   })
 
-  it('Test output sequences', () => {
+  it('Test output sequences', async () => {
     testOutput.instance.setNumber('my_point_sequence[0].y', 20)
     testOutput.instance.setNumber('my_int_sequence[1]', 2)
     testOutput.instance.setNumber('my_point_array[4].x', 5)
     testOutput.write()
-    testInput.wait(2000).then(() => {
-      testInput.take()
-      const sample = testInput.samples.get(0)
-      expect(sample.getValue('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
-      expect(sample.getValue('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
-      expect(sample.getValue('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
-      expect(sample.getValue('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
-      expect(sample.getValue('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
-    }).catch(() => {
+    try {
+      await testInput.wait(2000)
+    } catch (err) {
       // Fail the test
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
-    })
+    }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    expect(sample.getValue('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
+    expect(sample.getValue('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
+    expect(sample.getValue('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
+    expect(sample.getValue('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
+    expect(sample.getValue('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
   })
 
   it('Change union members', async () => {
@@ -537,6 +539,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(2000)
     } catch (err) {
       // Fail the test
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -550,6 +553,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(2000)
     } catch (err) {
       // Fail the test
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
