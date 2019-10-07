@@ -178,7 +178,7 @@ describe('Data access tests with a pre-populated input', function () {
   })
 
   it('unset optional members should not be in JSON objects returned by getJSON', () => {
-    // expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
     const jsonObj = sample.getJson()
     expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
   })
