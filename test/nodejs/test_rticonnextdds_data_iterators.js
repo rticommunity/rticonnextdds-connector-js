@@ -19,6 +19,10 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+
 describe('Test the iteration of Input Samples', () => {
   const expectedSampleCount = 4 // one of which is a dispose
   const expectedData = [
@@ -61,7 +65,7 @@ describe('Test the iteration of Input Samples', () => {
 
     // Wait for the entities to match
     try {
-      const newMatches = await input.waitForPublications(2000)
+      const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
       expect(newMatches).to.be.at.least(1)
     } catch (err) {
       // Fail the test
@@ -79,7 +83,7 @@ describe('Test the iteration of Input Samples', () => {
     // Read on the input until we have all 3 samples
     for (let i = 0; i < 20; i++) {
       try {
-        await input.wait(500)
+        await input.wait(testExpectSuccessTimeout)
         input.read()
         if (input.samples.length === expectedSampleCount) {
           break

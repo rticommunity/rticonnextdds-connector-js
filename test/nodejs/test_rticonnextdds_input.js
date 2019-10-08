@@ -21,6 +21,13 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+// We provide a much shorter timeout to operations that we expect to timeout.
+// This is to prevent us from hanging the tests for 10s
+const testExpectFailureTimeout = 500
+
 describe('Input Tests', function () {
   let connector = null
   // Initialization before all tests are executed
@@ -72,7 +79,7 @@ describe('Subscriber not automatically enabled tests', () => {
     expect(output).to.exist
     // The input is not automatically enabled in this QoS profile, meaning the
     // output should not match with it
-    return expect(output.waitForSubscriptions(200)).to.be.rejectedWith(rti.TimeoutError)
+    return expect(output.waitForSubscriptions(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
   })
 
   it('Calling getInput should enable the input', (done) => {
@@ -80,7 +87,7 @@ describe('Subscriber not automatically enabled tests', () => {
     expect(output).to.exist
     connector.getInput('TestSubscriber::TestReader')
 
-    expect(output.waitForSubscriptions(2000)).to.eventually.become(1).notify(done)
+    expect(output.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1).notify(done)
   })
 })
 

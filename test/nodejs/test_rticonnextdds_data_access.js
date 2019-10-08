@@ -21,6 +21,13 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+// We provide a much shorter timeout to operations that we expect to timeout.
+// This is to prevent us from hanging the tests for 10s
+const testExpectFailureTimeout = 500
+
 // These tests test the different wats to access data in Instance and SampleIterator
 describe('Data access tests with a pre-populated input', function () {
   let connector = null
@@ -57,9 +64,10 @@ describe('Data access tests with a pre-populated input', function () {
 
     // Wait for the input and output to dicovery each other
     try {
-      const matches = await output.waitForSubscriptions(2000)
+      const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
       expect(matches).to.be.at.least(1)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }
@@ -68,8 +76,9 @@ describe('Data access tests with a pre-populated input', function () {
     output.write()
     // Wait for data to arrive on input
     try {
-      await prepopulatedInput.wait(2000)
+      await prepopulatedInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }
@@ -446,8 +455,9 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -486,8 +496,9 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_bool', 1)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -500,8 +511,9 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setString('my_string', '1234')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -517,7 +529,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_array[4].x', 5)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -536,7 +548,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -550,7 +562,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -566,10 +578,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -579,7 +591,12 @@ describe('Tests with a testOutput and testInput', () => {
     // Change the union
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    await testInput.wait(2000)
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(false).to.deep.equals(true)
+    }
     testInput.take()
     sample = testInput.samples.get(0)
     expect(sample.getString('my_union#')).to.deep.equals('my_long')
@@ -591,10 +608,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_alias.x', 202)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -608,10 +625,10 @@ describe('Tests with a testOutput and testInput', () => {
   it('Get an unset optional boolean', async () => {
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -624,7 +641,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_long', null)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -643,7 +660,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setBoolean('my_optional_bool', null)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -664,7 +681,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_point_alias')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -688,7 +705,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_union.my_int_sequence')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -720,7 +737,7 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -758,7 +775,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_sequence[1].x', 44)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -773,7 +790,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setFromJson({ my_int_sequence: [] })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -809,7 +826,7 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -850,8 +867,8 @@ describe('Tests with two readers and two writers', () => {
     expect(testOutput2).to.exist
 
     // Wait for the input and output to dicovery each other
-    expect(testOutput1.waitForSubscriptions(2000)).to.eventually.become(1)
-    expect(testOutput2.waitForSubscriptions(2000)).to.eventually.become(1)
+    expect(testOutput1.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1)
+    expect(testOutput2.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1)
   })
 
   afterEach(async () => {
@@ -864,42 +881,42 @@ describe('Tests with two readers and two writers', () => {
   // Since we have not written any data, all different forms of wait for data
   // should timeout
   it('waiting for data on connector should timeout', () => {
-    return expect(connector.waitForData(500)).to.be.rejectedWith(rti.TimeoutError)
+    return expect(connector.waitForData(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
   })
   it('waiting for data on testInput should timeout', () => {
-    return expect(testInput1.wait(500)).to.be.rejectedWith(rti.TimeoutError)
+    return expect(testInput1.wait(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
   })
   it('waiting for data on testInput2 should timeout', () => {
-    return expect(testInput2.wait(500)).to.be.rejectedWith(rti.TimeoutError)
+    return expect(testInput2.wait(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
   })
 
   it('Writing data on a testOutput1 should wake up connector.waitForData', () => {
     testOutput1.write()
-    return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+    return expect(connector.waitForData(testExpectSuccessTimeout)).to.eventually.be.fulfilled
   })
 
   it('Writing data on a testOutput1 should wake up testInput1.wait', () => {
     testOutput1.write()
-    return expect(testInput1.wait(500)).to.eventually.be.fulfilled
+    return expect(testInput1.wait(testExpectSuccessTimeout)).to.eventually.be.fulfilled
   })
 
   it('Writing data on a testOutput1 should not wake up testInput2.wait', () => {
     testOutput1.write()
-    return expect(testInput2.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    return expect(testInput2.wait(testExpectFailureTimeout)).to.eventually.be.rejectedWith(rti.TimeoutError)
   })
 
   it('Writing data on a testOutput2 should wake up connector.waitForData', () => {
     testOutput2.write()
-    return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+    return expect(connector.waitForData(testExpectSuccessTimeout)).to.eventually.be.fulfilled
   })
 
   it('Writing data on a testOutput2 should wake up testInput2.wait', () => {
     testOutput2.write()
-    return expect(testInput2.wait(500)).to.eventually.be.fulfilled
+    return expect(testInput2.wait(testExpectSuccessTimeout)).to.eventually.be.fulfilled
   })
 
   it('Writing data on a testOutput2 should not wake up testInput1.wait', () => {
     testOutput2.write()
-    return expect(testInput1.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    return expect(testInput1.wait(testExpectFailureTimeout)).to.eventually.be.rejectedWith(rti.TimeoutError)
   })
 })
