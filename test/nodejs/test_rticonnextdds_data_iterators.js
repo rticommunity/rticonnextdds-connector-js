@@ -114,7 +114,7 @@ describe('Test the iteration of Input Samples', () => {
         expect(sample.getNumber('y')).to.deep.equals(expectedData[count].y)
         expect(sample.getBoolean('z')).to.deep.equals(expectedData[count].z)
         expect(sample.getString('color')).to.deep.equals(expectedData[count].color)
-        expect(sample.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
+        expect(sample.get('shapesize')).to.deep.equals(expectedData[count].shapesize)
       }
       count++
     }
@@ -136,7 +136,7 @@ describe('Test the iteration of Input Samples', () => {
         expect(singleSample.getNumber('y')).to.deep.equals(expectedData[count].y)
         expect(singleSample.getBoolean('z')).to.deep.equals(expectedData[count].z)
         expect(singleSample.getString('color')).to.deep.equals(expectedData[count].color)
-        expect(singleSample.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
+        expect(singleSample.get('shapesize')).to.deep.equals(expectedData[count].shapesize)
       } else {
         expect(singleSample.validData).to.deep.equals(false)
       }
@@ -152,7 +152,7 @@ describe('Test the iteration of Input Samples', () => {
       expect(sample.getNumber('y')).to.deep.equals(expectedData[count].y)
       expect(sample.getBoolean('z')).to.deep.equals(expectedData[count].z)
       expect(sample.getString('color')).to.deep.equals(expectedData[count].color)
-      expect(sample.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
+      expect(sample.get('shapesize')).to.deep.equals(expectedData[count].shapesize)
       count++
     }
 
@@ -170,7 +170,7 @@ describe('Test the iteration of Input Samples', () => {
         expect(singleSample.value.getNumber('y')).to.deep.equals(expectedData[count].y)
         expect(singleSample.value.getBoolean('z')).to.deep.equals(expectedData[count].z)
         expect(singleSample.value.getString('color')).to.deep.equals(expectedData[count].color)
-        expect(singleSample.value.getValue('shapesize')).to.deep.equals(expectedData[count].shapesize)
+        expect(singleSample.value.get('shapesize')).to.deep.equals(expectedData[count].shapesize)
       } else {
         expect(singleSample.done).to.be.true
       }

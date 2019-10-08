@@ -97,7 +97,7 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('getNumber should return a number', () => {
     expect(sample.getNumber('my_long')).to.deep.equals(10).and.is.a('number')
-    expect(sample.getValue('my_long')).to.deep.equals(10).and.is.a('number')
+    expect(sample.get('my_long')).to.deep.equals(10).and.is.a('number')
   })
 
   it('getString on a number field should return a string', () => {
@@ -107,7 +107,7 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('getBoolean should return a boolean', () => {
     expect(sample.getBoolean('my_optional_bool')).to.be.true.and.is.a('boolean')
-    expect(sample.getValue('my_optional_bool')).to.be.true.and.is.a('boolean')
+    expect(sample.get('my_optional_bool')).to.be.true.and.is.a('boolean')
   })
 
   it('getNumber on a boolean field should return a number', () => {
@@ -125,16 +125,16 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('access values and sizes of sequences and arrays', () => {
     expect(sample.getNumber('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
-    expect(sample.getValue('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
+    expect(sample.get('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
     expect(sample.getNumber('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
-    expect(sample.getValue('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
+    expect(sample.get('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
     // The '#' appended to the type name should provide the length
     expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
-    expect(sample.getValue('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
+    expect(sample.get('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
     expect(sample.getNumber('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
-    expect(sample.getValue('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
+    expect(sample.get('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
     expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
-    expect(sample.getValue('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
+    expect(sample.get('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
   })
 
   it('access values past the end of a sequence', () => {
@@ -169,12 +169,12 @@ describe('Data access tests with a pre-populated input', function () {
   it('obtain the selected member of a union with # syntax', () => {
     expect(sample.getString('my_int_union#')).to.deep.equals('my_long').and.is.a('string')
     expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
-    expect(sample.getValue('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
+    expect(sample.get('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
   })
 
   it('obtain an unset optional member', () => {
     expect(sample.getNumber('my_optional_long')).to.deep.equals(null)
-    expect(sample.getValue('my_optional_long')).to.deep.equals(null)
+    expect(sample.get('my_optional_long')).to.deep.equals(null)
     expect(sample.getJson().my_optional_long).to.deep.equals(undefined)
   })
 
@@ -273,36 +273,36 @@ describe('Data access tests with a pre-populated input', function () {
     })
   }
 
-  it('get complex members using getValue', () => {
-    const thePoint = sample.getValue('my_point')
+  it('get complex members using get', () => {
+    const thePoint = sample.get('my_point')
     // Since my_point is a struct it should have been converted to a JSON object
     expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
     expect(thePoint.x).to.deep.equals(3)
     expect(thePoint.y).to.deep.equals(4)
 
-    const thePointSequence = sample.getValue('my_point_sequence')
+    const thePointSequence = sample.get('my_point_sequence')
     expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
     expect(thePointSequence).to.be.an.instanceof([].constructor)
     expect(thePointSequence[0]).to.deep.equals({ x: 10, y: 20 })
     expect(thePointSequence[1]).to.deep.equals({ x: 11, y: 21 })
 
-    const thePointArray = sample.getValue('my_point_array')
+    const thePointArray = sample.get('my_point_array')
     expect(JSON.parse(JSON.stringify(thePointArray))).to.deep.equals(thePointArray)
     expect(thePointArray).to.be.an.instanceof([].constructor)
     expect(thePointArray[0]).to.deep.equals({ x: 0, y: 0 })
     expect(thePointArray[4]).to.deep.equals({ x: 5, y: 15 })
 
-    const thePointAlias = sample.getValue('my_point_alias')
+    const thePointAlias = sample.get('my_point_alias')
     // Alias should be resolved so we now have a JSON object
     expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
     expect(thePointAlias.x).to.deep.equals(30)
     expect(thePointAlias.y).to.deep.equals(40)
 
-    const theOptionalPoint = sample.getValue('my_optional_point')
+    const theOptionalPoint = sample.get('my_optional_point')
     // Unset optional should return null
     expect(theOptionalPoint).to.deep.equals(null)
 
-    const theUnion = sample.getValue('my_union')
+    const theUnion = sample.get('my_union')
     // Since no trailing '#' was supplied we should now have the JSON object
     expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
     expect(theUnion).to.deep.equals({ my_int_sequence: [10, 20, 30] })
@@ -503,7 +503,7 @@ describe('Tests with a testOutput and testInput', () => {
       expect(false).to.deep.equals(true)
     }
     testInput.take()
-    const theOptionalBool = testInput.samples.get(0).getValue('my_optional_bool')
+    const theOptionalBool = testInput.samples.get(0).get('my_optional_bool')
     expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
   })
 
@@ -518,8 +518,8 @@ describe('Tests with a testOutput and testInput', () => {
       expect(false).to.deep.equals(true)
     }
     testInput.take()
-    const theNumericString = testInput.samples.get(0).getValue('my_string')
-    // Due to CON-139 getValue returns strings as numbers if they represent a number
+    const theNumericString = testInput.samples.get(0).get('my_string')
+    // Due to CON-139 get returns strings as numbers if they represent a number
     expect(theNumericString).to.be.a('number').and.deep.equals(1234)
   })
 
@@ -537,11 +537,11 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getValue('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
-    expect(sample.getValue('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
-    expect(sample.getValue('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
-    expect(sample.getValue('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
-    expect(sample.getValue('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
+    expect(sample.get('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
+    expect(sample.get('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
+    expect(sample.get('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
+    expect(sample.get('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
+    expect(sample.get('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
   })
 
   it('Change union members', async () => {
@@ -842,6 +842,43 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point_array[0].x')).to.deep.equals(100)
     expect(sample.getNumber('my_point_array[0].y')).to.deep.equals(20)
     expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(14)
+  })
+
+  it('Check the type-independent Instance.set and Sample.get method', async () => {
+    // Set one of each type using the type-independent set API
+    testOutput.instance.set('my_string', 'Hello, World!')
+    testOutput.instance.set('my_boolean', true)
+    testOutput.instance.set('my_int64', 42)
+    testOutput.instance.set('my_point_sequence[0].x', 3)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    expect(sample.get('my_string')).to.deep.equals('Hello, World!')
+    expect(sample.get('my_boolean')).to.deep.equals(true)
+    expect(sample.get('my_int64')).to.deep.equals(42)
+    expect(sample.get('my_point_sequence[0].x')).to.deep.equals(3)
+  })
+
+  // TODO: Confirm the expeceted behaviour of this. The docs say that it is supported
+  // but currently it is not.
+  it.skip('Reset an optional member using the type independent set method', async () => {
+    testOutput.instance.set('my_optional_bool', null)
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_optional_bool')).to.deep.equals(null)
   })
 })
 

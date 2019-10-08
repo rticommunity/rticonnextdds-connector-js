@@ -162,5 +162,23 @@ describe('Output Tests', function () {
         output.instance.setFromJSON(JSON.parse(str))
       }).to.throw(Error)
     })
+
+    it('Use the type independent set with invalid fieldName', function () {
+      expect(function () {
+        output.instance.set(123, 123)
+      }).to.throw(TypeError)
+    })
+
+    it('Calling the type-independent set with non-existent field name', function () {
+      expect(function () {
+        output.instance.set('non-existent-member', 123)
+      }).to.throw(rti.DDSError)
+    })
+
+    it('Trying to set a JSON value with the set method should fail', function () {
+      expect(function () {
+        output.instance.set('whatever', { x: 12, y: 30 })
+      }).to.throw(TypeError)
+    })
   })
 })

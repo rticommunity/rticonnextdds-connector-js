@@ -683,7 +683,7 @@ class SampleInfo {
    * @returns The obtained value
    * @example let value = input.samples.get(0).info.getValue('source_timestamp')
    */
-  getValue (fieldName) {
+  get (fieldName) {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
@@ -801,7 +801,7 @@ class SampleIterator {
    * @param {string} fieldName - The name of the field.
    * @returns {number|string|boolean|JSON} The value of the field.
    */
-  getValue (fieldName) {
+  get (fieldName) {
     return this.input.samples.getValue(this.index, fieldName)
   }
 
@@ -1131,7 +1131,7 @@ class Instance {
    * Sets a boolean field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A boolean value, or null, to unset an optional member.
+   * @param {boolean} value - A boolean value, or null, to unset an optional member.
    */
   setBoolean (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1198,6 +1198,34 @@ class Instance {
       this.output.connector.native,
       this.output.name,
       JSON.stringify(jsonObj)))
+  }
+
+  /**
+   * Sets the value of fieldName
+   *
+   * The type of the argument ``value`` must correspond with the type of the field
+   * with name ``fieldName`` (as defined in the configuration XML file).
+   *
+   * This method is an alterative to :meth:`Instance.setNumber`, :meth:`Instance.setString`
+   * and :meth:`Instance.setBoolean`. The main difference is that it is type-independent (in
+   * that the same method can be used for all fields).
+   *
+   * @param {string} fieldName The name of the field.
+   * @param {number|boolean|string|null} value The value to set. Note that ``null`` is used to unset an optional member.
+   */
+  set (fieldName, value) {
+    if (!_isString(fieldName)) {
+      throw new TypeError('fieldName must be a string')
+    }
+    if (_isNumber(value)) {
+      this.setNumber(fieldName, value)
+    } else if (_isString(value)) {
+      this.setString(fieldName, value)
+    } else if (typeof value === 'boolean') {
+      this.setBoolean(fieldName, value)
+    } else {
+      throw new TypeError('value must be one of string, number, boolean or null')
+    }
   }
 
   /**
