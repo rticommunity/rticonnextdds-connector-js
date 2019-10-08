@@ -284,7 +284,10 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
     return !!boolVal.deref()
   } else if (selection === _AnyValueKind.connector_string) {
     const nodeStr = _moveCString(stringVal.deref())
-    // Try to convert the returned string to a JSON object
+    // Try to convert the returned string to a JSON object. We can now return
+    // one of two things:
+    // - An actual string (if the JSON.parse call fails)
+    // - A JSON object (if the JSON.parse call succeeds)
     try {
       return JSON.parse(nodeStr)
     } catch (err) {

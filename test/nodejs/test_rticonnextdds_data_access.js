@@ -28,7 +28,7 @@ const testExpectSuccessTimeout = 10000
 // This is to prevent us from hanging the tests for 10s
 const testExpectFailureTimeout = 500
 
-// These tests test the different wats to access data in Instance and SampleIterator
+// These tests test the different ways to access data in Instance and SampleIterator
 describe('Data access tests with a pre-populated input', function () {
   let connector = null
   let output = null

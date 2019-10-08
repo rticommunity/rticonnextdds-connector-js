@@ -34,6 +34,7 @@ const run = async () => {
   } catch (err) {
     console.log('Error encountered: ' + err)
   }
+  connector.close()
 }
 
 run()
