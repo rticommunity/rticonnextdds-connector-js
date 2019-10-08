@@ -3,18 +3,12 @@ Reading data (Input)
 
 .. :currentmodule:: rticonnextdds_connector
 
-.. testsetup:: *
-
-   const rti = require('rticonnextdds_connector')
-   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
-
-
 Getting the input
 ~~~~~~~~~~~~~~~~~
 
 To read/take samples, first get a reference to the :class:`Input`:
 
-.. testcode::
+.. code-block:: javascript
 
    input = connector.getInput('MySubscriber::MySquareReader')
 
@@ -41,17 +35,23 @@ resolved when new data is available, or rejected if the supplied timeout expires
 
 The method :meth:`Connector.wait()` has the same behavior as :meth:`Input.wait()`,
 but the returned promise will be resolved when data is available on any of the
-:class:`Input` objects within the :class:`Connector`::
+:class:`Input` objects within the :class:`Connector`.
+
+.. code-block:: javascript
 
   // Within an async function
   await connector.wait()
 
-Call :meth:`Input.take()` to access and remove the samples::
+Call :meth:`Input.take()` to access and remove the samples.
+
+.. code-block:: javascript
 
    input.take()
 
 or :meth:`Input.read()` to access the samples but leaving them available for
-a future :meth:`Input.read()` or :meth:`Input.take()`::
+a future :meth:`Input.read()` or :meth:`Input.take()`.
+
+.. code-block:: javascript
 
    input.read()
 
@@ -61,7 +61,7 @@ Accessing the data samples
 After calling :meth:`Input.read()` or :meth:`Input.take()`, :attr:`Input.samples` contains the data
 samples. A single sample can be accessed using :meth:`Samples.get()`.
 
-.. testcode::
+.. code-block:: javascript
 
    // Obtain the first sample in the Input's queue
    const theSample = input.samples.get(0)
@@ -74,9 +74,9 @@ samples. A single sample can be accessed using :meth:`Samples.get()`.
 It is also possible to iterate through all of the available samples in the ``Inputs``'s queue
 using the supplied :attr:`Samples.dataIterator` iterable.
 
-.. testcode::
+.. code-block:: javascript
 
-   for (let sample of input.samples.dataIterator) {
+   for (const sample of input.samples.dataIterator) {
       if (sample.validData) {
          console.log(JSON.stringify(sample.getJson()))
       }
@@ -86,16 +86,16 @@ If you don't need to access the meta-data (see :ref:`Accessing the SampleInfo`),
 the simplest way to access the data is to use :attr:`Samples.validDataIterator` to skip
 samples with invalid data:
 
-.. testcode::
+.. code-block:: javascript
 
-   for (let sample of input.samples.validDataIterator) {
+   for (const sample of input.samples.validDataIterator) {
       console.log(JSON.stringify(sample.getJson()))
    }
 
 Both of these iterables also provide iterator implementations, allowing the
 incrementation of them outside of a for loop:
 
-.. testcode::
+.. code-block:: javascript
 
    const iterator = input.samples.validDataIterator.iterator()
    let sample = iterator.next()
@@ -112,26 +112,26 @@ specific primitive fields using :meth:`SampleIterator.getNumber()`,
 :meth:`SampleIterator.getBoolean()` and :meth:`SampleIterator.getString()`,
 for example:
 
-.. testcode::
+.. code-block:: javascript
 
-   for (let sample of input.samples.validDataIterator) {
+   for (const sample of input.samples.validDataIterator) {
       const x = sample.getNumber('x')
       const y = sample.getNumber('y')
       const size = sample.getNumber('shapesize')
-      const color = sample.getString('color)
+      const color = sample.getString('color')
    }
 
-The :meth:`Samples.getValue` method exists as a type independent way of accessing
+The :meth:`Samples.get` method exists as a type independent way of accessing
 data within samples. Using this method it is not required to specify whether the
 member is a string, boolean, number or complex member:
 
-.. testcode::
+.. code-block:: javascript
 
-   for (let sample of input.samples.validDataIterator) {
-      const x = sample.getValue('x')
-      const y = sample.getValue('y')
-      const size = sample.getValue('shapesize')
-      const color = sample.getValue('color)
+   for (const sample of input.samples.validDataIterator) {
+      const x = sample.get('x')
+      const y = sample.get('y')
+      const size = sample.get('shapesize')
+      const color = sample.get('color')
    }
 
 See more information in :ref:`Accessing the data`.
@@ -145,11 +145,10 @@ in the *Connect DDS Core Libraries* User's Manual.
 
 You can access a field of the sample meta-data, the *SampleInfo*, as follows:
 
-.. testcode::
+.. code-block:: javascript
 
-   for sample in input.samples:
-   for (let sample of input.samples.dataIterator) {
-      const sourceTimestamp = sample.info.getValue('source_timestamp')
+   for (const sample of input.samples.dataIterator) {
+      const sourceTimestamp = sample.info.get('source_timestamp')
    }
 
 See :attr:`SampleIterator.info` for the list of meta-data fields available
@@ -161,15 +160,16 @@ The method :meth:`Input.waitForPublications()` can be used to detect when a comp
 DDS publication is matched or stops matching. It returns a promise which resolves to
 the change in the number of matched publications since the last time it was called::
 
+   // From within an async function. Otherwise, use traditional .then() syntax
    let changeInMatches = await input.waitForPublications()
 
 For example, if a new compatible publication is discovered within the specified
 ``timeout``, the promise will resolve to 1.
 
 You can obtain information about the existing matched publications with
-:attr:`Input.matchedPublications`:
+:attr:`Input.matchedPublications`.
 
-.. testcode::
+.. code-block:: javascript
 
    input.matchedPublications.forEach((match) => {
       pubName = match.name
@@ -195,7 +195,6 @@ SampleIterator class
 
 .. autoclass:: SampleIterator
    :members:
-
 
 ValidSampleIterator class
 ^^^^^^^^^^^^^^^^^^^^^^^^^

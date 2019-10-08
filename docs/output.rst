@@ -1,17 +1,12 @@
 Writing data (Output)
 =====================
 
-.. testsetup:: *
-
-   const rti = require('rticonnextdds_connector')
-   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
-
 Getting the Output
 ~~~~~~~~~~~~~~~~~~
 
 To write a data sample, first look up an output:
 
-.. testcode::
+.. code-block:: javascript
 
    output = connector.getOutput('MyPublisher::MySquareWriter')
 
@@ -31,7 +26,7 @@ Populating the data sample
 
 Then set the ``Output.instance`` fields. You can set them member by member:
 
-.. testcode::
+.. code-block:: javascript
 
    output.instance.setNumber('x', 1)
    output.instance.setNumber('y', 2)
@@ -40,7 +35,7 @@ Then set the ``Output.instance`` fields. You can set them member by member:
 
 Or using a JSON object:
 
-.. testcode::
+.. code-block:: javascript
 
    output.instance.setFromJson({ x: 1, y: 2, shapesize: 30, color: 'BLUE' })
 
@@ -72,14 +67,14 @@ data sample::
 The write method can also receive a JSON object specifing several options. For example, to
 write with a specific timestamp:
 
-.. testcode::
+.. code-block:: javascript
 
   output.write({ source_timestamp: 100000 })
 
 It is also possible to dispose or unregister an instance:
 
 
-.. testcode::
+.. code-block:: javascript
 
   output.write({ action: 'dispose' })
   output.write({ action: 'unregister' })
@@ -113,7 +108,7 @@ For example, if a new compatible subscription is discovered within the specified
 You can obtain information about the existing matched subscriptions with
 :attr:`Output.matchedSubscriptions`:
 
-.. testcode:: node
+.. code-block:: javascript
 
    output.matchedSubscriptions.forEach((match) => {
     subName = match.name

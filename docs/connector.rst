@@ -7,7 +7,7 @@ Import the Connector package
 
 To use the ``rticonnextdds_connector`` package, require it. For example:
 
-.. testcode::
+.. code-block:: javascript
 
    const rti = require('rticonnextdds-connector')
 
@@ -16,7 +16,7 @@ Creating a new Connector
 
 To create a new :class:`Connector`, pass an XML file and a configuration name:
 
-.. testcode::
+.. code-block:: javascript
 
    const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
 
@@ -54,7 +54,7 @@ Closing a Connector
 To destroy all the DDS entities that belong to a *Connector* previously
 created, call :meth:`Connector.close()`:
 
-.. testcode::
+.. code-block:: javascript
 
    const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
    // ...

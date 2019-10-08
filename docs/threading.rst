@@ -1,10 +1,6 @@
 Threading model
 ===============
 
-.. testsetup:: *
-
-   const rti = require('rticonnextdds_connector')
-
 Operations on the same :class:`Connector` instance or any contained :class:`Input`,
 :class:`Output` are in general not protected for multi-threaded access. The only
 exceptions are the following *wait* operations.
