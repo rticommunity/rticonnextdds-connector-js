@@ -19,8 +19,8 @@ And then run your *RTI Connector* applications:
 
     $ node my_connector_app.js
 
-You can also clone the repository and run the examples directly without installing
-*RTI Connector*:
+Alternatively, you can clone the github repository and run the examples directly without installing
+*RTI Connector* via *npm*:
 
 .. code:: bash
 
@@ -53,12 +53,12 @@ And, in another shell, run the writer:
 This is how ``reader.js`` looks like:
 
 .. literalinclude:: ../examples/nodejs/simple/reader.js
-    :lines: 17-39
+    :lines: 13-
 
 And this is ``writer.js``:
 
 .. literalinclude:: ../examples/nodejs/simple/writer.js
-    :lines: 18-38
+    :lines: 14-
 
 You can run the reader and the writer in any order, and you can run multiple
 instances of each at the same time. You can also run any other *DDS* application
@@ -87,7 +87,7 @@ MacOS platforms. It has been tested on the following systems:
 (TODO: link to main Connector landing page)
 
 *RTI Connector* is supported in other languages in addition to Node.js, see
-`main Connector
+`the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 License

@@ -12,8 +12,8 @@ To read/take samples, first get a reference to the :class:`Input`:
 
    input = connector.getInput('MySubscriber::MySquareReader')
 
-:meth:`Connector.getInput()` returns a :class:`Input` object. This example,
-obtains the input defined by the *data_reader* named *MySquareReader* within
+:meth:`Connector.getInput()` returns an :class:`Input` object. This example,
+obtains the *input* defined by the *data_reader* named *MySquareReader* within
 the *subscriber* named *MySubscriber*::
 
    <subscriber name="MySubscriber">
@@ -21,14 +21,16 @@ the *subscriber* named *MySubscriber*::
    </subscriber>
 
 This *subscriber* is defined inside the *domain_participant* selected to create
-this ``connector`` (see :ref:`Creating a new Connector`).
+this :class:`Connector` (see :ref:`Creating a new Connector`).
 
 Reading or taking the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The method :meth:`Input.wait()` can be used to identify when there is new data
 available on a specific :class:`Input`. It returns a ``Promise`` that will be
-resolved when new data is available, or rejected if the supplied timeout expires::
+resolved when new data is available, or rejected if the supplied timeout expires:
+
+.. code-block:: javascript
 
   // Within an async function
   await input.wait()
@@ -48,7 +50,7 @@ Call :meth:`Input.take()` to access and remove the samples.
 
    input.take()
 
-or :meth:`Input.read()` to access the samples but leaving them available for
+Or, use :meth:`Input.read()` to access the samples but leave them available for
 a future :meth:`Input.read()` or :meth:`Input.take()`.
 
 .. code-block:: javascript
@@ -89,22 +91,26 @@ samples with invalid data:
 .. code-block:: javascript
 
    for (const sample of input.samples.validDataIterator) {
+      // It is not necessary to check the sample.validData field
       console.log(JSON.stringify(sample.getJson()))
    }
 
-Both of these iterables also provide iterator implementations, allowing the
-incrementation of them outside of a for loop:
+Both of these iterables also provide iterator implementations, allowing them to
+be incremented outside of a ``for`` loop:
 
 .. code-block:: javascript
 
    const iterator = input.samples.validDataIterator.iterator()
    let sample = iterator.next()
+   // sample.value contains contains the current sample and sample.done is a
+   // boolean value which will become true when we have iterated over all of
+   // the available samples
    console.log(JSON.stringify(sample.value.getJson()))
 
 .. warning::
-   All the methods described in this section return iterators to samples.
-   Calling read/take again invalidates all iterators currently in
-   use. For that reason, it is not recommended to store any iterator.
+   All the methods described in this section return generators.
+   Calling read/take again invalidates all generators currently in
+   use. For that reason, it is not recommended to store any generator.
 
 :meth:`Samples.getJson` can receive a ``fieldName`` to only return the fields of a
 complex member. In addition to ``getJson``, you can get the values of

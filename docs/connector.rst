@@ -14,7 +14,7 @@ To use the ``rticonnextdds_connector`` package, require it. For example:
 Creating a new Connector
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To create a new :class:`Connector`, pass an XML file and a configuration name:
+To create a new :class:`Connector`, pass an XML file and a configuration name to the constructor:
 
 .. code-block:: javascript
 
@@ -36,7 +36,7 @@ file ShapeExample.xml::
 See the full file here: `ShapeExample.xml <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/ShapeExample.xml>`__.
 
 When you create a :class:`Connector`, the DDS *DomainParticipant* that you selected
-and all its contained entities (*Topics*, *Subscribers*, *DataReaders*,
+and all of its contained entities (*Topics*, *Subscribers*, *DataReaders*,
 *Publishers*, *DataWriters*) are created.
 
 For more information about the DDS entities, see `Part 2 - Core Concepts <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/PartCoreConcepts.htm#partcoreconcepts_4109331811_915546%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C_____0>`__
@@ -51,8 +51,8 @@ from the *RTI Connext DDS Core Libraries User's Manual*.
 Closing a Connector
 ~~~~~~~~~~~~~~~~~~~
 
-To destroy all the DDS entities that belong to a *Connector* previously
-created, call :meth:`Connector.close()`:
+To destroy all the DDS entities that belong to a previously created *Connector*,
+call :meth:`Connector.close()`:
 
 .. code-block:: javascript
 
@@ -70,7 +70,7 @@ returns the :class:`Input` that allows reading data.
 .. note::
 
   If the *domain_participant* you load contains both *data_writers* (Outputs) and
-  *data_readers* (Inputs) for the same topics and matching Qos, when you write
+  *data_readers* (Inputs) for the same topics with matching Qos, when you write
   data, the Inputs will receive the data even before you call
   :meth:`Connector.getInput()`. To avoid that, you can configure the
   *subscriber* that contains the *data_reader* with

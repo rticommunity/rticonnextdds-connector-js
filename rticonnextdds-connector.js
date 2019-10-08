@@ -1080,8 +1080,8 @@ class Instance {
    * it allows setting the values for the fields of the DDS Type.
    *
    * Attributes:
-   *  * output (:class:`Output`) - The :class:`Output` that owns this Instance.
-   *  * native (pointer) - Native handle to this Instance that allows for additional *Connext DDS Pro* C APIs to be called.
+   *  * ``output`` (:class:`Output`) - The :class:`Output` that owns this Instance.
+   *  * ``native`` (pointer) - Native handle to this Instance that allows for additional *Connext DDS Pro* C APIs to be called.
    */
   constructor (output) {
     this.output = output
@@ -1092,7 +1092,7 @@ class Instance {
    *
    * The effect is the same as that of :meth:`Output.clearMembers`, except that only
    * one member is cleared.
-   * @param {string} fieldName  - The name of the field. It can be a complex member or a primitive member.
+   * @param {string} fieldName The name of the field. It can be a complex member or a primitive member.
    */
   clearMember (fieldName) {
     if (!_isString(fieldName)) {
@@ -1209,7 +1209,7 @@ class Instance {
    * The type of the argument ``value`` must correspond with the type of the field
    * with name ``fieldName`` (as defined in the configuration XML file).
    *
-   * This method is an alterative to :meth:`Instance.setNumber`, :meth:`Instance.setString`
+   * This method is an alternative to :meth:`Instance.setNumber`, :meth:`Instance.setString`
    * and :meth:`Instance.setBoolean`. The main difference is that it is type-independent (in
    * that the same method can be used for all fields).
    *
@@ -1226,6 +1226,8 @@ class Instance {
       this.setString(fieldName, value)
     } else if (typeof value === 'boolean') {
       this.setBoolean(fieldName, value)
+    } else if (value === null) {
+      this.clearMember(fieldName)
     } else {
       throw new TypeError('value must be one of string, number, boolean or null')
     }
@@ -1264,15 +1266,15 @@ class Instance {
 class Output {
   /**
    * This class is used to publish data for a DDS Topic.
-   *
    * To get an Output object, use :meth:`Connector.getOutput`.
    *
    * Attributes:
    *  * ``instance`` (:class:`Instance`) - The data that is written when :meth:`Output.write` is called.
    *  * ``connector`` (:class:`Connector`) - The Connector that created this object.
-   *  * ``string`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`)
+   *  * ``string`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`).
    *  * ``native`` (pointer) - The native handle that allows accessing additional *Connext DDS* APIs in C.
    *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions.
+   *
    */
   constructor (connector, name) {
     this.connector = connector
@@ -1300,7 +1302,7 @@ class Output {
    *
    * @param {JSON} [params] The Write Parameters to use in the `write` call.
    *
-   * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
+   * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual).
    * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
    */
   write (params) {
@@ -1348,7 +1350,8 @@ class Output {
    *   This operation is asynchronous
    *
    * @param {timeout} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before all matching reliable subscriptions acknowledge all the samples
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before all matching reliable subscriptions acknowledge all the samples.
+   * @returns {Promise} Promise object which will be rejected if not all matching reliable subscriptions acknowledge all of the samples within the specified timeout.
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1458,12 +1461,12 @@ class Output {
  * The methods :meth:`Connector.getOutput` and :meth:`Connector.getInput` return an :class:`Input` and
  * :class:`Output` respectively.
  *
- * An application can create multiple **Connector** instances for the same of different configurations.
+ * An application can create multiple **Connector** instances for the same or different configurations.
  */
 class Connector extends EventEmitter {
   /**
-   * @arg {string} configName - The configuration to load. The configName format is `LibraryName::ParticipantName`, where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantName is the name attribute of a <domain_participant> tag inside that library.
-   * @arg {string} url - A URL locating the XML document. The url can be a file path (e.g., `/tmp/my_dds_config.xml`) or a string containing the full XML document with the following format: `str://"<dds>...</dds>"`
+   * @arg {string} configName The configuration to load. The configName format is `LibraryName::ParticipantName`, where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantName is the name attribute of a <domain_participant> tag within that library.
+   * @arg {string} url A URL locating the XML document. The url can be a file path (e.g., `/tmp/my_dds_config.xml`) or a string containing the full XML document with the following format: `str://"<dds>...</dds>"`.
    */
   constructor (configName, url) {
     super()
@@ -1483,7 +1486,7 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Frees al the resources created by this Connector instance.
+   * Frees all the resources created by this Connector instance.
    */
   close () {
     connectorBinding.api.RTI_Connector_delete(this.native)
@@ -1518,7 +1521,7 @@ class Connector extends EventEmitter {
    *       ...
    *     <domain_participant_library>
    *
-   * @param {string} inputName - The name of the `data_reader` to load. With the format `SubscriberName::DataReaderName`
+   * @param {string} inputName The name of the `data_reader` to load. With the format `SubscriberName::DataReaderName`
    * @returns {Input} The Input, if it exists.
    */
   getInput (inputName) {
@@ -1546,7 +1549,7 @@ class Connector extends EventEmitter {
    *       ...
    *     <domain_participant_library>
    *
-   * @param {string} outputName - The name of the data_writer to load. With the format `PublisherName::DataWriterName`
+   * @param {string} outputName The name of the data_writer to load. With the format `PublisherName::DataWriterName`
    * @returns {Output} The Output, if it exists.
    */
   getOutput (outputName) {
@@ -1617,10 +1620,10 @@ class Connector extends EventEmitter {
    * Waits for data to be received on any Input.
    *
    * .. note::
-   *   This operation is asynchronous
+   *   This operation is asynchronous.
    *
-   * @param {number} timeout - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} - :class:`TimeoutError` will be thrown if the timeout expires before data is received
+   * @param {number} timeout The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
    * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
    */
   waitForData (timeout) {
@@ -1664,9 +1667,9 @@ class Connector extends EventEmitter {
    *   This is a static method. It can only be called before creating any Connector instance.
    *
    * See `SYSTEM_RESOURCE_LIMITS QoS Policy <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
-   * in the *RTI Connext DDS* User's Manual.
+   * in the *RTI Connext DDS* User's Manual for more information.
    *
-   * @param {number} value - the value for *max_objects_per_thread*
+   * @param {number} value The value for *max_objects_per_thread*
    */
   static setMaxObjectsPerThread (value) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))

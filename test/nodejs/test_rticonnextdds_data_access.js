@@ -866,10 +866,9 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.get('my_point_sequence[0].x')).to.deep.equals(3)
   })
 
-  // TODO: Confirm the expeceted behaviour of this. The docs say that it is supported
-  // but currently it is not.
-  it.skip('Reset an optional member using the type independent set method', async () => {
+  it('Reset an optional member using the type independent set method', async () => {
     testOutput.instance.set('my_optional_bool', null)
+    testOutput.write()
     try {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
@@ -879,6 +878,24 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     expect(testInput.samples.get(0).get('my_optional_bool')).to.deep.equals(null)
+  })
+
+  // Confirm desired behaviour for this
+  it.skip('Use Instance.set to set a complex member', async () => {
+    const jsonObj = { x: 9, y: 12 }
+    console.log(jsonObj)
+    console.log(typeof jsonObj)
+    testOutput.instance.set('my_point', jsonObj)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point')).to.deep.equals(jsonObj)
   })
 })
 
