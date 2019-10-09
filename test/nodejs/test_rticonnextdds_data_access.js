@@ -89,7 +89,7 @@ describe('Data access tests with a pre-populated input', function () {
     expect(sample.validData).to.be.true
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take all samples here to ensure that next test case has a clean input
     prepopulatedInput.take()
     connector.close()
@@ -385,7 +385,7 @@ describe('Tests with a testOutput and testInput', () => {
     }
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take all samples here to ensure that next test case has a clean input
     testInput.take()
     connector.close()
@@ -943,7 +943,7 @@ describe('Tests with two readers and two writers', () => {
     }
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take any data
     testInput1.take()
     testInput2.take()

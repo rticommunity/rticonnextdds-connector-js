@@ -74,20 +74,31 @@ describe('Subscriber not automatically enabled tests', () => {
     connector.close()
   })
 
-  it('Entities should not auto-discover each other if QoS is set appropriately', () => {
+  it('Entities should not auto-discover each other if QoS is set appropriately', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
     expect(output).to.exist
     // The input is not automatically enabled in this QoS profile, meaning the
     // output should not match with it
-    return expect(output.waitForSubscriptions(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
+    try {
+      await output.waitForSubscriptions(testExpectFailureTimeout)
+      console.log('Expected output.waitForSubscriptions to timeout but it did not')
+      expect(true).to.deep.equal(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Calling getInput should enable the input', (done) => {
+  it('Calling getInput should enable the input', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
     expect(output).to.exist
     connector.getInput('TestSubscriber::TestReader')
-
-    expect(output.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1).notify(done)
+    try {
+      const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 })
 
