@@ -126,10 +126,12 @@ Output class
 ^^^^^^^^^^^^
 
 .. autoclass:: Output
+
    :members:
 
 Instance class
 ^^^^^^^^^^^^^^
 
 .. autoclass:: Instance
+
    :members:
