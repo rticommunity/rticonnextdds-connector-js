@@ -68,6 +68,7 @@ describe('Test the iteration of Input Samples', () => {
       const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
       expect(newMatches).to.be.at.least(1)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(true).to.be.false
     }

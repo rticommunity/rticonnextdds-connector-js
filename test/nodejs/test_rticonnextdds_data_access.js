@@ -365,7 +365,7 @@ describe('Tests with a testOutput and testInput', () => {
     my_uint64: 18014398509481984
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
@@ -376,7 +376,13 @@ describe('Tests with a testOutput and testInput', () => {
     expect(testOutput).to.exist
 
     // Wait for the input and output to dicovery each other
-    expect(testOutput.waitForSubscriptions(2000)).to.eventually.become(1)
+    try {
+      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
   afterEach(async () => {
@@ -906,7 +912,7 @@ describe('Tests with two readers and two writers', () => {
   let testOutput2 = null
   let testInput2 = null
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
@@ -921,8 +927,20 @@ describe('Tests with two readers and two writers', () => {
     expect(testOutput2).to.exist
 
     // Wait for the input and output to dicovery each other
-    expect(testOutput1.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1)
-    expect(testOutput2.waitForSubscriptions(testExpectSuccessTimeout)).to.eventually.become(1)
+    try {
+      const newMatches = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    try {
+      const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
   afterEach(async () => {
@@ -934,43 +952,95 @@ describe('Tests with two readers and two writers', () => {
 
   // Since we have not written any data, all different forms of wait for data
   // should timeout
-  it('waiting for data on connector should timeout', () => {
-    return expect(connector.waitForData(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
-  })
-  it('waiting for data on testInput should timeout', () => {
-    return expect(testInput1.wait(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
-  })
-  it('waiting for data on testInput2 should timeout', () => {
-    return expect(testInput2.wait(testExpectFailureTimeout)).to.be.rejectedWith(rti.TimeoutError)
+  it('waiting for data on connector should timeout', async () => {
+    try {
+      await connector.waitForData(testExpectFailureTimeout)
+      console.log('Expected connector.waitForData to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Writing data on a testOutput1 should wake up connector.waitForData', () => {
+  it('waiting for data on testInput should timeout', async () => {
+    try {
+      await testInput1.wait(testExpectFailureTimeout)
+      console.log('Expected testInput1.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
+  })
+
+  it('waiting for data on testInput2 should timeout', async () => {
+    try {
+      await testInput2.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
+  })
+
+  it('Writing data on a testOutput1 should wake up connector.waitForData', async () => {
     testOutput1.write()
-    return expect(connector.waitForData(testExpectSuccessTimeout)).to.eventually.be.fulfilled
+    try {
+      await connector.waitForData(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput1 should wake up testInput1.wait', () => {
+  it('Writing data on a testOutput1 should wake up testInput1.wait', async () => {
     testOutput1.write()
-    return expect(testInput1.wait(testExpectSuccessTimeout)).to.eventually.be.fulfilled
+    try {
+      await testInput1.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput1 should not wake up testInput2.wait', () => {
+  it('Writing data on a testOutput1 should not wake up testInput2.wait', async () => {
     testOutput1.write()
-    return expect(testInput2.wait(testExpectFailureTimeout)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    try {
+      await testInput2.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Writing data on a testOutput2 should wake up connector.waitForData', () => {
+  it('Writing data on a testOutput2 should wake up connector.waitForData', async () => {
     testOutput2.write()
-    return expect(connector.waitForData(testExpectSuccessTimeout)).to.eventually.be.fulfilled
+    try {
+      await connector.waitForData(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput2 should wake up testInput2.wait', () => {
+  it('Writing data on a testOutput2 should wake up testInput2.wait', async () => {
     testOutput2.write()
-    return expect(testInput2.wait(testExpectSuccessTimeout)).to.eventually.be.fulfilled
+    try {
+      await testInput2.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput2 should not wake up testInput1.wait', () => {
+  it('Writing data on a testOutput2 should not wake up testInput1.wait', async () => {
     testOutput2.write()
-    return expect(testInput1.wait(testExpectFailureTimeout)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    try {
+      await testInput1.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 })
