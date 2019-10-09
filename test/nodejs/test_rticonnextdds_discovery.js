@@ -104,12 +104,18 @@ const cleanupConnectors = () => {
   }
 }
 
-describe('Discovery tests', () => {
+describe('Discovery tests', function () {
+  // By default, mocha will kill all tests if they take longer than 2s. Some of
+  // the tests in this block can take up to 1.5s so to be safe we increase this
+  // timeout. Note, this means we cannot use fat arrow functions here (since 'this'
+  // is not binded in fat arrows).
+  this.timeout('30s')
+
   afterEach(() => {
     cleanupConnectors()
   })
 
-  it('Create a Connector object with an input and no ouput', async () => {
+  it('Create a Connector object with an input and no ouput', async function () {
     const input = getDiscoveryReaderOnlyInput()
     // At this point we should not have matched anything
     const matches = input.matchedPublications
@@ -125,7 +131,7 @@ describe('Discovery tests', () => {
     }
   })
 
-  it('Create a Connector object with an output and no input', async () => {
+  it('Create a Connector object with an output and no input', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // At this point we should not have matched anything
     const matches = output.matchedSubscriptions
@@ -141,7 +147,7 @@ describe('Discovery tests', () => {
     }
   })
 
-  it('Check matching between a single input and output', async () => {
+  it('Check matching between a single input and output', async function () {
     const connector = getDiscoveryConnector()
     const input = connector.getInput('MySubscriber::MyReader')
     const output = connector.getOutput('MyPublisher::MyWriter')
@@ -186,7 +192,7 @@ describe('Discovery tests', () => {
       }
     }
     expect(totalMatches).to.be.at.least(2)
-  
+
     // Another call to waitForSubscriptions should timeout
     try {
       const newMatches = await output.waitForSubscriptions(testExpectFailureTimeout)
@@ -236,7 +242,7 @@ describe('Discovery tests', () => {
     expect(matches).to.deep.include.members([{ name: 'MyWriter' }, { name: 'TestWriter' }])
   })
 
-  it('Checking unmatching from an input', async () => {
+  it('Checking unmatching from an input', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // To begin with there is no matching
     try {
@@ -294,7 +300,7 @@ describe('Discovery tests', () => {
     expect(output.matchedSubscriptions.length).to.deep.equals(0)
   })
 
-  it('Checking unmatching from an output', async () => {
+  it('Checking unmatching from an output', async function () {
     const input = getDiscoveryReaderOnlyInput()
     // To begin with there is no matching
     try {
@@ -352,7 +358,7 @@ describe('Discovery tests', () => {
     expect(input.matchedPublications.length).to.deep.equals(0)
   })
 
-  it('Matching entities with empty entity names', async () => {
+  it('Matching entities with empty entity names', async function () {
     const connector = getDiscoveryConnectorNoEntityNames()
     const output = connector.getOutput('MyPublisher::MyWriter')
 
@@ -372,7 +378,7 @@ describe('Discovery tests', () => {
     expect(matches).to.deep.include.members([{ name: '' }])
   })
 
-  it('Matching entities with no entity names', async () => {
+  it('Matching entities with no entity names', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // Create a matching remote reader which has no entity name (this isn't possible
     // with XML application creation)
