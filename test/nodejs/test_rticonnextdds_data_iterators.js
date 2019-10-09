@@ -179,3 +179,145 @@ describe('Test the iteration of Input Samples', () => {
     }
   })
 })
+
+describe('Test dispose', () => {
+  const expectedSampleCount = 2
+  let connector = null
+  let input = null
+  let output = null
+
+  beforeEach(async function () {
+    this.timeout('30s')
+    // Create the connector object and get the input and output
+    const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
+    const profile = 'MyParticipantLibrary::Zero'
+    connector = new rti.Connector(profile, xmlPath)
+    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    input = connector.getInput('MySubscriber::MySquareReader')
+    expect(input).to.exist
+    output = connector.getOutput('MyPublisher::MySquareWriter')
+    expect(output).to.exist
+
+    // Wait for the entities to match
+    try {
+      const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.be.at.least(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      // Fail the test
+      expect(true).to.be.false
+    }
+
+    // Write one sample with valid data, one unregister and one dispose
+    output.write()
+    output.write({ action: 'dispose' })
+
+    // Wait for the input to receive all the samples
+    while (input.samples.length !== expectedSampleCount) {
+      try {
+        await input.wait(testExpectSuccessTimeout)
+        input.read()
+      } catch (err) {
+        console.log('Caught err: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+    }
+    expect(input.samples.length).to.deep.equals(expectedSampleCount)
+  })
+
+  afterEach(async () => {
+    connector.close()
+  })
+
+  it('Dispose should not have validData set to true', () => {
+    let count = 0
+    for (const sample of input.samples.dataIterator) {
+      if (count === 0) {
+        expect(sample.validData).to.deep.equals(true)
+      } else {
+        expect(sample.validData).to.deep.equals(false)
+      }
+      count++
+    }
+    expect(count).to.deep.equals(expectedSampleCount)
+  })
+
+  it('ValidSampleIterator should not iterator over disposes', () => {
+    let count = 0
+    for (const sample of input.samples.validDataIterator) { // eslint-disable-line no-unused-vars
+      count++
+    }
+    expect(count).to.deep.equals(expectedSampleCount - 1)
+  })
+})
+
+describe('Test unregister', () => {
+  const expectedSampleCount = 2
+  let connector = null
+  let input = null
+  let output = null
+
+  beforeEach(async function () {
+    this.timeout('30s')
+    // Create the connector object and get the input and output
+    const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
+    const profile = 'MyParticipantLibrary::Zero'
+    connector = new rti.Connector(profile, xmlPath)
+    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    input = connector.getInput('MySubscriber::MySquareReader')
+    expect(input).to.exist
+    output = connector.getOutput('MyPublisher::MySquareWriter')
+    expect(output).to.exist
+
+    // Wait for the entities to match
+    try {
+      const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.be.at.least(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      // Fail the test
+      expect(true).to.be.false
+    }
+
+    // Write one sample with valid data, one unregister and one dispose
+    output.write()
+    output.write({ action: 'unregister' })
+
+    // Wait for the input to receive all the samples
+    while (input.samples.length !== expectedSampleCount) {
+      try {
+        await input.wait(testExpectSuccessTimeout)
+        input.read()
+      } catch (err) {
+        console.log('Caught err: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+    }
+    expect(input.samples.length).to.deep.equals(expectedSampleCount)
+  })
+
+  afterEach(async () => {
+    connector.close()
+  })
+
+  it('Unregister should not have validData set to true', () => {
+    let count = 0
+    for (const sample of input.samples.dataIterator) {
+      if (count === 0) {
+        expect(sample.validData).to.deep.equals(true)
+      } else {
+        expect(sample.validData).to.deep.equals(false)
+      }
+      count++
+    }
+    expect(count).to.deep.equals(expectedSampleCount)
+  })
+
+  it('ValidSampleIterator should not iterator over unregisters', () => {
+    let count = 0
+    for (const sample of input.samples.validDataIterator) { // eslint-disable-line no-unused-vars
+      count++
+    }
+    expect(count).to.deep.equals(expectedSampleCount - 1)
+  })
+})
