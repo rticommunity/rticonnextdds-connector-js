@@ -4,14 +4,14 @@ Accessing the data
 The types you use to write or read data may included nested structs, sequences and
 arrays of primitive types or structs, etc.
 
-These types are defined in the XML following the format of
+These types are defined in XML following the format of
 `RTI's XML-Based Application Creation <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm#XMLBasedAppCreation/UnderstandingPrototyper/XMLTagsConfigEntities.htm%3FTocPath%3D5.%2520Understanding%2520XML-Based%2520Application%2520Creation%7C5.5%2520XML%2520Tags%2520for%2520Configuring%2520Entities%7C_____0>`__.
 
 To access the data, :class:`Instance` and :class:`SampleIterator` provide
-setters and getters that expect a ``fieldName`` string. This section describes
-the format of this string.
+setters and getters that expect a ``fieldName`` string, used to identify specific
+fields within the type. This section describes the format of this string.
 
-We will use the following type definition of MyType::
+We will use the following XML type definition of MyType::
 
     <types>
         <enum name="Color">
@@ -83,7 +83,7 @@ Which corresponds to the following IDL definition::
     };
 
 .. note::
-    You can get the XML definition of an IDL file with *rtiddsgen -convertToXml MyType.idl*.
+    You can get the XML definition of an IDL file with ``rtiddsgen -convertToXml MyType.idl``.
 
 We will refer to an ``Output`` named ``output`` and
 ``Input`` named ``input`` such that ``input.samples.length > 0``.
@@ -91,11 +91,11 @@ We will refer to an ``Output`` named ``output`` and
 Using JSON objects vs accessing individual members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In an Input or an Output you can access the data all at once, using a JSON object,
+On an Input or an Output you can access the data all at once, using a JSON object,
 or member by member. Using a JSON object is usually more efficient if you intend
 to access most or all of the data members of a large type.
 
-In an Output, :meth:`Instance.setFromJson` receives a JSON object with all, or
+On an Output, :meth:`Instance.setFromJson` receives a JSON object with all, or
 some, of the Output type members, and in an Input, :meth:`SampleIterator.getJson`
 retrieves all of the members.
 
@@ -137,37 +137,38 @@ To set strings:
 
     output.instance.setString('my_string', 'Hello, World!')
 
-
-As an alternative to the previous setters, the special method ``set``
+As an alternative to the previous setters, the type-independent method ``set``
 can be used as follows:
 
 .. code-block:: javascript
 
+    // The set method works on all basic types
     output.instance.set('my_double') = 2.14
     output.instance.set('my_boolean') = true
     output.instance.set('my_string') = 'Hello, World!'
 
 In all cases, the type of the assigned value must be consistent with the type
-of the field as defined in the configuration file.
+of the field, as defined in the configuration file.
 
 Similarly, to get a field in a :class:`Input` sample, use the appropriate
 getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
-:meth:`SampleIterator.getString()`, or :meth:`SampleIterator.get()`. ``getString`` also works
-with numeric fields, returning the number as a string. For example:
+:meth:`SampleIterator.getString()`, or the type-independent :meth:`SampleIterator.get()`.
+``getString`` also works with numeric fields, returning the number as a string:
 
 .. code-block:: javascript
 
     for (const sample of input.samples.validDataIterator) {
+        // Use the basic type specific getters
         let value = sample.getNumber('my_double')
         value = sample.getBoolean('my_boolean')
         value = sample.getString('my_string')
 
-        // or alternatively:
+        // or alternatively, use the type-independent get method
         value = sample.get('my_double')
         value = sample.get('my_boolean')
         value = sample.get('my_string')
 
-        // get number as string:
+        // get a number as string:
         value = sample.getString('my_double')
     }
 
@@ -199,7 +200,14 @@ It is possible to reset the value of a complex member back to its default:
 
 .. code-block:: javascript
 
-    output.instance.clearMember('my_point') // x and y are now 0
+    output.instance.clearMember('my_point')
+    // x and y are now 0
+
+It is also possible to reset members using the ``set`` method:
+
+.. code-block:: javascript
+
+    output.instance.set('my_point', null)
 
 Structs are set via JSON objects as follows:
 
@@ -214,7 +222,8 @@ the following code after the previous call to ``setFromJson``:
 
     output.instance.setFromJson({ 'my_point': {' y': 200 } })
 
-The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``
+The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``. If you do not want the values
+to be retained you must clear the value first (as described above).
 
 It is possible to obtain the JSON object of a nested struct using
 `SampleIterator.getJson('memberName')`:
@@ -231,7 +240,11 @@ struct, value or union. If not, the call to get_dictionary will fail:
 .. code-block:: javascript
 
     for (let sample of input.samples.validDataIterator) {
-       let long = sample.getJson('my_long') // ERROR, my_long is a basic type
+       try {
+          let long = sample.getJson('my_long')
+       } catch (err) {
+          // Error was thrown since my_long is a basic type
+       }
    }
 
 It is also possible to obtain the dictionary of a struct using the :meth:`SampleIterator.get`
@@ -250,12 +263,12 @@ of using :meth:`SampleIterator.get` apply here.
 Accessing arrays and sequences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use ``"fieldName[index]"`` to access an element of a sequence or array,
+Use ``'fieldName[index]'`` to access an element of a sequence or array,
 where ``0 <= index < length``:
 
 .. code-block:: javascript
 
-    value = input.samples.get(0).getNumber('my_int_sequence[1]')
+    let value = input.samples.get(0).getNumber('my_int_sequence[1]')
     value = input.samples.get(0).getNumber('my_point_sequence[2].y')
 
 Another option is to use ``SampleIterator.getJson('fieldName')`` to obtain
@@ -276,7 +289,7 @@ type of the array is complex):
       let pointElement = sample.getJson('my_point_sequence[1]')
    }
 
-In an Output, sequences are automatically resized:
+In an :class:`Output`, sequences are automatically resized:
 
 .. code-block:: javascript
 
@@ -287,14 +300,16 @@ You can clear a sequence:
 
 .. code-block:: javascript
 
-    output.instance.clearSequence('my_int_sequence') // my_int_sequence is now empty
+    output.instance.clearMember('my_int_sequence') // my_int_sequence is now empty
 
-To get the length of a sequence in an Input sample:
+To obtain the length of a sequence in an :class:`Input` sample, append ``#`` to
+the ``fieldName``:
 
 .. code-block:: javascript
 
     let length = input.samples[0].getNumber('my_int_sequence#')
 
+This same syntax is used to obtain the selected member of an enum (see :ref:`Accessing unions`).
 
 In JSON objects, sequences and arrays are represented as lists. For example:
 
@@ -303,7 +318,7 @@ In JSON objects, sequences and arrays are represented as lists. For example:
     output.instance.setFromJson({
         my_int_sequence: [1, 2],
         my_point_sequence: [{ x: 1, y: 1 }, { x: 2, y: 2 }]
-        })
+    })
 
 Arrays have a constant length that can't be changed. When you don't set all the elements
 of an array, the remaining elements retain their previous value. However, sequences
@@ -368,12 +383,14 @@ There are several ways to reset an optional member. If the type is primitive:
 
     output.instance.setNumber('my_optional_long', null) // Option 1
     output.instance.clearMember('my_optional_long') // Option 2
+    output.instance.set('my_optional_long', null) // Option 3
 
-If the member type is complex:
+If the member type is complex, all the above options apart from option 1 are available:
 
 .. code-block:: javascript
 
     output.instance.clearMember('my_optional_point')
+    output.instance.set('my_optional_point', null)
 
 Note that :meth:`Instance.setFromJson()` doesn't clear those members that are
 not specified; their value remains. For example:
@@ -381,7 +398,8 @@ not specified; their value remains. For example:
 .. code-block:: javascript
 
     output.instance.setNumber('my_optional_long', 5)
-    output.instance.setFormJson({ my_double: 3.3, my_long: 4 }) // my_optional_long is still 5
+    output.instance.setFormJson({ my_double: 3.3, my_long: 4 })
+    // my_optional_long is still 5
 
 To clear a member, set it to ``null`` explicitly::
 

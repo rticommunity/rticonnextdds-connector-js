@@ -363,13 +363,14 @@ class Infos {
  */
 class Samples {
   /**
-   * This class provides access to data samples read by an :class:`Input`.
+   * This class provides access to data samples read by an :class:`Input` (using either
+   * the :meth:`Input.read` or :meth:`Input.take` methods).
    *
    * The methods :meth:`Samples.get` and :attr:`Samples.dataIterator` return
    * a :class:`SampleIterator` which implements iterable and iterator logic, allowing
    * the caller to iterate through all available samples. The samples returned by these
-   * methods may contain only meta-data. The :attr:`Samples.validDataIterator`
-   * only iterates over samples that contain valid data.
+   * methods may contain only meta-data (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIterator`
+   * iterable only iterates over samples that contain valid data (a :class:`ValidSampleIterator`).
    *
    * ``Samples`` is the type of the property :meth:`Input.samples`.
    *
@@ -377,7 +378,7 @@ class Samples {
    *
    * Attributes:
    *  * length (number) - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
-   *  * dataIterator (:class:`SampleIterator`) - The class used to iterate through the available samples
+   *  * dataIterator (:class:`SampleIterator`) - The class used to iterate through the available samples.
    *  * validDataIterator (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
    */
   constructor (input) {
@@ -461,12 +462,13 @@ class Samples {
   }
 
   /**
-   * Obtain the value of a numeric field within this sample
+   * Obtain the value of a numeric field within this sample.
    *
-   * @param {number} index The index of the sample
-   * @param {string} fieldName The name of the field
-   * @returns {number} The obtained value
    * See :ref:`Accessing the data samples`.
+   *
+   * @param {number} index The index of the sample.
+   * @param {string} fieldName The name of the field.
+   * @returns {number} The obtained value.
    */
   getNumber (index, fieldName) {
     if (!_isValidIndex(index)) {
@@ -494,12 +496,13 @@ class Samples {
   }
 
   /**
-   * Obtain the value of a boolean field within this sample
+   * Obtain the value of a boolean field within this sample.
    *
-   * @param {number} index The index of the sample
-   * @param {string} fieldName The name of the field
-   * @returns {boolean} The obtained value
    * See :ref:`Accessing the data samples`.
+   *
+   * @param {number} index The index of the sample.
+   * @param {string} fieldName The name of the field.
+   * @returns {boolean} The obtained value.
    */
   getBoolean (index, fieldName) {
     if (!_isValidIndex(index)) {
@@ -529,10 +532,11 @@ class Samples {
   /**
    * Obtain the value of a string field within this sample
    *
+   * See :ref:`Accessing the data samples`.
+   *
    * @param {number} index The index of the sample
    * @param {string} fieldName The name of the field
-   * @returns {string} The obtained value
-   * See :ref:`Accessing the data samples`.
+   * @returns {string} The obtained value.
    */
   getString (index, fieldName) {
     if (!_isValidIndex(index)) {
@@ -561,8 +565,11 @@ class Samples {
   /**
    * Get the value of a field within this sample.
    *
+   * See :ref:`Accessing the data samples`.
+   *
    * This API can be used to obtain strings, numbers, booleans and the JSON
    * reprentation of complex members.
+   *
    * @param {string} fieldName - The name of the field.
    * @returns {number|string|boolean|JSON} The value of the field.
    */
@@ -584,9 +591,10 @@ class Samples {
   /**
    * Gets a JSON object with the values of all the fields of this sample.
    *
-   * @param {number} index The index of the sample
+   * @param {number} index The index of the sample.
    * @param {string} [memberName] The name of the complex member. The type of the member with name memberName must be an array, sequence, struct, value or union.
-   * @returns {JSON} The obtained JSON object
+   * @returns {JSON} The obtained JSON object.
+   *
    * See :ref:`Accessing the data samples`.
    */
   getJson (index, memberName) {
@@ -709,19 +717,21 @@ class SampleIterator {
    * SampleIterators are accessed using :attr:`Input.samples.dataIterator`
    * and :meth:`Input.samples.get`.
    *
-   * see :attr:`Samples.dataIterator`
-   * see :class:`ValidSampleIterator`
-   *
-   * @property {boolean} validData - Whether or not the current sample contains valid data.
-   * @property {SampleInfo} infos - The meta data associated with the current sample
-   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C
+   * see :attr:`Samples.dataIterator` and :class:`ValidSampleIterator`.
    *
    * This class provides both an iterator and iterable, meaning there are the following
    * options to use it::
    *
-   *   for (let sample of input.samples.dataIterator)
+   *   // option 1
    *   const iterator = input.samples.dataIterator.iterator()
-   *   const individualSample = input.samples.get()
+   *   // option 2
+   *   const individualSample = input.samples.get(0)
+   *   // option 3
+   *   for (let sample of input.samples.dataIterator)
+   *
+   * @property {boolean} validData - Whether or not the current sample contains valid data.
+   * @property {SampleInfo} infos - The meta data associated with the current sample.
+   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
    */
   constructor (input, index) {
     this.input = input
@@ -747,8 +757,6 @@ class SampleIterator {
   /**
    * Provides access to this sample's meta-data.
    *
-   * see :class:`SampleInfo`
-   *
    * @type {SampleInfo}
    */
   get info () {
@@ -758,9 +766,10 @@ class SampleIterator {
   /**
    * Returns a JSON object with the values of all the fields of this sample.
    *
+   * see :ref:`Accessing the data samples`.
+   *
    * @param {string} [memberName] - The name of the complex member or field to obtain.
    * @returns {JSON} The obtained JSON object.
-   * see :ref:`Accessing the data samples`
    */
   getJson (memberName) {
     return this.input.samples.getJson(this.index, memberName)
@@ -863,8 +872,9 @@ class ValidSampleIterator extends SampleIterator {
    * The iterator generator (used by the iterable).
    *
    * Using this method it is possible to create your own iterable::
-   *   const iterator = input.samples.validDataIterator.iterator()
-   *   const singleSample = iterator.next().value
+   *
+   *  const iterator = input.samples.validDataIterator.iterator()
+   *  const singleSample = iterator.next().value
    *
    * @generator
    * @yields {ValidSampleIterator} The next sample in the queue with valid data
@@ -893,8 +903,8 @@ class Input {
    * To get an Input object, use :meth:`Connector.getInput`.
    *
    * Attributes:
-   *  * connector (:class:`Connector`) - The Connector creates this Input
-   *  * name (string) - The name of the Input (the name used in :meth:`Connector.getInput`)
+   *  * connector (:class:`Connector`) - The Connector creates this Input.
+   *  * name (string) - The name of the Input (the name used in :meth:`Connector.getInput`).
    *  * native (pointer) - A native handle that allows accessing additional *Connext DDS* APIs in C.
    *  * matchedPublications (JSON) - A JSON object containing information about all the publications currently matched with this Input.
    */
@@ -959,10 +969,7 @@ class Input {
    * Wait for this Input to receive data.
    *
    * .. note::
-   *   This operation is asynchronous
-   *
-   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
-   * for data to be received.
+   *   This operation is asynchronous.
    *
    * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
@@ -1003,7 +1010,7 @@ class Input {
    * Wait for this Input to match or unmatch a compatible DDS Subscription.
    *
    * .. note::
-   *   This operation is asynchronous
+   *   This operation is asynchronous.
    *
    * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
    * for a match (or unmatch) to occur.

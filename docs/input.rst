@@ -36,7 +36,7 @@ resolved when new data is available, or rejected if the supplied timeout expires
   await input.wait()
 
 The method :meth:`Connector.wait()` has the same behavior as :meth:`Input.wait()`,
-but the returned promise will be resolved when data is available on any of the
+but the returned promise will be resolved when data is available on *any* of the
 :class:`Input` objects within the :class:`Connector`.
 
 .. code-block:: javascript
@@ -85,7 +85,7 @@ using the supplied :attr:`Samples.dataIterator` iterable.
    }
 
 If you don't need to access the meta-data (see :ref:`Accessing the SampleInfo`),
-the simplest way to access the data is to use :attr:`Samples.validDataIterator` to skip
+the simplest way to access the data is to use :attr:`Samples.validDataIterator`, to skip
 samples with invalid data:
 
 .. code-block:: javascript
@@ -110,7 +110,7 @@ be incremented outside of a ``for`` loop:
 .. warning::
    All the methods described in this section return generators.
    Calling read/take again invalidates all generators currently in
-   use. For that reason, it is not recommended to store any generator.
+   use.
 
 :meth:`Samples.getJson` can receive a ``fieldName`` to only return the fields of a
 complex member. In addition to ``getJson``, you can get the values of
@@ -163,23 +163,27 @@ Matching with a Publication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The method :meth:`Input.waitForPublications()` can be used to detect when a compatible
-DDS publication is matched or stops matching. It returns a promise which resolves to
+DDS publication is matched or unmatched. It returns a promise which resolves to
 the change in the number of matched publications since the last time it was called::
 
    // From within an async function. Otherwise, use traditional .then() syntax
    let changeInMatches = await input.waitForPublications()
 
-For example, if a new compatible publication is discovered within the specified
-``timeout``, the promise will resolve to 1.
+For example, if 1 new compatible publication is discovered within the specified
+``timeout``, the promise will resolve to 1. If an existing, matched publication
+unmatched within the specified ``timeout``, the promise will resolve to -1.
 
-You can obtain information about the existing matched publications with
-:attr:`Input.matchedPublications`.
+You can obtain information about the existing matched publications through the
+:attr:`Input.matchedPublications` property:
 
 .. code-block:: javascript
 
    input.matchedPublications.forEach((match) => {
       pubName = match.name
    }
+
+:attr:`Input.matchedPublications` returns a JSON object containing meta-information
+about matched entities.
 
 Class reference: Input, Samples, SampleIterator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

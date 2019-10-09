@@ -105,8 +105,8 @@ For example, if a new compatible subscription is discovered within the specified
 (due to e.g., the application being closed) during the specified ``timeout``, the
 Promise will resolve to -1.
 
-You can obtain information about the existing matched subscriptions with
-:attr:`Output.matchedSubscriptions`:
+You can obtain information about the existing matched subscriptions with the
+:attr:`Output.matchedSubscriptions` property:
 
 .. code-block:: javascript
 
