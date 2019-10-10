@@ -6,12 +6,12 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var sleep = require('sleep');
-var rti   = require('rticonnextdds-connector');
+const sleep = require('sleep');
+const rti   = require('rticonnextdds-connector');
 
-var connector = new rti.Connector("MyParticipantLibrary::Zero",__dirname + "/../ShapeExample.xml");
-var input = connector.getInput("MySubscriber::MySquareReader");
-var output = connector.getOutput("MyPublisher::MySquareWriter");
+const connector = new rti.Connector("MyParticipantLibrary::Zero",__dirname + "/../ShapeExample.xml");
+const input = connector.getInput("MySubscriber::MySquareReader");
+const output = connector.getOutput("MyPublisher::MySquareWriter");
 
 connector.on('on_data_available',
    function() {
@@ -19,7 +19,7 @@ connector.on('on_data_available',
      for (var i=0; i < input.samples.getLength(); i++) {
          if (input.infos.isValid(i)) {
              //get the received sample
-             var mysample = input.samples.getJSON(i)
+             const mysample = input.samples.getJSON(i)
              //change the color
              mysample.color = 'YELLOW'
             //set the sample to write

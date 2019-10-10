@@ -6,9 +6,9 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var expect = require('chai').expect
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
+const path = require('path')
+const expect = require('chai').expect
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
@@ -101,7 +101,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setString with dictionary value should throw Error', function () {
+    it('setString with JSON value should throw Error', function () {
       expect(function () {
         const stringField = 'color'
         output.instance.setString(stringField, { key: 'value' })
@@ -123,7 +123,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setNumber with dictionary value should throw Error and ' +
+    it('setNumber with JSON value should throw Error and ' +
       'subscriber should not get a message with erroneous field data', function () {
       expect(function () {
         const numberField = 'x'
@@ -146,7 +146,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setBoolean with dictionary value should throw Error and ' +
+    it('setBoolean with JSON value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
       expect(function () {
         const booleanField = 'z'
@@ -161,6 +161,24 @@ describe('Output Tests', function () {
         const str = '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'
         output.instance.setFromJSON(JSON.parse(str))
       }).to.throw(Error)
+    })
+
+    it('Use the type independent set with invalid fieldName', function () {
+      expect(function () {
+        output.instance.set(123, 123)
+      }).to.throw(TypeError)
+    })
+
+    it('Calling the type-independent set with non-existent field name', function () {
+      expect(function () {
+        output.instance.set('non-existent-member', 123)
+      }).to.throw(rti.DDSError)
+    })
+
+    it('Try to set a bad JSON value', function () {
+      expect(function () {
+        output.instance.set('whatever', { x: 12, y: 30 })
+      }).to.throw(rti.DDSError)
     })
   })
 })

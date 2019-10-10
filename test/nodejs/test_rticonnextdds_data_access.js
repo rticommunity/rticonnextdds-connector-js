@@ -6,22 +6,29 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var os = require('os')
-var ffi = require('ffi')
-var chai = require('chai')
-var chaiAsPromised = require('chai-as-promised')
-var expect = chai.expect
+const path = require('path')
+const os = require('os')
+const ffi = require('ffi')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const expect = chai.expect
 chai.config.includeStack = true
 chai.use(chaiAsPromised)
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
-// These tests test the different wats to access data in Instance and SampleIterator
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+// We provide a much shorter timeout to operations that we expect to timeout.
+// This is to prevent us from hanging the tests for 10s
+const testExpectFailureTimeout = 500
+
+// These tests test the different ways to access data in Instance and SampleIterator
 describe('Data access tests with a pre-populated input', function () {
   let connector = null
   let output = null
@@ -57,9 +64,10 @@ describe('Data access tests with a pre-populated input', function () {
 
     // Wait for the input and output to dicovery each other
     try {
-      const matches = await output.waitForSubscriptions(2000)
+      const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
       expect(matches).to.be.at.least(1)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }
@@ -68,8 +76,9 @@ describe('Data access tests with a pre-populated input', function () {
     output.write()
     // Wait for data to arrive on input
     try {
-      await prepopulatedInput.wait(2000)
+      await prepopulatedInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }
@@ -80,7 +89,7 @@ describe('Data access tests with a pre-populated input', function () {
     expect(sample.validData).to.be.true
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take all samples here to ensure that next test case has a clean input
     prepopulatedInput.take()
     connector.close()
@@ -88,7 +97,7 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('getNumber should return a number', () => {
     expect(sample.getNumber('my_long')).to.deep.equals(10).and.is.a('number')
-    expect(sample.getValue('my_long')).to.deep.equals(10).and.is.a('number')
+    expect(sample.get('my_long')).to.deep.equals(10).and.is.a('number')
   })
 
   it('getString on a number field should return a string', () => {
@@ -98,7 +107,7 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('getBoolean should return a boolean', () => {
     expect(sample.getBoolean('my_optional_bool')).to.be.true.and.is.a('boolean')
-    expect(sample.getValue('my_optional_bool')).to.be.true.and.is.a('boolean')
+    expect(sample.get('my_optional_bool')).to.be.true.and.is.a('boolean')
   })
 
   it('getNumber on a boolean field should return a number', () => {
@@ -116,16 +125,16 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('access values and sizes of sequences and arrays', () => {
     expect(sample.getNumber('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
-    expect(sample.getValue('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
+    expect(sample.get('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
     expect(sample.getNumber('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
-    expect(sample.getValue('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
+    expect(sample.get('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
     // The '#' appended to the type name should provide the length
     expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
-    expect(sample.getValue('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
+    expect(sample.get('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
     expect(sample.getNumber('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
-    expect(sample.getValue('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
+    expect(sample.get('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
     expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
-    expect(sample.getValue('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
+    expect(sample.get('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
   })
 
   it('access values past the end of a sequence', () => {
@@ -160,12 +169,12 @@ describe('Data access tests with a pre-populated input', function () {
   it('obtain the selected member of a union with # syntax', () => {
     expect(sample.getString('my_int_union#')).to.deep.equals('my_long').and.is.a('string')
     expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
-    expect(sample.getValue('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
+    expect(sample.get('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
   })
 
   it('obtain an unset optional member', () => {
     expect(sample.getNumber('my_optional_long')).to.deep.equals(null)
-    expect(sample.getValue('my_optional_long')).to.deep.equals(null)
+    expect(sample.get('my_optional_long')).to.deep.equals(null)
     expect(sample.getJson().my_optional_long).to.deep.equals(undefined)
   })
 
@@ -264,36 +273,36 @@ describe('Data access tests with a pre-populated input', function () {
     })
   }
 
-  it('get complex members using getValue', () => {
-    const thePoint = sample.getValue('my_point')
+  it('get complex members using get', () => {
+    const thePoint = sample.get('my_point')
     // Since my_point is a struct it should have been converted to a JSON object
     expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
     expect(thePoint.x).to.deep.equals(3)
     expect(thePoint.y).to.deep.equals(4)
 
-    const thePointSequence = sample.getValue('my_point_sequence')
+    const thePointSequence = sample.get('my_point_sequence')
     expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
     expect(thePointSequence).to.be.an.instanceof([].constructor)
     expect(thePointSequence[0]).to.deep.equals({ x: 10, y: 20 })
     expect(thePointSequence[1]).to.deep.equals({ x: 11, y: 21 })
 
-    const thePointArray = sample.getValue('my_point_array')
+    const thePointArray = sample.get('my_point_array')
     expect(JSON.parse(JSON.stringify(thePointArray))).to.deep.equals(thePointArray)
     expect(thePointArray).to.be.an.instanceof([].constructor)
     expect(thePointArray[0]).to.deep.equals({ x: 0, y: 0 })
     expect(thePointArray[4]).to.deep.equals({ x: 5, y: 15 })
 
-    const thePointAlias = sample.getValue('my_point_alias')
+    const thePointAlias = sample.get('my_point_alias')
     // Alias should be resolved so we now have a JSON object
     expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
     expect(thePointAlias.x).to.deep.equals(30)
     expect(thePointAlias.y).to.deep.equals(40)
 
-    const theOptionalPoint = sample.getValue('my_optional_point')
+    const theOptionalPoint = sample.get('my_optional_point')
     // Unset optional should return null
     expect(theOptionalPoint).to.deep.equals(null)
 
-    const theUnion = sample.getValue('my_union')
+    const theUnion = sample.get('my_union')
     // Since no trailing '#' was supplied we should now have the JSON object
     expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
     expect(theUnion).to.deep.equals({ my_int_sequence: [10, 20, 30] })
@@ -356,7 +365,7 @@ describe('Tests with a testOutput and testInput', () => {
     my_uint64: 18014398509481984
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
@@ -367,10 +376,16 @@ describe('Tests with a testOutput and testInput', () => {
     expect(testOutput).to.exist
 
     // Wait for the input and output to dicovery each other
-    expect(testOutput.waitForSubscriptions(2000)).to.eventually.become(1)
+    try {
+      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take all samples here to ensure that next test case has a clean input
     testInput.take()
     connector.close()
@@ -446,14 +461,15 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
     testInput.take()
     const receivedJsonObject = testInput.samples.get(0).getJson()
-    expect(receivedJsonObject).deep.equals(testJsonObject)
+    expect(receivedJsonObject).to.deep.equals(testJsonObject)
   })
 
   it('Bad conversion from string in JSON object', () => {
@@ -467,7 +483,7 @@ describe('Tests with a testOutput and testInput', () => {
       'my_int_sequence[1]',
       'my_enum',
       'my_uint64']
-    for (var field of fieldNames) {
+    for (const field of fieldNames) {
       expect(() => {
         testOutput.instance.setFromJson({ field: 'this is not a number' })
         console.log(field + ' did not raise an exception')
@@ -475,24 +491,71 @@ describe('Tests with a testOutput and testInput', () => {
     }
   })
 
-  it('Attempt to access past the end of a sequence using setFromJson', () => {
+  it('Attempt to access past the end of a sequence using setFromJson', async () => {
     expect(() => {
       // my_int_sequence has a bound of 10 and we are supplying 11 elements
       testOutput.instance.setFromJson({ my_int_sequence: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] })
     }).to.throw(rti.DDSError)
+    // Ensure that the previous error didn't corrupt the instance
+    const sent = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    testOutput.instance.set('my_int_sequence', sent)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const received = testInput.samples.get(0).get('my_int_sequence')
+    expect(received).to.deep.equals(sent)
+  })
+
+  it('Attempt to pass an invalid JSON object to setFromJson', async () => {
+    expect(() => {
+      testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, bad: 4 }] })
+    }).to.throw(rti.DDSError)
+    // Ensure that the previous error did not corrupt the instance
+    const sent = [{ x: 1, y: 2 }, { x: 3, y: 4 }]
+    testOutput.instance.set('my_point_sequence', sent)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const received = testInput.samples.get(0).get('my_point_sequence')
+    expect(received).to.deep.equals(sent)
+  })
+
+  it('The type-independent get should return the same result as getJson', async () => {
+    testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, y: 4 }] })
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    expect(sample.getJson('my_point_sequence')).to.deep.equals(sample.get('my_point_sequence'))
   })
 
   it('Set a boolean field using setNumber and check the resultant value on an input', async () => {
     testOutput.instance.setNumber('my_optional_bool', 1)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
     testInput.take()
-    const theOptionalBool = testInput.samples.get(0).getValue('my_optional_bool')
+    const theOptionalBool = testInput.samples.get(0).get('my_optional_bool')
     expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
   })
 
@@ -500,14 +563,15 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setString('my_string', '1234')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught err: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
     testInput.take()
-    const theNumericString = testInput.samples.get(0).getValue('my_string')
-    // Due to CON-139 getValue returns strings as numbers if they represent a number
+    const theNumericString = testInput.samples.get(0).get('my_string')
+    // Due to CON-139 get returns strings as numbers if they represent a number
     expect(theNumericString).to.be.a('number').and.deep.equals(1234)
   })
 
@@ -517,7 +581,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_array[4].x', 5)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -525,18 +589,18 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getValue('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
-    expect(sample.getValue('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
-    expect(sample.getValue('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
-    expect(sample.getValue('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
-    expect(sample.getValue('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
+    expect(sample.get('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
+    expect(sample.get('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
+    expect(sample.get('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
+    expect(sample.get('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
+    expect(sample.get('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
   })
 
   it('Change union members', async () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -550,7 +614,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Caught error: ' + err)
@@ -566,10 +630,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -579,7 +643,12 @@ describe('Tests with a testOutput and testInput', () => {
     // Change the union
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    await testInput.wait(2000)
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(false).to.deep.equals(true)
+    }
     testInput.take()
     sample = testInput.samples.get(0)
     expect(sample.getString('my_union#')).to.deep.equals('my_long')
@@ -591,10 +660,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_alias.x', 202)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -608,10 +677,10 @@ describe('Tests with a testOutput and testInput', () => {
   it('Get an unset optional boolean', async () => {
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
-      console.log('Error caught: ' + err)
+      console.log('Caught error: ' + err)
       expect(false).to.deep.equals(true)
     }
     testInput.take()
@@ -624,7 +693,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_long', null)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -643,7 +712,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setBoolean('my_optional_bool', null)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -664,7 +733,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_point_alias')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -688,7 +757,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_union.my_int_sequence')
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -700,7 +769,7 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point.x')).to.deep.equals(3)
   })
 
-  it('Clear a sequence with a dictionary', async () => {
+  it('Clear a sequence with a JSON object', async () => {
     // Set the non-default values
     testOutput.instance.setFromJson(testJsonObject)
     testOutput.instance.setBoolean('my_optional_bool', true)
@@ -720,7 +789,7 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -758,7 +827,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point_sequence[1].x', 44)
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -773,7 +842,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setFromJson({ my_int_sequence: [] })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -809,7 +878,7 @@ describe('Tests with a testOutput and testInput', () => {
     })
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -826,6 +895,74 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point_array[0].y')).to.deep.equals(20)
     expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(14)
   })
+
+  it('Check the type-independent Instance.set and Sample.get method', async () => {
+    // Set one of each type using the type-independent set API
+    testOutput.instance.set('my_string', 'Hello, World!')
+    testOutput.instance.set('my_boolean', true)
+    testOutput.instance.set('my_int64', 42)
+    testOutput.instance.set('my_point_sequence[0].x', 3)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    expect(sample.get('my_string')).to.deep.equals('Hello, World!')
+    expect(sample.get('my_boolean')).to.deep.equals(true)
+    expect(sample.get('my_int64')).to.deep.equals(42)
+    expect(sample.get('my_point_sequence[0].x')).to.deep.equals(3)
+  })
+
+  it('Reset an optional member using the type independent set method', async () => {
+    testOutput.instance.set('my_optional_bool', null)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_optional_bool')).to.deep.equals(null)
+  })
+
+  it('Test nested JSON object syntax', async () => {
+    testOutput.instance.setFromJson({ 'my_point_sequence[2].y': 153 })
+    testOutput.instance.setFromJson({ 'my_point_sequence[2].x': 111 })
+    testOutput.instance.set('my_point_sequence[3]', { x: 444, y: 555 })
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point_sequence[2]')).to.deep.equals({ x: 111, y: 153 })
+    expect(testInput.samples.get(0).get('my_point_sequence[3]')).to.deep.equals({ x: 444, y: 555 })
+  })
+
+  // Confirm desired behaviour for this
+  it('Use Instance.set to set a complex member', async () => {
+    const jsonObj = { x: 9, y: 12 }
+    testOutput.instance.set('my_point', jsonObj)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point')).to.deep.equals(jsonObj)
+  })
 })
 
 describe('Tests with two readers and two writers', () => {
@@ -835,7 +972,7 @@ describe('Tests with two readers and two writers', () => {
   let testOutput2 = null
   let testInput2 = null
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
@@ -850,11 +987,23 @@ describe('Tests with two readers and two writers', () => {
     expect(testOutput2).to.exist
 
     // Wait for the input and output to dicovery each other
-    expect(testOutput1.waitForSubscriptions(2000)).to.eventually.become(1)
-    expect(testOutput2.waitForSubscriptions(2000)).to.eventually.become(1)
+    try {
+      const newMatches = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    try {
+      const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     // Take any data
     testInput1.take()
     testInput2.take()
@@ -863,43 +1012,95 @@ describe('Tests with two readers and two writers', () => {
 
   // Since we have not written any data, all different forms of wait for data
   // should timeout
-  it('waiting for data on connector should timeout', () => {
-    return expect(connector.waitForData(500)).to.be.rejectedWith(rti.TimeoutError)
-  })
-  it('waiting for data on testInput should timeout', () => {
-    return expect(testInput1.wait(500)).to.be.rejectedWith(rti.TimeoutError)
-  })
-  it('waiting for data on testInput2 should timeout', () => {
-    return expect(testInput2.wait(500)).to.be.rejectedWith(rti.TimeoutError)
+  it('waiting for data on connector should timeout', async () => {
+    try {
+      await connector.waitForData(testExpectFailureTimeout)
+      console.log('Expected connector.waitForData to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Writing data on a testOutput1 should wake up connector.waitForData', () => {
+  it('waiting for data on testInput should timeout', async () => {
+    try {
+      await testInput1.wait(testExpectFailureTimeout)
+      console.log('Expected testInput1.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
+  })
+
+  it('waiting for data on testInput2 should timeout', async () => {
+    try {
+      await testInput2.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
+  })
+
+  it('Writing data on a testOutput1 should wake up connector.waitForData', async () => {
     testOutput1.write()
-    return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+    try {
+      await connector.waitForData(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput1 should wake up testInput1.wait', () => {
+  it('Writing data on a testOutput1 should wake up testInput1.wait', async () => {
     testOutput1.write()
-    return expect(testInput1.wait(500)).to.eventually.be.fulfilled
+    try {
+      await testInput1.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput1 should not wake up testInput2.wait', () => {
+  it('Writing data on a testOutput1 should not wake up testInput2.wait', async () => {
     testOutput1.write()
-    return expect(testInput2.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    try {
+      await testInput2.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Writing data on a testOutput2 should wake up connector.waitForData', () => {
+  it('Writing data on a testOutput2 should wake up connector.waitForData', async () => {
     testOutput2.write()
-    return expect(connector.waitForData(500)).to.eventually.be.fulfilled
+    try {
+      await connector.waitForData(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput2 should wake up testInput2.wait', () => {
+  it('Writing data on a testOutput2 should wake up testInput2.wait', async () => {
     testOutput2.write()
-    return expect(testInput2.wait(500)).to.eventually.be.fulfilled
+    try {
+      await testInput2.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 
-  it('Writing data on a testOutput2 should not wake up testInput1.wait', () => {
+  it('Writing data on a testOutput2 should not wake up testInput1.wait', async () => {
     testOutput2.write()
-    return expect(testInput1.wait(500)).to.eventually.be.rejectedWith(rti.TimeoutError)
+    try {
+      await testInput1.wait(testExpectFailureTimeout)
+      console.log('Expected testInput2.wait to timeout but it did not')
+      expect(true).to.deep.equals(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 })

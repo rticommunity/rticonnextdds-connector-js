@@ -138,13 +138,13 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     <!-- Domain Library -->
     <domain_library name="MyDomainLibrary">
-        <domain name="MyDomain" domain_id="0">
+        <domain name="MyDomain" domain_id="229">
             <register_type name="ShapeType" type_ref="ShapeType" />
             <topic name="Square" register_type_ref="ShapeType"/>
             <topic name="Circle" register_type_ref="ShapeType"/>
             <topic name="SingleUseShape" register_type_ref="ShapeType"/>
         </domain>
-        <domain name="DataAccessDomain" domain_id="0">
+        <domain name="DataAccessDomain" domain_id="229">
             <register_type name="MyType" type_ref="MyType" />
             <topic name="TestTopic" register_type_ref="MyType"/>
             <topic name="TestTopic2" register_type_ref="MyType"/>
@@ -152,7 +152,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
         <!-- Since the Discovery Tests check how many matches etc. have occurred
              we perform the tests in a separate domain, to avoid interference
              from other tests -->
-        <domain name="DiscoveryDomain" domain_id="1">
+        <domain name="DiscoveryDomain" domain_id="228">
             <register_type name="ShapeType" type_ref="ShapeType" />
             <topic name="Square" register_type_ref="ShapeType"/>
         </domain>

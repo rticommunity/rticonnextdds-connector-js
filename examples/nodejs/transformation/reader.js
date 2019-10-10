@@ -6,8 +6,8 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var rti = require('rticonnextdds-connector')
-var path = require('path')
+const rti = require('rticonnextdds-connector')
+const path = require('path')
 const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
@@ -24,6 +24,7 @@ const run = async () => {
   } catch (err) {
     console.log('Error encountered: ' + err)
   }
+  connector.close()
 }
 
 run()

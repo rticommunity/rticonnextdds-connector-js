@@ -6,15 +6,18 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var expect = require('chai').expect
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-var sleep = require('sleep')
+const path = require('path')
+const expect = require('chai').expect
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
+
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
 
 // Test Parameterization- describe block will execute once for each param
 const params = ['read', 'take']
@@ -24,13 +27,20 @@ params.forEach((retrievalMethod) => {
     var input, output, testMsg
 
     // Initialization before all tests execute
-    before(function () {
+    before(async function () {
       testMsg = { x: 1, y: 1, z: true, color: 'BLUE', shapesize: 5 }
       const participantProfile = 'MyParticipantLibrary::Zero'
       const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
       connector = new rti.Connector(participantProfile, xmlProfile)
       input = connector.getInput('MySubscriber::MySquareReader')
       output = connector.getOutput('MyPublisher::MySquareWriter')
+      try {
+        const matches = await input.waitForPublications(testExpectSuccessTimeout)
+        expect(matches).to.be.at.least(1)
+      } catch (err) {
+        console.log('Caught err: ' + err)
+        expect(true).to.deep.equals(false)
+      }
     })
 
     // Clean-up after all tests execute
@@ -40,19 +50,22 @@ params.forEach((retrievalMethod) => {
     })
 
     // Initialization done before each test executes
-    beforeEach(function () {
-      // take pre-existing samples from middleware chache
-      input.take()
+    beforeEach(async function () {
       output.instance.setFromJSON(testMsg)
       output.write()
-      // loop to allow sometime for discovery of Input and Output objects
-      for (var i = 0; i < 20; i++) {
-        sleep.usleep(500)
-        input[retrievalMethod]()
-        if (input.samples.getLength() > 0) {
-          break
-        }
+      try {
+        await input.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Caught err: ' + err)
+        expect(true).to.deep.equals(false)
       }
+      input[retrievalMethod]()
+      expect(input.samples.length).to.be.at.least(1)
+    })
+
+    afterEach(function () {
+      // take any samples from middleware chache
+      input.take()
     })
 
     it('samples length should be 1', function () {

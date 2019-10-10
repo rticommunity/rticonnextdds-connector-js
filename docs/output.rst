@@ -1,17 +1,12 @@
 Writing data (Output)
 =====================
 
-.. testsetup:: *
-
-   var rti = require('rticonnextdds_connector')
-   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
-
 Getting the Output
 ~~~~~~~~~~~~~~~~~~
 
 To write a data sample, first look up an output:
 
-.. testcode::
+.. code-block:: javascript
 
    output = connector.getOutput('MyPublisher::MySquareWriter')
 
@@ -24,14 +19,14 @@ the *publisher* named *MyPublisher*::
    </publisher>
 
 This *publisher* is defined inside the *domain_participant* selected to create
-this ``connector`` (see :ref:`Creating a new Connector`).
+this :class:`Connector` (see :ref:`Creating a new Connector`).
 
 Populating the data sample
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Then set the ``Output.instance`` fields. You can set them member by member:
+The next step is to set the :class:`Instance` fields. You can set them member by member:
 
-.. testcode::
+.. code-block:: javascript
 
    output.instance.setNumber('x', 1)
    output.instance.setNumber('y', 2)
@@ -40,12 +35,12 @@ Then set the ``Output.instance`` fields. You can set them member by member:
 
 Or using a JSON object:
 
-.. testcode::
+.. code-block:: javascript
 
    output.instance.setFromJson({ x: 1, y: 2, shapesize: 30, color: 'BLUE' })
 
 The name of each member corresponds to the type assigned to this output in XML.
-For example::
+For example, the XML configuration corresponding to the above code snippets is::
 
    <struct name="ShapeType">
      <member name="color" type="string" stringMaxLength="128" key="true" default="RED"/>
@@ -59,7 +54,7 @@ See :class:`Instance` and :ref:`Accessing the data` for more information.
 Writing the data sample
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-To write the values you set in ``Output.instance`` call :meth:`Output.write()`::
+To write the values have been set in ``Output.instance``, call :meth:`Output.write()`::
 
    output.write()
 
@@ -72,52 +67,55 @@ data sample::
 The write method can also receive a JSON object specifing several options. For example, to
 write with a specific timestamp:
 
-.. testcode::
+.. code-block:: javascript
 
   output.write({ source_timestamp: 100000 })
 
 It is also possible to dispose or unregister an instance:
 
-
-.. testcode::
+.. code-block:: javascript
 
   output.write({ action: 'dispose' })
   output.write({ action: 'unregister' })
 
 In these two cases, only the *key* fields in the ``Output.instance`` are relevant.
+For more information on the supported parameters to this ``write`` call please see
+:meth:`Output.write`.
 
 Matching with a Subscription
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before writing, the method :meth:`Output.waitForSubscriptions()` can be used to
-detect when a compatible DDS subscription is matched or stops matching. It returns
+detect when a compatible DDS subscription is matched or unmatched. It returns
 a ``Promise`` that will resolve to the change in the number of matched subscriptions
 since the last time it was called::
 
-   // Using async/await
-   const waitForMatches = async () => {
-     let changeInMatches = await output.waitForSubscriptions()
-   }
+   // From within an async function
+    let changeInMatches = await output.waitForSubscriptions()
 
    // Using traditional Promises
-   output.waitForSubscriptions(1000).then((res) => {
-     // The Promise resolved successfully
-     let changesInMatches = res
+   output.waitForSubscriptions().then((res) => {
+     // The Promise resolved successfully and the number of matches is stored in res
    }).catch((err) => {
-     // Handle the error
+     // Handle the error (which is possibly a timeout)
    }
 
 For example, if a new compatible subscription is discovered within the specified
-``timeout``, the function returns 1.
+``timeout``, the Promise will resolve to 1. If an existing subscription unmatched
+(due to e.g., the application being closed) during the specified ``timeout``, the
+Promise will resolve to -1.
 
-You can obtain information about the existing matched subscriptions with
-:attr:`Output.matchedSubscriptions`:
+You can obtain information about the existing matched subscriptions with the
+:attr:`Output.matchedSubscriptions` property:
 
-.. testcode:: node
+.. code-block:: javascript
 
    output.matchedSubscriptions.forEach((match) => {
     subName = match.name
    }
+
+:attr:`Output.matchedSubscriptions` returns a JSON object containing meta-information
+about matched entities.
 
 Class reference: Output, Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,12 +124,10 @@ Output class
 ^^^^^^^^^^^^
 
 .. autoclass:: Output
-
    :members:
 
 Instance class
 ^^^^^^^^^^^^^^
 
 .. autoclass:: Instance
-
    :members:

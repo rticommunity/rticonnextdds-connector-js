@@ -6,20 +6,27 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var os = require('os')
-var ffi = require('ffi')
-var chai = require('chai')
-var chaiAsPromised = require('chai-as-promised')
-var expect = chai.expect
+const path = require('path')
+const os = require('os')
+const ffi = require('ffi')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const expect = chai.expect
 chai.config.includeStack = true
 chai.use(chaiAsPromised)
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
+
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+// We provide a much shorter timeout to operations that we expect to timeout.
+// This is to prevent us from hanging the tests for 10s
+const testExpectFailureTimeout = 500
 
 describe('Input Tests', function () {
   let connector = null
@@ -67,20 +74,31 @@ describe('Subscriber not automatically enabled tests', () => {
     connector.close()
   })
 
-  it('Entities should not auto-discover each other if QoS is set appropriately', () => {
+  it('Entities should not auto-discover each other if QoS is set appropriately', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
     expect(output).to.exist
     // The input is not automatically enabled in this QoS profile, meaning the
     // output should not match with it
-    return expect(output.waitForSubscriptions(200)).to.be.rejectedWith(rti.TimeoutError)
+    try {
+      await output.waitForSubscriptions(testExpectFailureTimeout)
+      console.log('Expected output.waitForSubscriptions to timeout but it did not')
+      expect(true).to.deep.equal(false)
+    } catch (err) {
+      expect(err).to.be.an.instanceof(rti.TimeoutError)
+    }
   })
 
-  it('Calling getInput should enable the input', (done) => {
+  it('Calling getInput should enable the input', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
     expect(output).to.exist
     connector.getInput('TestSubscriber::TestReader')
-
-    expect(output.waitForSubscriptions(2000)).to.eventually.become(1).notify(done)
+    try {
+      const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
   })
 })
 

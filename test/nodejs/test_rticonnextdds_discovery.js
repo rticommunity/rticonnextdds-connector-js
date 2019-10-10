@@ -6,13 +6,13 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var path = require('path')
-var chai = require('chai')
-var chaiAsPromised = require('chai-as-promised')
-var expect = chai.expect
+const path = require('path')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const expect = chai.expect
 chai.config.includeStack = true
 chai.use(chaiAsPromised)
-var rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
+const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
@@ -25,6 +25,12 @@ var discoveryConnector = null
 var discoveryConnectorNoEntityNames = null
 var readerOnlyConnector = null
 var writerOnlyConnector = null
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+// We provide a much shorter timeout to operations that we expect to timeout.
+// This is to prevent us from hanging the tests for 10s
+const testExpectFailureTimeout = 500
 
 const getDiscoveryConnector = () => {
   if (discoveryConnector === null) {
@@ -98,19 +104,26 @@ const cleanupConnectors = () => {
   }
 }
 
-describe('Discovery tests', () => {
+describe('Discovery tests', function () {
+  // By default, mocha will kill all tests if they take longer than 2s. Some of
+  // the tests in this block can take up to 1.5s so to be safe we increase this
+  // timeout. Note, this means we cannot use fat arrow functions here (since 'this'
+  // is not binded in fat arrows).
+  this.timeout('30s')
+
   afterEach(() => {
     cleanupConnectors()
   })
 
-  it('Create a Connector object with an input and no ouput', async () => {
+  it('Create a Connector object with an input and no ouput', async function () {
     const input = getDiscoveryReaderOnlyInput()
     // At this point we should not have matched anything
     const matches = input.matchedPublications
     expect(matches.length).to.deep.equals(0)
     // We should timeout if we attempt to wait for a match
     try {
-      await input.waitForPublications(500)
+      const newMatches = await input.waitForPublications(testExpectFailureTimeout)
+      console.log('Expected waitForPublications to timeout, but we matched ' + newMatches + ' publications')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -118,14 +131,15 @@ describe('Discovery tests', () => {
     }
   })
 
-  it('Create a Connector object with an output and no input', async () => {
+  it('Create a Connector object with an output and no input', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // At this point we should not have matched anything
     const matches = output.matchedSubscriptions
     expect(matches.length).to.deep.equals(0)
     // We should timeout if we attempt to wait for a match
     try {
-      await output.waitForSubscriptions(500)
+      const newMatches = await output.waitForSubscriptions(testExpectFailureTimeout)
+      console.log('Expected waitForSubscriptions to timeout, but we matched ' + newMatches + ' subscriptions')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -133,18 +147,19 @@ describe('Discovery tests', () => {
     }
   })
 
-  it('Check matching between a single input and output', async () => {
+  it('Check matching between a single input and output', async function () {
     const connector = getDiscoveryConnector()
     const input = connector.getInput('MySubscriber::MyReader')
     const output = connector.getOutput('MyPublisher::MyWriter')
 
     // Both the input and output should match each other and nothing else
     try {
-      let changesInMatches = await input.waitForPublications(2000)
+      let changesInMatches = await input.waitForPublications(testExpectSuccessTimeout)
       expect(changesInMatches).to.deep.equals(1)
-      changesInMatches = await output.waitForSubscriptions(2000)
+      changesInMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
       expect(changesInMatches).to.deep.equals(1)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -169,17 +184,19 @@ describe('Discovery tests', () => {
     // straight away
     while (totalMatches < 2) {
       try {
-        totalMatches += await output.waitForSubscriptions(2000)
+        totalMatches += await output.waitForSubscriptions(testExpectSuccessTimeout)
       } catch (err) {
+        console.log('Caught error: ' + err)
         // Fail the test
         expect(true).to.deep.equals(false)
       }
     }
     expect(totalMatches).to.be.at.least(2)
-  
+
     // Another call to waitForSubscriptions should timeout
     try {
-      await output.waitForSubscriptions(300)
+      const newMatches = await output.waitForSubscriptions(testExpectFailureTimeout)
+      console.log('Expected waitForSubscriptions to timeout, but we matched ' + newMatches + ' subscriptions')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -202,8 +219,9 @@ describe('Discovery tests', () => {
     // straight away
     while (totalMatches < 2) {
       try {
-        totalMatches += await input.waitForPublications(2000)
+        totalMatches += await input.waitForPublications(testExpectSuccessTimeout)
       } catch (err) {
+        console.log('Caught error: ' + err)
         // Fail the test
         expect(true).to.deep.equals(false)
       }
@@ -212,7 +230,8 @@ describe('Discovery tests', () => {
 
     // Another call to waitForPublications should timeout
     try {
-      await input.waitForPublications(300)
+      const newMatches = await input.waitForPublications(testExpectFailureTimeout)
+      console.log('Expected waitForPublications to timeout, but we matched ' + newMatches + ' publications')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -223,11 +242,12 @@ describe('Discovery tests', () => {
     expect(matches).to.deep.include.members([{ name: 'MyWriter' }, { name: 'TestWriter' }])
   })
 
-  it('Checking unmatching from an input', async () => {
+  it('Checking unmatching from an input', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // To begin with there is no matching
     try {
-      await output.waitForSubscriptions(300)
+      const newMatches = await output.waitForSubscriptions(testExpectFailureTimeout)
+      console.log('Expected waitForSubscriptions to timeout, but we matched ' + newMatches + ' subscriptions')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -242,8 +262,9 @@ describe('Discovery tests', () => {
     let changesInMatches = 0
     let matches = []
     try {
-      changesInMatches = await output.waitForSubscriptions(1000)
+      changesInMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -252,8 +273,9 @@ describe('Discovery tests', () => {
     expect(matches.length).to.deep.equals(1)
     expect(matches).to.deep.include.members([{ name: 'TestReader' }])
     try {
-      changesInMatches = await input.waitForPublications(1000)
+      changesInMatches = await input.waitForPublications(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -268,8 +290,9 @@ describe('Discovery tests', () => {
 
     // The output should unmatch from the input
     try {
-      changesInMatches = await output.waitForSubscriptions(1000)
+      changesInMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -277,11 +300,12 @@ describe('Discovery tests', () => {
     expect(output.matchedSubscriptions.length).to.deep.equals(0)
   })
 
-  it('Checking unmatching from an output', async () => {
+  it('Checking unmatching from an output', async function () {
     const input = getDiscoveryReaderOnlyInput()
     // To begin with there is no matching
     try {
-      await input.waitForPublications(300)
+      const newMatches = await input.waitForPublications(testExpectFailureTimeout)
+      console.log('Expected waitForPublications to timeout, but we matched ' + newMatches + ' publications')
       // Should not get here - fail the test
       expect(false).to.deep.equals(true)
     } catch (err) {
@@ -296,8 +320,9 @@ describe('Discovery tests', () => {
     let changesInMatches = 0
     let matches = []
     try {
-      changesInMatches = await input.waitForPublications(1000)
+      changesInMatches = await input.waitForPublications(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -306,8 +331,9 @@ describe('Discovery tests', () => {
     expect(matches.length).to.deep.equals(1)
     expect(matches).to.deep.include.members([{ name: 'TestWriter' }])
     try {
-      changesInMatches = await output.waitForSubscriptions(1000)
+      changesInMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -322,8 +348,9 @@ describe('Discovery tests', () => {
 
     // The input should unmatch from the output
     try {
-      changesInMatches = await input.waitForPublications(1000)
+      changesInMatches = await input.waitForPublications(testExpectSuccessTimeout)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(false).to.deep.equals(true)
     }
@@ -331,15 +358,16 @@ describe('Discovery tests', () => {
     expect(input.matchedPublications.length).to.deep.equals(0)
   })
 
-  it('Matching entities with empty entity names', async () => {
+  it('Matching entities with empty entity names', async function () {
     const connector = getDiscoveryConnectorNoEntityNames()
     const output = connector.getOutput('MyPublisher::MyWriter')
 
     // Ensure that the entities match
     try {
-      const newMatches = await output.waitForSubscriptions(2000)
+      const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }
@@ -350,7 +378,7 @@ describe('Discovery tests', () => {
     expect(matches).to.deep.include.members([{ name: '' }])
   })
 
-  it('Matching entities with no entity names', async () => {
+  it('Matching entities with no entity names', async function () {
     const output = getDiscoveryWriterOnlyOutput()
     // Create a matching remote reader which has no entity name (this isn't possible
     // with XML application creation)
@@ -362,9 +390,10 @@ describe('Discovery tests', () => {
 
     // Wait to match with the new reader
     try {
-      const newMatches = await output.waitForSubscriptions(2000)
+      const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
+      console.log('Caught error: ' + err)
       // Fail the test
       expect(true).to.deep.equals(false)
     }

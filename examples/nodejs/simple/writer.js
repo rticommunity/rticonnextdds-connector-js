@@ -6,10 +6,10 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-var sleep = require('sleep')
-var rti = require('rticonnextdds-connector')
-var path = require('path')
-var fullpath = path.join(__dirname, '/../ShapeExample.xml')
+const sleep = require('sleep')
+const rti = require('rticonnextdds-connector')
+const path = require('path')
+const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
   const connector = new rti.Connector('MyParticipantLibrary::MyPubParticipant', fullpath)
@@ -35,6 +35,7 @@ const run = async () => {
   } catch (err) {
     console.log('Error encountered: ' + err)
   }
+  connector.close()
 }
 
 run()
