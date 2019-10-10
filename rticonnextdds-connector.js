@@ -1283,8 +1283,6 @@ class Output {
     if (params === undefined) {
       cStr = null
     } else {
-      // TODO:
-      //       Add docs
       cStr = JSON.stringify(params)
     }
     _checkRetcode(connectorBinding.api.RTI_Connector_write(
