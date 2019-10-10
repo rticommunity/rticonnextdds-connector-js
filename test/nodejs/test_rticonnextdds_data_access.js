@@ -469,7 +469,7 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     const receivedJsonObject = testInput.samples.get(0).getJson()
-    expect(receivedJsonObject).deep.equals(testJsonObject)
+    expect(receivedJsonObject).to.deep.equals(testJsonObject)
   })
 
   it('Bad conversion from string in JSON object', () => {
@@ -491,11 +491,57 @@ describe('Tests with a testOutput and testInput', () => {
     }
   })
 
-  it('Attempt to access past the end of a sequence using setFromJson', () => {
+  it('Attempt to access past the end of a sequence using setFromJson', async () => {
     expect(() => {
       // my_int_sequence has a bound of 10 and we are supplying 11 elements
       testOutput.instance.setFromJson({ my_int_sequence: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] })
     }).to.throw(rti.DDSError)
+    // Ensure that the previous error didn't corrupt the instance
+    const sent = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    testOutput.instance.set('my_int_sequence', sent)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const received = testInput.samples.get(0).get('my_int_sequence')
+    expect(received).to.deep.equals(sent)
+  })
+
+  it('Attempt to pass an invalid JSON object to setFromJson', async () => {
+    expect(() => {
+      testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, bad: 4 }] })
+    }).to.throw(rti.DDSError)
+    // Ensure that the previous error did not corrupt the instance
+    const sent = [{ x: 1, y: 2 }, { x: 3, y: 4 }]
+    testOutput.instance.set('my_point_sequence', sent)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const received = testInput.samples.get(0).get('my_point_sequence')
+    expect(received).to.deep.equals(sent)
+  })
+
+  it('The type-independent get should return the same result as getJson', async () => {
+    testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, y: 4 }] })
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Caught error: ' + err)
+      expect(true).to.deep.equals(false)
+    }
+    testInput.take()
+    const sample = testInput.samples.get(0)
+    expect(sample.getJson('my_point_sequence')).to.deep.equals(sample.get('my_point_sequence'))
   })
 
   it('Set a boolean field using setNumber and check the resultant value on an input', async () => {
@@ -723,7 +769,7 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point.x')).to.deep.equals(3)
   })
 
-  it('Clear a sequence with a dictionary', async () => {
+  it('Clear a sequence with a JSON object', async () => {
     // Set the non-default values
     testOutput.instance.setFromJson(testJsonObject)
     testOutput.instance.setBoolean('my_optional_bool', true)
@@ -886,11 +932,25 @@ describe('Tests with a testOutput and testInput', () => {
     expect(testInput.samples.get(0).get('my_optional_bool')).to.deep.equals(null)
   })
 
+  it('Test nested JSON object syntax', async () => {
+    testOutput.instance.setFromJson({ 'my_point_sequence[2].y': 153 })
+    testOutput.instance.setFromJson({ 'my_point_sequence[2].x': 111 })
+    testOutput.instance.set('my_point_sequence[3]', { x: 444, y: 555 })
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point_sequence[2]')).to.deep.equals({ x: 111, y: 153 })
+    expect(testInput.samples.get(0).get('my_point_sequence[3]')).to.deep.equals({ x: 444, y: 555 })
+  })
+
   // Confirm desired behaviour for this
-  it.skip('Use Instance.set to set a complex member', async () => {
+  it('Use Instance.set to set a complex member', async () => {
     const jsonObj = { x: 9, y: 12 }
-    console.log(jsonObj)
-    console.log(typeof jsonObj)
     testOutput.instance.set('my_point', jsonObj)
     testOutput.write()
     try {

@@ -101,7 +101,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setString with dictionary value should throw Error', function () {
+    it('setString with JSON value should throw Error', function () {
       expect(function () {
         const stringField = 'color'
         output.instance.setString(stringField, { key: 'value' })
@@ -123,7 +123,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setNumber with dictionary value should throw Error and ' +
+    it('setNumber with JSON value should throw Error and ' +
       'subscriber should not get a message with erroneous field data', function () {
       expect(function () {
         const numberField = 'x'
@@ -146,7 +146,7 @@ describe('Output Tests', function () {
       }).to.throw(Error)
     })
 
-    it('setBoolean with dictionary value should throw Error and ' +
+    it('setBoolean with JSON value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
       expect(function () {
         const booleanField = 'z'
@@ -175,10 +175,10 @@ describe('Output Tests', function () {
       }).to.throw(rti.DDSError)
     })
 
-    it('Trying to set a JSON value with the set method should fail', function () {
+    it('Try to set a bad JSON value', function () {
       expect(function () {
         output.instance.set('whatever', { x: 12, y: 30 })
-      }).to.throw(TypeError)
+      }).to.throw(rti.DDSError)
     })
   })
 })

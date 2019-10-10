@@ -235,7 +235,7 @@ It is possible to obtain the JSON object of a nested struct using
    }
 
 ``memberName`` must be one of the following types: array, sequence,
-struct, value or union. If not, the call to get_dictionary will fail:
+struct, value or union. If not, the call to getJson will fail:
 
 .. code-block:: javascript
 
@@ -247,7 +247,7 @@ struct, value or union. If not, the call to get_dictionary will fail:
        }
    }
 
-It is also possible to obtain the dictionary of a struct using the :meth:`SampleIterator.get`
+It is also possible to obtain the JSON of a struct using the :meth:`SampleIterator.get`
 method:
 
 .. code-block:: javascript

@@ -847,7 +847,7 @@ class SampleIterator {
   /**
    * Implementation of iterable logic. This allows for the following syntax::
    *   for (let sample of input.dataIterator) {
-   *    jsonDictionary = sample.getJson()
+   *    json = sample.getJson()
    *   }
    */
   [Symbol.iterator] () {
@@ -1233,10 +1233,16 @@ class Instance {
       this.setString(fieldName, value)
     } else if (typeof value === 'boolean') {
       this.setBoolean(fieldName, value)
+    } else if (typeof value === 'object') {
+      // We need to use computed property names to set use the variable 'fieldName'
+      // as the key in a JSON object
+      const json = { }
+      json[fieldName] = value
+      this.setFromJson(json)
     } else if (value === null) {
       this.clearMember(fieldName)
     } else {
-      throw new TypeError('value must be one of string, number, boolean or null')
+      throw new TypeError('value must be one of string, number, boolean, object or null')
     }
   }
 
