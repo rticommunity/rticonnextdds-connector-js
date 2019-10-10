@@ -3,10 +3,10 @@
 Getting Started
 ===============
 
-Installing RTI Connector for Node.js
+Installing RTI Connector for Javascript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are two ways to obtain *RTI Connector* for Node.js. You can install it with
+There are two ways to obtain *RTI Connector* for Javascript. You can install it with
 *npm*:
 
 .. code:: bash
@@ -32,7 +32,7 @@ Running the examples
 ~~~~~~~~~~~~~~~~~~~~
 
 The examples are located in the `examples/nodejs <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs>`__
-directory of the *RTI Connector for Node.js* GitHub repository.
+directory of the *RTI Connector for Javascript* GitHub repository.
 
 In the simple example, `writer.js` periodically publishes data for a
 *Square* topic, and `reader.js` subscribes to the topic and prints all the
@@ -71,7 +71,7 @@ To learn more about *RTI Connector* continue to the next section,
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for Node.js* has been tested with Node.js 8.7.0.
+*RTI Connector for Javascript* has been tested with Node.js 8.7.0.
 
 (TODO: clarify which version of Node.js to officially support - 8.7.0 is EOL soon)
 

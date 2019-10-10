@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'RTI Connector for Node.js'
+project = 'RTI Connector for Javascript'
 copyright = '2019, Real-Time Innovations, Inc.'
 author = 'Real-Time Innovations, Inc.'
 

@@ -502,7 +502,7 @@ class Samples {
    *
    * @param {number} index The index of the sample.
    * @param {string} fieldName The name of the field.
-   * @returns {boolean} The obtained value.
+   * @returns {number} The obtained value.
    */
   getBoolean (index, fieldName) {
     if (!_isValidIndex(index)) {
@@ -524,7 +524,7 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        return !!value.deref()
+        return value.deref()
       }
     }
   }
@@ -792,7 +792,15 @@ class SampleIterator {
    * @returns {boolean} The boolean value of the field.
    */
   getBoolean (fieldName) {
-    return this.input.samples.getBoolean(this.index, fieldName)
+    const ret = this.input.samples.getBoolean(this.index, fieldName) 
+    // Performing !! on null produces false, but we want to maintain null
+    if (ret === null) {
+      return ret
+    } else {
+      // For legacy reasons, Samples.getBoolean returns a number, convert that to
+      // a bool here
+      return !!ret
+    }
   }
 
   /**
@@ -1511,6 +1519,7 @@ class Connector extends EventEmitter {
    */
   delete () {
     this.close()
+    this.native = null
   }
 
   /**
@@ -1584,20 +1593,22 @@ class Connector extends EventEmitter {
       this.native,
       1000,
       (err, res) => {
-        if (err) throw err
-        // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
-        // we call this in a loop (and therefore expect to receive timeout error)
-        // for this reason do not raise a timeout exception
-        if (res !== _ReturnCodes.timeout) {
-          _checkRetcode(res)
-        }
-        if (this.onDataAvailableRun) {
-          this.onDataAvailable()
-        }
-        // Emitting this from the EventEmitter will trigger the callback created
-        // by the user
-        if (res === _ReturnCodes.ok) {
-          this.emit('on_data_available')
+        if (this.native !== null) {
+          if (err) throw err
+          // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
+          // we call this in a loop (and therefore expect to receive timeout error)
+          // for this reason do not raise a timeout exception
+          if (res !== _ReturnCodes.timeout) {
+            _checkRetcode(res)
+          }
+          if (this.onDataAvailableRun) {
+            this.onDataAvailable()
+          }
+          // Emitting this from the EventEmitter will trigger the callback created
+          // by the user
+          if (res === _ReturnCodes.ok) {
+            this.emit('on_data_available')
+          }
         }
       }
     )

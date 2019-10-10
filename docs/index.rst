@@ -3,7 +3,7 @@
 .. image:: static/RTI_Launcher_Icon_Connector_JavaScript_100x100_0919_forDocumentation.png
     :align: left
 
-Welcome to RTI Connector for Node.js!
+Welcome to RTI Connector for Javascript!
 =====================================
 
 RTI® Connext® DDS is a connectivity software framework for integrating data
