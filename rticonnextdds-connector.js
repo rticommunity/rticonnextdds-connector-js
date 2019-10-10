@@ -1272,6 +1272,8 @@ class Output {
    * * ``identity`` – A JSON object containing the fields ``"writer_guid"`` and ``"sequence_number"``
    * * ``related_sample_identity`` – Used for request-reply communications. It has the same format as identity
    *
+   * @example output.write({ action: "write", identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } })
+   *
    * @param {JSON} [params] [Optional] The Write Parameters to use in the `write` call. Filled in by Connector by default.
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking Duraing a write()' in the *Connext DDS Core Libraries* User's Manual.)
    * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
