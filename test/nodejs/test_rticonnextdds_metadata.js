@@ -19,6 +19,10 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+
 describe('Test operations involving meta data', () => {
   let connector = null
   let testOutput = null
@@ -37,7 +41,7 @@ describe('Test operations involving meta data', () => {
 
     // Wait for the input and output to dicovery each other
     try {
-      const newMatches = await testOutput.waitForSubscriptions(10000)
+      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
@@ -66,8 +70,8 @@ describe('Test operations involving meta data', () => {
     testInput.take()
 
     for (const sample of testInput.samples.dataIterator) {
-      expect(sample.info.getValue('source_timestamp')).to.deep.equals(sourceTimestamp)
-      expect(sample.getValue('my_string')).to.deep.equals(testJsonObject.my_string)
+      expect(sample.info.get('source_timestamp')).to.deep.equals(sourceTimestamp)
+      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
   })
 
@@ -93,9 +97,9 @@ describe('Test operations involving meta data', () => {
     testInput.take()
 
     for (const sample of testInput.samples.dataIterator) {
-      expect(sample.info.getValue('identity').writer_guid).to.deep.equals(identWriterGuid)
-      expect(sample.info.getValue('identity').sequence_number).to.deep.equals(identSeqNumber)
-      expect(sample.getValue('my_string')).to.deep.equals(testJsonObject.my_string)
+      expect(sample.info.get('identity').writer_guid).to.deep.equals(identWriterGuid)
+      expect(sample.info.get('identity').sequence_number).to.deep.equals(identSeqNumber)
+      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
   })
 
@@ -121,9 +125,9 @@ describe('Test operations involving meta data', () => {
     testInput.take()
 
     for (const sample of testInput.samples.validDataIterator) {
-      expect(sample.info.getValue('related_sample_identity').writer_guid).to.deep.equals(rIdentWriterGuid)
-      expect(sample.info.getValue('related_sample_identity').sequence_number).to.deep.equals(rIdentSeqNumber)
-      expect(sample.getValue('my_string')).to.deep.equals(testJsonObject.my_string)
+      expect(sample.info.get('related_sample_identity').writer_guid).to.deep.equals(rIdentWriterGuid)
+      expect(sample.info.get('related_sample_identity').sequence_number).to.deep.equals(rIdentSeqNumber)
+      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
   })
 
@@ -195,12 +199,12 @@ describe('Test operations involving meta data', () => {
     testInput.take()
 
     for (const sample of testInput.samples.validDataIterator) {
-      expect(sample.info.getValue('source_timestamp')).is.a('number')
-      expect(sample.info.getValue('identity').writer_guid).is.an('array')
-      expect(sample.info.getValue('identity').sequence_number).is.a('number')
-      expect(sample.info.getValue('related_sample_identity').writer_guid).is.an('array')
-      expect(sample.info.getValue('related_sample_identity').sequence_number).is.a('number')
-      expect(sample.getValue('my_string')).to.deep.equals(testJsonObject.my_string)
+      expect(sample.info.get('source_timestamp')).is.a('number')
+      expect(sample.info.get('identity').writer_guid).is.an('array')
+      expect(sample.info.get('identity').sequence_number).is.a('number')
+      expect(sample.info.get('related_sample_identity').writer_guid).is.an('array')
+      expect(sample.info.get('related_sample_identity').sequence_number).is.a('number')
+      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
   })
 })
