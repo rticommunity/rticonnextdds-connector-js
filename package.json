@@ -20,7 +20,7 @@
     "ffi": "*",
     "ref": "*",
     "sleep": "*",
-    "socket.io": "*",
+    "socket.io": "*"
   },
   "keywords": [
     "rti",
