@@ -667,10 +667,11 @@ class Samples {
 
 /**
  * The type returned by the property :meth:`SampleIterator.info`.
- *
- * This class provides a way to access the SampleInfo of a recieved data sample.
  */
 class SampleInfo {
+  /**
+   * This class provides a way to access the SampleInfo of a recieved data sample.
+   */
   constructor (input, index) {
     this.input = input
     this.index = index
@@ -679,20 +680,20 @@ class SampleInfo {
   /**
    * Type independent function to obtain any value from the SampleInfo structure.
    *
-   * This method provides access to some of the SampleInfo meta-data fields which
-   * are sent within samples. The supported fieldNames are:
-   * * ``"source_timestamp"``, returns an integer representing nanoseconds
-   * * ``"reception_timestamp"``, returns an integer representing nanoseconds
-   * * ``"sample_identity"``, or ``"identity"``, returns a JSON object (see :meth:`Output.write`)
-   * * ``"related_sample_identity"``, returns a JSON object (see :meth:`Output.write`)
-   * * ``"valid_data"``, returns a boolean (equivalent to :meth:`SampleIterator.validData`)
+   * The support fieldNames are:
+   *
+   * * ``'source_timestamp'``, returns an integer representing nanoseconds
+   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
+   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
    *
    * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
    * section in the *Connext DDS Core Libraries User's Manual*.
    *
-   * @param {string} fieldName - The value in the SampleInfo to obtain
-   * @returns The obtained value
-   * @example let value = input.samples.get(0).info.getValue('source_timestamp')
+   * @param {string} fieldName - The name of the ``SampleInfo`` field to obtain
+   * @returns The obtained value from the ``SampleInfo`` structure
+   * @example const source_timestamp = input.samples.get(0).info.get('source_timestamp')
    */
   get (fieldName) {
     if (!_isString(fieldName)) {
@@ -757,7 +758,22 @@ class SampleIterator {
   /**
    * Provides access to this sample's meta-data.
    *
-   * @type {SampleInfo}
+   * The ``info`` property expects one of the :class:`SampleInfo` field names::
+   *
+   *   const value = sample.info.get('field')
+   *
+   * The support field names are:
+   *
+   * * ``'source_timestamp'``, returns an integer representing nanoseconds
+   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
+   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
+   *
+   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
+   * section in the *Connext DDS Core Libraries User's Manual*.
+   *
+   * See :class:`SampleInfo`
    */
   get info () {
     return new SampleInfo(this.input, this.index)

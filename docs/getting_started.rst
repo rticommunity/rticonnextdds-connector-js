@@ -4,7 +4,7 @@ Getting Started
 ===============
 
 Installing RTI Connector for Javascript
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are two ways to obtain *RTI Connector* for Javascript. You can install it with
 *npm*:
@@ -42,13 +42,13 @@ Run the reader as follows:
 
 .. code:: bash
 
-    node examples/python/simple/reader.js
+    node examples/nodejs/simple/reader.js
 
 And, in another shell, run the writer:
 
 .. code:: bash
 
-    node examples/python/simple/writer.js
+    node examples/nodejs/simple/writer.js
 
 This is how ``reader.js`` looks like:
 

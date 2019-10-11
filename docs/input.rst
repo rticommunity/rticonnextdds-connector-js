@@ -211,3 +211,9 @@ ValidSampleIterator class
 
 .. autoclass:: ValidSampleIterator
    :members:
+
+SampleInfo class
+^^^^^^^^^^^^^^^^
+
+.. autoclass:: SampleInfo
+   :members:
