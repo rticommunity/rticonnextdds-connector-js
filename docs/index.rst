@@ -1,4 +1,5 @@
-.. rticonnextdds-connector-js
+
+.. highlight:: javascript
 
 .. image:: static/RTI_Launcher_Icon_Connector_JavaScript_100x100_0919_forDocumentation.png
     :align: left

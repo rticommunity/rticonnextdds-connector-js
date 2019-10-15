@@ -21,7 +21,7 @@ const run = async () => {
     for (let i = 0; i < 500; i++) {
       await input.wait()
       input.take()
-      for (const sample of input.samples.validDataIterator) {
+      for (const sample of input.samples.validDataIter) {
         // You can obtain all the fields as a JSON object
         const data = sample.getJson()
         const x = data.x

@@ -1,7 +1,7 @@
-
-
 Getting Started
 ===============
+
+.. highlight:: javascript
 
 Installing RTI Connector for Javascript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

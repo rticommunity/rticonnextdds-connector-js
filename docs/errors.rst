@@ -1,7 +1,7 @@
 Error Handling
 ==============
 
-.. :currentmodule:: rticonnextdds_connector
+.. highlight:: javascript
 
 *Connector* reports internal errors in *RTI Connext DDS* by raising an
 :class:`rticonnextdds_connector.DDSError`. This exception may contain a description

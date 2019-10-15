@@ -1,18 +1,22 @@
 Writing data (Output)
 =====================
 
+.. highlight:: javascript
+
 Getting the Output
 ~~~~~~~~~~~~~~~~~~
 
 To write a data sample, first look up an output:
 
-.. code-block:: javascript
+.. code-block::
 
    output = connector.getOutput('MyPublisher::MySquareWriter')
 
 :meth:`Connector.getOutput()` returns an :class:`Output` object. This example,
 obtains the output defined by the *data_writer* named *MySquareWriter* within
-the *publisher* named *MyPublisher*::
+the *publisher* named *MyPublisher*:
+
+.. code-block:: xml
 
    <publisher name="MyPublisher">
      <data_writer name="MySquareWriter" topic_ref="Square" />
@@ -26,7 +30,7 @@ Populating the data sample
 
 The next step is to set the :class:`Instance` fields. You can set them member by member:
 
-.. code-block:: javascript
+.. code-block::
 
    output.instance.setNumber('x', 1)
    output.instance.setNumber('y', 2)
@@ -35,12 +39,14 @@ The next step is to set the :class:`Instance` fields. You can set them member by
 
 Or using a JSON object:
 
-.. code-block:: javascript
+.. code-block::
 
    output.instance.setFromJson({ x: 1, y: 2, shapesize: 30, color: 'BLUE' })
 
 The name of each member corresponds to the type assigned to this output in XML.
-For example, the XML configuration corresponding to the above code snippets is::
+For example, the XML configuration corresponding to the above code snippets is:
+
+.. code-block:: xml
 
    <struct name="ShapeType">
      <member name="color" type="string" stringMaxLength="128" key="true" default="RED"/>
@@ -62,18 +68,22 @@ If the *datawriter_qos* is reliable, you can use :meth:`Output.wait()`
 to block until all matching reliable subscribers acknowledge the reception of the
 data sample::
 
-    output.wait()
+    try {
+      await output.wait()
+    } catch (err) {
+      console.log('Error caught: ' + err)
+    }
 
 The write method can also receive a JSON object specifing several options. For example, to
 write with a specific timestamp:
 
-.. code-block:: javascript
+.. code-block::
 
   output.write({ source_timestamp: 100000 })
 
 It is also possible to dispose or unregister an instance:
 
-.. code-block:: javascript
+.. code-block::
 
   output.write({ action: 'dispose' })
   output.write({ action: 'unregister' })
@@ -91,7 +101,7 @@ a ``Promise`` that will resolve to the change in the number of matched subscript
 since the last time it was called::
 
    // From within an async function
-    let changeInMatches = await output.waitForSubscriptions()
+   let changeInMatches = await output.waitForSubscriptions()
 
    // Using traditional Promises
    output.waitForSubscriptions().then((res) => {
@@ -108,7 +118,7 @@ Promise will resolve to -1.
 You can obtain information about the existing matched subscriptions with the
 :attr:`Output.matchedSubscriptions` property:
 
-.. code-block:: javascript
+.. code-block::
 
    output.matchedSubscriptions.forEach((match) => {
     subName = match.name

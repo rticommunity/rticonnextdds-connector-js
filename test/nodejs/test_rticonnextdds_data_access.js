@@ -963,6 +963,23 @@ describe('Tests with a testOutput and testInput', () => {
     testInput.take()
     expect(testInput.samples.get(0).get('my_point')).to.deep.equals(jsonObj)
   })
+
+  it('Use Instance.set to set a list', async () => {
+    const intSeq = [11, 22, 33]
+    const pointSeq = [{ x: 100, y: 200 }, { x: 300, y: 400 }]
+    testOutput.instance.set('my_int_sequence', intSeq)
+    testOutput.instance.set('my_point_sequence', pointSeq)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_int_sequence')).to.deep.equals(intSeq)
+    expect(testInput.samples.get(0).get('my_point_sequence')).to.deep.equals(pointSeq)
+  })
 })
 
 describe('Tests with two readers and two writers', () => {

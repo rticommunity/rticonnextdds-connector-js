@@ -1,6 +1,8 @@
 Accessing the data
 ==================
 
+.. highlight:: javascript
+
 The types you use to write or read data may included nested structs, sequences and
 arrays of primitive types or structs, etc.
 
@@ -11,7 +13,9 @@ To access the data, :class:`Instance` and :class:`SampleIterator` provide
 setters and getters that expect a ``fieldName`` string, used to identify specific
 fields within the type. This section describes the format of this string.
 
-We will use the following XML type definition of MyType::
+We will use the following XML type definition of MyType:
+
+.. code-block:: xml
 
     <types>
         <enum name="Color">
@@ -49,7 +53,9 @@ We will use the following XML type definition of MyType::
         </struct>
     </types>
 
-Which corresponds to the following IDL definition::
+Which corresponds to the following IDL definition:
+
+.. code-block:: idl
 
     enum Color {
         RED,
@@ -112,7 +118,7 @@ To set a field in an :class:`Output`, use the appropriate setter.
 
 To set any numeric type, including enumerations:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_long', 2)
     output.instance.setNumber('my_double', 2.14)
@@ -127,25 +133,25 @@ To set any numeric type, including enumerations:
 
 To set booleans:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setBoolean('my_boolean', True)
 
 To set strings:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setString('my_string', 'Hello, World!')
 
 As an alternative to the previous setters, the type-independent method ``set``
 can be used as follows:
 
-.. code-block:: javascript
+.. code-block::
 
     // The set method works on all basic types
-    output.instance.set('my_double') = 2.14
-    output.instance.set('my_boolean') = true
-    output.instance.set('my_string') = 'Hello, World!'
+    output.instance.set('my_double', 2.14)
+    output.instance.set('my_boolean', true)
+    output.instance.set('my_string', 'Hello, World!')
 
 In all cases, the type of the assigned value must be consistent with the type
 of the field, as defined in the configuration file.
@@ -155,9 +161,9 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
 :meth:`SampleIterator.getString()`, or the type-independent :meth:`SampleIterator.get()`.
 ``getString`` also works with numeric fields, returning the number as a string:
 
-.. code-block:: javascript
+.. code-block::
 
-    for (const sample of input.samples.validDataIterator) {
+    for (const sample of input.samples.validDataIter) {
         // Use the basic type specific getters
         let value = sample.getNumber('my_double')
         value = sample.getBoolean('my_boolean')
@@ -191,55 +197,54 @@ Accessing structs
 To access a nested member, use ``.`` to identify the fully-qualified ``fieldName``
 and pass it to the corresponding setter or getter.
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_point.x', 10)
     output.instance.setNumber('my_point.y', 20)
 
 It is possible to reset the value of a complex member back to its default:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.clearMember('my_point')
     // x and y are now 0
 
 It is also possible to reset members using the ``set`` method:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.set('my_point', null)
 
 Structs are set via JSON objects as follows:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setFromJson({ 'my_point': { 'x':10, 'y':20 } })
 
 When an member of a struct is not set, it retains its previous value. If we run
 the following code after the previous call to ``setFromJson``:
 
-.. code-block:: javascript
+.. code-block::
 
-    output.instance.setFromJson({ 'my_point': {' y': 200 } })
+    output.instance.setFromJson({ 'my_point': { 'y': 200 } })
 
 The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``. If you do not want the values
 to be retained you must clear the value first (as described above).
 
-It is possible to obtain the JSON object of a nested struct using
-`SampleIterator.getJson('memberName')`:
+It is possible to obtain the JSON object of a nested struct as follows:
 
-.. code-block:: javascript
+.. code-block::
 
-   for (const sample of input.samples.validDataIterator) {
+   for (const sample of input.samples.validDataIter) {
       let point = sample.getJson('my_point')
    }
 
 ``memberName`` must be one of the following types: array, sequence,
-struct, value or union. If not, the call to getJson will fail:
+struct, value or union. If not, the call to ``getJson`` will fail:
 
-.. code-block:: javascript
+.. code-block::
 
-    for (let sample of input.samples.validDataIterator) {
+    for (let sample of input.samples.validDataIter) {
        try {
           let long = sample.getJson('my_long')
        } catch (err) {
@@ -250,9 +255,9 @@ struct, value or union. If not, the call to getJson will fail:
 It is also possible to obtain the JSON of a struct using the :meth:`SampleIterator.get`
 method:
 
-.. code-block:: javascript
+.. code-block::
 
-    for (const sample of input.samples.validDataIterator) {
+    for (const sample of input.samples.validDataIter) {
         let point = sample.get('my_point')
         // point is a JSON object
    }
@@ -266,54 +271,54 @@ Accessing arrays and sequences
 Use ``'fieldName[index]'`` to access an element of a sequence or array,
 where ``0 <= index < length``:
 
-.. code-block:: javascript
+.. code-block::
 
     let value = input.samples.get(0).getNumber('my_int_sequence[1]')
     value = input.samples.get(0).getNumber('my_point_sequence[2].y')
 
+To obtain the length of a sequence in an :class:`Input` sample, append ``#`` to
+the ``fieldName``:
+
+.. code-block::
+
+    let length = input.samples[0].getNumber('my_int_sequence#')
+
+This same syntax is used to obtain the selected member of an enum (see :ref:`Accessing unions`).
+
 Another option is to use ``SampleIterator.getJson('fieldName')`` to obtain
 a JSON object containing all of the elements of the array or sequence with name ``fieldName``:
 
-.. code-block:: javascript
+.. code-block::
 
-    for (let sample of input.samples.validDataIterator) {
+    for (let sample of input.samples.validDataIter) {
         let thePointSequence = sample.getJson('my_point_sequence')
     }
 
-It is also possible to supply ``memberName`` as an element of an array (if the
-type of the array is complex):
+It is also possible to supply ``memberName`` as an element of an array or sequence
+(if the member type is complex):
 
-.. code-block:: javascript
+.. code-block::
 
-   for (let sample of input.samples.validDataIterator) {
+   for (let sample of input.samples.validDataIter) {
       let pointElement = sample.getJson('my_point_sequence[1]')
    }
 
 In an :class:`Output`, sequences are automatically resized:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_int_sequence[5]', 10) // length is now 6
     output.instance.setNumber('my_int_sequence[4]', 9) // length still 6
 
 You can clear a sequence:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.clearMember('my_int_sequence') // my_int_sequence is now empty
 
-To obtain the length of a sequence in an :class:`Input` sample, append ``#`` to
-the ``fieldName``:
-
-.. code-block:: javascript
-
-    let length = input.samples[0].getNumber('my_int_sequence#')
-
-This same syntax is used to obtain the selected member of an enum (see :ref:`Accessing unions`).
-
 In JSON objects, sequences and arrays are represented as lists. For example:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setFromJson({
         my_int_sequence: [1, 2],
@@ -324,7 +329,7 @@ Arrays have a constant length that can't be changed. When you don't set all the 
 of an array, the remaining elements retain their previous value. However, sequences
 are always overwritten. See the following example:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setFromJson({
         my_point_sequence: [{ x: 1, y: 1 }, { x: 2, y: 2 }],
@@ -348,7 +353,7 @@ a possible value.
 
 On an Input, any of the getters may return ``null`` if the field is optional:
 
-.. code-block:: javascript
+.. code-block::
 
     if (input.samples.get(0).getNumber('my_optional_long') == null) {
         console.log('my_optional_long not set')
@@ -363,14 +368,14 @@ optional members.
 
 To set an optional member on an Output:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_optional_long', 10)
 
 If the type of the optional member is not primitive, when any of its members is
 first set, the rest are initialized to their default values:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_optional_point.x', 10)
 
@@ -387,7 +392,7 @@ There are several ways to reset an optional member. If the type is primitive:
 
 If the member type is complex, all the above options apart from option 1 are available:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.clearMember('my_optional_point')
     output.instance.set('my_optional_point', null)
@@ -395,10 +400,10 @@ If the member type is complex, all the above options apart from option 1 are ava
 Note that :meth:`Instance.setFromJson()` doesn't clear those members that are
 not specified; their value remains. For example:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_optional_long', 5)
-    output.instance.setFormJson({ my_double: 3.3, my_long: 4 })
+    output.instance.setFromJson({ my_double: 3.3, my_long: 4 })
     // my_optional_long is still 5
 
 To clear a member, set it to ``null`` explicitly::
@@ -415,18 +420,18 @@ Accessing unions
 
 In an Output the union member is automatically selected when you set it:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_union.point.x', 10)
 
 You can change it later:
 
-.. code-block:: javascript
+.. code-block::
 
     output.instance.setNumber('my_union.my_long', 10)
 
-In an Input, you can obtain the selected member as a string::
+In an :class:`Input`, you can obtain the selected member as a string::
 
     if (input.samples.get(0).getString('my_union#') == 'point') {
-        value = input.samples.get(0).getNumber('my_union.point')
+        value = input.samples.get(0).getNumber('my_union.point.x')
     }

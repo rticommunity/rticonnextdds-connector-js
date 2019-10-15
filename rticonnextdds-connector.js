@@ -369,7 +369,7 @@ class Samples {
    * The methods :meth:`Samples.get` and :attr:`Samples.dataIterator` return
    * a :class:`SampleIterator` which implements iterable and iterator logic, allowing
    * the caller to iterate through all available samples. The samples returned by these
-   * methods may contain only meta-data (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIterator`
+   * methods may contain only meta-data (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIter`
    * iterable only iterates over samples that contain valid data (a :class:`ValidSampleIterator`).
    *
    * ``Samples`` is the type of the property :meth:`Input.samples`.
@@ -379,7 +379,7 @@ class Samples {
    * Attributes:
    *  * length (number) - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
    *  * dataIterator (:class:`SampleIterator`) - The class used to iterate through the available samples.
-   *  * validDataIterator (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
+   *  * validDataIter (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
    */
   constructor (input) {
     this.input = input
@@ -393,7 +393,7 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :attr:`Samples.validDataIterator` to avoid having to check :attr:`SampleIterator.validData`.
+   * Use :attr:`Samples.validDataIter` to avoid having to check :attr:`SampleIterator.validData`.
    *
    * @param {number} [index] The index of the sample from which the iteration should begin. By default, the iterator begins with the first sample.
    *
@@ -411,7 +411,7 @@ class Samples {
    *
    * This iterator may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :attr:`Samples.validDataIterator` to avoid having to check :attr:`SampleIterator.validData`.
+   * Use :attr:`Samples.validDataIter` to avoid having to check :attr:`SampleIterator.validData`.
    *
    * @returns :class:`SampleIterator` An iterator to the samples.
    */
@@ -431,7 +431,7 @@ class Samples {
    *
    * @returns {ValidSampleIterator} An iterator to the sample containing valid data (which implements both iterable and iterator logic).
    */
-  get validDataIterator () {
+  get validDataIter () {
     return new ValidSampleIterator(this.input)
   }
 
@@ -883,11 +883,11 @@ class SampleIterator {
  * Iterates and provides access to data samples with valid data.
  *
  * This iterator provides the same methods as :class:`SampleIterator`. It can be
- * obtained using :attr:`Input.samples.validDataIterator`.
+ * obtained using :attr:`Input.samples.validDataIter`.
  * @extends SampleIterator
  *
  * Using this class it is possible to iterator through all valid data samples::
- *   for (let sample of input.samples.validDataIterator) {
+ *   for (let sample of input.samples.validDataIter) {
  *    console.log(JSON.stringify(sample.getJson()))
  *   }
  */
@@ -897,7 +897,7 @@ class ValidSampleIterator extends SampleIterator {
    *
    * Using this method it is possible to create your own iterable::
    *
-   *  const iterator = input.samples.validDataIterator.iterator()
+   *  const iterator = input.samples.validDataIter.iterator()
    *  const singleSample = iterator.next().value
    *
    * @generator
@@ -1308,9 +1308,9 @@ class Output {
    * Attributes:
    *  * ``instance`` (:class:`Instance`) - The data that is written when :meth:`Output.write` is called.
    *  * ``connector`` (:class:`Connector`) - The Connector that created this object.
-   *  * ``string`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`).
+   *  * ``name`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`).
    *  * ``native`` (pointer) - The native handle that allows accessing additional *Connext DDS* APIs in C.
-   *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions.
+   *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions (see below).
    *
    */
   constructor (connector, name) {
@@ -1337,12 +1337,12 @@ class Output {
    * The supported parameters are a subset of those documented in the `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
    * of the *Connext DDS Core Libraries* User's Manual. These are:
    *
-   * * ``action`` – One of ``"write"`` (default), ``"dispose"`` or ``"unregister"``
+   * * ``action`` – One of ``'write'`` (default), ``'dispose'`` or ``'unregister'``
    * * ``source_timestamp`` – An integer representing the total number of nanoseconds
-   * * ``identity`` – A JSON object containing the fields ``"writer_guid"`` and ``"sequence_number"``
+   * * ``identity`` – A JSON object containing the fields ``'writer_guid'`` and ``'sequence_number'``
    * * ``related_sample_identity`` – Used for request-reply communications. It has the same format as identity
    *
-   * @example output.write({ action: "write", identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } })
+   * @example output.write({ action: 'write', identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } })
    *
    * @param {JSON} [params] [Optional] The Write Parameters to use in the `write` call. Filled in by Connector by default.
    * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking During a write()' in the *Connext DDS Core Libraries* User's Manual.)
@@ -1548,7 +1548,9 @@ class Connector extends EventEmitter {
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getInput('MySubscriber::MyReader')
    *
-   * Loads the Input in this XML::
+   * Loads the Input in this XML:
+   *
+   * .. code-block:: xml
    *
    *     <domain_participant_library name="MyParticipantLibrary">
    *       <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">
@@ -1576,7 +1578,9 @@ class Connector extends EventEmitter {
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getOutput('MyPublisher::MyWriter')
    *
-   * Loads the Input in this XML::
+   * Loads the Input in this XML:
+   *
+   * .. code-block:: xml
    *
    *     <domain_participant_library name="MyParticipantLibrary">
    *       <domain_participant name="MyParticipant" domain_ref="MyDomainLibrary::MyDomain">

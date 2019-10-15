@@ -17,7 +17,7 @@ const run = async () => {
     for (;;) {
       await input.wait()
       input.take()
-      for (const sample of input.samples.validDataIterator) {
+      for (const sample of input.samples.validDataIter) {
         console.log('Received Circle: ' + JSON.stringify(sample.getJson()))
       }
     }

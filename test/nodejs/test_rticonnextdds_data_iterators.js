@@ -148,7 +148,7 @@ describe('Test the iteration of Input Samples', () => {
     expect(input.samples.length).to.deep.equals(expectedSampleCount)
 
     let count = 0
-    for (const sample of input.samples.validDataIterator) {
+    for (const sample of input.samples.validDataIter) {
       expect(sample.validData).to.deep.equals(true)
       expect(sample.getNumber('y')).to.deep.equals(expectedData[count].y)
       expect(sample.getBoolean('z')).to.deep.equals(expectedData[count].z)
@@ -161,7 +161,7 @@ describe('Test the iteration of Input Samples', () => {
     expect(count).to.deep.equals(expectedSampleCount - 1)
 
     // Manually incrementing the iterator
-    const iterator = input.samples.validDataIterator.iterator()
+    const iterator = input.samples.validDataIter.iterator()
     count = 0
     while (count < input.samples.length) {
       const singleSample = iterator.next()
@@ -244,7 +244,7 @@ describe('Test dispose', () => {
 
   it('ValidSampleIterator should not iterator over disposes', () => {
     let count = 0
-    for (const sample of input.samples.validDataIterator) { // eslint-disable-line no-unused-vars
+    for (const sample of input.samples.validDataIter) { // eslint-disable-line no-unused-vars
       count++
     }
     expect(count).to.deep.equals(expectedSampleCount - 1)
@@ -315,7 +315,7 @@ describe('Test unregister', () => {
 
   it('ValidSampleIterator should not iterator over unregisters', () => {
     let count = 0
-    for (const sample of input.samples.validDataIterator) { // eslint-disable-line no-unused-vars
+    for (const sample of input.samples.validDataIter) { // eslint-disable-line no-unused-vars
       count++
     }
     expect(count).to.deep.equals(expectedSampleCount - 1)

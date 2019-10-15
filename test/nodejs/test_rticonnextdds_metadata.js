@@ -124,7 +124,7 @@ describe('Test operations involving meta data', () => {
     }
     testInput.take()
 
-    for (const sample of testInput.samples.validDataIterator) {
+    for (const sample of testInput.samples.validDataIter) {
       expect(sample.info.get('related_sample_identity').writer_guid).to.deep.equals(rIdentWriterGuid)
       expect(sample.info.get('related_sample_identity').sequence_number).to.deep.equals(rIdentSeqNumber)
       expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
@@ -198,7 +198,7 @@ describe('Test operations involving meta data', () => {
     }
     testInput.take()
 
-    for (const sample of testInput.samples.validDataIterator) {
+    for (const sample of testInput.samples.validDataIter) {
       expect(sample.info.get('source_timestamp')).is.a('number')
       expect(sample.info.get('identity').writer_guid).is.an('array')
       expect(sample.info.get('identity').sequence_number).is.a('number')

@@ -20,7 +20,7 @@ const run = async () => {
     for (;;) {
       await input.wait()
       input.take()
-      for (const sample of input.samples.validDataIterator) {
+      for (const sample of input.samples.validDataIter) {
         // You can obtain all the fields as a JSON object
         const data = sample.getJson()
         data.x = data.y
