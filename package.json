@@ -16,11 +16,10 @@
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js.git"
   },
   "dependencies": {
-    "ref": "*",
-    "util": "*",
-    "ffi": "*",
-    "sleep": "*",
     "events": "*",
+    "ffi": "*",
+    "ref": "*",
+    "sleep": "*",
     "socket.io": "*"
   },
   "keywords": [
@@ -32,8 +31,8 @@
     "sub",
     "pub-sub"
   ],
-  "author": "Gianpiero Napoli <gianpiero@rti.com>",
-  "license": "See License File",
+  "author": "Real-Time Innovations, Inc.",
+  "license": "SEE LICENSE IN LICENSE.pdf",
   "bugs": {
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js/issues"
   },

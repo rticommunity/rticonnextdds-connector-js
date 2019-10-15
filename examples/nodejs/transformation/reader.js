@@ -1,5 +1,5 @@
 /******************************************************************************
-* (c) 2005-2019 Copyright, Real-Time Innovations.  All rights reserved.       *
+* (c) 2019 Copyright, Real-Time Innovations.  All rights reserved.       *
 * No duplications, whole or partial, manual or electronic, may be made        *
 * without express written permission.  Any such copies, or revisions thereof, *
 * must display this notice unaltered.                                         *
@@ -11,26 +11,14 @@ const path = require('path')
 const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
+  const connector = new rti.Connector('MyParticipantLibrary::TransformationParticipant', fullpath)
   const input = connector.getInput('MySubscriber::MySquareReader')
   try {
-    console.log('Waiting for publications...')
-    await input.waitForPublications()
-
-    console.log('Waiting for data...')
-    for (let i = 0; i < 500; i++) {
+    for (;;) {
       await input.wait()
       input.take()
       for (const sample of input.samples.validDataIter) {
-        // You can obtain all the fields as a JSON object
-        const data = sample.getJson()
-        const x = data.x
-        const y = data.y
-        // Or you can access each field individually
-        const size = sample.getNumber('shapesize')
-        const color = sample.getString('color')
-
-        console.log('Received x: ' + x + ', y: ' + y + ', shapesize: ' + size + ', color: ' + color)
+        console.log('Received Circle: ' + JSON.stringify(sample.getJson()))
       }
     }
   } catch (err) {
