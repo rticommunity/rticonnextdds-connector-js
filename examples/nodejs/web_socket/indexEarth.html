@@ -22,10 +22,10 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 <script type="text/javascript">
    var ge;
    var singlePM;
-   google.load("earth", "1", {"other_params":"sensor=false"});
+   google.load("maps", "1", {"other_params":"sensor=false"});
 
    function init() {
-      google.earth.createInstance('map3d', initCB, failureCB);
+      google.maps.createInstance('map3d', initCB, failureCB);
    }
 
    function initCB(instance) {
@@ -76,8 +76,6 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
      // Add the placemark to Earth.
      ge.getFeatures().appendChild(placemark);
-
-
    }
 
    function moveCamera(lat, lon) {
@@ -91,25 +89,20 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
    google.setOnLoadCallback(init);
 
+  var socket = io.connect('http://127.0.0.1:7400');
+  var lat = document.getElementById('lat');
+  var lon = document.getElementById('lon');
 
+  socket.on('shape', function (data) {
+    console.log('Got udpate from the server');
+    console.log('There are ' + data.x + ' users');
 
-
-
-
-      var socket = io.connect('http://127.0.0.1:7400');
-      var lat = document.getElementById('lat');
-      var lon = document.getElementById('lon');
-
-      socket.on('shape', function (data) {
-        console.log('Got udpate from the server');
-        console.log('There are ' + data.x + ' users');
-
-        var latToSet = 37.7544   + data.y/2000;
-        var lonToSet = -122.4337 + data.x/2000;
-        lat.innerHTML = latToSet;
-        lon.innerHTML = lonToSet;
-        setPM( latToSet,lonToSet);
-      });
+    var latToSet = 37.7544   + data.y/2000;
+    var lonToSet = -122.4337 + data.x/2000;
+    lat.innerHTML = latToSet;
+    lon.innerHTML = lonToSet;
+    setPM( latToSet,lonToSet);
+  });
     </script>
 
 <div id="map3d" style="height:400px; width:600px;"></div>

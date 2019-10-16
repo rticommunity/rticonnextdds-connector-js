@@ -9,9 +9,10 @@
 const http = require('http')
 const fs = require('fs')
 const rti = require('rticonnextdds-connector')
+const socketsio = require('socket.io')
 const path = require('path')
-
-const connector = new rti.Connector('MyParticipantLibrary::Zero', path.join(__dirname, '/../ShapeExample.xml'))
+const fullpath = path.join(__dirname, '/../ShapeExample.xml')
+const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
 const input = connector.getInput('MySubscriber::MySquareReader')
 
 var server = http.createServer(function (req, res) {
@@ -50,19 +51,12 @@ var server = http.createServer(function (req, res) {
 }).listen(7400, '127.0.0.1')
 console.log('Server running at http://127.0.0.1:7400/')
 
-var io = require('socket.io').listen(server)
+const io = socketsio.listen(server)
 
 connector.on('on_data_available',
   function () {
-    console.log('on_dat')
     input.take()
-    console.log(input.samples.getLength())
-    for (let i = 0; i < input.samples.getLength(); i++) {
-      if (input.infos.isValid(i)) {
-        console.log('is valid')
-        var jsonObj = input.samples.getJSON(i)
-        console.log(JSON.stringify(jsonObj))
-        io.sockets.emit('shape', jsonObj)
-      }
+    for (const sample of input.samples) {
+      io.sockets.emit('shape', sample.getJson())
     }
   })
