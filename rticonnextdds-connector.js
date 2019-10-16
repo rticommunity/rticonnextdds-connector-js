@@ -359,6 +359,214 @@ class Infos {
 // Public API
 
 /**
+ * Iterates and provides access to a data sample.
+ */
+class SampleIterator {
+  /**
+   * A SampleIterator provides access to the data receieved by an :class:`Input`.
+   *
+   * The :attr:`Input.samples` attribute implements a :class:`SampleIterator`, meaning
+   * it can be iterated over. An individual sample can be accessed using :meth:`Input.samples.get`.
+   *
+   * See :class:`ValidSampleIterator`.
+   *
+   * This class provides both an iterator and iterable, and is internally used
+   * by the :class:`Samples` class. The following options to iterate over the samples
+   * exist::
+   *
+   *   // option 1 - The iterable can be used in for...of loops
+   *   for (const sample of input.samples)
+   *   // option 2 - Returns an inidivudal sample at the given index
+   *   const individualSample = input.samples.get(0)
+   *   // option 3 - Returns a generator which much be incremented by the application
+   *   const iterator = input.samples.iterator()
+   *
+   * @property {boolean} validData - Whether or not the current sample contains valid data.
+   * @property {SampleInfo} infos - The meta data associated with the current sample.
+   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
+   */
+  constructor (input, index) {
+    this.input = input
+    if (index === undefined) {
+      index = -1
+    }
+    this.index = index
+    this.length = input.samples.getLength()
+  }
+
+  /**
+   * Whether or not this sample contains valid data.
+   *
+   * If ``false``, this methods to obtain values of the samples (e.g., :meth:`SampleIterator.getNumber`,
+   * :meth:`SampleIterator.getBoolean`, :meth:`SampleIterator.getJson`, :meth:`SampleIterator.getString`)
+   * should not be called. To avoid this restraint, use an :class:`ValidSampleIterator`.
+   * @type {boolean}
+   */
+  get validData () {
+    return !!this.input.infos.isValid(this.index)
+  }
+
+  /**
+   * Provides access to this sample's meta-data.
+   *
+   * The ``info`` property expects one of the :class:`SampleInfo` field names::
+   *
+   *   const value = sample.info.get('field')
+   *
+   * The support field names are:
+   *
+   * * ``'source_timestamp'``, returns an integer representing nanoseconds
+   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
+   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
+   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
+   *
+   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
+   * section in the *Connext DDS Core Libraries User's Manual*.
+   *
+   * See :class:`SampleInfo`
+   */
+  get info () {
+    return new SampleInfo(this.input, this.index)
+  }
+
+  /**
+   * Returns a JSON object with the values of all the fields of this sample.
+   *
+   * see :ref:`Accessing the data samples`.
+   *
+   * @param {string} [memberName] - The name of the complex member or field to obtain.
+   * @returns {JSON} The obtained JSON object.
+   */
+  getJson (memberName) {
+    return this.input.samples.getJson(this.index, memberName)
+  }
+
+  /**
+   * Gets the value of a numeric field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {number} The numeric value of the field.
+   */
+  getNumber (fieldName) {
+    return this.input.samples.getNumber(this.index, fieldName)
+  }
+
+  /**
+   * Gets the value of a boolean field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {boolean} The boolean value of the field.
+   */
+  getBoolean (fieldName) {
+    const ret = this.input.samples.getBoolean(this.index, fieldName) 
+    // Performing !! on null produces false, but we want to maintain null
+    if (ret === null) {
+      return ret
+    } else {
+      // For legacy reasons, Samples.getBoolean returns a number, convert that to
+      // a bool here
+      return !!ret
+    }
+  }
+
+  /**
+   * Gets the value of a string field in this sample.
+   *
+   * @param {string} fieldName - The name of the field.
+   * @returns {string} The string value of the field.
+   */
+  getString (fieldName) {
+    return this.input.samples.getString(this.index, fieldName)
+  }
+
+  /**
+   * Get the value of a field within this sample.
+   *
+   * This API can be used to obtain strings, numbers, booleans and the JSON
+   * reprentation of complex members.
+   * @param {string} fieldName - The name of the field.
+   * @returns {number|string|boolean|JSON} The value of the field.
+   */
+  get (fieldName) {
+    return this.input.samples.getValue(this.index, fieldName)
+  }
+
+  /**
+   * The native pointer to the DynamicData sample.
+   *
+   * @type {pointer}
+   * @private
+   */
+  get native () {
+    return this.input.samples.getNative(this.index)
+  }
+
+  /**
+   * The iterator generator (used by the iterable).
+   *
+   * This generator is used internally by the iterable.
+   * A public generator is provided :meth:`Samples.iterator`.
+   *
+   * @private
+   */
+  * iterator () {
+    while ((this.index + 1) < this.length) {
+      this.index += 1
+      yield this
+    }
+  }
+
+  /**
+   * Implementation of iterable logic. This allows for the following syntax::
+   *   for (const sample of input.samples) {
+   *    json = sample.getJson()
+   *   }
+   */
+  [Symbol.iterator] () {
+    return this.iterator()
+  }
+}
+
+/**
+ * Iterates and provides access to data samples with valid data.
+ *
+ * This iterator provides the same methods as :class:`SampleIterator`. It can be
+ * obtained using :attr:`Input.samples.validDataIter`.
+ * @extends SampleIterator
+ *
+ * Using this class it is possible to iterator through all valid data samples::
+ *   for (let sample of input.samples.validDataIter) {
+ *    console.log(JSON.stringify(sample.getJson()))
+ *   }
+ */
+class ValidSampleIterator extends SampleIterator {
+  /**
+   * The iterator generator (used by the iterable).
+   *
+   * Using this method it is possible to create your own iterable::
+   *
+   *  const iterator = input.samples.validDataIter.iterator()
+   *  const singleSample = iterator.next().value
+   *
+   * @generator
+   * @yields {ValidSampleIterator} The next sample in the queue with valid data
+   */
+  * iterator () {
+    while ((this.index + 1) < this.length) {
+      // Increment the sample to the next one with valid
+      while (((this.index + 1) < this.length) && !this.input.infos.isValid(this.index + 1)) {
+        this.index += 1
+      }
+      if ((this.index + 1) < this.length) {
+        this.index += 1
+        yield this
+      }
+    }
+  }
+}
+
+/**
  * Provide access to the data samples read by an :class:`Input`.
  */
 class Samples {
@@ -366,11 +574,27 @@ class Samples {
    * This class provides access to data samples read by an :class:`Input` (using either
    * the :meth:`Input.read` or :meth:`Input.take` methods).
    *
-   * The methods :meth:`Samples.get` and :attr:`Samples.dataIterator` return
-   * a :class:`SampleIterator` which implements iterable and iterator logic, allowing
-   * the caller to iterate through all available samples. The samples returned by these
-   * methods may contain only meta-data (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIter`
+   * This class implements a ``[Symbol.iterator]()`` method, making it an iterable.
+   * This allows for it to be used in ``for... of`` loops, to iterate through
+   * available samples::
+   *
+   *    for (const sample of input.samples) {
+   *       console.log(JSON.stringify(sample.getJson()))
+   *    }
+   *
+   * The method :meth:`Samples.get` returns a :class:`SampleIterator` which
+   * can also be used to access available samples::
+   *
+   *    const sample = input.samples.get(0)
+   *    console.log(JSON.stringify(sample.getJson()))
+   *
+   * The samples returned by these methods may only contain meta-data
+   * (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIter`
    * iterable only iterates over samples that contain valid data (a :class:`ValidSampleIterator`).
+   *
+   * :class:`Samples` and :class:`ValidSampleIterator` both also provide generators to
+   * the samples, allowing application to define their own iterables (see :meth:`Samples.iterator()` and
+   * :meth:`ValidSampleIterator.iterator()`).
    *
    * ``Samples`` is the type of the property :meth:`Input.samples`.
    *
@@ -378,7 +602,6 @@ class Samples {
    *
    * Attributes:
    *  * length (number) - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
-   *  * dataIterator (:class:`SampleIterator`) - The class used to iterate through the available samples.
    *  * validDataIter (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
    */
   constructor (input) {
@@ -404,19 +627,51 @@ class Samples {
   }
 
   /**
-   * Returns an iterator to the data samples.
+   * Returns an iterable, allowing the samples to be accessed using a for...of loop.
    *
-   * The iterator provides access to all the data samples retrieved by the most
+   * The iterable provides access to all the data samples retrieved by the most
    * recent call to :meth:`Input.read` or :meth:`Input.take`.
    *
-   * This iterator may return samples with invalid data (samples that only contain
+   * This iterable may return samples with invalid data (samples that only contain
    * meta-data).
    * Use :attr:`Samples.validDataIter` to avoid having to check :attr:`SampleIterator.validData`.
    *
+   * Allows for the following syntax::
+   *
+   *    for (const sample of input.samples) {
+   *      // ..
+   *    }
+   *
    * @returns :class:`SampleIterator` An iterator to the samples.
    */
-  get dataIterator () {
-    return new SampleIterator(this.input)
+  [Symbol.iterator] () {
+    const iterable = new SampleIterator(this.input)
+    return iterable.iterator()
+  }
+
+  /**
+   * The iterator generator (used by the iterable).
+   *
+   * This method returns a generator, which must be incremented manually by the
+   * application (using the iterator.next() method).
+   *
+   * Once incremented, the data can be accessed via the ``.value`` attribute.
+   * Once no more samples are available, the ``.done`` attribute will be true.
+   *
+   * Using this method it is possible to create your own iterable::
+   *
+   *   const iterator = input.samples.iterator()
+   *   const singleSample = iterator.next().value
+   *
+   * @generator
+   * @yields {SampleIterator} The next sample in the queue
+   */
+  * iterator () {
+    const iterator = new SampleIterator(this.input)
+    while ((iterator.index + 1) < iterator.length) {
+      iterator.index += 1
+      yield iterator
+    }
   }
 
   /**
@@ -705,214 +960,6 @@ class SampleInfo {
         this.input.name,
         this.index,
         fieldName)
-    }
-  }
-}
-
-/**
- * Iterates and provides access to a data sample.
- */
-class SampleIterator {
-  /**
-   * A SampleIterator provides access to the data receieved by an :class:`Input`.
-   * SampleIterators are accessed using :attr:`Input.samples.dataIterator`
-   * and :meth:`Input.samples.get`.
-   *
-   * see :attr:`Samples.dataIterator` and :class:`ValidSampleIterator`.
-   *
-   * This class provides both an iterator and iterable, meaning there are the following
-   * options to use it::
-   *
-   *   // option 1
-   *   const iterator = input.samples.dataIterator.iterator()
-   *   // option 2
-   *   const individualSample = input.samples.get(0)
-   *   // option 3
-   *   for (let sample of input.samples.dataIterator)
-   *
-   * @property {boolean} validData - Whether or not the current sample contains valid data.
-   * @property {SampleInfo} infos - The meta data associated with the current sample.
-   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
-   */
-  constructor (input, index) {
-    this.input = input
-    if (index === undefined) {
-      index = -1
-    }
-    this.index = index
-    this.length = input.samples.getLength()
-  }
-
-  /**
-   * Whether or not this sample contains valid data.
-   *
-   * If ``false``, this methods to obtain values of the samples (e.g., :meth:`SampleIterator.getNumber`,
-   * :meth:`SampleIterator.getBoolean`, :meth:`SampleIterator.getJson`, :meth:`SampleIterator.getString`)
-   * should not be called. To avoid this restraint, use an :class:`ValidSampleIterator`.
-   * @type {boolean}
-   */
-  get validData () {
-    return !!this.input.infos.isValid(this.index)
-  }
-
-  /**
-   * Provides access to this sample's meta-data.
-   *
-   * The ``info`` property expects one of the :class:`SampleInfo` field names::
-   *
-   *   const value = sample.info.get('field')
-   *
-   * The support field names are:
-   *
-   * * ``'source_timestamp'``, returns an integer representing nanoseconds
-   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
-   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
-   *
-   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
-   * section in the *Connext DDS Core Libraries User's Manual*.
-   *
-   * See :class:`SampleInfo`
-   */
-  get info () {
-    return new SampleInfo(this.input, this.index)
-  }
-
-  /**
-   * Returns a JSON object with the values of all the fields of this sample.
-   *
-   * see :ref:`Accessing the data samples`.
-   *
-   * @param {string} [memberName] - The name of the complex member or field to obtain.
-   * @returns {JSON} The obtained JSON object.
-   */
-  getJson (memberName) {
-    return this.input.samples.getJson(this.index, memberName)
-  }
-
-  /**
-   * Gets the value of a numeric field in this sample.
-   *
-   * @param {string} fieldName - The name of the field.
-   * @returns {number} The numeric value of the field.
-   */
-  getNumber (fieldName) {
-    return this.input.samples.getNumber(this.index, fieldName)
-  }
-
-  /**
-   * Gets the value of a boolean field in this sample.
-   *
-   * @param {string} fieldName - The name of the field.
-   * @returns {boolean} The boolean value of the field.
-   */
-  getBoolean (fieldName) {
-    const ret = this.input.samples.getBoolean(this.index, fieldName) 
-    // Performing !! on null produces false, but we want to maintain null
-    if (ret === null) {
-      return ret
-    } else {
-      // For legacy reasons, Samples.getBoolean returns a number, convert that to
-      // a bool here
-      return !!ret
-    }
-  }
-
-  /**
-   * Gets the value of a string field in this sample.
-   *
-   * @param {string} fieldName - The name of the field.
-   * @returns {string} The string value of the field.
-   */
-  getString (fieldName) {
-    return this.input.samples.getString(this.index, fieldName)
-  }
-
-  /**
-   * Get the value of a field within this sample.
-   *
-   * This API can be used to obtain strings, numbers, booleans and the JSON
-   * reprentation of complex members.
-   * @param {string} fieldName - The name of the field.
-   * @returns {number|string|boolean|JSON} The value of the field.
-   */
-  get (fieldName) {
-    return this.input.samples.getValue(this.index, fieldName)
-  }
-
-  /**
-   * The native pointer to the DynamicData sample.
-   *
-   * @type {pointer}
-   * @private
-   */
-  get native () {
-    return this.input.samples.getNative(this.index)
-  }
-
-  /**
-   * The iterator generator (used by the iterable).
-   *
-   * Using this method it is possible to create your own iterable::
-   *   const iterator = input.samples.dataIterator.iterator()
-   *   const singleSample = iterator.next().value
-   *
-   * @generator
-   * @yields {SampleIterator} The next sample in the queue
-   */
-  * iterator () {
-    while ((this.index + 1) < this.length) {
-      this.index += 1
-      yield this
-    }
-  }
-
-  /**
-   * Implementation of iterable logic. This allows for the following syntax::
-   *   for (let sample of input.dataIterator) {
-   *    json = sample.getJson()
-   *   }
-   */
-  [Symbol.iterator] () {
-    return this.iterator()
-  }
-}
-
-/**
- * Iterates and provides access to data samples with valid data.
- *
- * This iterator provides the same methods as :class:`SampleIterator`. It can be
- * obtained using :attr:`Input.samples.validDataIter`.
- * @extends SampleIterator
- *
- * Using this class it is possible to iterator through all valid data samples::
- *   for (let sample of input.samples.validDataIter) {
- *    console.log(JSON.stringify(sample.getJson()))
- *   }
- */
-class ValidSampleIterator extends SampleIterator {
-  /**
-   * The iterator generator (used by the iterable).
-   *
-   * Using this method it is possible to create your own iterable::
-   *
-   *  const iterator = input.samples.validDataIter.iterator()
-   *  const singleSample = iterator.next().value
-   *
-   * @generator
-   * @yields {ValidSampleIterator} The next sample in the queue with valid data
-   */
-  * iterator () {
-    while ((this.index + 1) < this.length) {
-      // Increment the sample to the next one with valid
-      while (((this.index + 1) < this.length) && !this.input.infos.isValid(this.index + 1)) {
-        this.index += 1
-      }
-      if ((this.index + 1) < this.length) {
-        this.index += 1
-        yield this
-      }
     }
   }
 }
