@@ -6,6 +6,8 @@ Getting Started
 Installing RTI Connector for Javascript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+**TODO**
+
 There are two ways to obtain *RTI Connector* for Javascript. You can install it with
 *npm*:
 
