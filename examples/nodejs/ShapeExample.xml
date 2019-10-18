@@ -46,7 +46,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     <!-- Domain Library -->
     <domain_library name="MyDomainLibrary">
-        <domain name="MyDomain" domain_id="0">
+        <domain name="MyDomain" domain_id="229">
             <register_type name="ShapeType" type_ref="ShapeType" />
             <topic name="Square" register_type_ref="ShapeType"/>
             <topic name="Circle" register_type_ref="ShapeType"/>

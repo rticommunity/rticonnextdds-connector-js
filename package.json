@@ -18,7 +18,10 @@
   "dependencies": {
     "events": "*",
     "ffi": "*",
+    "ol": "^6.0.1",
+    "parcel": "^1.12.4",
     "ref": "*",
+    "rticonnextdds-connector": "^0.4.3",
     "sleep": "*",
     "socket.io": "*"
   },

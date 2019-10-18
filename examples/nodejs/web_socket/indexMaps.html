@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8" />
+      <title>RTI Connector for Javascript Example - Maps</title>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v6.0.1/build/ol.js"></script>
+    <style>
+      .map {
+        width: 100%;
+        height:1000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script>
+        // In reader_websocket.js we emit the received data with the 'shape' event,
+        // receive that data here.
+        var socket = io.connect('http://127.0.0.1:7400')
+        var latitude;
+        var longitude;
+        var color;
+        var size;
+        socket.on('shape', function (data) {
+          // Convert y -> latitude
+          latitude = -(data.y * (180/250) - 90);
+          // Convert x -> longitude
+          longitude = (data.x * (360/250) - 180);
+          // Scale size appropriately
+          size = (data.shapesize / 5);
+          color = data.color
+        });
+
+      var Map = ol.Map;
+      var View = ol.View;
+      var TileLayer = ol.layer.Tile;
+      var OSM = ol.source.OSM;
+      var MultiPoint = ol.geom.MultiPoint;
+      var Point = ol.geom.Point;
+      var CircleStyle = ol.style.Circle;
+      var Fill = ol.style.Fill;
+      var Stroke = ol.style.Stroke;
+      var Style = ol.style.Style;
+      var getVectorContext = ol.render.getVectorContext;
+      var fromLonLat = ol.proj.fromLonLat
+
+      var tileLayer = new TileLayer({
+        source: new OSM()
+      });
+
+      var map = new Map({
+        layers: [tileLayer],
+        target: 'map',
+        view: new View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+
+      var imageStyle = new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({color: 'yellow'}),
+          stroke: new Stroke({color: 'red', width: 1})
+        })
+      });
+    
+
+      tileLayer.on('postrender', function(event) {
+        var vectorContext = getVectorContext(event);
+        var frameState = event.frameState;
+        var coordinates = [];
+        coordinates.push([longitude, latitude]);
+        vectorContext.setStyle(imageStyle);
+        vectorContext.drawGeometry(new Point(fromLonLat(coordinates[0])));
+        map.render();
+      });
+      map.render();
+    </script>
+  </body> -->
+</html>
