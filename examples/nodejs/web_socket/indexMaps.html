@@ -17,22 +17,11 @@
   <body>
     <div id="map" class="map"></div>
     <script>
-        // In reader_websocket.js we emit the received data with the 'shape' event,
-        // receive that data here.
-        var socket = io.connect('http://127.0.0.1:7400')
-        var latitude;
-        var longitude;
-        var color;
-        var size;
-        socket.on('shape', function (data) {
-          // Convert y -> latitude
-          latitude = -(data.y * (180/250) - 90);
-          // Convert x -> longitude
-          longitude = (data.x * (360/250) - 180);
-          // Scale size appropriately
-          size = (data.shapesize / 5);
-          color = data.color
-        });
+      var socket = io.connect('http://127.0.0.1:7400')
+      var latitude;
+      var longitude;
+      var color;
+      var size;
 
       var Map = ol.Map;
       var View = ol.View;
@@ -45,14 +34,17 @@
       var Stroke = ol.style.Stroke;
       var Style = ol.style.Style;
       var getVectorContext = ol.render.getVectorContext;
-      var fromLonLat = ol.proj.fromLonLat
 
-      var tileLayer = new TileLayer({
-        source: new OSM()
+      var vectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector()
       });
-
       var map = new Map({
-        layers: [tileLayer],
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          vectorLayer
+        ],
         target: 'map',
         view: new View({
           center: [0, 0],
@@ -67,18 +59,36 @@
           stroke: new Stroke({color: 'red', width: 1})
         })
       });
-    
 
-      tileLayer.on('postrender', function(event) {
-        var vectorContext = getVectorContext(event);
-        var frameState = event.frameState;
+      var obtainMapShapeFromData = function (data) {
         var coordinates = [];
+        // Convert y -> latitude
+        latitude = -(data.y * (180/250) - 90);
+        // Convert x -> longitude
+        longitude = (data.x * (360/250) - 180);
         coordinates.push([longitude, latitude]);
-        vectorContext.setStyle(imageStyle);
-        vectorContext.drawGeometry(new Point(fromLonLat(coordinates[0])));
-        map.render();
+        var receivedShape = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        receivedShape.setStyle(new Style({
+          image: new CircleStyle({
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1})
+          })
+        }));
+        return receivedShape;
+      }
+
+      var vectorSource = vectorLayer.getSource();
+      var features = [];
+      socket.on('shape', function (data) {
+        while (features.length > 10) {
+          vectorSource.removeFeature(features.shift())
+        }
+        features.push(obtainMapShapeFromData(data))
+        vectorSource.addFeature(features[features.length - 1]);
       });
-      map.render();
+
     </script>
-  </body> -->
+  </body>
 </html>
