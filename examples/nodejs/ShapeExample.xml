@@ -46,10 +46,11 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     <!-- Domain Library -->
     <domain_library name="MyDomainLibrary">
-        <domain name="MyDomain" domain_id="229">
+        <domain name="MyDomain" domain_id="0">
             <register_type name="ShapeType" type_ref="ShapeType" />
             <topic name="Square" register_type_ref="ShapeType"/>
             <topic name="Circle" register_type_ref="ShapeType"/>
+            <topic name="Triangle" register_type_ref="ShapeType"/>
         </domain>
     </domain_library>
 
@@ -67,6 +68,8 @@ This code contains trade secrets of Real-Time Innovations, Inc.
         <domain_participant name="MySubParticipant" domain_ref="MyDomainLibrary::MyDomain">
             <subscriber name="MySubscriber">
                 <data_reader name="MySquareReader" topic_ref="Square" />
+                <data_reader name="MyCircleReader" topic_ref="Circle" />
+                <data_reader name="MyTriangleReader" topic_ref="Triangle" />
             </subscriber>
         </domain_participant>
 

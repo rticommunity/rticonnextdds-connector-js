@@ -51,16 +51,35 @@ console.log('Server running at http://127.0.0.1:7400/')
 
 const run = async () => {
   const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
-  const input = connector.getInput('MySubscriber::MySquareReader')
+  const inputSquare = connector.getInput('MySubscriber::MySquareReader')
+  const inputTriangle = connector.getInput('MySubscriber::MyTriangleReader')
+  const inputCircle = connector.getInput('MySubscriber::MyCircleReader')
   const io = socketsio.listen(server)
 
   for (;;) {
     try {
-      await input.wait()
-      input.take()
-      for (const sample of input.samples.validDataIter) {
-        console.log('reader_websocket.js: emitting: ' + sample.getJson())
-        io.sockets.emit('shape', sample.getJson())
+      await inputSquare.wait()
+      inputSquare.take()
+      for (const sample of inputSquare.samples.validDataIter) {
+        io.sockets.emit('square', sample.getJson())
+      }
+    } catch (err) {
+      console.log('Caught err: ' + err)
+    }
+    try {
+      await inputTriangle.wait()
+      inputTriangle.take()
+      for (const sample of inputTriangle.samples.validDataIter) {
+        io.sockets.emit('triangle', sample.getJson())
+      }
+    } catch (err) {
+      console.log('Caught err: ' + err)
+    }
+    try {
+      await inputCircle.wait()
+      inputCircle.take()
+      for (const sample of inputCircle.samples.validDataIter) {
+        io.sockets.emit('circle', sample.getJson())
       }
     } catch (err) {
       console.log('Caught err: ' + err)

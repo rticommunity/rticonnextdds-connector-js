@@ -18,10 +18,6 @@
     <div id="map" class="map"></div>
     <script>
       var socket = io.connect('http://127.0.0.1:7400')
-      var latitude;
-      var longitude;
-      var color;
-      var size;
 
       var Map = ol.Map;
       var View = ol.View;
@@ -34,6 +30,7 @@
       var Stroke = ol.style.Stroke;
       var Style = ol.style.Style;
       var getVectorContext = ol.render.getVectorContext;
+      var RegularShape = ol.style.RegularShape;
 
       var vectorLayer = new ol.layer.Vector({
         source: new ol.source.Vector()
@@ -60,35 +57,98 @@
         })
       });
 
-      var obtainMapShapeFromData = function (data) {
+      var getCoordinatesFromData = function (data) {
         var coordinates = [];
-        // Convert y -> latitude
-        latitude = -(data.y * (180/250) - 90);
+        // Convert y -> latitude)
+        var latitude = -(data.y * (180/300) - 90);
+        if (latitude < -90) {
+          latitude = -90;
+        }
+        if (latitude > 90) {
+          latitude = 90;
+        }
         // Convert x -> longitude
-        longitude = (data.x * (360/250) - 180);
+        var longitude = (data.x * (360/300) - 180);
+        if (longitude < -180) {
+          longitude = -180
+        }
+        if (longitude > 180) {
+          longitude = 180
+        }
         coordinates.push([longitude, latitude]);
-        var receivedShape = new ol.Feature(
+        return coordinates;
+      }
+
+      var getCircleFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var circle = new ol.Feature(
             new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
-        receivedShape.setStyle(new Style({
+        circle.setStyle(new Style({
           image: new CircleStyle({
             radius: data.shapesize / 5,
             fill: new Fill({color: data.color}),
             stroke: new Stroke({color: 'black', width: 1})
           })
         }));
-        return receivedShape;
+        return circle;
+      }
+
+      var getSquareFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var square = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        square.setStyle(new Style({
+          image: new RegularShape({
+            points: 4,
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1}),
+            rotation: Math.PI / 4
+          })
+        }));
+        return square;
+      }
+
+      var getTriangleFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var triangle = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        triangle.setStyle(new Style({
+          image: new RegularShape({
+            points: 3,
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1})
+          })
+        }));
+        return triangle;
       }
 
       var vectorSource = vectorLayer.getSource();
-      var features = [];
-      socket.on('shape', function (data) {
-        while (features.length > 10) {
-          vectorSource.removeFeature(features.shift())
+      var squares = [];
+      var circles = [];
+      var triangles = [];
+      socket.on('square', function (data) {
+        while (squares.length >= 20) {
+          vectorSource.removeFeature(squares.shift());
         }
-        features.push(obtainMapShapeFromData(data))
-        vectorSource.addFeature(features[features.length - 1]);
+        squares.push(getSquareFromData(data));
+        vectorSource.addFeature(squares[squares.length - 1]);
       });
-
+      socket.on('triangle', function (data) {
+        while (triangles.length >= 20) {
+          vectorSource.removeFeature(triangles.shift());
+        }
+        triangles.push(getTriangleFromData(data));
+        vectorSource.addFeature(triangles[triangles.length - 1]);
+      });
+      socket.on('circle', function (data) {
+        while (circles.length >= 20) {
+          vectorSource.removeFeature(circles.shift());
+        }
+        circles.push(getCircleFromData(data));
+        vectorSource.addFeature(circles[circles.length - 1]);
+      });
     </script>
   </body>
 </html>
