@@ -17,3 +17,8 @@ publisher.
 * Click either the `read` or `take` button to perform an operation
 * Navigating to [http://localhost:7400/read](http://localhost:7400/read) will read data,
 whilst [http://localhost:7400/take](http://localhost:7400/take) will take data
+
+You will notice that if ``read`` is called repeatedly, the number of samples obtained grows.
+This is because a call to ``read`` does not remove the sample from the Input's queue, but leaves
+it there for future access.
+Contrarily, a call to ``take`` obtains any samples available in the Input's queue and removes them.
