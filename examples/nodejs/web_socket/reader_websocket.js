@@ -27,6 +27,20 @@ const server = http.createServer(function (req, res) {
 }).listen(7400, '127.0.0.1')
 console.log('Server running at http://127.0.0.1:7400/')
 
+const waitForShapeOnInput = async (io, input, shapeName) => {
+  try {
+    await input.wait()
+    input.take()
+    for (const sample of input.samples.validDataIter) {
+      io.sockets.emit(shapeName, sample.getJson())
+    }
+  } catch (err) {
+    if (err !== rti.TimeoutError) {
+      console.log('Caught error: ' + err)
+    }
+  }
+}
+
 const run = async () => {
   // Create the DDS entities required for this example - a reader of Triangle, Circle
   // and Square (all under the same participant).
@@ -37,34 +51,26 @@ const run = async () => {
   const io = socketsio.listen(server)
 
   for (;;) {
+    const promisesToWait = []
+
+    // Only wait for data on an input if it has a matched publication
+    if (inputSquare.matchedPublications.length > 0) {
+      promisesToWait.push(waitForShapeOnInput(io, inputSquare, 'square'))
+    }
+    if (inputTriangle.matchedPublications.length > 0) {
+      promisesToWait.push(waitForShapeOnInput(io, inputTriangle, 'triangle'))
+    }
+    if (inputCircle.matchedPublications.length > 0) {
+      promisesToWait.push(waitForShapeOnInput(io, inputCircle, 'circle'))
+    }
+    // If we are not waiting on any data currently, add a delay before checking again.
+    // This is so that we don't hang the server
+    if (promisesToWait.length === 0) {
+      promisesToWait.push(new Promise(resolve => setTimeout(resolve, 500)))
+    }
+
     // Take data on each input and emit the corresponding socket event
-    try {
-      await inputSquare.wait()
-      inputSquare.take()
-      for (const sample of inputSquare.samples.validDataIter) {
-        io.sockets.emit('square', sample.getJson())
-      }
-    } catch (err) {
-      console.log('Caught err: ' + err)
-    }
-    try {
-      await inputTriangle.wait()
-      inputTriangle.take()
-      for (const sample of inputTriangle.samples.validDataIter) {
-        io.sockets.emit('triangle', sample.getJson())
-      }
-    } catch (err) {
-      console.log('Caught err: ' + err)
-    }
-    try {
-      await inputCircle.wait()
-      inputCircle.take()
-      for (const sample of inputCircle.samples.validDataIter) {
-        io.sockets.emit('circle', sample.getJson())
-      }
-    } catch (err) {
-      console.log('Caught err: ' + err)
-    }
+    await Promise.all(promisesToWait)
   }
 }
 
