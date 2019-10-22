@@ -57,6 +57,7 @@ const run = async () => {
   const io = socketsio.listen(server)
 
   for (;;) {
+    // Take data on each input and emit the corresponding socket event
     try {
       await inputSquare.wait()
       inputSquare.take()

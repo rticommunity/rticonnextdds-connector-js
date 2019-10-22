@@ -50,7 +50,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
       var svg = d3.select("body").append("svg")
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
-        .append("g")
+          .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
       svg.append("defs").append("clipPath")
           .attr("id", "clip")
@@ -94,12 +94,12 @@ This code contains trade secrets of Real-Time Innovations, Inc.
     <h3>y:</h3>
     <p id="receivedY"></p>
     <script>
-      // In reader_websocket.js we emit the received data with the 'shape' event,
+      // In reader_websocket.js we emit the received data with the 'square' event,
       // receive that data here.
       var socket = io.connect('http://127.0.0.1:7400');
       var receivedX = document.getElementById('receivedX');
       var receivedY = document.getElementById('receivedY');
-      socket.on('shape', function (data) {
+      socket.on('square', function (data) {
         receivedX.innerHTML = data.x
         receivedY.innerHTML = data.y
         tick(data.x);
