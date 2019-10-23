@@ -19,8 +19,7 @@
     "events": "*",
     "ffi": "*",
     "ref": "*",
-    "sleep": "*",
-    "socket.io": "*"
+    "sleep": "*"
   },
   "keywords": [
     "rti",

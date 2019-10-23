@@ -106,7 +106,7 @@ describe('Test the iteration of Input Samples', () => {
 
     // Check that it is possible to use the iterable object
     let count = 0
-    for (const sample of input.samples.dataIterator) {
+    for (const sample of input.samples) {
       if (count === 3) {
         expect(sample.validData).to.deep.equals(false)
       } else {
@@ -128,7 +128,7 @@ describe('Test the iteration of Input Samples', () => {
 
     // Check that it is possible to use the iterator manually (by progressing
     // the iterator using next())
-    const iterator = input.samples.dataIterator.iterator()
+    const iterator = input.samples.iterator()
     for (count = 0; count < input.samples.length; count++) {
       const singleSample = iterator.next().value
       if (count <= 2) {
@@ -231,7 +231,7 @@ describe('Test dispose', () => {
 
   it('Dispose should not have validData set to true', () => {
     let count = 0
-    for (const sample of input.samples.dataIterator) {
+    for (const sample of input.samples) {
       if (count === 0) {
         expect(sample.validData).to.deep.equals(true)
       } else {
@@ -302,7 +302,7 @@ describe('Test unregister', () => {
 
   it('Unregister should not have validData set to true', () => {
     let count = 0
-    for (const sample of input.samples.dataIterator) {
+    for (const sample of input.samples) {
       if (count === 0) {
         expect(sample.validData).to.deep.equals(true)
       } else {
