@@ -61,33 +61,25 @@ const run = async () => {
   // Create the DDS entities required for this example - a reader of Triangle, Circle
   // and Square (all under the same participant).
   const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
-  const inputSquare = connector.getInput('MySubscriber::MySquareReader')
-  const inputTriangle = connector.getInput('MySubscriber::MyTriangleReader')
-  const inputCircle = connector.getInput('MySubscriber::MyCircleReader')
   const io = socketsio.listen(server)
+  const inputs = [
+    { input: connector.getInput('MySubscriber::MySquareReader'), topic: 'square' },
+    { input: connector.getInput('MySubscriber::MyTriangleReader'), topic: 'triangle' },
+    { input: connector.getInput('MySubscriber::MyCircleReader'), topic: 'circle' }
+  ]
 
   for (;;) {
-    const promisesToWait = []
-
-    // Only wait for data on an input if it has a matched publication
-    if (inputSquare.matchedPublications.length > 0) {
-      promisesToWait.push(waitForShapeOnInput(io, inputSquare, 'square'))
-    }
-    if (inputTriangle.matchedPublications.length > 0) {
-      promisesToWait.push(waitForShapeOnInput(io, inputTriangle, 'triangle'))
-    }
-    if (inputCircle.matchedPublications.length > 0) {
-      promisesToWait.push(waitForShapeOnInput(io, inputCircle, 'circle'))
-    }
-    // If we are not waiting on any data currently, add a delay before checking again.
-    // This is so that we don't hang the server
-    if (promisesToWait.length === 0) {
-      promisesToWait.push(new Promise(resolve => setTimeout(resolve, 500)))
-    }
-
-    // Take data on each input and emit the corresponding socket event
     try {
-      await Promise.all(promisesToWait)
+      // Wait for data on any of the inputs
+      await connector.waitForData()
+      inputs.forEach(element => {
+        // Check each input for data
+        element.input.take()
+        // If there are any available samples, emit the corresponding event
+        for (const sample of element.input.samples.validDataIter) {
+          io.sockets.emit(element.topic, sample.getJson())
+        }
+      })
     } catch (err) {
       console.log('Caught err: ' + err)
     }
