@@ -69,7 +69,7 @@ describe('Test operations involving meta data', () => {
     }
     testInput.take()
 
-    for (const sample of testInput.samples.dataIterator) {
+    for (const sample of testInput.samples) {
       expect(sample.info.get('source_timestamp')).to.deep.equals(sourceTimestamp)
       expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
@@ -96,7 +96,7 @@ describe('Test operations involving meta data', () => {
     }
     testInput.take()
 
-    for (const sample of testInput.samples.dataIterator) {
+    for (const sample of testInput.samples) {
       expect(sample.info.get('identity').writer_guid).to.deep.equals(identWriterGuid)
       expect(sample.info.get('identity').sequence_number).to.deep.equals(identSeqNumber)
       expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)

@@ -134,15 +134,15 @@ For more ways to access the data, see :ref:`Accessing the data`.
 Accessing the SampleInfo
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-*Connect DDS* can produce samples with invalid data, which contain meta-data only.
-For more information about this see `Valid Data Flag <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#receiving_2076951295_727613>`__
+*Connext DDS* can produce samples with invalid data, which contain meta-data only.
+For more information about this, see `Valid Data Flag <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#receiving_2076951295_727613>`__
 in the *Connect DDS Core Libraries* User's Manual.
 
 You can access a field of the sample meta-data, the *SampleInfo*, as follows:
 
 .. code-block::
 
-   for (const sample of input.samples.dataIterator) {
+   for (const sample of input.samples) {
       const sourceTimestamp = sample.info.get('source_timestamp')
    }
 
