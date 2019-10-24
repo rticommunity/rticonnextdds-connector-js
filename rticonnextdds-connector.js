@@ -967,7 +967,7 @@ class SampleInfo {
 /**
  * Allows reading data for a DDS Topic.
  */
-class Input {
+class Input extends EventEmitter {
   /**
    * This class is used to subscribe to a specific DDS Topic.
    *
@@ -980,6 +980,7 @@ class Input {
    *  * matchedPublications (JSON) - A JSON object containing information about all the publications currently matched with this Input.
    */
   constructor (connector, name) {
+    super()
     this.connector = connector
     this.name = name
     this.native = connectorBinding.api.RTI_Connector_get_datareader(
@@ -999,6 +1000,9 @@ class Input {
     // are not used concurrently. This works because the Node.js interpreter is
     // single-threaded.
     this.waitsetBusy = false
+    this.onDataAvailableRun = false
+    this.on('newListener', this.newListenerCallBack)
+    this.on('removeListener', this.removeListenerCallBack)
   }
 
   /**
@@ -1144,6 +1148,93 @@ class Input {
       cStr)
     _checkRetcode(retcode)
     return JSON.parse(_moveCString(cStr.deref()))
+  }
+
+  /**
+   * **TODO** - How can I document the .on() method? These docs should be included
+   * in the reference but for the .on() method which we inherit from EventEmitter class.
+   *
+   * Emits the 'on_data_available' event when new data is available on this Input.
+   *
+   * .. note::
+   *   This operation is asynchronous
+   *
+   * This API is used internally to emit the 'on_data_available' event when data is
+   * received on this Input.
+   *
+   * The Input class extends EventEmitter, meaning that callbacks can be
+   * registered for specific events using the following syntax:
+   *
+   * .. code-block:: javascript
+   *
+   *    function myCallback() {
+   *      input.take()
+   *      for (const sample of input.samples) {
+   *        // do something with the data
+   *      }
+   *    }
+   *    input.on('on_data_available', myCallback)
+   *    // ...
+   *    input.off('on_data_available', myCallback)
+   *
+   * @private
+   */
+  onDataAvailable () {
+    // Promises cannot be cancelled. For this reason we provide a timeout of 1s.
+    // This way, we wake up every second and check if this listener is still installed.
+    this.wait(1000)
+      .then(() => {
+        // Ensure that the entity was not deleted whilst we were waiting
+        if (this.native !== null) {
+          // Emit the requested event
+          this.emit('on_data_available')
+          // If still requested, restart the wait
+          if (this.onDataAvailableRun) {
+            this.onDataAvailable()
+          }
+        }
+      })
+      .catch((err) => {
+        // If no data was received within one second, the operation will timeout
+        // This should not be treated as an error.
+        if (!(err instanceof TimeoutError)) {
+          console.log('Caught error: ' + err)
+          throw err
+        } else if (this.onDataAvailableRun) {
+          // Only restart the wait if we timed out
+          this.onDataAvailable()
+        }
+      })
+  }
+
+  // This callback was added for the 'newListener' event, meaning it is triggered
+  // just before we add a new callback.
+  // Since the onDataAvailable() function above is using an asynchronous function
+  // and the Connector binding is not thread-safe we have to ensure it is not
+  // called concurrently
+  /**
+   * @private
+   */
+  newListenerCallBack (eventName, functionListener) {
+    if (eventName === 'on_data_available') {
+      if (this.onDataAvailableRun === false) {
+        this.onDataAvailableRun = true
+        this.onDataAvailable()
+      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  removeListenerCallBack (eventName, functionListener) {
+    if (this.listenerCount(eventName) === 0) {
+      if (eventName === 'on_data_available') {
+        this.onDataAvailableRun = false
+      } else if (eventName === 'on_publication_matched') {
+        this.onPublicationMatchedRun = false
+      }
+    }
   }
 }
 
@@ -1569,6 +1660,7 @@ class Connector extends EventEmitter {
     this.on('newListener', this.newListenerCallBack)
     this.on('removeListener', this.removeListenerCallBack)
     this.onDataAvailableRun = false
+    this.waitSetBusy = false
   }
 
   /**
@@ -1648,39 +1740,57 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * This is deprecated. Use waitForData.
+   * **TODO** - How can I document the .on() method? These docs should be included
+   * in the reference but for the .on() method which we inherit from EventEmitter class.
+   *
+   * Emits the 'on_data_available' event when any Inputs within this Connector object
+   * receive data.
    *
    * .. note::
    *   This operation is asynchronous
    *
+   * This API is used internally to emit the 'on_data_available' event when data is
+   * received on any of the Inputs contained within this Connector object.
+   *
+   * The Connector class extends EventEmitter, meaning that callbacks can be
+   * registered for specific events using the following syntax:
+   *
+   * .. code-block:: javascript
+   *
+   *    function myCallback() {
+   *      // Handle the fact that there is new data on one of the inputs
+   *    }
+   *    connector.on('on_data_available', myCallback)
+   *    // ...
+   *    connector.off('on_data_available', myCallback)
+   *
    * @private
    */
   onDataAvailable () {
-    // No need to cache return value. When using .async() the result
-    // is passed as 'res' to the callback function.
-    connectorBinding.api.RTI_Connector_wait_for_data.async(
-      this.native,
-      1000,
-      (err, res) => {
-        if (this.native !== null) {
-          if (err) throw err
-          // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
-          // we call this in a loop (and therefore expect to receive timeout error)
-          // for this reason do not raise a timeout exception
-          if (res !== _ReturnCodes.timeout) {
-            _checkRetcode(res)
-          }
+    // Ensure that this entity has not been deleted
+    if (this.native !== null) {
+      // Promises are not cancellable, so we wake up every second to check that
+      // this event is still requested
+      this.waitForData(1000)
+        .then(() => {
+          // Emit the on_data_available event (envoking the registered callback)
+          this.emit('on_data_available')
+          // If the listener is still installed, do it all again
           if (this.onDataAvailableRun) {
             this.onDataAvailable()
           }
-          // Emitting this from the EventEmitter will trigger the callback created
-          // by the user
-          if (res === _ReturnCodes.ok) {
-            this.emit('on_data_available')
+        })
+        .catch((err) => {
+          // Since we wake up every 1s, do not treat timeout error as anything
+          // significant - just wait again
+          if (!(err instanceof TimeoutError)) {
+            console.log('Caught error: ' + err)
+            throw err
+          } else if (this.onDataAvailableRun) {
+            this.onDataAvailable()
           }
-        }
-      }
-    )
+        })
+    }
   }
 
   // This callback was added for the 'newListener' event, meaning it is triggered
@@ -1705,7 +1815,9 @@ class Connector extends EventEmitter {
    */
   removeListenerCallBack (eventName, functionListener) {
     if (this.listenerCount(eventName) === 0) {
-      this.onDataAvailableRun = false
+      if (eventName === 'on_data_available') {
+        this.onDataAvailableRun = false
+      }
     }
   }
 
@@ -1727,15 +1839,15 @@ class Connector extends EventEmitter {
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
-      if (this.onDataAvailableRun) {
+      if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Connector object')
       }
-      this.onDataAvailableRun = true
+      this.waitSetBusy = true
       connectorBinding.api.RTI_Connector_wait_for_data.async(
         this.native,
         timeout,
         (err, res) => {
-          this.onDataAvailableRun = false
+          this.waitSetBusy = false
           if (err) {
             return reject(err)
           } else if (res === _ReturnCodes.ok) {
