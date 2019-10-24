@@ -30,7 +30,7 @@ Thread-safe operations:
    (it is currently not possible to have more than one ``Promise`` pending on
    :meth:`Input.wait` or :meth:`Input.waitForPublications`). Since internally
    the same resource is used for both of these operations, it is not possible to
-   wait on both :meth:`Input.wait` or :meth:`Input.waitForPublications` simulatenously.
+   wait on both :meth:`Input.wait` or :meth:`Input.waitForPublications` simultaneously.
 
    For example, the following code will throw an :class:`DDSError`::
 
@@ -54,7 +54,7 @@ Thread-safe operations:
       waitForData()
 
    The ``input.wait`` call within the asynchronous function ``waitForData`` will
-   fail since there is a simulatenous request to ``input.waitForSubscriptions``.
+   fail since there is a simultaneous request to ``input.waitForSubscriptions``.
    This can be avoided by ensuring you only have a single ``wait`` operation pending
    at a time::
 
