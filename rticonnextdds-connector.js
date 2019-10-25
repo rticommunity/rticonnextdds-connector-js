@@ -1231,8 +1231,7 @@ class Input extends EventEmitter {
     if (this.listenerCount(eventName) === 0) {
       if (eventName === 'on_data_available') {
         this.onDataAvailableRun = false
-      } else if (eventName === 'on_publication_matched') {
-        this.onPublicationMatchedRun = false
+        // Ideally we would cancel the async ffi call here but it is not possible
       }
     }
   }
@@ -1668,6 +1667,7 @@ class Connector extends EventEmitter {
    */
   close () {
     connectorBinding.api.RTI_Connector_delete(this.native)
+    this.native = null
   }
 
   /**
@@ -1817,6 +1817,7 @@ class Connector extends EventEmitter {
     if (this.listenerCount(eventName) === 0) {
       if (eventName === 'on_data_available') {
         this.onDataAvailableRun = false
+        // Ideally we would cancel the async ffi call here but it is not possible
       }
     }
   }

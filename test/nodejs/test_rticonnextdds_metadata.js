@@ -61,7 +61,7 @@ describe('Test operations involving meta data', () => {
 
     testOutput.write({ source_timestamp: sourceTimestamp })
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -88,7 +88,7 @@ describe('Test operations involving meta data', () => {
         }
       })
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -116,7 +116,7 @@ describe('Test operations involving meta data', () => {
         }
       })
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
@@ -190,7 +190,7 @@ describe('Test operations involving meta data', () => {
 
     testOutput.write()
     try {
-      await testInput.wait(2000)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       // Fail the test
       console.log('Error caught: ' + err)
