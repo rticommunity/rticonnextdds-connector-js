@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+(c) 2005-2019 Copyright, Real-Time Innovations.  All rights reserved.
+No duplications, whole or partial, manual or electronic, may be made
+without express written permission.  Any such copies, or revisions thereof,
+must display this notice unaltered.
+This code contains trade secrets of Real-Time Innovations, Inc.
+ -->
+
+<head>
+  <meta charset="utf-8" />
+  <title>RTI Connector for Javascript Example - Simple</title>
+</head>
+<body>
+  <h2>Latest Shape</h2>
+  <h3>
+    <pre>
+    Shape: <p style="display:inline" id="shapetype"></p>
+    x: <p style="display:inline" id="x"></p>
+    y: <p style="display:inline" id="y"></p>
+    shapesize: <p style="display:inline" id="shapesize"></p>
+    color: <p style="display:inline" id="color"></p></pre>
+  </h3>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    var updateShape = function (data) {
+      const x = document.getElementById('x');
+      const y = document.getElementById('y');
+      const shapesize = document.getElementById('shapesize');
+      const color = document.getElementById('color');
+
+      x.innerHTML = data.x;
+      y.innerHTML = data.y;
+      shapesize.innerHTML = data.shapesize
+      color.innerHTML = data.color
+    }
+    const socket = io.connect('http://127.0.0.1:7400');
+    const shapetype = document.getElementById('shapetype');
+
+    socket.on('square', function (data) {
+      shapetype.innerHTML = 'Square'
+      updateShape(data)
+    });
+    socket.on('circle', function (data) {
+      shapetype.innerHTML = 'Circle'
+      updateShape(data)
+    });
+    socket.on('triangle', function (data) {
+      shapetype.innerHTML = 'Triangle'
+      updateShape(data)
+    });
+  </script>
+</body>
+</html>
