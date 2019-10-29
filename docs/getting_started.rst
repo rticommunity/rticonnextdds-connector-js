@@ -3,38 +3,37 @@ Getting Started
 
 .. highlight:: javascript
 
-Installing RTI Connector for Javascript
+Installing RTI Connector for JavaScript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**TODO**
+*RTI Connector for JavaScript* can be installed in two ways.
 
-There are two ways to obtain *RTI Connector* for Javascript. You can install it with
-*npm*:
-
-.. code:: bash
-
-   $ npm install rticonnextdds_connector
-
-And then run your *RTI Connector* applications:
+You can install the *RTI Connector for JavaScript* package via npm:
 
 .. code:: bash
 
-    $ node my_connector_app.js
+    $ npm install rticonnextdds-connector
 
-Alternatively, you can clone the github repository and run the examples directly without installing
-*RTI Connector* via *npm*:
+Alternatively, running ``npm install`` with the git repository as the argument will fetch the required
+files from the github repository, and also install all of the required dependencies:
 
 .. code:: bash
 
-   $ git clone --recursive https://github.com/rticommunity/rticonnextdds-connector-js.git
+   $ npm install https://www.github.com/rticommunity/rticonnextdds-connector-js.git
 
-In order to gain access to the examples, clone the github repository.
+The examples can then be run as follows:
+
+.. code:: bash
+
+    $ node node_modules/rticonnextdds-connector/examples/nodejs/simple/reader.js
+
+In order to gain access to the examples, run ``npm install`` with the git repository.
 
 Running the examples
 ~~~~~~~~~~~~~~~~~~~~
 
 The examples are located in the `examples/nodejs <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs>`__
-directory of the *RTI Connector for Javascript* GitHub repository.
+directory of the *RTI Connector for JavaScript* GitHub repository.
 
 In the simple example, `writer.js` periodically publishes data for a
 *Square* topic, and `reader.js` subscribes to the topic and prints all the
@@ -73,31 +72,43 @@ To learn more about *RTI Connector* continue to the next section,
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for Javascript* has been tested with Node.js 8.7.0.
-
-(TODO: clarify which version of Node.js to officially support - 8.7.0 is EOL soon)
+*RTI Connector for JavaScript* has not been tested with versions of Node.js older than v8.7.0.
+It has been tested with Node.js versions v8.7.0, v10.4.0 and v11.15.0. *RTI Connector for JavaScript* current
+does not work with newer versions of Node.js (v12.13.0) because some of its dependencies (ffi) are not
+yet compatible with this version.
 
 *RTI Connector* uses a native C library that works on most Windows, Linux and
 MacOS platforms. It has been tested on the following systems:
+**TODO**
 
-(TODO: clarify PAM)
-
-- Windows: 64-bit Windows 10 with VS 2015 and 32-bit Windows 7 with VS 2017
-- Linux: 64-bit CentOS 6.5 with gcc 4.8.2, 32-bit Ubuntu 16.04 gcc 5.4.0, and ARM Yocto Linux 2.0.3 with gcc 5.2.0
-- MacOS: Darwin 18 with clang 10
-
-(TODO: link to main Connector landing page)
-
-*RTI Connector* is supported in other languages in addition to Node.js, see
+*RTI Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
+
+Dependencies
+~~~~~~~~~~~~
+
+npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of Connector's
+dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
+compiler (such as gcc 4.8+).
+
+On Windows systems you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
+which include both the Visual C++ compiler and Python 2.7.
+
+Version
+~~~~~~~
+
+The library used by Connector is built on top of RTI® Connext® DDS, currently the version built against is 6.0.1.
+This library is statically linked and a dynamically linked variant is not currently available.
 
 License
 ~~~~~~~
 
-With the sole exception of the contents of the “examples” subdirectory,
-all use of this product is subject to the RTI Software License Agreement
-included at the top level of this repository. Files within the
-“examples” subdirectory are licensed as marked within the file.
-
-(TODO: final license)
+With the sole exception of the contents of the "examples" subdirectory, all use
+of the software shall be governed by this license. RTI Connector for JavaScript
+and RTI Connector for Python is part of the Connext DDS Professional Package.
+If you have a valid license for the RTI Connext DDS Professional Package,
+such license shall govern your use of RTI Connector for Python and RTI Connector
+for JavaScript. All other use of this software shall be governed solely by the
+terms of RTI’s Software License for Non-Commercial Use #4040, included at the
+top level of this repository.
