@@ -1,4 +1,4 @@
-/******************************************************************************
+lass/******************************************************************************
 * (c) 2005-2019 Copyright, Real-Time Innovations.  All rights reserved.       *
 * No duplications, whole or partial, manual or electronic, may be made        *
 * without express written permission.  Any such copies, or revisions thereof, *
@@ -459,7 +459,7 @@ class SampleIterator {
    * @returns {boolean} The boolean value of the field.
    */
   getBoolean (fieldName) {
-    const ret = this.input.samples.getBoolean(this.index, fieldName) 
+    const ret = this.input.samples.getBoolean(this.index, fieldName)
     // Performing !! on null produces false, but we want to maintain null
     if (ret === null) {
       return ret
@@ -999,7 +999,7 @@ class Input extends EventEmitter {
     // of these functions are async, we use use this boolean to ensure that they
     // are not used concurrently. This works because the Node.js interpreter is
     // single-threaded.
-    this.waitsetBusy = false
+    this.waitSetBusy = false
     this.onDataAvailableRun = false
     this.on('newListener', this.newListenerCallBack)
     this.on('removeListener', this.removeListenerCallBack)
@@ -1052,20 +1052,21 @@ class Input extends EventEmitter {
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
+      // timeout is defaulted to -1 (infinite) if not supplied
       if (timeout === undefined) {
         timeout = -1
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
-      if (this.waitsetBusy) {
+      if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
-        this.waitsetBusy = true
+        this.waitSetBusy = true
         connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
           this.native,
           timeout,
           (err, res) => {
-            this.waitsetBusy = false
+            this.waitSetBusy = false
             if (err) {
               return reject(err)
             } else if (res === _ReturnCodes.ok) {
@@ -1075,8 +1076,7 @@ class Input extends EventEmitter {
             } else {
               return reject(new DDSError('DDS error'))
             }
-          }
-        )
+          })
       }
     })
   }
@@ -1100,17 +1100,17 @@ class Input extends EventEmitter {
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
-      if (this.waitsetBusy) {
+      if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
-        this.waitsetBusy = true
+        this.waitSetBusy = true
         const currentChangeCount = ref.alloc('int')
         connectorBinding.api.RTI_Connector_wait_for_matched_publication.async(
           this.native,
           timeout,
           currentChangeCount,
           (err, res) => {
-            this.waitsetBusy = false
+            this.waitSetBusy = false
             if (err) {
               return reject(err)
             } else if (res === _ReturnCodes.ok) {
@@ -1151,9 +1151,6 @@ class Input extends EventEmitter {
   }
 
   /**
-   * **TODO** - How can I document the .on() method? These docs should be included
-   * in the reference but for the .on() method which we inherit from EventEmitter class.
-   *
    * Emits the 'on_data_available' event when new data is available on this Input.
    *
    * .. note::
@@ -1180,7 +1177,7 @@ class Input extends EventEmitter {
    * @private
    */
   onDataAvailable () {
-    // Promises cannot be cancelled. For this reason we provide a timeout of 1s.
+    // FFI async calls cannot be cancelled. For this reason we provide a timeout of 1s.
     // This way, we wake up every second and check if this listener is still installed.
     this.wait(1000)
       .then(() => {
@@ -1666,8 +1663,17 @@ class Connector extends EventEmitter {
    * Frees all the resources created by this Connector instance.
    */
   close () {
-    connectorBinding.api.RTI_Connector_delete(this.native)
-    this.native = null
+    // First removeAllListeners('on_data_available')
+    // Wait until we are sure that waitSetBusy && onDataAvailableRun are false
+    if (this.waitSetBusy) {
+      this.removeAllListeners('on_data_available')
+      setTimeout(this.close(), 100) // maybe this is closeImpl
+    } else {
+      connectorBinding.api.RTI_Connector_delete(this.native)
+      this.native = null
+      // notify user by resolving a promise?
+    }
+    // return new Promise (resolve, reject) which resolves when 
   }
 
   /**
@@ -1740,9 +1746,6 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * **TODO** - How can I document the .on() method? These docs should be included
-   * in the reference but for the .on() method which we inherit from EventEmitter class.
-   *
    * Emits the 'on_data_available' event when any Inputs within this Connector object
    * receive data.
    *
@@ -1767,30 +1770,30 @@ class Connector extends EventEmitter {
    * @private
    */
   onDataAvailable () {
-    // Ensure that this entity has not been deleted
-    if (this.native !== null) {
-      // Promises are not cancellable, so we wake up every second to check that
-      // this event is still requested
-      this.waitForData(1000)
-        .then(() => {
+    // Asynic FFI calls are not cancellable, so we wake up every second to check that
+    // this event is still requested
+    this.waitForData(1000)
+      .then(() => {
+        // Ensure that this entity has not been deleted
+        if (this.native !== null) {
           // Emit the on_data_available event (envoking the registered callback)
           this.emit('on_data_available')
           // If the listener is still installed, do it all again
           if (this.onDataAvailableRun) {
             this.onDataAvailable()
           }
-        })
-        .catch((err) => {
-          // Since we wake up every 1s, do not treat timeout error as anything
-          // significant - just wait again
-          if (!(err instanceof TimeoutError)) {
-            console.log('Caught error: ' + err)
-            throw err
-          } else if (this.onDataAvailableRun) {
-            this.onDataAvailable()
-          }
-        })
-    }
+        }
+      })
+      .catch((err) => {
+        // Since we wake up every 1s, do not treat timeout error as anything
+        // significant - just wait again
+        if (!(err instanceof TimeoutError)) {
+          console.log('Caught error: ' + err)
+          this.emit('error', err)
+        } else if (this.onDataAvailableRun) {
+          this.onDataAvailable()
+        }
+      })
   }
 
   // This callback was added for the 'newListener' event, meaning it is triggered
@@ -1815,9 +1818,9 @@ class Connector extends EventEmitter {
    */
   removeListenerCallBack (eventName, functionListener) {
     if (this.listenerCount(eventName) === 0) {
-      if (eventName === 'on_data_available') {
-        this.onDataAvailableRun = false
+      if (eventName === 'on_data_available' && this.onDataAvailableRun) {
         // Ideally we would cancel the async ffi call here but it is not possible
+        this.onDataAvailableRun = false
       }
     }
   }
@@ -1842,23 +1845,24 @@ class Connector extends EventEmitter {
       }
       if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Connector object')
+      } else {
+        this.waitSetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_data.async(
+          this.native,
+          timeout,
+          (err, res) => {
+            this.waitSetBusy = false
+            if (err) {
+              return reject(err)
+            } else if (res === _ReturnCodes.ok) {
+              return resolve()
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('res: ' + res))
+            }
+          })
       }
-      this.waitSetBusy = true
-      connectorBinding.api.RTI_Connector_wait_for_data.async(
-        this.native,
-        timeout,
-        (err, res) => {
-          this.waitSetBusy = false
-          if (err) {
-            return reject(err)
-          } else if (res === _ReturnCodes.ok) {
-            return resolve()
-          } else if (res === _ReturnCodes.timeout) {
-            return reject(new TimeoutError('Timeout error'))
-          } else {
-            return reject(new DDSError('DDS error'))
-          }
-        })
     })
   }
 
