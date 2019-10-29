@@ -979,7 +979,7 @@ class SampleInfo {
 /**
  * Allows reading data for a DDS Topic.
  */
-class Input extends EventEmitter {
+class Input {
   /**
    * This class is used to subscribe to a specific DDS Topic.
    *
@@ -992,7 +992,6 @@ class Input extends EventEmitter {
    *  * matchedPublications (JSON) - A JSON object containing information about all the publications currently matched with this Input.
    */
   constructor (connector, name) {
-    super()
     this.connector = connector
     this.name = name
     this.native = connectorBinding.api.RTI_Connector_get_datareader(
@@ -1012,9 +1011,6 @@ class Input extends EventEmitter {
     // are not used concurrently. This works because the Node.js interpreter is
     // single-threaded.
     this.waitSetBusy = false
-    this.onDataAvailableRun = false
-    this.on('newListener', this.newListenerCallBack)
-    this.on('removeListener', this.removeListenerCallBack)
   }
 
   /**
@@ -1159,139 +1155,6 @@ class Input extends EventEmitter {
             }
           })
       }
-    })
-  }
-
-  /**
-   * Emits the 'on_data_available' event when new data is available on this Input.
-   *
-   * .. note::
-   *   This operation is asynchronous
-   *
-   * .. warning::
-   *   If, after using the events functionality of an Input, you want to disable that
-   *   functionality, it is necessary to call :func:`Input.waitForInternalResources`. The
-   *   returned Promise will resolve once the Input can be re-used.
-   *
-   * This API is used internally to emit the 'on_data_available' event when data is
-   * received on this Input.
-   *
-   * The Input class extends EventEmitter, meaning that callbacks can be
-   * registered for specific events using the following syntax:
-   *
-   * .. code-block:: javascript
-   *
-   *    function myCallback() {
-   *      input.take()
-   *      for (const sample of input.samples) {
-   *        // do something with the data
-   *      }
-   *    }
-   *    input.on('on_data_available', myCallback)
-   *    // ...
-   *    input.off('on_data_available', myCallback)
-   *
-   * @private
-   */
-  onDataAvailable () {
-    // FFI async calls cannot be cancelled. For this reason we provide a timeout of 1s.
-    // This way, we wake up every second and check if this listener is still installed.
-    this.wait(500)
-      .then(() => {
-        // Ensure that the entity was not deleted whilst we were waiting
-        if (this.native !== null) {
-          // Emit the requested event
-          this.emit('on_data_available')
-          // If still requested, restart the wait
-          if (this.onDataAvailableRun) {
-            this.onDataAvailable()
-          }
-        }
-      })
-      .catch((err) => {
-        // If no data was received within one second, the operation will timeout
-        // This should not be treated as an error.
-        if (!(err instanceof TimeoutError)) {
-          console.log('Caught error: ' + err)
-          // At this point we are in the context of the EventEmitter so do not throw
-          // The convention is to emit the 'error' event. If no handlers are
-          // installed this will terminate the program.
-          this.emit('error', err)
-        } else if (this.onDataAvailableRun) {
-          // Only restart the wait if we timed out
-          this.onDataAvailable()
-        }
-      })
-  }
-
-  // This callback was added for the 'newListener' event, meaning it is triggered
-  // just before we add a new callback.
-  // Since the onDataAvailable() function above is using an asynchronous function
-  // and the Connector binding is not thread-safe we have to ensure it is not
-  // called concurrently
-  /**
-   * @private
-   */
-  newListenerCallBack (eventName, functionListener) {
-    if (eventName === 'on_data_available') {
-      if (this.onDataAvailableRun === false) {
-        this.onDataAvailableRun = true
-        this.onDataAvailable()
-      }
-    }
-  }
-
-  /**
-   * @private
-   */
-  removeListenerCallBack (eventName, functionListener) {
-    if (this.listenerCount(eventName) === 0) {
-      if (eventName === 'on_data_available' && this.onDataAvailableRun) {
-        // Ideally we would cancel the async ffi call here but it is not possible
-        this.onDataAvailableRun = false
-      }
-    }
-  }
-
-  /**
-   * @param {function} resolve The resolve() callback to call once waitSetBusy is false.
-   * @param {function} reject The reject() callback to call if we timeout, or if another error occurs.
-   * @param {number} iterations maximum number of iterations to perform before timing out
-   * @private
-   */
-  waitForInternalResourcesImpl (resolve, reject, iterations) {
-    if (iterations-- === 0) {
-      reject()
-    } else if (this.waitSetBusy) {
-      setTimeout(this.waitForInternalResourcesImpl.bind(this, resolve, reject, iterations), 200)
-    } else {
-      resolve()
-    }
-  }
-
-  /**
-   * Returns a promise which resolves once the internal resources of this
-   * Input are no longer in use.
-   *
-   * It is not possible to....
-   *
-   * When using EventEmitters (via the Input.on() functionality) internally some
-   * resources are used which are not thread-safe. The release of these resources
-   * is triggered by removing all 'on_data_available' listeners.
-   * This API removes all attached 'on_data_available' and returns a promise that will
-   * resolve once the internal resources can be used again.
-   *
-   * It is necessary to use this function if in the future, you plan to receive
-   * data on an Input again.
-   *
-   * @returns {Promise} A Promise that will resolve once the internal resources are no longer in use.
-   */
-  waitForInternalResources () {
-    if (this.listenerCount('on_data_available') !== 0) {
-      this.removeAllListeners('on_data_available')
-    }
-    return new Promise((resolve, reject) => {
-      this.waitForInternalResourcesImpl(resolve, reject, 10)
     })
   }
 }
@@ -1883,6 +1746,11 @@ class Connector extends EventEmitter {
    *    connector.on('on_data_available', myCallback)
    *    // ...
    *    connector.off('on_data_available', myCallback)
+   *
+   * Once the ``'on_data_available'`` event has fired, either :meth:`Input.read` or
+   * :meth:`Input.take` should be called on the :class:`Input` which has new data.
+   * This will prevent the ``'on_data_available'`` being fired more than once
+   * for the same data.
    *
    * @private
    */

@@ -47,25 +47,20 @@ console.log('Server running at http://127.0.0.1:7400/')
 // and Square (all under the same participant).
 const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
 const io = socketsio.listen(server)
-const squareInput = connector.getInput('MySubscriber::MySquareReader')
-const triangleInput = connector.getInput('MySubscriber::MyTriangleReader')
-const circleInput = connector.getInput('MySubscriber::MyCircleReader')
+// Create an array of each input which we want to receive data on
+const inputs = [
+  { input: connector.getInput('MySubscriber::MySquareReader'), topic: 'square' },
+  { input: connector.getInput('MySubscriber::MyTriangleReader'), topic: 'triangle' },
+  { input: connector.getInput('MySubscriber::MyCircleReader'), topic: 'circle' }
+]
 
-squareInput.on('on_data_available', () => {
-  squareInput.take()
-  for (const sample of squareInput.samples.validDataIter) {
-    io.sockets.emit('square', sample.getJson())
-  }
-})
-triangleInput.on('on_data_available', () => {
-  triangleInput.take()
-  for (const sample of triangleInput.samples.validDataIter) {
-    io.sockets.emit('triangle', sample.getJson())
-  }
-})
-circleInput.on('on_data_available', () => {
-  circleInput.take()
-  for (const sample of circleInput.samples.validDataIter) {
-    io.sockets.emit('circle', sample.getJson())
-  }
+connector.on('on_data_available', () => {
+  // We have received data on one of the inputs within this connector
+  // Iterate through each one, checking if it has any valid data
+  inputs.forEach(element => {
+    element.input.take()
+    for (const sample of element.input.samples.validDataIter) {
+      io.sockets.emit(element.topic, sample.getJson())
+    }
+  })
 })
