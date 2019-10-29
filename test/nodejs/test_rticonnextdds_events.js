@@ -10,6 +10,7 @@ const path = require('path')
 const expect = require('chai').expect
 const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 const sinon = require('sinon')
+const events = require('events')
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
@@ -20,30 +21,13 @@ const sinon = require('sinon')
 // is so that if they fail, we know for sure something went wrong
 const testExpectSuccessTimeout = 10000
 
-const waitForCondition = function (spyObj, timeoutms) {
-  const interval = 200
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      if (spyObj.calledOnce) {
-        resolve()
-      } else if ((timeoutms -= interval) < 0) {
-        reject(new Error('timed out'))
-      } else {
-        console.log(spyObj)
-        setTimeout(check, interval)
-      }
-    }
-    setTimeout(check, interval)
-  })
-}
-
 describe('Connector EventEmitter tests', function () {
   this.timeout('4s')
   let connector = null
   let input = null
   let output = null
 
-  before(async () => {
+  beforeEach(async () => {
     // Create the connector object
     const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
     const profile = 'MyParticipantLibrary::DataAccessTest'
@@ -64,39 +48,8 @@ describe('Connector EventEmitter tests', function () {
     }
   })
 
-  afterEach(() => {
-    /*
-    **TODO** https://github.com/node-ffi/node-ffi/issues/413
-    It is not possible to cancel an FFI library call
-    In this case, we are calling connector.on() which repeatedly (every 1s) calls waitfordata
-    If connector.close() is called it can be the case that the waitset is busy etc. causing issues
-    To get around this I modified connector.close() to:
-        close (callback) {
-          // The Call to RTI_Connector_wait_for_data via ffi is asynchronous and can not
-          // be cancelled. This means that when we come to close the connector it may still
-          // be in use. Ensure that it is cleaned up correctly.
-          if (this.waitSetBusy) {
-            setTimeout(() => {
-              this.close()
-            }, 100)
-          } else {
-            connectorBinding.api.RTI_Connector_delete(this.native)
-            this.native = null
-            callback()
-          }
-        }
-    But this has other issues because now when you call connector.close() you don't know when
-    it is actually closed (setTimeout runs in a different thread)
-    How should we handle this?
-    I spoke to Israel and he doesn't see another solution other than spwaning another process
-    and killing it from a parent process... too risky to do at this point?
-    */
-    input.take()
-    connector.removeAllListeners('on_data_available')
-  })
-
-  after(() => {
-    connector.close()
+  afterEach(async () => {
+    await connector.close()
   })
 
   /*
@@ -116,11 +69,6 @@ describe('Connector EventEmitter tests', function () {
     connector.emit('on_data_available')
     expect(spy.calledOnce).to.be.true
     connector.removeListener('on_data_available', spy)
-    // removeListener() {
-      //do something
-      // emit('removeListener')
-      // return
-    // }
     done()
   })
 
@@ -128,7 +76,7 @@ describe('Connector EventEmitter tests', function () {
     var spy = sinon.spy()
     connector.on('on_data_available', spy)
     output.write()
-    waitForCondition(spy, testExpectSuccessTimeout)
+    events.once(connector, 'on_data_available')
       .then(() => {
         expect(spy.calledOnce).to.be.true
         // test is complete BUT internally, removeListener handler might not have run
@@ -136,76 +84,67 @@ describe('Connector EventEmitter tests', function () {
       })
   })
 
-  // it('Connector.once() should automatically unregister the callback after data is received', (done) => {
-  //   var spy = sinon.spy()
-  //   connector.once('on_data_available', spy)
-  //   output.write()
-    // waitForCondition((spy) => { return spy.calledOnce === true }, testExpectSuccessTimeout)
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-  //       // Writing again
-  //       output.write()
-  //       // Wait for the input to receive data (since we used once the event shouldn't be emitted)
-  //       return input.wait(testExpectSuccessTimeout)
-  //     })
-  //     .then(() => {
-  //       // Should still only have a single call
-  //       expect(spy.calledOnce).to.be.true
-  //     })
-  // })
+  it('Connector.once() should automatically unregister the callback after data is received', (done) => {
+    var spy = sinon.spy()
+    connector.once('on_data_available', spy)
+    output.write()
+    events.once(connector, 'on_data_available')
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
+        // Writing again
+        output.write()
+        return events.once(connector, 'on_data_available')
+      })
+      .then(() => {
+        // Should still only have a single call
+        expect(spy.calledOnce).to.be.true
+        done()
+      })
+  })
 
-  // it('When no data is written, no event should be emitted', (done) => {
-  //   var spy = sinon.spy()
-  //   connector.on('on_data_available', spy)
-  //   setTimeout(() => {
-  //     expect(spy.notCalled).to.be.true
-  //     done()
-  //   }, 500)
-  // })
+  it('When no data is written, no event should be emitted', (done) => {
+    var spy = sinon.spy()
+    connector.on('on_data_available', spy)
+    setTimeout(() => {
+      expect(spy.notCalled).to.be.true
+      done()
+    }, 250)
+  })
 
-  // it('Should be possible to add multiple callbacks for the same event', () => {
-  //   var spy1 = sinon.spy()
-  //   var spy2 = sinon.spy()
-  //   connector.on('on_data_available', spy1)
-  //   connector.on('on_data_available', spy2)
-  //   expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
-  //   output.write()
-  //   return input.wait(testExpectSuccessTimeout)
-  //     .then(() => {
-  //       console.log('then')
-  //       expect(spy1.calledOnce).to.be.true
-  //       expect(spy2.calledOnce).to.be.true
-  //     })
-  //     // .catch((err) => {
-  //     //   console.log('Caught err: ' + err)
-  //     //   throw err
-  //     // })
-  // })
+  it('Should be possible to add multiple callbacks for the same event', (done) => {
+    var spy1 = sinon.spy()
+    var spy2 = sinon.spy()
+    connector.on('on_data_available', spy1)
+    connector.on('on_data_available', spy2)
+    expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
+    output.write()
+    events.once(connector, 'on_data_available')
+      .then(() => {
+        expect(spy1.calledOnce).to.be.true
+        expect(spy2.calledOnce).to.be.true
+        done()
+      })
+  })
 
-  // it('Possible to uninstall the eventListener with .off()', (done) => {
-  //   var spy = sinon.spy()
-  //   connector.on('on_data_available', spy)
-  //   output.write()
-  //   input.wait(testExpectSuccessTimeout)
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       connector.off('on_data_available', spy)
-  //       expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-  //       // Writing again
-  //       output.write()
-  //       return input.wait()
-  //     })
-  //     .then(() => {
-  //       // Should still only have a single call
-  //       expect(spy.calledOnce).to.be.true
-  //       done()
-  //     })
-  //     .catch((err) => {
-  //       console.log('Caught err: ' + err)
-  //       throw err
-  //     })
-  // })
+  it('Possible to uninstall the eventListener with .off()', (done) => {
+    var spy = sinon.spy()
+    connector.on('on_data_available', spy)
+    output.write()
+    events.once(connector, 'on_data_available')
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        connector.off('on_data_available', spy)
+        expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
+        // Writing again
+        output.write()
+        setTimeout(() => {
+          // We should still only have a single call to the spy callback
+          expect(spy.calledOnce).to.be.true
+          done()
+        }, 250)
+      })
+  })
 
   it('Using .off() should only unregister the supplied callback, if multiple are registered', (done) => {
     var spy1 = sinon.spy()
@@ -214,52 +153,47 @@ describe('Connector EventEmitter tests', function () {
     connector.on('on_data_available', spy2)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
     output.write()
-    // input.wait(testExpectSuccessTimeout) wait for data to be received
+    events.once(connector, 'on_data_available')
       .then(() => {
         expect(spy1.calledOnce).to.be.true
         expect(spy2.calledOnce).to.be.true
         connector.off('on_data_available', spy1)
         expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
-        // Writing again
         output.write()
-        return input.wait()
+        return events.once(connector, 'on_data_available')
       })
       .then(() => {
         expect(spy1.calledOnce).to.be.true
         expect(spy2.calledTwice).to.be.true
         done()
       })
-      .catch((err) => {
-        console.log('Caught err: ' + err)
-        throw err
-      })
   })
 
-  // it('Using .removeAllListeners() should remove all eventListeners', () => {
-  //   var spy1 = sinon.spy()
-  //   var spy2 = sinon.spy()
-  //   connector.on('on_data_available', spy1)
-  //   connector.on('on_data_available', spy2)
-  //   expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
-  //   connector.removeAllListeners('on_data_available')
-  //   expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-  // })
+  it('Using .removeAllListeners() should remove all eventListeners', () => {
+    var spy1 = sinon.spy()
+    var spy2 = sinon.spy()
+    connector.on('on_data_available', spy1)
+    connector.on('on_data_available', spy2)
+    expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
+    connector.removeAllListeners('on_data_available')
+    expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
+  })
 
-  // it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
-  //   var spy = sinon.spy()
-  //   connector.on('on_data_available', spy)
-  //   // Internally, the connector's waitset is now busy
-  //   connector.waitForData(500)
-  //     .then(() => {
-  //       // This should not have been possible
-  //       console.log('Error occurred. Expected waitForData to fail due to waitSetBusy')
-  //       expect(true).to.deep.equals(false)
-  //     })
-  //     .catch((err) => {
-  //       expect(err.message).to.deep.equals('Can not concurrently wait on the same Connector object')
-  //       done()
-  //     })
-  // })
+  it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
+    var spy = sinon.spy()
+    connector.on('on_data_available', spy)
+    // Internally, the connector's waitset is now busy
+    connector.waitForData(500)
+      .then(() => {
+        // This should not have been possible
+        console.log('Error occurred. Expected waitForData to fail due to waitSetBusy')
+        expect(true).to.deep.equals(false)
+      })
+      .catch((err) => {
+        expect(err.message).to.deep.equals('Can not concurrently wait on the same Connector object')
+        done()
+      })
+  })
 })
 
 describe('Input EventEmitter tests', function () {

@@ -1,4 +1,4 @@
-lass/******************************************************************************
+/******************************************************************************
 * (c) 2005-2019 Copyright, Real-Time Innovations.  All rights reserved.       *
 * No duplications, whole or partial, manual or electronic, may be made        *
 * without express written permission.  Any such copies, or revisions thereof, *
@@ -1179,7 +1179,7 @@ class Input extends EventEmitter {
   onDataAvailable () {
     // FFI async calls cannot be cancelled. For this reason we provide a timeout of 1s.
     // This way, we wake up every second and check if this listener is still installed.
-    this.wait(1000)
+    this.wait(500)
       .then(() => {
         // Ensure that the entity was not deleted whilst we were waiting
         if (this.native !== null) {
@@ -1196,7 +1196,10 @@ class Input extends EventEmitter {
         // This should not be treated as an error.
         if (!(err instanceof TimeoutError)) {
           console.log('Caught error: ' + err)
-          throw err
+          // At this point we are in the context of the EventEmitter so do not throw
+          // The convention is to emit the 'error' event. If no handlers are
+          // installed this will terminate the program.
+          this.emit('error', err)
         } else if (this.onDataAvailableRun) {
           // Only restart the wait if we timed out
           this.onDataAvailable()
@@ -1660,20 +1663,33 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Frees all the resources created by this Connector instance.
+   * @private
    */
-  close () {
-    // First removeAllListeners('on_data_available')
-    // Wait until we are sure that waitSetBusy && onDataAvailableRun are false
-    if (this.waitSetBusy) {
-      this.removeAllListeners('on_data_available')
-      setTimeout(this.close(), 100) // maybe this is closeImpl
+  closeImpl (resolve, reject, iterations) {
+    if (iterations > 10) {
+      reject()
+    }
+    else if (this.waitSetBusy) {
+      setTimeout(this.closeImpl.bind(this, resolve, reject, iterations++), 200)
     } else {
       connectorBinding.api.RTI_Connector_delete(this.native)
       this.native = null
-      // notify user by resolving a promise?
+      resolve()
     }
-    // return new Promise (resolve, reject) which resolves when 
+  }
+
+  /**
+   * Frees all the resources created by this Connector instance.
+   *
+   * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you are using the EventEmitter functionality (e.g., ``connector.on()``).
+   */
+  close () {
+    if (this.listenerCount('on_data_available') !== 0) {
+      this.removeAllListeners('on_data_available')
+    }
+    return new Promise((resolve, reject) => {
+      this.closeImpl(resolve, reject, 0)
+    })
   }
 
   /**
@@ -1682,7 +1698,6 @@ class Connector extends EventEmitter {
    */
   delete () {
     this.close()
-    this.native = null
   }
 
   /**
@@ -1772,7 +1787,7 @@ class Connector extends EventEmitter {
   onDataAvailable () {
     // Asynic FFI calls are not cancellable, so we wake up every second to check that
     // this event is still requested
-    this.waitForData(1000)
+    this.waitForData(500)
       .then(() => {
         // Ensure that this entity has not been deleted
         if (this.native !== null) {
@@ -1789,9 +1804,16 @@ class Connector extends EventEmitter {
         // significant - just wait again
         if (!(err instanceof TimeoutError)) {
           console.log('Caught error: ' + err)
+          // At this point we are in the context of the EventEmitter so do not throw
+          // The convention is to emit the 'error' event. If no handlers are
+          // installed this will terminate the program.
           this.emit('error', err)
         } else if (this.onDataAvailableRun) {
           this.onDataAvailable()
+        } else {
+          // At this point we must have removed the listener. Emit an event here
+          // to notify the call that this has occurred.
+          // this.emit('')
         }
       })
   }
