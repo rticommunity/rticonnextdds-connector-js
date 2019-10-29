@@ -73,8 +73,9 @@ Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
 
 *RTI Connector for JavaScript* has not been tested with versions of Node.js older than v8.7.0.
-It has been tested with Node.js versions v8.7.0, v10.4.0 and v11.15.0. Whilst *RTI Connector for JavaScript* should
-work with newer versions of Node.js (v12.13.0), currently not all of its dependencies are compatible with this version.
+It has been tested with Node.js versions v8.7.0, v10.4.0 and v11.15.0. *RTI Connector for JavaScript* current
+does not work with newer versions of Node.js (v12.13.0) because some of its dependencies (ffi) are not
+yet compatible with this version.
 
 *RTI Connector* uses a native C library that works on most Windows, Linux and
 MacOS platforms. It has been tested on the following systems:
@@ -87,12 +88,12 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Dependencies
 ~~~~~~~~~~~~
 
-Some of the dependencies are shipped as source code and use `node-gyp <https://github.com/nodejs/node-gyp>`__ to be compiled locally. `node-gyp` requires Python 2.7 and does not work with Python 3. The requirements for `node-gyp` can be found at:
-* `unix <https://github.com/nodejs/node-gyp#on-unix>`__
-* `dawin <https://github.com/nodejs/node-gyp#on-macos>`__
-* `windows <https://github.com/nodejs/node-gyp#on-windows>`__
+npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of Connector's
+dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
+compiler (such as gcc 4.8+).
 
-The dependency `ref <https://www.npmjs.com/package/ref>`__ is shipped as source code and requires a C++11 compiler to be built.
+On Windows systems you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
+which include both the Visual C++ compiler and Python 2.7.
 
 Version
 ~~~~~~~

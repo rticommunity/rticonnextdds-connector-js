@@ -41,7 +41,7 @@ Python dependency
 
 Some of the dependencies are shipped as source code and use `node-gyp <https://github.com/nodejs/node-gyp>`__ to be compiled locally. `node-gyp` requires Python 2.7 and does not work with Python 3. The requirements for `node-gyp` can be found at:
 * `unix <https://github.com/nodejs/node-gyp#on-unix>`__
-* `dawin <https://github.com/nodejs/node-gyp#on-macos>`__
+* `darwin <https://github.com/nodejs/node-gyp#on-macos>`__
 * `windows <https://github.com/nodejs/node-gyp#on-windows>`__
 
 C/C++ compiler dependency

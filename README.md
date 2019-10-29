@@ -37,7 +37,7 @@ Additional dependencies are required to run the unit tests and some of the examp
 
 Some of the dependencies are shipped as source code and use [node-gyp](https://github.com/nodejs/node-gyp) to be compiled locally. `node-gyp` requires Python 2.7 and does not work with Python 3. The requirements for `node-gyp` can be found at:
 * [unix](https://github.com/nodejs/node-gyp#on-unix)
-* [dawin](https://github.com/nodejs/node-gyp#on-macos)
+* [darwin](https://github.com/nodejs/node-gyp#on-macos)
 * [windows](https://github.com/nodejs/node-gyp#on-windows)
 
 ### C/C++ compiler dependency
