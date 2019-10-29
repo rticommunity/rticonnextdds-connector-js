@@ -46,6 +46,54 @@ but the returned promise will be resolved when data is available on *any* of the
   // Within an async function
   await connector.wait()
 
+Both the :class:`Connector` and :class:`Input` classes inherit from the `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__
+class, which is defined and exposed in the `events module <https://nodejs.org/api/events.html>`__.
+If a listener is attached to ``Connector`` or ``Input`` object for the ``'on_data_available'`` event, this event
+will be emitted whenever new data is received.
+In the case of an :class:`Input`, it is emitted whenever new data is available on that particular :class:`Input`.
+In the case of a :class:`Connector`, it is emitted whenever new data is available on *any* of the :class:`Input`same
+contained within that ``Connector`` configuration.
+
+On an :class:`Input` we can do:
+
+.. code-block::
+
+  input.on('on_data_available', () => {
+    // We must take or read the data to clear the on_data_available event
+    input.take()
+    for (sample of input.samples.validDataIter) {
+        // access the data within sample
+    }
+  })
+
+Similarily, on a :class:`Connector` we can do:
+
+.. code-block::
+
+  // Assumes that all inputs within this Connector are contained within an
+  // array called inputs
+  connector.on('on_data_available', () => {
+    // One of the contained inputs has available data
+    inputs.forEach(input => {
+      input.take()
+      for (const sample of input.samples.validDataIter) {
+        // Access the data
+      }
+    }
+  })
+
+For more information on how to use the event-based notification, please refer to the
+`documentation of the events module <https://nodejs.org/api/events.html>`__.
+
+.. warning::
+  There are restrictions on adding a listener for the ``'on_data_available'`` event
+  at the same time as waiting for data using the alternative methods such as :meth:`Connector.waitForData`
+  and :meth:`Input.wait`. See :ref:`Threading model` for more information.
+
+.. note::
+  When using the event-based methods to be notified of available data, errors are
+  propagated using the ``'error'`` event. See :ref:`Error Handling`.
+
 Call :meth:`Input.take()` to access and remove the samples.
 
 .. code-block::

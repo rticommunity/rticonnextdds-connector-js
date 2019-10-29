@@ -15,8 +15,11 @@ const EventEmitter = require('events').EventEmitter
 
 /**
  * The Node.js representation of the RTI_Connector_Options structure within
- * the core. We define it here using the module ref-struct such that we can
+ * the core.
+ *
+ * We define it here using the module ref-struct (require above). This allows to
  * pass it by value into the Core when creating a Connector object.
+ *
  * @private
  */
 var _ConnectorOptions = StructType({
@@ -73,7 +76,9 @@ class _ConnectorBinding {
     }
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
-    // Obtain FFI'd methods for all of the APIs which we require from the binding
+    // Obtain FFI'd methods for all of the APIs which we require from the binding,
+    // specifying the argument types and return types. If any of the types are
+    // not builtin Node types then we have to use the ref module to represent them.
     this.api = ffi.Library(this.library, {
       RTI_Connector_new: ['pointer', ['string', 'string', ref.refType(_ConnectorOptions)]],
       RTI_Connector_delete: ['void', ['pointer']],
@@ -116,13 +121,15 @@ class _ConnectorBinding {
   }
 }
 
-// Create the connectorBinding
+// Create an instance of the connectorBinding class, allowing us to call the FFI'd methods
 var connectorBinding = new _ConnectorBinding()
 
 /**
  * Copies a natively-allocated string into a Node.js string and frees the
  * native memory.
+ *
  * @param {Buffer} cstring - The string returned by the core
+ *
  * @private
  */
 function _moveCString (cstring) {
@@ -139,12 +146,15 @@ function _getLastDdsErrorMessage () {
   const cStr = connectorBinding.api.RTI_Connector_get_last_error_message()
   if (cStr !== null) {
     return _moveCString(cStr)
+  } else {
+    return ''
   }
-  return ''
 }
 
 /**
- * Node.js representation of DDS_ReturnCode_t
+ * Node.js representation of DDS_ReturnCode_t enum.
+ *
+ * We only expose the ones we currently care about.
  * @private
  */
 const _ReturnCodes = {
@@ -165,6 +175,7 @@ const _AnyValueKind = {
   connector_boolean: 2,
   connector_string: 3
 }
+// Make this immutable
 Object.freeze(_AnyValueKind)
 
 /**
@@ -206,8 +217,8 @@ class DDSError extends Error {
  * Checks the value returned by the functions in the core for success and throws
  * the appropriate error on failure.
  *
- * We do not handle DDS_RETCODE_NO_DATA here since in some operations (those
- * related with optional members) we need to handle it separately.
+ * We do not handle DDS_RETCODE_NO_DATA here since, in some operations (those
+ * related with optional members), we need to handle it separately.
  *
  * @param {number} retcode - The retcode to check
  * @private
@@ -257,6 +268,7 @@ function _isNumber (value) {
  * @param {string} inputName - The name of the input to access
  * @param {number} index - The index in the samples / infos array
  * @param {string} fieldName - The name of the fields to obtain
+ *
  * @private
  */
 function _getAnyValue (getter, connector, inputName, index, fieldName) {
@@ -1156,6 +1168,11 @@ class Input extends EventEmitter {
    * .. note::
    *   This operation is asynchronous
    *
+   * .. warning::
+   *   If, after using the events functionality of an Input, you want to disable that
+   *   functionality, it is necessary to call :func:`Input.waitForInternalResources`. The
+   *   returned Promise will resolve once the Input can be re-used.
+   *
    * This API is used internally to emit the 'on_data_available' event when data is
    * received on this Input.
    *
@@ -1255,6 +1272,8 @@ class Input extends EventEmitter {
   /**
    * Returns a promise which resolves once the internal resources of this
    * Input are no longer in use.
+   *
+   * It is not possible to....
    *
    * When using EventEmitters (via the Input.on() functionality) internally some
    * resources are used which are not thread-safe. The release of these resources

@@ -22,7 +22,7 @@ const events = require('events')
 const testExpectSuccessTimeout = 10000
 
 describe('Connector EventEmitter tests', function () {
-  this.timeout('4s')
+  this.timeout(testExpectSuccessTimeout)
   let connector = null
   let input = null
   let output = null
@@ -197,7 +197,7 @@ describe('Connector EventEmitter tests', function () {
 })
 
 describe('Input EventEmitter tests', function () {
-  this.timeout('10s')
+  this.timeout(testExpectSuccessTimeout)
   let connector = null
   let input = null
   let output = null

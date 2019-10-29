@@ -85,4 +85,3 @@ Thread-safe operations:
    :meth:`Output.waitForSubscriptions`.
 
 All operations on **different** :class:`Connector` instances are thread-safe.
-
