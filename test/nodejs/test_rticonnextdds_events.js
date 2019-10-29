@@ -223,167 +223,145 @@ describe('Input EventEmitter tests', function () {
     }
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Clean up the state of the Input
-    input.removeAllListeners('on_data_available')
     input.take()
+    await input.waitForInternalResources()
   })
 
   after(() => {
     connector.close()
   })
 
-  // it('Callback should be called when event is emitted', () => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(1)
-  //   input.emit('on_data_available')
-  //   input.off('on_data_available', spy)
-  //   expect(spy.calledOnce).to.be.true
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(0)
-  // })
+  it('Callback should be called when event is emitted', () => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(1)
+    input.emit('on_data_available')
+    input.off('on_data_available', spy)
+    expect(spy.calledOnce).to.be.true
+    expect(input.listenerCount('on_data_available')).to.deep.equals(0)
+  })
 
-  // it('Event should be emitted when data is received', (done) => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   output.write()
-  //   // Have to use connector.waitForData instead of the per-input option due
-  //   // to the fact that we cannot concurrently wait on the same input
-  //   connector.waitForData(testExpectSuccessTimeout)
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       done()
-  //     })
-  //     .catch((err) => {
-  //       console.log('Caught err: ' + err)
-  //       console.log('spy callCount: ' + spy.callCount)
-  //       throw err
-  //     })
-  // })
+  it('Event should be emitted when data is received', (done) => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    output.write()
+    events.once(input, 'on_data_available')
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        done()
+      })
+  })
 
-  // it('.once() should automatically unregister event', (done) => {
-  //   var spy = sinon.spy()
-  //   input.once('on_data_available', spy)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(1)
-  //   output.write()
-  //   connector.waitForData(testExpectSuccessTimeout)
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       expect(input.listenerCount('on_data_available')).to.deep.equals(0)
-  //       done()
-  //     })
-  //     .catch((err) => {
-  //       console.log('Caught err: ' + err)
-  //       console.log('Spy callCount: ' + spy.callCount)
-  //       throw err
-  //     })
-  // })
+  it('.once() should automatically unregister event', (done) => {
+    var spy = sinon.spy()
+    input.once('on_data_available', spy)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(1)
+    output.write()
+    events.once(input, 'on_data_available')
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        expect(input.listenerCount('on_data_available')).to.deep.equals(0)
+        done()
+      })
+  })
 
-  // it('If no data is received, the event should not be emitted', (done) => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   setTimeout(() => {
-  //     expect(spy.notCalled).to.be.true
-  //     done()
-  //   }, 500)
-  // })
+  it('If no data is received, the event should not be emitted', (done) => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    setTimeout(() => {
+      expect(spy.notCalled).to.be.true
+      done()
+    }, 250)
+  })
 
-  // it('The event should not be emitted when data is received on another input', (done) => {
-  //   const otherInput = connector.getInput('TestSubscriber::TestReader2')
-  //   const otherOutput = connector.getOutput('TestPublisher::TestWriter2')
-  //   var spy = sinon.spy()
-  //   var otherSpy = sinon.spy()
+  it('The event should not be emitted when data is received on another input', (done) => {
+    const otherInput = connector.getInput('TestSubscriber::TestReader2')
+    const otherOutput = connector.getOutput('TestPublisher::TestWriter2')
+    var spy = sinon.spy()
+    var otherSpy = sinon.spy()
 
-  //   // Wait for the new input / output to match
-  //   otherInput.waitForPublications(testExpectSuccessTimeout)
-  //     .then((res) => {
-  //       expect(res).to.deep.equals(1)
-  //       return otherOutput.waitForSubscriptions(testExpectSuccessTimeout)
-  //     })
-  //     .then((res) => {
-  //       expect(res).to.deep.equals(1)
-  //       expect(otherInput.matchedPublications.length).to.deep.equals(1)
-  //       expect(otherOutput.matchedSubscriptions.length).to.deep.equals(1)
-  //       // Add the listeners to each input
-  //       input.on('on_data_available', spy)
-  //       otherInput.on('on_data_available', otherSpy)
-  //       // The on_data_available callback is only cleared once data is read (or taken)
-  //       // Since we are explicitly checking the number of times the callback occurs,
-  //       // we have to make sure that we clear the status. Do this by adding another
-  //       // listener which will just take any data.
-  //       input.on('on_data_available', () => { input.take() })
-  //       otherInput.on('on_data_available', () => { otherInput.take() })
-  //       // Writing data on output should only trigger one of these callbacks
-  //       output.write()
-  //       return connector.waitForData(testExpectSuccessTimeout)
-  //     })
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       expect(otherSpy.notCalled).to.be.true
-  //       // Test the opposite
-  //       otherOutput.write()
-  //       return connector.waitForData(testExpectSuccessTimeout)
-  //     })
-  //     .then(() => {
-  //       expect(spy.calledOnce).to.be.true
-  //       expect(otherSpy.calledOnce).to.be.true
-  //       otherInput.removeAllListeners('on_data_available')
-  //       done()
-  //     })
-  //     .catch((err) => {
-  //       console.log('Caught err: ' + err)
-  //       console.log('spy.callCount: ' + spy.callCount)
-  //       console.log('otherSpy.callCount: ' + otherSpy.callCount)
-  //       throw err
-  //     })
-  // })
+    // Wait for the new input / output to match
+    otherInput.waitForPublications(testExpectSuccessTimeout)
+      .then((res) => {
+        expect(res).to.deep.equals(1)
+        return otherOutput.waitForSubscriptions(testExpectSuccessTimeout)
+      })
+      .then((res) => {
+        expect(res).to.deep.equals(1)
+        expect(otherInput.matchedPublications.length).to.deep.equals(1)
+        expect(otherOutput.matchedSubscriptions.length).to.deep.equals(1)
+        // Add the listeners to each input
+        input.on('on_data_available', spy)
+        otherInput.on('on_data_available', otherSpy)
+        // The on_data_available callback is only cleared once data is read (or taken)
+        // Since we are explicitly checking the number of times the callback occurs,
+        // we have to make sure that we clear the status. Do this by adding another
+        // listener which will just take any data.
+        input.on('on_data_available', () => { input.take() })
+        otherInput.on('on_data_available', () => { otherInput.take() })
+        // Writing data on output should only trigger one of these callbacks
+        output.write()
+        return events.once(input, 'on_data_available')
+      })
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        expect(otherSpy.notCalled).to.be.true
+        // Test the opposite
+        otherOutput.write()
+        return events.once(otherInput, 'on_data_available')
+      })
+      .then(() => {
+        expect(spy.calledOnce).to.be.true
+        expect(otherSpy.calledOnce).to.be.true
+        otherInput.removeAllListeners('on_data_available')
+        done()
+      })
+  })
 
-  // it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   input.wait(500)
-  //     .then(() => {
-  //       console.log('Error occurred. Expected input.wait() to fail due to waitSetBusy')
-  //       expect(true).to.deep.equals(false)
-  //     })
-  //     .catch((err) => {
-  //       expect(err.message).to.deep.equals('Can not concurrently wait on the same Input')
-  //       done()
-  //     })
-  // })
+  it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    input.wait(500)
+      .then(() => {
+        console.log('Error occurred. Expected input.wait() to fail due to waitSetBusy')
+        expect(true).to.deep.equals(false)
+      })
+      .catch((err) => {
+        expect(err.message).to.deep.equals('Can not concurrently wait on the same Input')
+        done()
+      })
+  })
 
-  // it('Register multiple callbacks for the same event', (done) => {
-  //   var spy1 = sinon.spy()
-  //   var spy2 = sinon.spy()
-  //   input.on('on_data_available', spy1)
-  //   input.on('on_data_available', spy2)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(2)
-  //   output.write()
-  //   connector.waitForData(testExpectSuccessTimeout)
-  //     .then(() => {
-  //       expect(spy1.calledOnce).to.be.true
-  //       expect(spy2.calledOnce).to.be.true
-  //       done()
-  //     })
-  //     .catch((err) => {
-  //       console.log('Caught err: ' + err)
-  //       throw err
-  //     })
-  // })
+  it('Register multiple callbacks for the same event', (done) => {
+    var spy1 = sinon.spy()
+    var spy2 = sinon.spy()
+    input.on('on_data_available', spy1)
+    input.on('on_data_available', spy2)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(2)
+    output.write()
+    events.once(input, 'on_data_available')
+      .then(() => {
+        expect(spy1.calledOnce).to.be.true
+        expect(spy2.calledOnce).to.be.true
+        done()
+      })
+  })
 
-  // it('Uninstall a callback using .off()', () => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(1)
-  //   input.off('on_data_available', spy)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(0)
-  // })
+  it('Uninstall a callback using .off()', () => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(1)
+    input.off('on_data_available', spy)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(0)
+  })
 
-  // it('Uninstall all callbacks using .removeAllListeners()', () => {
-  //   var spy = sinon.spy()
-  //   input.on('on_data_available', spy)
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(1)
-  //   input.removeAllListeners('on_data_available')
-  //   expect(input.listenerCount('on_data_available')).to.deep.equals(0)
-  // })
+  it('Uninstall all callbacks using .removeAllListeners()', () => {
+    var spy = sinon.spy()
+    input.on('on_data_available', spy)
+    expect(input.listenerCount('on_data_available')).to.deep.equals(1)
+    input.removeAllListeners('on_data_available')
+    expect(input.listenerCount('on_data_available')).to.deep.equals(0)
+  })
 })
