@@ -43,48 +43,29 @@ const server = http.createServer(function (req, res) {
 }).listen(7400, '127.0.0.1')
 console.log('Server running at http://127.0.0.1:7400/')
 
-const waitForShapeOnInput = async (io, input, shapeName) => {
-  try {
-    await input.wait()
-    input.take()
-    for (const sample of input.samples.validDataIter) {
-      io.sockets.emit(shapeName, sample.getJson())
-    }
-  } catch (err) {
-    if (err !== rti.TimeoutError) {
-      console.log('Caught error: ' + err)
-    }
+// Create the DDS entities required for this example - a reader of Triangle, Circle
+// and Square (all under the same participant).
+const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
+const io = socketsio.listen(server)
+const squareInput = connector.getInput('MySubscriber::MySquareReader')
+const triangleInput = connector.getInput('MySubscriber::MyTriangleReader')
+const circleInput = connector.getInput('MySubscriber::MyCircleReader')
+
+squareInput.on('on_data_available', () => {
+  squareInput.take()
+  for (const sample of squareInput.samples.validDataIter) {
+    io.sockets.emit('square', sample.getJson())
   }
-}
-
-const run = async () => {
-  // Create the DDS entities required for this example - a reader of Triangle, Circle
-  // and Square (all under the same participant).
-  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
-  const io = socketsio.listen(server)
-  const inputs = [
-    { input: connector.getInput('MySubscriber::MySquareReader'), topic: 'square' },
-    { input: connector.getInput('MySubscriber::MyTriangleReader'), topic: 'triangle' },
-    { input: connector.getInput('MySubscriber::MyCircleReader'), topic: 'circle' }
-  ]
-
-  for (;;) {
-    try {
-      // Wait for data on any of the inputs
-      await connector.waitForData()
-      inputs.forEach(element => {
-        // Check each input for data
-        element.input.take()
-        // If there are any available samples, emit the corresponding event
-        for (const sample of element.input.samples.validDataIter) {
-          io.sockets.emit(element.topic, sample.getJson())
-        }
-      })
-    } catch (err) {
-      console.log('Caught err: ' + err)
-    }
+})
+triangleInput.on('on_data_available', () => {
+  triangleInput.take()
+  for (const sample of triangleInput.samples.validDataIter) {
+    io.sockets.emit('triangle', sample.getJson())
   }
-}
-
-// To allow for async/await syntax we write the javascript code in a non-anonymous function
-run()
+})
+circleInput.on('on_data_available', () => {
+  circleInput.take()
+  for (const sample of circleInput.samples.validDataIter) {
+    io.sockets.emit('circle', sample.getJson())
+  }
+})
