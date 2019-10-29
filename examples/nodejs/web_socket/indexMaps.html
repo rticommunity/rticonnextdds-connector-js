@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!--
+  (c) 2019 Copyright, Real-Time Innovations.  All rights reserved.
+  No duplications, whole or partial, manual or electronic, may be made
+  without express written permission.  Any such copies, or revisions thereof,
+  must display this notice unaltered.
+  This code contains trade secrets of Real-Time Innovations, Inc.
+   -->
+  <head>
+      <meta charset="utf-8" />
+      <title>RTI Connector for Javascript Example - Maps</title>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v6.0.1/build/ol.js"></script>
+    <style>
+      .map {
+        width: 100%;
+        height:1000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script>
+      var socket = io.connect('http://127.0.0.1:7400')
+
+      var Map = ol.Map;
+      var View = ol.View;
+      var TileLayer = ol.layer.Tile;
+      var OSM = ol.source.OSM;
+      var MultiPoint = ol.geom.MultiPoint;
+      var Point = ol.geom.Point;
+      var CircleStyle = ol.style.Circle;
+      var Fill = ol.style.Fill;
+      var Stroke = ol.style.Stroke;
+      var Style = ol.style.Style;
+      var getVectorContext = ol.render.getVectorContext;
+      var RegularShape = ol.style.RegularShape;
+
+      var vectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+      });
+      var map = new Map({
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          vectorLayer
+        ],
+        target: 'map',
+        view: new View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+
+      var imageStyle = new Style({
+        image: new CircleStyle({
+          radius: 5,
+          fill: new Fill({color: 'yellow'}),
+          stroke: new Stroke({color: 'red', width: 1})
+        })
+      });
+
+      var getCoordinatesFromData = function (data) {
+        var coordinates = [];
+        // Convert y -> latitude
+        var latitude = -(data.y * (180/300) - 90);
+        // Since shapes demo has no real range on the values of x and y it can produce
+        // we must ensure that the latitude and longitude are valid
+        if (latitude < -90) {
+          latitude = -90;
+        }
+        if (latitude > 90) {
+          latitude = 90;
+        }
+        // Convert x -> longitude
+        var longitude = (data.x * (360/300) - 180);
+        if (longitude < -180) {
+          longitude = -180;
+        }
+        if (longitude > 180) {
+          longitude = 180;
+        }
+        coordinates.push([longitude, latitude]);
+        return coordinates;
+      }
+
+      var getCircleFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var circle = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        circle.setStyle(new Style({
+          image: new CircleStyle({
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1})
+          })
+        }));
+        return circle;
+      }
+
+      var getSquareFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var square = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        square.setStyle(new Style({
+          image: new RegularShape({
+            points: 4,
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1}),
+            rotation: Math.PI / 4
+          })
+        }));
+        return square;
+      }
+
+      var getTriangleFromData = function (data) {
+        var coordinates = getCoordinatesFromData(data)
+        var triangle = new ol.Feature(
+            new ol.geom.Point(ol.proj.fromLonLat(coordinates[0])));
+        triangle.setStyle(new Style({
+          image: new RegularShape({
+            points: 3,
+            radius: data.shapesize / 5,
+            fill: new Fill({color: data.color}),
+            stroke: new Stroke({color: 'black', width: 1})
+          })
+        }));
+        return triangle;
+      }
+
+      var vectorSource = vectorLayer.getSource();
+      // We store an array of the recieved shapes (and only ever display up to
+      // 20 of each at one time)
+      var squares = [];
+      var circles = [];
+      var triangles = [];
+      // Each shape is transmitted from reader_websocket.js as a different event,
+      // listen for each event, then convert the received JSON data into a shape
+      // which we draw on the map.
+      socket.on('square', function (data) {
+        while (squares.length >= 20) {
+          vectorSource.removeFeature(squares.shift());
+        }
+        squares.push(getSquareFromData(data));
+        vectorSource.addFeature(squares[squares.length - 1]);
+      });
+      socket.on('triangle', function (data) {
+        while (triangles.length >= 20) {
+          vectorSource.removeFeature(triangles.shift());
+        }
+        triangles.push(getTriangleFromData(data));
+        vectorSource.addFeature(triangles[triangles.length - 1]);
+      });
+      socket.on('circle', function (data) {
+        while (circles.length >= 20) {
+          vectorSource.removeFeature(circles.shift());
+        }
+        circles.push(getCircleFromData(data));
+        vectorSource.addFeature(circles[circles.length - 1]);
+      });
+    </script>
+  </body>
+</html>

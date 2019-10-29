@@ -178,6 +178,32 @@ describe('Test the iteration of Input Samples', () => {
       count++
     }
   })
+
+  it('Check that validDataIter does not iterate over no data', () => {
+    // The beforeEach does a read(), take here to clear the queue
+    input.take()
+    // Take again, there should now be zero samples available
+    input.take()
+    expect(input.samples.length).to.deep.equals(0)
+    let hasData = false
+    for (const sample of input.samples.validDataIter) {
+      hasData = true
+    }
+    expect(hasData).to.deep.equals(false)
+  })
+
+  it('Check that iterator does not iterate over no data', () => {
+    // The beforeEach does a read(), take here to clear the queue
+    input.take()
+    // Take again, there should now be zero samples available
+    input.take()
+    expect(input.samples.length).to.deep.equals(0)
+    let hasData = false
+    for (const sample of input.samples) {
+      hasData = true
+    }
+    expect(hasData).to.deep.equals(false)
+  })
 })
 
 describe('Test dispose', () => {

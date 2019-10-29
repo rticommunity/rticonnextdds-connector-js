@@ -9,60 +9,82 @@
 const http = require('http')
 const fs = require('fs')
 const rti = require('rticonnextdds-connector')
+const socketsio = require('socket.io')
 const path = require('path')
+const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
-const connector = new rti.Connector('MyParticipantLibrary::Zero', path.join(__dirname, '/../ShapeExample.xml'))
-const input = connector.getInput('MySubscriber::MySquareReader')
-
-var server = http.createServer(function (req, res) {
+// Create the HTTP server (and configure it to serve the requested visualisation)
+const server = http.createServer(function (req, res) {
   if (req.url === '/simple') {
-    fs.readFile(path.join(__dirname, '/indexShape.html'), (error, data) => {
+    fs.readFile(path.join(__dirname, 'indexSimple.html'), (error, data) => {
       if (error) {
         console.log('Error: ' + error)
         throw new Error(error)
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(data, 'utf-8')
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(data, 'utf-8')
     })
-  } else if (req.url === '/chart') {
-    fs.readFile(path.join(__dirname, '/indexChart.html'), (error, data) => {
+  } else if (req.url === '/maps') {
+    fs.readFile(path.join(__dirname, 'indexMaps.html'), (error, data) => {
       if (error) {
         console.log('Error: ' + error)
         throw new Error(error)
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(data, 'utf-8')
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(data, 'utf-8')
-    })
-  } else if (req.url === '/earth') {
-    fs.readFile(path.join(__dirname, '/indexEarth.html'), (error, data) => {
-      if (error) {
-        console.log('Error: ' + error)
-        throw new Error(error)
-      }
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(data, 'utf-8')
     })
   } else {
     res.writeHead(200, { 'Content-Type': 'text/html' })
-    res.write("Click <a href='simple'>simple</a>, <a href='chart'>D3 chart</a> or <a href='earth'>earth</a>")
+    res.write("Select your visualisation: <a href='simple'>simple</a> or <a href='maps'>maps</a>")
     res.end()
   }
 }).listen(7400, '127.0.0.1')
 console.log('Server running at http://127.0.0.1:7400/')
 
-var io = require('socket.io').listen(server)
-
-connector.on('on_data_available',
-  function () {
-    console.log('on_dat')
+const waitForShapeOnInput = async (io, input, shapeName) => {
+  try {
+    await input.wait()
     input.take()
-    console.log(input.samples.getLength())
-    for (let i = 0; i < input.samples.getLength(); i++) {
-      if (input.infos.isValid(i)) {
-        console.log('is valid')
-        var jsonObj = input.samples.getJSON(i)
-        console.log(JSON.stringify(jsonObj))
-        io.sockets.emit('shape', jsonObj)
-      }
+    for (const sample of input.samples.validDataIter) {
+      io.sockets.emit(shapeName, sample.getJson())
     }
-  })
+  } catch (err) {
+    if (err !== rti.TimeoutError) {
+      console.log('Caught error: ' + err)
+    }
+  }
+}
+
+const run = async () => {
+  // Create the DDS entities required for this example - a reader of Triangle, Circle
+  // and Square (all under the same participant).
+  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
+  const io = socketsio.listen(server)
+  const inputs = [
+    { input: connector.getInput('MySubscriber::MySquareReader'), topic: 'square' },
+    { input: connector.getInput('MySubscriber::MyTriangleReader'), topic: 'triangle' },
+    { input: connector.getInput('MySubscriber::MyCircleReader'), topic: 'circle' }
+  ]
+
+  for (;;) {
+    try {
+      // Wait for data on any of the inputs
+      await connector.waitForData()
+      inputs.forEach(element => {
+        // Check each input for data
+        element.input.take()
+        // If there are any available samples, emit the corresponding event
+        for (const sample of element.input.samples.validDataIter) {
+          io.sockets.emit(element.topic, sample.getJson())
+        }
+      })
+    } catch (err) {
+      console.log('Caught err: ' + err)
+    }
+  }
+}
+
+// To allow for async/await syntax we write the javascript code in a non-anonymous function
+run()
