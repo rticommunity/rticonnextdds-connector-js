@@ -27,7 +27,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
-    var updateGenericShapeData = function (data) {
+    var updateShape = function (data) {
       const x = document.getElementById('x');
       const y = document.getElementById('y');
       const shapesize = document.getElementById('shapesize');
@@ -43,15 +43,15 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     socket.on('square', function (data) {
       shapetype.innerHTML = 'Square'
-      updateGenericShapeData(data)
+      updateShape(data)
     });
     socket.on('circle', function (data) {
       shapetype.innerHTML = 'Circle'
-      updateGenericShapeData(data)
+      updateShape(data)
     });
     socket.on('triangle', function (data) {
       shapetype.innerHTML = 'Triangle'
-      updateGenericShapeData(data)
+      updateShape(data)
     });
   </script>
 </body>

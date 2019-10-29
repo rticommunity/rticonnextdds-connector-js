@@ -20,6 +20,6 @@ They can be installed using `npm install socket.io ol`
 publisher.
 * Run the web server `node ./reader_web_socket.js`
 * In a browser, navigate to [http:/localhost:7400](http://127.0.0.1:7400)
-* Select how you would like to visualise the data (simple, chart or maps).
-* Navigating to [http://localhost:7400/simple](http://localhost:7400/simple) will show the simple visualisation and
-[http://localhost:7400/maps](http://localhost:7400/maps) will show the maps visualation.
+* Select how you would like to visualize the data (simple or maps).
+* Navigating to [http://localhost:7400/simple](http://localhost:7400/simple) will show the simple visualization and
+[http://localhost:7400/maps](http://localhost:7400/maps) will show the maps visualization.
