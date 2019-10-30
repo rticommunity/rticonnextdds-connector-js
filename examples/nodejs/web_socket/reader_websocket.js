@@ -47,7 +47,8 @@ console.log('Server running at http://127.0.0.1:7400/')
 // and Square (all under the same participant).
 const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
 const io = socketsio.listen(server)
-// Create an array of each input which we want to receive data on
+// Create an array of each input which we want to receive data on, and its associated
+// topic name. We will emit the topic name from the io object.
 const inputs = [
   { input: connector.getInput('MySubscriber::MySquareReader'), topic: 'square' },
   { input: connector.getInput('MySubscriber::MyTriangleReader'), topic: 'triangle' },

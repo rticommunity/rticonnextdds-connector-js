@@ -1551,6 +1551,17 @@ class Output {
 /**
  * Loads a configuration and creates its Inputs and Outputs.
  *
+ * .. note::
+ *   The Connector class inherits from `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__.
+ *   This allows us to support event-based notification for data, using the following
+ *   syntax:
+ *
+ *   .. code-block:: javascript
+ *
+ *     connector.on('on_data_available', () => { } )
+ *
+ *   Please refer to :ref:`Reading data (Input)` for more information.
+ *
  * A **Connector** instance loads a configuration file from an XML document.
  * For example::
  *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
@@ -1585,34 +1596,74 @@ class Connector extends EventEmitter {
   }
 
   /**
+   * This method is used internally by the public APIs :meth:`Connector.close`
+   * and :meth:`Connector.waitForInternalResources`. It should not be used
+   * directly by applications.
+   *
    * @param {function} resolve The resolve() callback to call once waitSetBusy is false.
    * @param {function} reject The reject() callback to call if we timeout, or if another error occurs.
-   * @param {number} iterations maximum number of iterations to perform before timing out
+   * @param {number} iterations Maximum number of iterations to perform before timing out
+   * @param {boolean} cleanup Whether or not the Connector object should be deleted once the waitset is no longer busy
    * @private
    */
-  closeImpl (resolve, reject, iterations) {
+  closeImpl (resolve, reject, iterations, cleanup) {
     if (iterations-- === 0) {
+      // The waitset remained busy throughout all attempts. To avoid an infinite loop,
+      // reject the promise.
       reject()
     } else if (this.waitSetBusy) {
-      setTimeout(this.closeImpl.bind(this, resolve, reject, iterations), 200)
+      // If the waitset is still in use - check again in 200ms (do this up to _iterations_ times).
+      setTimeout(this.closeImpl.bind(this, resolve, reject, iterations, cleanup), 200)
     } else {
-      connectorBinding.api.RTI_Connector_delete(this.native)
-      this.native = null
+      // Only delete the Connector object if cleanup boolean is true. This method
+      // is also used by the waitForInternalResources API, and in that case we
+      // should not delete anything
+      if (cleanup) {
+        connectorBinding.api.RTI_Connector_delete(this.native)
+        this.native = null
+      }
+      // Call the resolve() callback of the passed promise
       resolve()
     }
   }
 
   /**
+   * Returns a ``Promise`` that will resolve once the resources used internally
+   * by the :class:`Connector` are no longer in use.
+   *
+   * .. note::
+   *   This returned promise will be rejected fail if there are any listeners registered for the
+   *   ``'on_data_available'`` event. Ensure that they have all been removed before
+   *   calling this method using ``connector.removeAllListeners('on_data_available')``.
+   *
+   * It is currently only necessary to call this method if you remove all of the
+   * listeners for the ``'on_data_available'`` event and at some point in the future
+   * wish to use the same Connector object to get notifications of new data
+   * (be that, via the :meth:`Connector.waitForData` method, or by re-adding a listener
+   * for the ``'on_data_available'`` event).
+   *
+   * This operation does **not** free any resources. It is still necessary to call
+   * :meth:`Connector.close` when the :class:`Connector` is no longer required.
+   *
+   * @returns {Promise} A Promise that will be resolved once the resources being used by internally by the Connector object are no longer in use.
+   */
+  waitForInternalResources () {
+    return new Promise((resolve, reject) => {
+      this.closeImpl(resolve, reject, 10, false)
+    })
+  }
+
+  /**
    * Frees all the resources created by this Connector instance.
    *
-   * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you are using the EventEmitter functionality (e.g., ``connector.on()``).
+   * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you have attached a listener for the ``'on_data_available'``  event.
    */
   close () {
     if (this.listenerCount('on_data_available') !== 0) {
       this.removeAllListeners('on_data_available')
     }
     return new Promise((resolve, reject) => {
-      this.closeImpl(resolve, reject, 10)
+      this.closeImpl(resolve, reject, 10, true)
     })
   }
 

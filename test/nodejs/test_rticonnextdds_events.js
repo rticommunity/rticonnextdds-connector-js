@@ -96,6 +96,24 @@ describe('Connector EventEmitter tests', function () {
     expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
   })
 
+  it('Should be possible to re-use a Connector after calling waitForInternalResources', (done) => {
+    var spy = sinon.spy()
+    connector.on('on_data_available', spy)
+    expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
+    connector.emit('on_data_available')
+    expect(spy.calledOnce).to.be.true
+    connector.off('on_data_available', spy)
+    expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
+    connector.waitForInternalResources()
+      .then(() => {
+        connector.on('on_data_available', spy)
+        expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
+        connector.emit('on_data_available')
+        expect(spy.calledTwice).to.be.true
+        done()
+      })
+  })
+
   // We use the events.once() API to detect when an event has occured. It is not
   // available in all versions of node (added in v11.12), so run these next
   // test conditionally

@@ -36,6 +36,13 @@ resolved when new data is available, or rejected if the supplied timeout expires
 
   // Within an async function
   await input.wait()
+  input.take()
+
+  // Alternatively, using traditional Promise syntax (outside of an async function)
+  input.wait()
+    .then(() => {
+      input.take()
+    })
 
 The method :meth:`Connector.wait()` has the same behavior as :meth:`Input.wait()`,
 but the returned promise will be resolved when data is available on *any* of the
@@ -46,27 +53,10 @@ but the returned promise will be resolved when data is available on *any* of the
   // Within an async function
   await connector.wait()
 
-Both the :class:`Connector` and :class:`Input` classes inherit from the `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__
+The :class:`Connector` inherits from the `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__
 class, which is defined and exposed in the `events module <https://nodejs.org/api/events.html>`__.
-If a listener is attached to ``Connector`` or ``Input`` object for the ``'on_data_available'`` event, this event
-will be emitted whenever new data is received.
-In the case of an :class:`Input`, it is emitted whenever new data is available on that particular :class:`Input`.
-In the case of a :class:`Connector`, it is emitted whenever new data is available on *any* of the :class:`Input`same
-contained within that ``Connector`` configuration.
-
-On an :class:`Input` we can do:
-
-.. code-block::
-
-  input.on('on_data_available', () => {
-    // We must take or read the data to clear the on_data_available event
-    input.take()
-    for (sample of input.samples.validDataIter) {
-        // access the data within sample
-    }
-  })
-
-Similarily, on a :class:`Connector` we can do:
+If a listener for the ``'on_data_available'`` event is attached to a :class:`Connector`, this event will be emitted
+whenever new data is available on any of the :class:`Input`s defined within the :class:`Connector`.
 
 .. code-block::
 
@@ -85,14 +75,17 @@ Similarily, on a :class:`Connector` we can do:
 For more information on how to use the event-based notification, please refer to the
 `documentation of the events module <https://nodejs.org/api/events.html>`__.
 
+An example of this functionality is shown in `reader_websocket.js <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/web_socket/reader_websocket.js>`__
+within the `web_socket example <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs/web_socket>`__.
+
 .. warning::
-  There are restrictions on adding a listener for the ``'on_data_available'`` event
-  at the same time as waiting for data using the alternative methods such as :meth:`Connector.waitForData`
-  and :meth:`Input.wait`. See :ref:`Threading model` for more information.
+  There are additional threading concerns to take into account when using the
+  ``'on_data_available'`` event. Refer to :ref:`Additional considerations when using event-based functionality`
+  for more information.
 
 .. note::
   When using the event-based methods to be notified of available data, errors are
-  propagated using the ``'error'`` event. See :ref:`Error Handling`.
+  propagated using the ``'error'`` event. See :ref:`Error Handling` for more information.
 
 Call :meth:`Input.take()` to access and remove the samples.
 
