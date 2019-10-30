@@ -74,10 +74,10 @@ describe('Connector EventEmitter tests', function () {
     var spy = sinon.spy()
     connector.on('on_data_available', spy)
     // Internally, the connector's waitset is now busy
-    connector.waitForData(500)
+    connector.wait(500)
       .then(() => {
         // This should not have been possible
-        console.log('Error occurred. Expected waitForData to fail due to waitSetBusy')
+        console.log('Error occurred. Expected wait to fail due to waitSetBusy')
         expect(true).to.deep.equals(false)
       })
       .catch((err) => {
@@ -96,7 +96,7 @@ describe('Connector EventEmitter tests', function () {
     expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
   })
 
-  it('Should be possible to re-use a Connector after calling waitForInternalResources', (done) => {
+  it('Should be possible to re-use a Connector after calling waitForCallbackFinalization', (done) => {
     var spy = sinon.spy()
     connector.on('on_data_available', spy)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
@@ -104,7 +104,7 @@ describe('Connector EventEmitter tests', function () {
     expect(spy.calledOnce).to.be.true
     connector.off('on_data_available', spy)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-    connector.waitForInternalResources()
+    connector.waitForCallbackFinalization()
       .then(() => {
         connector.on('on_data_available', spy)
         expect(connector.listenerCount('on_data_available')).to.deep.equals(1)

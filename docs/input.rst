@@ -60,8 +60,12 @@ whenever new data is available on any of the :class:`Input`s defined within the 
 
 .. code-block::
 
-  // Assumes that all inputs within this Connector are contained within an
-  // array called inputs
+  // All of the Inputs are stored in the inputs array
+  const inputs = [
+    connector.getInput('MySubscriber::MySquareReader'),
+    connector.getInput('MySubscriber::MyCircleReader'),
+    connector.getInput('MySubscriber::MyTriangleReader')
+  ]
   connector.on('on_data_available', () => {
     // One of the contained inputs has available data
     inputs.forEach(input => {

@@ -1004,7 +1004,7 @@ class Input {
     // input.samples to call the getter, not access the internal variable
     this._samples = new Samples(this)
     this.infos = new Infos(this)
-    // Internally, we use a StatusCondition for the waitForData and for
+    // Internally, we use a StatusCondition for the wait and for
     // waitForPublications, making these operations not thread-safe (since each
     // DataReader only has a single StatusCondition associated with it). Since both
     // of these functions are async, we use use this boolean to ensure that they
@@ -1597,7 +1597,7 @@ class Connector extends EventEmitter {
 
   /**
    * This method is used internally by the public APIs :meth:`Connector.close`
-   * and :meth:`Connector.waitForInternalResources`. It should not be used
+   * and :meth:`Connector.waitForCallbackFinalization`. It should not be used
    * directly by applications.
    *
    * @param {function} resolve The resolve() callback to call once waitSetBusy is false.
@@ -1616,7 +1616,7 @@ class Connector extends EventEmitter {
       setTimeout(this.closeImpl.bind(this, resolve, reject, iterations, cleanup), 200)
     } else {
       // Only delete the Connector object if cleanup boolean is true. This method
-      // is also used by the waitForInternalResources API, and in that case we
+      // is also used by the waitForCallbackFinalization API, and in that case we
       // should not delete anything
       if (cleanup) {
         connectorBinding.api.RTI_Connector_delete(this.native)
@@ -1639,31 +1639,41 @@ class Connector extends EventEmitter {
    * It is currently only necessary to call this method if you remove all of the
    * listeners for the ``'on_data_available'`` event and at some point in the future
    * wish to use the same Connector object to get notifications of new data
-   * (be that, via the :meth:`Connector.waitForData` method, or by re-adding a listener
+   * (be that, via the :meth:`Connector.wait` method, or by re-adding a listener
    * for the ``'on_data_available'`` event).
    *
    * This operation does **not** free any resources. It is still necessary to call
    * :meth:`Connector.close` when the :class:`Connector` is no longer required.
    *
+   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
    * @returns {Promise} A Promise that will be resolved once the resources being used by internally by the Connector object are no longer in use.
    */
-  waitForInternalResources () {
+  waitForCallbackFinalization (timeout) {
+    if (timeout === undefined) {
+      timeout = 10
+    }
     return new Promise((resolve, reject) => {
-      this.closeImpl(resolve, reject, 10, false)
+      // Internally, we retry every 200ms, so scale the timeout appropriately
+      this.closeImpl(resolve, reject, timeout * 5, false)
     })
   }
 
   /**
    * Frees all the resources created by this Connector instance.
    *
+   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
    * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you have attached a listener for the ``'on_data_available'``  event.
    */
-  close () {
+  close (timeout) {
+    if (timeout === undefined) {
+      timeout = 10
+    }
     if (this.listenerCount('on_data_available') !== 0) {
       this.removeAllListeners('on_data_available')
     }
     return new Promise((resolve, reject) => {
-      this.closeImpl(resolve, reject, 10, true)
+      // Internally, we retry every 200ms, so scale the timeout appropriately
+      this.closeImpl(resolve, reject, timeout * 5, true)
     })
   }
 
@@ -1745,7 +1755,7 @@ class Connector extends EventEmitter {
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
    * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
    */
-  waitForData (timeout) {
+  wait (timeout) {
     return new Promise((resolve, reject) => {
       // timeout is defaulted to -1 (infinite) if not supplied
       if (timeout === undefined) {
@@ -1808,7 +1818,7 @@ class Connector extends EventEmitter {
   onDataAvailable () {
     // Asynic FFI calls are not cancellable, so we wake up every second to check that
     // this event is still requested
-    this.waitForData(500)
+    this.wait(500)
       .then(() => {
         // Ensure that this entity has not been deleted
         if (this.native !== null) {

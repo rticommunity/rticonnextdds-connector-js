@@ -15,7 +15,7 @@ exceptions are the following *wait* operations with the caveats mentioned below.
    section below.
 
 Thread-safe operations:
-   * :meth:`Connector.waitForData` (wait for data on any ``Input``)
+   * :meth:`Connector.wait` (wait for data on any ``Input``)
    * :meth:`Output.wait` (wait for acknowledgments)
    * :meth:`Output.waitForSubscriptions` (wait to (un)match a subscription)
    * :meth:`Input.wait` (wait for data on this ``Input``)
@@ -48,7 +48,7 @@ Thread-safe operations:
          }
       }
 
-      const waitForData = async () => {
+      const wait = async () => {
          try {
             await input.wait()
          } catch (err) {
@@ -57,9 +57,9 @@ Thread-safe operations:
       }
 
       waitForDiscovery()
-      waitForData()
+      wait()
 
-   The ``input.wait`` call within the asynchronous function ``waitForData`` will
+   The ``input.wait`` call within the asynchronous function ``wait`` will
    fail since there is a simultaneous request to ``input.waitForSubscriptions``.
    This can be avoided by ensuring you only have a single ``wait`` operation pending
    at a time::
@@ -72,7 +72,7 @@ Thread-safe operations:
          }
       }
 
-      const waitForData = async () => {
+      const wait = async () => {
          try {
             await input.wait()
          } catch (err) {
@@ -82,7 +82,7 @@ Thread-safe operations:
 
       const myApplication = async () => {
          await waitForDiscovery()
-         await waitForData()
+         await wait()
       }
 
       myApplication()
@@ -106,23 +106,28 @@ In the above example, when data is received both the installed callbacks will be
 These callbacks are run sequentially, so it is not necessary to protect them manually
 at an application level.
 
-It is not possible to call :meth:`Connector.waitForData` if there is an installed listener
+It is not possible to call :meth:`Connector.wait` if there is an installed listener
 for the ``'on_data_available'`` event. This is due to the fact that whilst the ``'on_data_available'``
-listener is installed, the resource required internally for :meth:`Connector.waitForData` is busy.
+listener is installed, the resource required internally for :meth:`Connector.wait` is busy.
 
 In your application, if you need to remove the listener for ``'on_data_available'`` and later
-re-add it (or later wait for data using :meth:`Connector.waitForData`), it is necessary to call
-:meth:`Connector.waitForInternalResources`. This method returns a Promise that will resolve once
+re-add it (or later wait for data using :meth:`Connector.wait`), it is necessary to call
+:meth:`Connector.waitForCallbackFinalization`. This method returns a Promise that will resolve once
 the resources used internally by the :class:`Connector` are no longer in use.
 
 .. warning::
 
-  It is important to note that :meth:`Connector.waitForInternalResources` does **not**
+  It is important to note that :meth:`Connector.waitForCallbackFinalization` does **not**
   free any resources. It should only be used for notification of when a :class:`Connector`
   can be re-used for other wait operations. It is still necessary to call :meth:`Connector.close`
   to free the resources.
 
-When a ``'on_data_available'`` listener is installed on a :class:`Connetor`, it is necessary
+When a ``'on_data_available'`` listener is installed on a :class:`Connector`, it is necessary
 to wait for the ``Promise`` returned by :meth:`Connector.close` to resolve before continuing
 with the applications shutdown procedure. This is due to the fact that the internal resources
-used must be freed, but this application happens asynchronously.
+used must be freed, but this application happens asynchronously::
+
+  connector.close()
+    .then(() => {
+      // continue with application shutdown
+    })
