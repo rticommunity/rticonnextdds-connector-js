@@ -63,6 +63,20 @@ call :meth:`Connector.close()`:
    // ...
    connector.close()
 
+:meth:`Connector.close` returns a ``Promise`` that will resolve once the Connector
+object has been destroyed. The :meth:`Connector.close` operation is only
+asynchronous (and therefore, it is only necessary to wait for the ``Promise`` to
+resolve) if you have installed a listener for the ``'on_data_available'`` event::
+
+  const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'ShapeExample.xml')
+  connector.on('on_data_available', handleNewDataCallback)
+  connector.close()
+    .then(() => {
+      // Continue with application shutdown once the returned Promise resolves
+    })
+
+For more information please refer to :ref:`Additional considerations when using event-based functionality`.
+
 Getting the Inputs and Outputs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

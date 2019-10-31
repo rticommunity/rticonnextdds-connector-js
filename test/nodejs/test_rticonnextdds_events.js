@@ -170,7 +170,7 @@ describe('Connector EventEmitter tests', function () {
       events.once(connector, 'on_data_available')
         .then(() => {
           expect(spy.calledOnce).to.be.true
-          connector.off('on_data_available', spy)
+          connector.removeListener('on_data_available', spy)
           expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
           // Writing again
           output.write()

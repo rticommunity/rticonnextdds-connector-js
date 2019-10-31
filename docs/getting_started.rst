@@ -29,6 +29,13 @@ The examples can then be run as follows:
 
 In order to gain access to the examples, run ``npm install`` with the git repository.
 
+npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of Connector's
+dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
+compiler (such as gcc 4.8+).
+
+On Windows systems you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
+which include both the Visual C++ compiler and Python 2.7.
+
 Running the examples
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -84,16 +91,6 @@ MacOS platforms. It has been tested on the following systems:
 *RTI Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
-
-Dependencies
-~~~~~~~~~~~~
-
-npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of Connector's
-dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
-compiler (such as gcc 4.8+).
-
-On Windows systems you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
-which include both the Visual C++ compiler and Python 2.7.
 
 Version
 ~~~~~~~

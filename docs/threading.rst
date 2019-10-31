@@ -99,21 +99,38 @@ additional restrictions to be aware of.
 
 It is possible to install multiple listeners for the ``'on_data_available'`` event::
 
-  connector.on('on_data_available', () => { console.log('Data received!') })
-  connector.on('on_data_available', () => { input.take() })
+  connector.on('on_data_available', () => {
+    // Read the samples so that they remain available within the Input
+    input.read()
+    doSomething(input.samples)
+  })
+  connector.on('on_data_available', () => {
+    // Take the samples to remove them from the Input. Since event callbacks
+    // are, by default, run in the order they are registered, there is no risk
+    // that this is run before the above listener
+    input.take()
+    doSomethingElse(input.samples)
+  })
 
 In the above example, when data is received both the installed callbacks will be run.
 These callbacks are run sequentially, so it is not necessary to protect them manually
 at an application level.
 
 It is not possible to call :meth:`Connector.wait` if there is an installed listener
-for the ``'on_data_available'`` event. This is due to the fact that whilst the ``'on_data_available'``
+for the ``'on_data_available'`` event. This is due to the fact that while the ``'on_data_available'``
 listener is installed, the resource required internally for :meth:`Connector.wait` is busy.
 
-In your application, if you need to remove the listener for ``'on_data_available'`` and later
-re-add it (or later wait for data using :meth:`Connector.wait`), it is necessary to call
+In your application, if you remove all the registered listeners for ``'on_data_available'``
+and later require to re-add them (or wait for data using :meth:`Connector.wait`), it is necessary to call
 :meth:`Connector.waitForCallbackFinalization`. This method returns a Promise that will resolve once
-the resources used internally by the :class:`Connector` are no longer in use.
+the resources used internally by the :class:`Connector` are no longer in use::
+
+  connector.on('on_data_available', handleDataCallback)
+  connector.off('on_data_available', handleDataCallback)
+  // Since we removed the only callback for the on_data_available event, we must
+  // now wait for the Promise to resolve before re-adding a new callback
+  await connector.waitForCallbackFinalization()
+  connector.on('on_data_available', newHandleDataCallback)
 
 .. warning::
 

@@ -57,6 +57,9 @@ The :class:`Connector` inherits from the `EventEmitter <https://nodejs.org/api/e
 class, which is defined and exposed in the `events module <https://nodejs.org/api/events.html>`__.
 If a listener for the ``'on_data_available'`` event is attached to a :class:`Connector`, this event will be emitted
 whenever new data is available on any of the :class:`Input`s defined within the :class:`Connector`.
+If using the ``'on_data_available'`` event, it is recommended that you read the
+:ref:`Additional considerations when using event-based functionality` section of the
+documentation.
 
 .. code-block::
 
