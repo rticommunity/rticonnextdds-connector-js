@@ -102,7 +102,7 @@ describe('Connector EventEmitter tests', function () {
     expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
     connector.emit('on_data_available')
     expect(spy.calledOnce).to.be.true
-    connector.off('on_data_available', spy)
+    connector.removeListener('on_data_available', spy)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
     connector.waitForCallbackFinalization()
       .then(() => {
@@ -193,7 +193,7 @@ describe('Connector EventEmitter tests', function () {
         .then(() => {
           expect(spy1.calledOnce).to.be.true
           expect(spy2.calledOnce).to.be.true
-          connector.off('on_data_available', spy1)
+          connector.removeListener('on_data_available', spy1)
           expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
           output.write()
           return events.once(connector, 'on_data_available')

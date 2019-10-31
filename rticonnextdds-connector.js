@@ -1682,7 +1682,7 @@ class Connector extends EventEmitter {
    * @private
    */
   delete () {
-    this.close()
+    return this.close()
   }
 
   /**

@@ -74,9 +74,8 @@ describe('Connector Tests', function () {
     })
 
     // Cleanup after all tests have executed
-    after(() => {
-      this.timeout(0)
-      connector.delete()
+    after(async () => {
+      await connector.delete()
     })
 
     it('on_data_available callback gets called when data is available', function (done) {
