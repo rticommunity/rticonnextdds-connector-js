@@ -89,21 +89,23 @@ It is also possible to dispose or unregister an instance:
   output.write({ action: 'unregister' })
 
 In these two cases, only the *key* fields in the ``Output.instance`` are relevant.
-For more information on the supported parameters to this ``write`` call please see
-:meth:`Output.write`.
+
+See :meth:`Output.write` for more information on the supported parameters.
 
 Matching with a Subscription
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before writing, the method :meth:`Output.waitForSubscriptions()` can be used to
-detect when a compatible DDS subscription is matched or unmatched. It returns
+Before writing, you can use the method :meth:`Output.waitForSubscriptions()` to
+detect when a compatible DDS subscription is matched or stops matching. It returns
 a ``Promise`` that will resolve to the change in the number of matched subscriptions
-since the last time it was called::
+since the last time it was called.
 
-   // From within an async function
+You can wait for the ``Promise`` using ``await`` in an async function::
+
    let changeInMatches = await output.waitForSubscriptions()
 
-   // Using traditional Promises
+Or using the ``then`` and ``catch`` methods::
+
    output.waitForSubscriptions().then((res) => {
      // The Promise resolved successfully and the number of matches is stored in res
    }).catch((err) => {
@@ -111,11 +113,10 @@ since the last time it was called::
    }
 
 For example, if a new compatible subscription is discovered within the specified
-``timeout``, the Promise will resolve to 1. If an existing subscription unmatched
-(due to e.g., the application being closed) during the specified ``timeout``, the
-Promise will resolve to -1.
+``timeout``, the Promise will resolve to 1; if an previously matching subscription
+no longer matches (for example, due to the application being closed), it resolves to -1.
 
-You can obtain information about the existing matched subscriptions with the
+You can obtain information about the currently matched subscriptions with the
 :attr:`Output.matchedSubscriptions` property:
 
 .. code-block::
@@ -123,9 +124,6 @@ You can obtain information about the existing matched subscriptions with the
    output.matchedSubscriptions.forEach((match) => {
     subName = match.name
    }
-
-:attr:`Output.matchedSubscriptions` returns a JSON object containing meta-information
-about matched entities.
 
 Class reference: Output, Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

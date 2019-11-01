@@ -94,8 +94,8 @@ Additional considerations when using event-based functionality
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If using event-based notifications (that is, if you have installed a listener for
-the ``'on_data_available'`` event on a :class:`Connector`), there are
-additional restrictions to be aware of.
+the ``'on_data_available'`` event on a :class:`Connector`, as explained in
+:ref:`Reading or taking the data`), there are additional restrictions to be aware of.
 
 It is possible to install multiple listeners for the ``'on_data_available'`` event::
 
@@ -139,12 +139,13 @@ the resources used internally by the :class:`Connector` are no longer in use::
   can be re-used for other wait operations. It is still necessary to call :meth:`Connector.close`
   to free the resources.
 
-When a ``'on_data_available'`` listener is installed on a :class:`Connector`, it is necessary
-to wait for the ``Promise`` returned by :meth:`Connector.close` to resolve before continuing
-with the applications shutdown procedure. This is due to the fact that the internal resources
-used must be freed, but this application happens asynchronously::
+If you install a ``'on_data_available'`` listener, you need to wait for the
+``Promise`` returned by :meth:`Connector.close` to resolve before continuing
+with the application shutdown procedure. This allows the :class:`Connector` to
+synchronize its shutdown with the listener::
 
   connector.close()
     .then(() => {
       // continue with application shutdown
     })
+

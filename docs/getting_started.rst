@@ -6,41 +6,35 @@ Getting Started
 Installing RTI Connector for JavaScript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for JavaScript* can be installed in two ways.
+*RTI Connector for JavaScript* can be installed with npm in two ways:
 
-You can install the *RTI Connector for JavaScript* package via npm:
+You can pass the package name:
 
 .. code:: bash
 
     $ npm install rticonnextdds-connector
 
-Alternatively, running ``npm install`` with the git repository as the argument will fetch the required
-files from the github repository, and also install all of the required dependencies:
+Or the GitHub repository:
 
 .. code:: bash
 
    $ npm install https://www.github.com/rticommunity/rticonnextdds-connector-js.git
 
-The examples can then be run as follows:
+In order to gain access to the examples, run npm with the GitHub repository.
 
-.. code:: bash
-
-    $ node node_modules/rticonnextdds-connector/examples/nodejs/simple/reader.js
-
-In order to gain access to the examples, run ``npm install`` with the git repository.
-
-npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of Connector's
+npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of *Connector*'s
 dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
 compiler (such as gcc 4.8+).
 
-On Windows systems you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
+On Windows you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
 which include both the Visual C++ compiler and Python 2.7.
 
 Running the examples
 ~~~~~~~~~~~~~~~~~~~~
 
 The examples are located in the `examples/nodejs <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs>`__
-directory of the *RTI Connector for JavaScript* GitHub repository.
+directory of the *RTI Connector for JavaScript* GitHub repository. The npm installation
+will copy the examples under ``<installation directory>/node_modules/rticonnextdds-connector/``.
 
 In the simple example, `writer.js` periodically publishes data for a
 *Square* topic, and `reader.js` subscribes to the topic and prints all the
@@ -61,12 +55,12 @@ And, in another shell, run the writer:
 This is how ``reader.js`` looks like:
 
 .. literalinclude:: ../examples/nodejs/simple/reader.js
-    :lines: 13-
+    :lines: 10-
 
 And this is ``writer.js``:
 
 .. literalinclude:: ../examples/nodejs/simple/writer.js
-    :lines: 14-
+    :lines: 11-
 
 You can run the reader and the writer in any order, and you can run multiple
 instances of each at the same time. You can also run any other *DDS* application
@@ -79,14 +73,18 @@ To learn more about *RTI Connector* continue to the next section,
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for JavaScript* has not been tested with versions of Node.js older than v8.7.0.
-It has been tested with Node.js versions v8.7.0, v10.4.0 and v11.15.0. *RTI Connector for JavaScript* current
-does not work with newer versions of Node.js (v12.13.0) because some of its dependencies (ffi) are not
-yet compatible with this version.
+*RTI Connector for JavaScript* has been tested with Node.js versions 8.7.0, 10.4.0 and 11.15.0.
+*Connector* currently does not work with Node.js 12 because some of its dependencies,
+such as *ffi* are not yet compatible with this version.
 
-*RTI Connector* uses a native C library that works on most Windows, Linux and
+*Connector* uses a native C library that works on most Windows, Linux and
 MacOS platforms. It has been tested on the following systems:
-**TODO**
+
+
+    * Windows: Windows 7 and Windows 10
+    * x86/x86_64 Linux: CentOS 7.6, 8.0; Ubuntu 18.04; SUSE 15
+    * ARM Linux (Raspberry Pi)
+    * Mac: OS X 10.10.2, macOS 10.12.2, macOS 10.14
 
 *RTI Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector

@@ -7,12 +7,12 @@
 ******************************************************************************/
 
 const sleep = require('sleep')
-const rti = require('rticonnextdds-connector')
 const path = require('path')
-const fullpath = path.join(__dirname, '/../ShapeExample.xml')
+const rti = require('rticonnextdds-connector')
+const configFile = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::MyPubParticipant', fullpath)
+  const connector = new rti.Connector('MyParticipantLibrary::MyPubParticipant', configFile)
   const output = connector.getOutput('MyPublisher::MySquareWriter')
   try {
     console.log('Waiting for subscriptions...')

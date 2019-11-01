@@ -88,7 +88,7 @@ Which corresponds to the following IDL definition:
         @optional long my_optional_long;
     };
 
-.. note::
+.. hint::
     You can get the XML definition of an IDL file with ``rtiddsgen -convertToXml MyType.idl``.
 
 We will refer to an ``Output`` named ``output`` and
@@ -97,7 +97,7 @@ We will refer to an ``Output`` named ``output`` and
 Using JSON objects vs accessing individual members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On an Input or an Output you can access the data all at once, using a JSON object,
+On an Input or an Output you can access the data all at once by using a JSON object,
 or member by member. Using a JSON object is usually more efficient if you intend
 to access most or all of the data members of a large type.
 
@@ -130,6 +130,10 @@ To set any numeric type, including enumerations:
     ``getNumber`` can't handle 64-bit integers (*int64* and *uint64*)
     whose absolute values are larger than 2^53. This is a *Connector* limitation
     due to the use of *double* as an intermediate representation.
+
+    When ``setNumber`` or ``getNumber`` detect this situation, they will raise
+    an :class:`DDSError`. ``getJson`` and ``setJson`` do not have this
+    limitation and can handle any 64-bit integer.
 
 To set booleans:
 
@@ -202,12 +206,15 @@ and pass it to the corresponding setter or getter.
     output.instance.setNumber('my_point.x', 10)
     output.instance.setNumber('my_point.y', 20)
 
+    // alternatively:
+    output.instance.set('my_point.x', 10)
+    output.instance.set('my_point.y', 20)
+
 It is possible to reset the value of a complex member back to its default:
 
 .. code-block::
 
-    output.instance.clearMember('my_point')
-    // x and y are now 0
+    output.instance.clearMember('my_point') // x and y are now 0
 
 It is also possible to reset members using the ``set`` method:
 
@@ -231,7 +238,7 @@ the following code after the previous call to ``setFromJson``:
 The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``. If you do not want the values
 to be retained you must clear the value first (as described above).
 
-It is possible to obtain the JSON object of a nested struct as follows:
+It is possible to obtain the JSON object of a nested struct:
 
 .. code-block::
 
@@ -283,8 +290,6 @@ the ``fieldName``:
 
     let length = input.samples[0].getNumber('my_int_sequence#')
 
-This same syntax is used to obtain the selected member of an enum (see :ref:`Accessing unions`).
-
 Another option is to use ``SampleIterator.getJson('fieldName')`` to obtain
 a JSON object containing all of the elements of the array or sequence with name ``fieldName``:
 
@@ -294,8 +299,7 @@ a JSON object containing all of the elements of the array or sequence with name 
         let thePointSequence = sample.getJson('my_point_sequence')
     }
 
-It is also possible to supply ``memberName`` as an element of an array or sequence
-(if the member type is complex):
+You can also get a specific element as a dictionary (if the element type is complex):
 
 .. code-block::
 

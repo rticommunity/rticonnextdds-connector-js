@@ -6,12 +6,12 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-const rti = require('rticonnextdds-connector')
 const path = require('path')
-const fullpath = path.join(__dirname, '/../ShapeExample.xml')
+const rti = require('rticonnextdds-connector')
+const configFile = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
+  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', configFile)
   const input = connector.getInput('MySubscriber::MySquareReader')
   try {
     console.log('Waiting for publications...')
@@ -21,7 +21,7 @@ const run = async () => {
     for (let i = 0; i < 500; i++) {
       await input.wait()
       input.take()
-      for (const sample of input.samples) {
+      for (const sample of input.samples.validDataIter) {
         // You can obtain all the fields as a JSON object
         const data = sample.getJson()
         const x = data.x
