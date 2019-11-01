@@ -36,6 +36,13 @@ resolved when new data is available, or rejected if the supplied timeout expires
 
   // Within an async function
   await input.wait()
+  input.take()
+
+  // Alternatively, using traditional Promise syntax (outside of an async function)
+  input.wait()
+    .then(() => {
+      input.take()
+    })
 
 The method :meth:`Connector.wait()` has the same behavior as :meth:`Input.wait()`,
 but the returned promise will be resolved when data is available on *any* of the
@@ -45,6 +52,47 @@ but the returned promise will be resolved when data is available on *any* of the
 
   // Within an async function
   await connector.wait()
+
+The :class:`Connector` inherits from the `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__
+class, which is defined and exposed in the `events module <https://nodejs.org/api/events.html>`__.
+If a listener for the ``'on_data_available'`` event is attached to a :class:`Connector`, this event will be emitted
+whenever new data is available on any of the :class:`Input`s defined within the :class:`Connector`.
+If using the ``'on_data_available'`` event, it is recommended that you read the
+:ref:`Additional considerations when using event-based functionality` section of the
+documentation.
+
+.. code-block::
+
+  // All of the Inputs are stored in the inputs array
+  const inputs = [
+    connector.getInput('MySubscriber::MySquareReader'),
+    connector.getInput('MySubscriber::MyCircleReader'),
+    connector.getInput('MySubscriber::MyTriangleReader')
+  ]
+  connector.on('on_data_available', () => {
+    // One of the contained inputs has available data
+    inputs.forEach(input => {
+      input.take()
+      for (const sample of input.samples.validDataIter) {
+        // Access the data
+      }
+    }
+  })
+
+For more information on how to use the event-based notification, please refer to the
+`documentation of the events module <https://nodejs.org/api/events.html>`__.
+
+An example of this functionality is shown in `reader_websocket.js <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/web_socket/reader_websocket.js>`__
+within the `web_socket example <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs/web_socket>`__.
+
+.. warning::
+  There are additional threading concerns to take into account when using the
+  ``'on_data_available'`` event. Refer to :ref:`Additional considerations when using event-based functionality`
+  for more information.
+
+.. note::
+  When using the event-based methods to be notified of available data, errors are
+  propagated using the ``'error'`` event. See :ref:`Error Handling` for more information.
 
 Call :meth:`Input.take()` to access and remove the samples.
 

@@ -15,8 +15,11 @@ const EventEmitter = require('events').EventEmitter
 
 /**
  * The Node.js representation of the RTI_Connector_Options structure within
- * the core. We define it here using the module ref-struct such that we can
+ * the core.
+ *
+ * We define it here using the module ref-struct (require above). This allows to
  * pass it by value into the Core when creating a Connector object.
+ *
  * @private
  */
 var _ConnectorOptions = StructType({
@@ -73,7 +76,9 @@ class _ConnectorBinding {
     }
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
-    // Obtain FFI'd methods for all of the APIs which we require from the binding
+    // Obtain FFI'd methods for all of the APIs which we require from the binding,
+    // specifying the argument types and return types. If any of the types are
+    // not builtin Node types then we have to use the ref module to represent them.
     this.api = ffi.Library(this.library, {
       RTI_Connector_new: ['pointer', ['string', 'string', ref.refType(_ConnectorOptions)]],
       RTI_Connector_delete: ['void', ['pointer']],
@@ -116,13 +121,15 @@ class _ConnectorBinding {
   }
 }
 
-// Create the connectorBinding
+// Create an instance of the connectorBinding class, allowing us to call the FFI'd methods
 var connectorBinding = new _ConnectorBinding()
 
 /**
  * Copies a natively-allocated string into a Node.js string and frees the
  * native memory.
+ *
  * @param {Buffer} cstring - The string returned by the core
+ *
  * @private
  */
 function _moveCString (cstring) {
@@ -139,12 +146,15 @@ function _getLastDdsErrorMessage () {
   const cStr = connectorBinding.api.RTI_Connector_get_last_error_message()
   if (cStr !== null) {
     return _moveCString(cStr)
+  } else {
+    return ''
   }
-  return ''
 }
 
 /**
- * Node.js representation of DDS_ReturnCode_t
+ * Node.js representation of DDS_ReturnCode_t enum.
+ *
+ * We only expose the ones we currently care about.
  * @private
  */
 const _ReturnCodes = {
@@ -165,6 +175,7 @@ const _AnyValueKind = {
   connector_boolean: 2,
   connector_string: 3
 }
+// Make this immutable
 Object.freeze(_AnyValueKind)
 
 /**
@@ -206,8 +217,8 @@ class DDSError extends Error {
  * Checks the value returned by the functions in the core for success and throws
  * the appropriate error on failure.
  *
- * We do not handle DDS_RETCODE_NO_DATA here since in some operations (those
- * related with optional members) we need to handle it separately.
+ * We do not handle DDS_RETCODE_NO_DATA here since, in some operations (those
+ * related with optional members), we need to handle it separately.
  *
  * @param {number} retcode - The retcode to check
  * @private
@@ -257,6 +268,7 @@ function _isNumber (value) {
  * @param {string} inputName - The name of the input to access
  * @param {number} index - The index in the samples / infos array
  * @param {string} fieldName - The name of the fields to obtain
+ *
  * @private
  */
 function _getAnyValue (getter, connector, inputName, index, fieldName) {
@@ -459,7 +471,7 @@ class SampleIterator {
    * @returns {boolean} The boolean value of the field.
    */
   getBoolean (fieldName) {
-    const ret = this.input.samples.getBoolean(this.index, fieldName) 
+    const ret = this.input.samples.getBoolean(this.index, fieldName)
     // Performing !! on null produces false, but we want to maintain null
     if (ret === null) {
       return ret
@@ -992,13 +1004,13 @@ class Input {
     // input.samples to call the getter, not access the internal variable
     this._samples = new Samples(this)
     this.infos = new Infos(this)
-    // Internally, we use a StatusCondition for the waitForData and for
+    // Internally, we use a StatusCondition for the wait and for
     // waitForPublications, making these operations not thread-safe (since each
     // DataReader only has a single StatusCondition associated with it). Since both
     // of these functions are async, we use use this boolean to ensure that they
     // are not used concurrently. This works because the Node.js interpreter is
     // single-threaded.
-    this.waitsetBusy = false
+    this.waitSetBusy = false
   }
 
   /**
@@ -1037,47 +1049,6 @@ class Input {
   }
 
   /**
-   * Wait for this Input to receive data.
-   *
-   * .. note::
-   *   This operation is asynchronous.
-   *
-   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
-   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected if the timeout expires
-   */
-  wait (timeout) {
-    return new Promise((resolve, reject) => {
-      if (timeout === undefined) {
-        timeout = -1
-      } else if (!_isNumber(timeout)) {
-        throw new TypeError('timeout must be a number')
-      }
-      if (this.waitsetBusy) {
-        throw new Error('Can not concurrently wait on the same Input')
-      } else {
-        this.waitsetBusy = true
-        connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
-          this.native,
-          timeout,
-          (err, res) => {
-            this.waitsetBusy = false
-            if (err) {
-              return reject(err)
-            } else if (res === _ReturnCodes.ok) {
-              return resolve()
-            } else if (res === _ReturnCodes.timeout) {
-              return reject(new TimeoutError('Timeout error'))
-            } else {
-              return reject(new DDSError('DDS error'))
-            }
-          }
-        )
-      }
-    })
-  }
-
-  /**
    * Wait for this Input to match or unmatch a compatible DDS Subscription.
    *
    * .. note::
@@ -1096,17 +1067,17 @@ class Input {
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
-      if (this.waitsetBusy) {
+      if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
-        this.waitsetBusy = true
+        this.waitSetBusy = true
         const currentChangeCount = ref.alloc('int')
         connectorBinding.api.RTI_Connector_wait_for_matched_publication.async(
           this.native,
           timeout,
           currentChangeCount,
           (err, res) => {
-            this.waitsetBusy = false
+            this.waitSetBusy = false
             if (err) {
               return reject(err)
             } else if (res === _ReturnCodes.ok) {
@@ -1144,6 +1115,47 @@ class Input {
       cStr)
     _checkRetcode(retcode)
     return JSON.parse(_moveCString(cStr.deref()))
+  }
+
+  /**
+   * Wait for this Input to receive data.
+   *
+   * .. note::
+   *   This operation is asynchronous.
+   *
+   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
+   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected if the timeout expires
+   */
+  wait (timeout) {
+    return new Promise((resolve, reject) => {
+      // timeout is defaulted to -1 (infinite) if not supplied
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        throw new TypeError('timeout must be a number')
+      }
+      if (this.waitSetBusy) {
+        throw new Error('Can not concurrently wait on the same Input')
+      } else {
+        this.waitSetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
+          this.native,
+          timeout,
+          (err, res) => {
+            this.waitSetBusy = false
+            if (err) {
+              return reject(err)
+            } else if (res === _ReturnCodes.ok) {
+              return resolve()
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('DDS error'))
+            }
+          })
+      }
+    })
   }
 }
 
@@ -1539,6 +1551,17 @@ class Output {
 /**
  * Loads a configuration and creates its Inputs and Outputs.
  *
+ * .. note::
+ *   The Connector class inherits from `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__.
+ *   This allows us to support event-based notification for data, using the following
+ *   syntax:
+ *
+ *   .. code-block:: javascript
+ *
+ *     connector.on('on_data_available', () => { } )
+ *
+ *   Please refer to :ref:`Reading data (Input)` for more information.
+ *
  * A **Connector** instance loads a configuration file from an XML document.
  * For example::
  *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
@@ -1569,13 +1592,89 @@ class Connector extends EventEmitter {
     this.on('newListener', this.newListenerCallBack)
     this.on('removeListener', this.removeListenerCallBack)
     this.onDataAvailableRun = false
+    this.waitSetBusy = false
+  }
+
+  /**
+   * This method is used internally by the public APIs :meth:`Connector.close`
+   * and :meth:`Connector.waitForCallbackFinalization`. It should not be used
+   * directly by applications.
+   *
+   * @param {function} resolve The resolve() callback to call once waitSetBusy is false.
+   * @param {function} reject The reject() callback to call if we timeout, or if another error occurs.
+   * @param {number} iterations Maximum number of iterations to perform before timing out
+   * @param {boolean} cleanup Whether or not the Connector object should be deleted once the waitset is no longer busy
+   * @private
+   */
+  closeImpl (resolve, reject, iterations, cleanup) {
+    if (iterations-- === 0) {
+      // The waitset remained busy throughout all attempts. To avoid an infinite loop,
+      // reject the promise.
+      reject()
+    } else if (this.waitSetBusy) {
+      // If the waitset is still in use - check again in 200ms (do this up to _iterations_ times).
+      setTimeout(this.closeImpl.bind(this, resolve, reject, iterations, cleanup), 200)
+    } else {
+      // Only delete the Connector object if cleanup boolean is true. This method
+      // is also used by the waitForCallbackFinalization API, and in that case we
+      // should not delete anything
+      if (cleanup) {
+        connectorBinding.api.RTI_Connector_delete(this.native)
+        this.native = null
+      }
+      // Call the resolve() callback of the passed promise
+      resolve()
+    }
+  }
+
+  /**
+   * Returns a ``Promise`` that will resolve once the resources used internally
+   * by the :class:`Connector` are no longer in use.
+   *
+   * .. note::
+   *   This returned promise will be rejected fail if there are any listeners registered for the
+   *   ``'on_data_available'`` event. Ensure that they have all been removed before
+   *   calling this method using ``connector.removeAllListeners('on_data_available')``.
+   *
+   * It is currently only necessary to call this method if you remove all of the
+   * listeners for the ``'on_data_available'`` event and at some point in the future
+   * wish to use the same Connector object to get notifications of new data
+   * (be that, via the :meth:`Connector.wait` method, or by re-adding a listener
+   * for the ``'on_data_available'`` event).
+   *
+   * This operation does **not** free any resources. It is still necessary to call
+   * :meth:`Connector.close` when the :class:`Connector` is no longer required.
+   *
+   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
+   * @returns {Promise} A Promise that will be resolved once the resources being used by internally by the Connector object are no longer in use.
+   */
+  waitForCallbackFinalization (timeout) {
+    if (timeout === undefined) {
+      timeout = 10
+    }
+    return new Promise((resolve, reject) => {
+      // Internally, we retry every 200ms, so scale the timeout appropriately
+      this.closeImpl(resolve, reject, timeout * 5, false)
+    })
   }
 
   /**
    * Frees all the resources created by this Connector instance.
+   *
+   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
+   * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you have attached a listener for the ``'on_data_available'``  event.
    */
-  close () {
-    connectorBinding.api.RTI_Connector_delete(this.native)
+  close (timeout) {
+    if (timeout === undefined) {
+      timeout = 10
+    }
+    if (this.listenerCount('on_data_available') !== 0) {
+      this.removeAllListeners('on_data_available')
+    }
+    return new Promise((resolve, reject) => {
+      // Internally, we retry every 200ms, so scale the timeout appropriately
+      this.closeImpl(resolve, reject, timeout * 5, true)
+    })
   }
 
   /**
@@ -1583,8 +1682,7 @@ class Connector extends EventEmitter {
    * @private
    */
   delete () {
-    this.close()
-    this.native = null
+    return this.close()
   }
 
   /**
@@ -1648,39 +1746,103 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * This is deprecated. Use waitForData.
+   * Waits for data to be received on any Input.
+   *
+   * .. note::
+   *   This operation is asynchronous.
+   *
+   * @param {number} timeout The maximum time to wait in milliseconds. By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
+   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
+   */
+  wait (timeout) {
+    return new Promise((resolve, reject) => {
+      // timeout is defaulted to -1 (infinite) if not supplied
+      if (timeout === undefined) {
+        timeout = -1
+      } else if (!_isNumber(timeout)) {
+        throw new TypeError('timeout must be a number')
+      }
+      if (this.waitSetBusy) {
+        throw new Error('Can not concurrently wait on the same Connector object')
+      } else {
+        this.waitSetBusy = true
+        connectorBinding.api.RTI_Connector_wait_for_data.async(
+          this.native,
+          timeout,
+          (err, res) => {
+            this.waitSetBusy = false
+            if (err) {
+              return reject(err)
+            } else if (res === _ReturnCodes.ok) {
+              return resolve()
+            } else if (res === _ReturnCodes.timeout) {
+              return reject(new TimeoutError('Timeout error'))
+            } else {
+              return reject(new DDSError('res: ' + res))
+            }
+          })
+      }
+    })
+  }
+
+  /**
+   * Emits the 'on_data_available' event when any Inputs within this Connector object
+   * receive data.
    *
    * .. note::
    *   This operation is asynchronous
    *
+   * This API is used internally to emit the 'on_data_available' event when data is
+   * received on any of the Inputs contained within this Connector object.
+   *
+   * The Connector class extends EventEmitter, meaning that callbacks can be
+   * registered for specific events using the following syntax:
+   *
+   * .. code-block:: javascript
+   *
+   *    function myCallback() {
+   *      // Handle the fact that there is new data on one of the inputs
+   *    }
+   *    connector.on('on_data_available', myCallback)
+   *    // ...
+   *    connector.off('on_data_available', myCallback)
+   *
+   * Once the ``'on_data_available'`` event has fired, either :meth:`Input.read` or
+   * :meth:`Input.take` should be called on the :class:`Input` which has new data.
+   * This will prevent the ``'on_data_available'`` being fired more than once
+   * for the same data.
+   *
    * @private
    */
   onDataAvailable () {
-    // No need to cache return value. When using .async() the result
-    // is passed as 'res' to the callback function.
-    connectorBinding.api.RTI_Connector_wait_for_data.async(
-      this.native,
-      1000,
-      (err, res) => {
+    // Asynic FFI calls are not cancellable, so we wake up every second to check that
+    // this event is still requested
+    this.wait(500)
+      .then(() => {
+        // Ensure that this entity has not been deleted
         if (this.native !== null) {
-          if (err) throw err
-          // Since ffi async functoins are not cancellable (https://github.com/node-ffi/node-ffi/issues/413)
-          // we call this in a loop (and therefore expect to receive timeout error)
-          // for this reason do not raise a timeout exception
-          if (res !== _ReturnCodes.timeout) {
-            _checkRetcode(res)
-          }
+          // Emit the on_data_available event (envoking the registered callback)
+          this.emit('on_data_available')
+          // If the listener is still installed, do it all again
           if (this.onDataAvailableRun) {
             this.onDataAvailable()
           }
-          // Emitting this from the EventEmitter will trigger the callback created
-          // by the user
-          if (res === _ReturnCodes.ok) {
-            this.emit('on_data_available')
-          }
         }
-      }
-    )
+      })
+      .catch((err) => {
+        // Since we wake up every 1s, do not treat timeout error as anything
+        // significant - just wait again
+        if (!(err instanceof TimeoutError)) {
+          console.log('Caught error: ' + err)
+          // At this point we are in the context of the EventEmitter so do not throw
+          // The convention is to emit the 'error' event. If no handlers are
+          // installed this will terminate the program.
+          this.emit('error', err)
+        } else if (this.onDataAvailableRun) {
+          this.onDataAvailable()
+        }
+      })
   }
 
   // This callback was added for the 'newListener' event, meaning it is triggered
@@ -1705,48 +1867,11 @@ class Connector extends EventEmitter {
    */
   removeListenerCallBack (eventName, functionListener) {
     if (this.listenerCount(eventName) === 0) {
-      this.onDataAvailableRun = false
+      if (eventName === 'on_data_available' && this.onDataAvailableRun) {
+        // Ideally we would cancel the async ffi call here but it is not possible
+        this.onDataAvailableRun = false
+      }
     }
-  }
-
-  /**
-   * Waits for data to be received on any Input.
-   *
-   * .. note::
-   *   This operation is asynchronous.
-   *
-   * @param {number} timeout The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
-   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
-   */
-  waitForData (timeout) {
-    return new Promise((resolve, reject) => {
-      // timeout is defaulted to -1 (infinite) if not supplied
-      if (timeout === undefined) {
-        timeout = -1
-      } else if (!_isNumber(timeout)) {
-        throw new TypeError('timeout must be a number')
-      }
-      if (this.onDataAvailableRun) {
-        throw new Error('Can not concurrently wait on the same Connector object')
-      }
-      this.onDataAvailableRun = true
-      connectorBinding.api.RTI_Connector_wait_for_data.async(
-        this.native,
-        timeout,
-        (err, res) => {
-          this.onDataAvailableRun = false
-          if (err) {
-            return reject(err)
-          } else if (res === _ReturnCodes.ok) {
-            return resolve()
-          } else if (res === _ReturnCodes.timeout) {
-            return reject(new TimeoutError('Timeout error'))
-          } else {
-            return reject(new DDSError('DDS error'))
-          }
-        })
-    })
   }
 
   /**

@@ -1031,8 +1031,8 @@ describe('Tests with two readers and two writers', () => {
   // should timeout
   it('waiting for data on connector should timeout', async () => {
     try {
-      await connector.waitForData(testExpectFailureTimeout)
-      console.log('Expected connector.waitForData to timeout but it did not')
+      await connector.wait(testExpectFailureTimeout)
+      console.log('Expected connector.wait to timeout but it did not')
       expect(true).to.deep.equals(false)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
@@ -1059,10 +1059,10 @@ describe('Tests with two readers and two writers', () => {
     }
   })
 
-  it('Writing data on a testOutput1 should wake up connector.waitForData', async () => {
+  it('Writing data on a testOutput1 should wake up connector.wait', async () => {
     testOutput1.write()
     try {
-      await connector.waitForData(testExpectSuccessTimeout)
+      await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
       expect(true).to.deep.equals(false)
@@ -1090,10 +1090,10 @@ describe('Tests with two readers and two writers', () => {
     }
   })
 
-  it('Writing data on a testOutput2 should wake up connector.waitForData', async () => {
+  it('Writing data on a testOutput2 should wake up connector.wait', async () => {
     testOutput2.write()
     try {
-      await connector.waitForData(testExpectSuccessTimeout)
+      await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
       expect(true).to.deep.equals(false)
