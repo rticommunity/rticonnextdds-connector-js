@@ -12,8 +12,8 @@ sources of all types. At its core is the world's leading ultra-high performance,
 distributed networking databus.
 
 *RTI Connector* provides a quick and easy way to write applications that
-publish and subscribe to the *RTI Connext DDS databus* in JavaScript (with Node.js) and other
-languages.
+publish and subscribe to the *RTI Connext DDS* databus in JavaScript (with Node.js)
+and other languages.
 
 You can learn how to use *RTI Connector* by reading the following sections, which
 include examples and detailed API reference. You can also find a specific type
@@ -24,8 +24,11 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
 
+   intro
    getting_started
+   configuration
    connector
    output
    input
