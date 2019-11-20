@@ -13,14 +13,13 @@ November 2019. |br|
 
 .. rubric:: License
 
-With the sole exception of the contents of the "examples" subdirectory, all use
-of the software shall be governed by this license. 
-*RTI Connector for JavaScript* and *RTI Connector for Python* are part of the 
-*RTI Connext DDS Professional* package. If you have a valid license for the 
-*RTI Connext DDS Professional* package, such license shall govern your use of 
-*RTI Connector for Python* and *RTI Connector for JavaScript*. All other use of 
-this software shall be governed solely by the terms of RTI’s Software License 
-for Non-Commercial Use #4040, included at the top level of this repository.
+RTI Connector for JavaScript and RTI Connector for Python are part of the Connext
+DDS Professional Package. If you have a valid license for the RTI Connext DDS
+Professional Package, such license shall govern your use of RTI Connector for
+Python and RTI Connector for JavaScript. All other use of this software shall
+be governed solely by the terms of RTI’s Software License for Non-Commercial
+Use #4040, included at the top level of the `Connector for JavaScript repository
+<https://github.com/rticommunity/rticonnextdds-connector-js>`__.
 
 
 .. rubric:: Trademarks

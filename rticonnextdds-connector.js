@@ -434,13 +434,13 @@ class SampleIterator {
    *
    * The supported field names are:
    *
-   * * ``source_timestamp`` returns an integer representing nanoseconds
-   * * ``reception_timestamp`` returns an integer representing nanoseconds
-   * * ``sample_identity`` or ``identity`` returns a JSON object 
+   * * ``'source_timestamp'`` returns an integer representing nanoseconds
+   * * ``'reception_timestamp'`` returns an integer representing nanoseconds
+   * * ``'sample_identity'`` or ``'identity'`` returns a JSON object 
    *   (see :meth:`Output.write`)
-   * * ``related_sample_identity`` returns a JSON object 
+   * * ``'related_sample_identity'`` returns a JSON object 
    *   (see :meth:`Output.write`)
-   * * ``valid_data`` returns a boolean (equivalent to 
+   * * ``'valid_data'`` returns a boolean (equivalent to 
    *   :attr:`SampleIterator.validData`)
    *
    * These fields are documented in `The SampleInfo Structure 
@@ -977,13 +977,13 @@ class SampleInfo {
    *
    * The supported fieldNames are:
    *
-   * * ``source_timestamp`` returns an integer representing nanoseconds
-   * * ``reception_timestamp`` returns an integer representing nanoseconds
-   * * ``sample_identity`` or ``identity`` returns a JSON object 
+   * * ``'source_timestamp'`` returns an integer representing nanoseconds
+   * * ``'reception_timestamp'`` returns an integer representing nanoseconds
+   * * ``'sample_identity'`` or ``'identity'`` returns a JSON object 
    *   (see :meth:`Output.write`)
-   * * ``related_sample_identity`` returns a JSON object 
+   * * ``'related_sample_identity'`` returns a JSON object 
    *   (see :meth:`Output.write`)
-   * * ``valid_data`` returns a boolean (equivalent to 
+   * * ``'valid_data'`` returns a boolean (equivalent to 
    *   :attr:`SampleIterator.validData`)
    *
    * These fields are documented in `The SampleInfo Structure 
@@ -1489,10 +1489,13 @@ class Output {
    * * ``related_sample_identity`` – Used for request-reply communications. 
    *   It has the same format as identity
    *
-   * @example output.write({ action: 'write', identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } })
+   * @example output.write()
+   * @example output.write({ 
+   *     action: 'dispose', 
+   *     identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } 
+   * })
    *
-   * @param {JSON} [params] [Optional] The Write Parameters to use in the 
-   *   ``write`` call. Filled in by *Connector* by default.
+   * @param {JSON} [params] [Optional] The optional parameters described above
    * @throws {TimeoutError} The write method can block under multiple 
    *   circumstances (see 'Blocking During a write()' in the `Writing Data section 
    *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm>`__

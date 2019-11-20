@@ -14,7 +14,7 @@ To read/take samples, first get a reference to the :class:`Input`:
 
 :meth:`Connector.getInput()` returns an :class:`Input` object. This example,
 obtains the Input defined by the ``data_reader`` named *MySquareReader* within
-the ``subscriber`` named *MySubscriber*:
+the ``<subscriber>`` named *MySubscriber*:
 
 .. code-block:: xml
 
@@ -22,8 +22,8 @@ the ``subscriber`` named *MySubscriber*:
      <data_reader name="MySquareReader" topic_ref="Square" />
    </subscriber>
 
-This *subscriber* is defined inside the ``domain_participant`` selected to 
-create this :class:`Connector` (see :ref:`Creating a new Connector`).
+This ``<subscriber>`` is defined inside the ``<domain_participant>`` selected to 
+create this ``connector`` (see :ref:`Creating a new Connector`).
 
 Reading or taking the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -25,5 +25,3 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 RTI Connext DDS Version
 ~~~~~~~~~~~~~~~~~~~~~~~
 The library used by *Connector* is built on top of *RTI Connext DDS* 6.0.1.
-
-This library is statically linked; a dynamically linked variant is not currently available.
