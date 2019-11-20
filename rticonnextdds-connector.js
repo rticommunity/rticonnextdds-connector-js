@@ -115,6 +115,7 @@ class _ConnectorBinding {
       RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
       RTI_Connector_free_string: ['void', ['char *']],
       RTI_Connector_set_max_objects_per_thread: ['int', ['int']],
+      RTIDDSConnector_getJSONInstance:['char *', ['pointer', 'string']],
       // This API is only used in the unit tests
       RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
     })
@@ -1326,6 +1327,23 @@ class Instance {
       this.clearMember(fieldName)
     } else {
       throw new TypeError('value must be one of string, number, boolean, object or null')
+    }
+  }
+
+  /**
+   * Retrives the value of this instance as a JSON object.
+   *
+   * @returns {JSON} The value of this instance as a JSON object.
+   */
+  getJson () {
+    const nativeStr = connectorBinding.api.RTIDDSConnector_getJSONInstance(
+        this.output.connector.native,
+        this.output.name)
+    // Now move the native string
+    if (nativeStr === null) {
+        throw new Error('Failed to create JSON object of instance')
+    } else {
+        return JSON.parse(_moveCString(nativeStr))
     }
   }
 

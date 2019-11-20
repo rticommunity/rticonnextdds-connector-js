@@ -341,6 +341,11 @@ describe('Data access tests with a pre-populated input', function () {
     expect(complexJson).to.be.an.instanceof([].constructor)
     expect(complexJson[0].x).to.deep.equals(0)
   })
+
+  it('Obtain JSON string of dictoinary', () => {
+      const jsonInstance = output.instance.getJson()
+      expect(jsonInstance).to.deep.equals(testJsonObject)
+  })
 })
 
 describe('Tests with a testOutput and testInput', () => {
