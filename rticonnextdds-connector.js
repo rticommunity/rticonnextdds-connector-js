@@ -17,8 +17,8 @@ const EventEmitter = require('events').EventEmitter
  * The Node.js representation of the RTI_Connector_Options structure within
  * the core.
  *
- * We define it here using the module ref-struct (require above). This allows to
- * pass it by value into the Core when creating a Connector object.
+ * We define it here using the module ref-struct (require above). This allows 
+ * us to pass it by value into the Core when creating a :class:`Connector` object.
  *
  * @private
  */
@@ -32,7 +32,7 @@ class _ConnectorBinding {
     let libArch = ''
     let libName = ''
 
-    // Obtain th ename of the library which contains the Connector binding
+    // Obtain the name of the library that contains the Connector binding
     if (os.arch() === 'x64') {
       switch (os.platform()) {
         case 'darwin':
@@ -125,7 +125,7 @@ class _ConnectorBinding {
 var connectorBinding = new _ConnectorBinding()
 
 /**
- * Copies a natively-allocated string into a Node.js string and frees the
+ * Copies a natively allocated string into a Node.js string and frees the
  * native memory.
  *
  * @param {Buffer} cstring - The string returned by the core
@@ -139,7 +139,7 @@ function _moveCString (cstring) {
 }
 
 /**
- * Obtain the last error message from the RTI Connext DDS Core
+ * Obtains the last error message from the *RTI Connext DDS* Core
  * @private
  */
 function _getLastDdsErrorMessage () {
@@ -196,12 +196,12 @@ class TimeoutError extends Error {
 }
 
 /**
- * An error originating from the RTI Connext DDS Core
+ * An error originating from the *RTI Connext DDS* Core
  */
 class DDSError extends Error {
   /**
-   * This error is thrown when an error is encountered from within one of the APIs
-   * within the RTI Connext DDS Core.
+   * This error is thrown when an error is encountered from within one of the 
+   * APIs within the *RTI Connext DDS* Core.
    * @private
    */
   constructor (message, extra) {
@@ -214,10 +214,10 @@ class DDSError extends Error {
 }
 
 /**
- * Checks the value returned by the functions in the core for success and throws
- * the appropriate error on failure.
+ * Checks the value returned by the functions in the core for success and 
+ * throws the appropriate error on failure.
  *
- * We do not handle DDS_RETCODE_NO_DATA here since, in some operations (those
+ * We do not handle DDS_RETCODE_NO_DATA here, since in some operations (those
  * related with optional members), we need to handle it separately.
  *
  * @param {number} retcode - The retcode to check
@@ -312,10 +312,10 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
 }
 
 /**
- * Provide access to the metadata contained in samples read by an input.
+ * Provides access to the meta-data contained in samples read by an input.
  *
- * Note: The Infos class is deprecated and should not be used directly. Instead,
- * use :meth:`SampleIterator.info`.
+ * Note: The Infos class is deprecated and should not be used directly. 
+ * Instead, use :meth:`SampleIterator.info`.
  *
  * @private
  */
@@ -325,7 +325,7 @@ class Infos {
   }
 
   /**
-   * Obtain the number of samples in the related :class:`Input`'s queue.
+   * Obtains the number of samples in the related :class:`Input`'s queue.
    * @private
    */
   getLength () {
@@ -341,8 +341,8 @@ class Infos {
   /**
    * Checks if the sample at the given index contains valid data.
    *
-   * @param {number} index - The index of the sample in the :class:`Input`'s queue
-   * to check for valid data.
+   * @param {number} index - The index of the sample in the :class:`Input`'s 
+   *   queue to check for valid data
    * @returns{boolean} True if the sample contains valid data
    * @private
    */
@@ -377,25 +377,29 @@ class SampleIterator {
   /**
    * A SampleIterator provides access to the data receieved by an :class:`Input`.
    *
-   * The :attr:`Input.samples` attribute implements a :class:`SampleIterator`, meaning
-   * it can be iterated over. An individual sample can be accessed using :meth:`Input.samples.get`.
+   * The :attr:`Input.samples` attribute implements a :class:`SampleIterator`, 
+   * meaning it can be iterated over. An individual sample can be accessed 
+   * using :meth:`Input.samples.get`.
    *
    * See :class:`ValidSampleIterator`.
    *
-   * This class provides both an iterator and iterable, and is internally used
-   * by the :class:`Samples` class. The following options to iterate over the samples
-   * exist::
+   * This class provides both an iterator and iterable, and is used internally
+   * by the :class:`Samples` class. The following options to iterate over the 
+   * samples exist::
    *
    *   // option 1 - The iterable can be used in for...of loops
    *   for (const sample of input.samples)
-   *   // option 2 - Returns an inidivudal sample at the given index
+   *   // option 2 - Returns an individual sample at the given index
    *   const individualSample = input.samples.get(0)
-   *   // option 3 - Returns a generator which much be incremented by the application
+   *   // option 3 - Returns a generator which must be incremented by the application
    *   const iterator = input.samples.iterator()
    *
-   * @property {boolean} validData - Whether or not the current sample contains valid data.
-   * @property {SampleInfo} infos - The meta data associated with the current sample.
-   * @property {pointer} native - A native handle that allows accessing additional *Connext DDS* APIs in C.
+   * @property {boolean} validData - Whether or not the current sample 
+   *   contains valid data.
+   * @property {SampleInfo} infos - The meta-data associated with the 
+   *   current sample.
+   * @property {pointer} native - A native handle that allows accessing 
+   *   additional *Connext DDS* APIs in C.
    */
   constructor (input, index) {
     this.input = input
@@ -409,9 +413,11 @@ class SampleIterator {
   /**
    * Whether or not this sample contains valid data.
    *
-   * If ``false``, this methods to obtain values of the samples (e.g., :meth:`SampleIterator.getNumber`,
-   * :meth:`SampleIterator.getBoolean`, :meth:`SampleIterator.getJson`, :meth:`SampleIterator.getString`)
-   * should not be called. To avoid this restraint, use an :class:`ValidSampleIterator`.
+   * If ``false``, the methods to obtain values of the samples 
+   * (e.g., :meth:`SampleIterator.getNumber`, 
+   * :meth:`SampleIterator.getBoolean`, :meth:`SampleIterator.getJson`, 
+   * :meth:`SampleIterator.getString`) should not be called. To avoid 
+   * this restraint, use a :class:`ValidSampleIterator`.
    * @type {boolean}
    */
   get validData () {
@@ -425,18 +431,22 @@ class SampleIterator {
    *
    *   const value = sample.info.get('field')
    *
-   * The support field names are:
+   * The supported field names are:
    *
-   * * ``'source_timestamp'``, returns an integer representing nanoseconds
-   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
-   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
+   * * ``source_timestamp`` returns an integer representing nanoseconds
+   * * ``reception_timestamp`` returns an integer representing nanoseconds
+   * * ``sample_identity`` or ``identity`` returns a JSON object 
+   *   (see :meth:`Output.write`)
+   * * ``related_sample_identity`` returns a JSON object 
+   *   (see :meth:`Output.write`)
+   * * ``valid_data`` returns a boolean (equivalent to 
+   *   :attr:`SampleIterator.validData`)
    *
-   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
-   * section in the *Connext DDS Core Libraries User's Manual*.
+   * These fields are documented in `The SampleInfo Structure 
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
-   * See :class:`SampleInfo`
+   * See :class:`SampleInfo`.
    */
   get info () {
     return new SampleInfo(this.input, this.index)
@@ -445,9 +455,10 @@ class SampleIterator {
   /**
    * Returns a JSON object with the values of all the fields of this sample.
    *
-   * see :ref:`Accessing the data samples`.
+   * See :ref:`Accessing the data samples`.
    *
-   * @param {string} [memberName] - The name of the complex member or field to obtain.
+   * @param {string} [memberName] - The name of the complex member or field 
+   *   to obtain.
    * @returns {JSON} The obtained JSON object.
    */
   getJson (memberName) {
@@ -493,10 +504,10 @@ class SampleIterator {
   }
 
   /**
-   * Get the value of a field within this sample.
+   * Gets the value of a field within this sample.
    *
    * This API can be used to obtain strings, numbers, booleans and the JSON
-   * reprentation of complex members.
+   * representation of complex members.
    * @param {string} fieldName - The name of the field.
    * @returns {number|string|boolean|JSON} The value of the field.
    */
@@ -543,11 +554,11 @@ class SampleIterator {
 /**
  * Iterates and provides access to data samples with valid data.
  *
- * This iterator provides the same methods as :class:`SampleIterator`. It can be
- * obtained using :attr:`Input.samples.validDataIter`.
+ * This iterator provides the same methods as :class:`SampleIterator`. 
+ * It can be obtained using :attr:`Input.samples.validDataIter`.
  * @extends SampleIterator
  *
- * Using this class it is possible to iterator through all valid data samples::
+ * Using this class, it is possible to iterate through all valid data samples::
  *   for (let sample of input.samples.validDataIter) {
  *    console.log(JSON.stringify(sample.getJson()))
  *   }
@@ -556,7 +567,7 @@ class ValidSampleIterator extends SampleIterator {
   /**
    * The iterator generator (used by the iterable).
    *
-   * Using this method it is possible to create your own iterable::
+   * Using this method, it is possible to create your own iterable::
    *
    *  const iterator = input.samples.validDataIter.iterator()
    *  const singleSample = iterator.next().value
@@ -566,7 +577,7 @@ class ValidSampleIterator extends SampleIterator {
    */
   * iterator () {
     while ((this.index + 1) < this.length) {
-      // Increment the sample to the next one with valid
+      // Increment the sample to the next one with valid data
       while (((this.index + 1) < this.length) && !this.input.infos.isValid(this.index + 1)) {
         this.index += 1
       }
@@ -579,16 +590,17 @@ class ValidSampleIterator extends SampleIterator {
 }
 
 /**
- * Provide access to the data samples read by an :class:`Input`.
+ * Provides access to the data samples read by an :class:`Input`.
  */
 class Samples {
   /**
-   * This class provides access to data samples read by an :class:`Input` (using either
-   * the :meth:`Input.read` or :meth:`Input.take` methods).
+   * This class provides access to data samples read by an 
+   * :class:`Input` (using either the :meth:`Input.read` 
+   * or :meth:`Input.take` methods).
    *
-   * This class implements a ``[Symbol.iterator]()`` method, making it an iterable.
-   * This allows for it to be used in ``for... of`` loops, to iterate through
-   * available samples::
+   * This class implements a ``[Symbol.iterator]()`` method, making it an 
+   * iterable. This allows it to be used in ``for... of`` loops, to iterate 
+   * through available samples::
    *
    *    for (const sample of input.samples) {
    *       console.log(JSON.stringify(sample.getJson()))
@@ -602,19 +614,23 @@ class Samples {
    *
    * The samples returned by these methods may only contain meta-data
    * (see :attr:`SampleIterator.info`). The :attr:`Samples.validDataIter`
-   * iterable only iterates over samples that contain valid data (a :class:`ValidSampleIterator`).
+   * iterable only iterates over samples that contain valid data 
+   * (a :class:`ValidSampleIterator`).
    *
-   * :class:`Samples` and :class:`ValidSampleIterator` both also provide generators to
-   * the samples, allowing application to define their own iterables (see :meth:`Samples.iterator()` and
+   * :class:`Samples` and :class:`ValidSampleIterator` both also provide 
+   * generators to the samples, allowing applications to define their own 
+   * iterables (see :meth:`Samples.iterator()` and 
    * :meth:`ValidSampleIterator.iterator()`).
    *
    * ``Samples`` is the type of the property :meth:`Input.samples`.
    *
-   * For more information and examples see :ref:`Accessing the data samples`.
+   * For more information and examples, see :ref:`Accessing the data samples`.
    *
    * Attributes:
-   *  * length (number) - The number of samples available since the last time :meth:`Input.read` or :meth:`Input.take` was called.
-   *  * validDataIter (:class:`ValidSampleIterator`) - The class used to iterate through the available samples which have valid data.
+   *  * length (number) - The number of samples available since the last time 
+   *    :meth:`Input.read` or :meth:`Input.take` was called.
+   *  * validDataIter (:class:`ValidSampleIterator`) - The class used to 
+   *    iterate through the available samples that have valid data.
    */
   constructor (input) {
     this.input = input
@@ -623,16 +639,19 @@ class Samples {
   /**
    * Returns an iterator to the data samples, starting at the index specified.
    *
-   * The iterator provides access to all the data samples retrieved by the most
-   * recent call to :meth:`Input.read` or :meth:`Input.take`.
+   * The iterator provides access to all the data samples retrieved by the 
+   * most recent call to :meth:`Input.read` or :meth:`Input.take`.
    *
-   * This iterator may return samples with invalid data (samples that only contain
-   * meta-data).
-   * Use :attr:`Samples.validDataIter` to avoid having to check :attr:`SampleIterator.validData`.
+   * This iterator may return samples with invalid data (samples that only 
+   * contain meta-data).
+   * Use :attr:`Samples.validDataIter` to avoid having to check 
+   * :attr:`SampleIterator.validData`.
    *
-   * @param {number} [index] The index of the sample from which the iteration should begin. By default, the iterator begins with the first sample.
+   * @param {number} [index] The index of the sample from which the iteration 
+   *   should begin. By default, the iterator begins with the first sample.
    *
-   * @returns :class:`SampleIterator` - An iterator to the samples (which implements both iterable and iterator logic).
+   * @returns :class:`SampleIterator` - An iterator to the samples (which 
+   *   implements both iterable and iterator logic).
    */
   get (index) {
     return new SampleIterator(this.input, index)
@@ -646,7 +665,8 @@ class Samples {
    *
    * This iterable may return samples with invalid data (samples that only contain
    * meta-data).
-   * Use :attr:`Samples.validDataIter` to avoid having to check :attr:`SampleIterator.validData`.
+   * Use :attr:`Samples.validDataIter` to avoid having to check 
+   * :attr:`SampleIterator.validData`.
    *
    * Allows for the following syntax::
    *
@@ -670,7 +690,7 @@ class Samples {
    * Once incremented, the data can be accessed via the ``.value`` attribute.
    * Once no more samples are available, the ``.done`` attribute will be true.
    *
-   * Using this method it is possible to create your own iterable::
+   * Using this method, it is possible to create your own iterable::
    *
    *   const iterator = input.samples.iterator()
    *   const singleSample = iterator.next().value
@@ -687,16 +707,17 @@ class Samples {
   }
 
   /**
-   * Returns an iterator to the data samples which contain valid data.
+   * Returns an iterator to the data samples that contain valid data.
    *
    * The iterator provides access to all the data samples retrieved by the most
-   * recent call to :meth:`Input.read` or :meth:`Input.take`, and skips samples with
-   * invalid data (meta-data only).
+   * recent call to :meth:`Input.read` or :meth:`Input.take`, and skips samples 
+   * with invalid data (meta-data only).
    *
    * By using this iterator, it is not necessary to check if each sample contains
    * valid data.
    *
-   * @returns {ValidSampleIterator} An iterator to the sample containing valid data (which implements both iterable and iterator logic).
+   * @returns {ValidSampleIterator} An iterator to the samples containing valid 
+   *   data (which implements both iterable and iterator logic).
    */
   get validDataIter () {
     return new ValidSampleIterator(this.input)
@@ -712,7 +733,7 @@ class Samples {
   /**
    * Returns the number of samples available.
    *
-   * This methos is deprecated , use the getter :meth:`Samples.length`
+   * This method is deprecated, use the getter :meth:`Samples.length`.
    * @private
    */
   getLength () {
@@ -724,12 +745,12 @@ class Samples {
     _checkRetcode(retcode)
     // We use ~~ to convert from double -> int. This is required to allow:
     // for (var i =0; i < input.samples.getLength(); ++i)
-    // It works since the we are doing a bitwise complement (double not)
+    // It works since we are doing a bitwise complement (double not).
     return ~~length.deref()
   }
 
   /**
-   * Obtain the value of a numeric field within this sample.
+   * Obtains the value of a numeric field within this sample.
    *
    * See :ref:`Accessing the data samples`.
    *
@@ -743,7 +764,7 @@ class Samples {
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
-      // Increment index since C API based on Lua with 1-based indexes
+      // Increment index since C API is based on Lua with 1-based indexes
       index += 1
       const value = ref.alloc('double')
       const retcode = connectorBinding.api.RTI_Connector_get_number_from_sample(
@@ -763,7 +784,7 @@ class Samples {
   }
 
   /**
-   * Obtain the value of a boolean field within this sample.
+   * Obtains the value of a boolean field within this sample.
    *
    * See :ref:`Accessing the data samples`.
    *
@@ -777,7 +798,7 @@ class Samples {
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
-      // Increment index since C API based on Lua with 1-based indexes
+      // Increment index since C API is based on Lua with 1-based indexes
       index += 1
       const value = ref.alloc('int')
       const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_sample(
@@ -797,12 +818,12 @@ class Samples {
   }
 
   /**
-   * Obtain the value of a string field within this sample
+   * Obtains the value of a string field within this sample.
    *
    * See :ref:`Accessing the data samples`.
    *
-   * @param {number} index The index of the sample
-   * @param {string} fieldName The name of the field
+   * @param {number} index The index of the sample.
+   * @param {string} fieldName The name of the field.
    * @returns {string} The obtained value.
    */
   getString (index, fieldName) {
@@ -811,7 +832,7 @@ class Samples {
     } else if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
-      // Increment index since C API based on Lua with 1-based indexes
+      // Increment index since C API is based on Lua with 1-based indexes
       index += 1
       const value = ref.alloc('char *')
       const retcode = connectorBinding.api.RTI_Connector_get_string_from_sample(
@@ -830,12 +851,12 @@ class Samples {
   }
 
   /**
-   * Get the value of a field within this sample.
+   * Gets the value of a field within this sample.
    *
    * See :ref:`Accessing the data samples`.
    *
    * This API can be used to obtain strings, numbers, booleans and the JSON
-   * reprentation of complex members.
+   * representation of complex members.
    *
    * @param {string} fieldName - The name of the field.
    * @returns {number|string|boolean|JSON} The value of the field.
@@ -859,7 +880,9 @@ class Samples {
    * Gets a JSON object with the values of all the fields of this sample.
    *
    * @param {number} index The index of the sample.
-   * @param {string} [memberName] The name of the complex member. The type of the member with name memberName must be an array, sequence, struct, value or union.
+   * @param {string} [memberName] The name of the complex member. The type 
+   *   of the member with name memberName must be an array, sequence, struct, 
+   *   value or union.
    * @returns {JSON} The obtained JSON object.
    *
    * See :ref:`Accessing the data samples`.
@@ -901,9 +924,11 @@ class Samples {
   }
 
   /**
-   * Obtains a native handle to the sample, which can be used to access additional *Connext DDS* APIs in C.
+   * Obtains a native handle to the sample, which can be used to access 
+   * additional *Connext DDS* APIs in C.
    *
-   * @param {number} index The index of the sample for which to obtain the native pointer
+   * @param {number} index The index of the sample for which to obtain 
+   *   the native pointer.
    * @returns {pointer} A native pointer to the sample.
    */
   getNative (index) {
@@ -922,9 +947,11 @@ class Samples {
   /**
    * This method is deprecated, use :meth:`Samples.getJson`.
    *
-   * @param {number} index - The index of the sample for which to obtain the JSON object.
-   * @param {string} [memberName] - The name of the complex member for which to obtain the JSON object.
-   * @returns {JSON} A JSON object representing the current sample
+   * @param {number} index - The index of the sample for which to obtain 
+   *   the JSON object.
+   * @param {string} [memberName] - The name of the complex member for 
+   *   which to obtain the JSON object.
+   * @returns {JSON} A JSON object representing the current sample.
    * @private
    */
   getJSON (index, memberName) {
@@ -937,7 +964,7 @@ class Samples {
  */
 class SampleInfo {
   /**
-   * This class provides a way to access the SampleInfo of a recieved data sample.
+   * This class provides a way to access the SampleInfo of a received data sample.
    */
   constructor (input, index) {
     this.input = input
@@ -945,18 +972,22 @@ class SampleInfo {
   }
 
   /**
-   * Type independent function to obtain any value from the SampleInfo structure.
+   * Type-independent function to obtain any value from the SampleInfo structure.
    *
-   * The support fieldNames are:
+   * The supported fieldNames are:
    *
-   * * ``'source_timestamp'``, returns an integer representing nanoseconds
-   * * ``'reception_timestamp'``, returns an integer representing nanoseconds
-   * * ``'sample_identity'`` or ``'identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'related_sample_identity'``, returns a JSON object (see :meth:`Output.write`)
-   * * ``'valid_data'``, returns a boolean (equivalent to :attr:`SampleIterator.validData`)
+   * * ``source_timestamp`` returns an integer representing nanoseconds
+   * * ``reception_timestamp`` returns an integer representing nanoseconds
+   * * ``sample_identity`` or ``identity`` returns a JSON object 
+   *   (see :meth:`Output.write`)
+   * * ``related_sample_identity`` returns a JSON object 
+   *   (see :meth:`Output.write`)
+   * * ``valid_data`` returns a boolean (equivalent to 
+   *   :attr:`SampleIterator.validData`)
    *
-   * These fields are documented in `The SampleInfo Structure <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#7.4.6_The_SampleInfo_Structure%3FTocPath%3DPart%25202%253A%2520Core%2520Concepts%7C7.%2520Receiving%2520Data%7C7.4%2520Using%2520DataReaders%2520to%2520Access%2520Data%2520(Read%2520%2526%2520Take)%7C7.4.6%2520The%2520SampleInfo%2520Structure%7C_____0>`__
-   * section in the *Connext DDS Core Libraries User's Manual*.
+   * These fields are documented in `The SampleInfo Structure 
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
    * @param {string} fieldName - The name of the ``SampleInfo`` field to obtain
    * @returns The obtained value from the ``SampleInfo`` structure
@@ -987,9 +1018,12 @@ class Input {
    *
    * Attributes:
    *  * connector (:class:`Connector`) - The Connector creates this Input.
-   *  * name (string) - The name of the Input (the name used in :meth:`Connector.getInput`).
-   *  * native (pointer) - A native handle that allows accessing additional *Connext DDS* APIs in C.
-   *  * matchedPublications (JSON) - A JSON object containing information about all the publications currently matched with this Input.
+   *  * name (string) - The name of the Input (the name used in 
+   *    :meth:`Connector.getInput`).
+   *  * native (pointer) - A native handle that allows accessing additional 
+   *    *Connext DDS* APIs in C.
+   *  * matchedPublications (JSON) - A JSON object containing information 
+   *    about all the publications currently matched with this Input.
    */
   constructor (connector, name) {
     this.connector = connector
@@ -1014,10 +1048,11 @@ class Input {
   }
 
   /**
-   * Access the samples received by this Input.
+   * Accesses the samples received by this Input.
    *
-   * This operation performs the same operation as :meth:`Input.take` but the samples
-   * remain accessible (in the internal queue) after the operation has been called.
+   * This operation performs the same operation as :meth:`Input.take` but 
+   * the samples remain accessible (in the internal queue) after the 
+   * operation has been called.
    */
   read () {
     _checkRetcode(connectorBinding.api.RTI_Connector_read(
@@ -1026,9 +1061,10 @@ class Input {
   }
 
   /**
-   * Access the samples receieved by this Input.
+   * Accesses the samples receieved by this Input.
    *
-   * After calling this method, the samples are accessible using :meth:`Input.samples`.
+   * After calling this method, the samples are accessible using 
+   * :meth:`Input.samples`.
    */
   take () {
     _checkRetcode(connectorBinding.api.RTI_Connector_take(
@@ -1049,16 +1085,24 @@ class Input {
   }
 
   /**
-   * Wait for this Input to match or unmatch a compatible DDS Subscription.
+   * Waits for this Input to match or unmatch a compatible DDS Subscription.
    *
    * .. note::
    *   This operation is asynchronous.
    *
-   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
-   * for a match (or unmatch) to occur.
-   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before any publications are matched
-   * @returns {Promise} Promise object resolving with the change in the current number of matched outputs. If this is a positive number, the input has matched with new publishers. If it is negative, the input has unmatched from an output. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the input matched the same number of outputs as it unmatched).
+   * This method waits for the specified timeout (or if no timeout is 
+   * specified, it waits forever), for a match (or unmatch) to occur.
+   * @param {number} [timeout] The maximum time to wait, in milliseconds. 
+   *   By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the 
+   *   timeout expires before any publications are matched.
+   * @returns {Promise} Promise object resolving with the change in the 
+   *   current number of matched outputs. If this is a positive number, 
+   *   the input has matched with new publishers. If it is negative, the 
+   *   input has unmatched from an output. It is possible for multiple 
+   *   matches and/or unmatches to be returned (e.g., 0 could be returned, 
+   *   indicating that the input matched the same number of outputs as it 
+   *   unmatched).
    */
   waitForPublications (timeout) {
     return new Promise((resolve, reject) => {
@@ -1096,15 +1140,16 @@ class Input {
   /**
    * Returns information about matched publications.
    *
-   * This property returns a JSON array with each element of the array containing
-   * information about a matched publication.
+   * This property returns a JSON array, with each element of the 
+   * array containing information about a matched publication.
    *
-   * Currently the only information contained in this JSON object is the publication name of
-   * the matched publication. If the matched publication doesn't have a name, the
-   * name for that specific publication will be null.
+   * Currently the only information contained in this JSON object is 
+   * the publication name of the matched publication. If the matched 
+   * publication doesn't have a name, the name for that specific 
+   * publication will be null.
    *
-   * Note that Connector Outputs are automatically assigned a name from the *data_writer name*
-   * element in the XML configuration.
+   * Note that :class:`Connector` Outputs are automatically assigned 
+   * a name from the ``data_writer name`` element in the XML configuration.
    *
    * @type {JSON}
    */
@@ -1123,9 +1168,12 @@ class Input {
    * .. note::
    *   This operation is asynchronous.
    *
-   * @param {number} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
-   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected if the timeout expires
+   * @param {number} [timeout] The maximum time to wait, in milliseconds. 
+   *   By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the 
+   *   timeout expires before data is received.
+   * @returns {Promise} A ``Promise`` which will be resolved once data is 
+   *   available, or rejected if the timeout expires.
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1163,15 +1211,18 @@ class Instance {
   /**
    * A data sample.
    *
-   * :class:`Instance` is the type obtained through ``Output.instance`` and is the object that
-   * is published by :meth:`Output.write`.
+   * :class:`Instance` is the type obtained through ``Output.instance`` 
+   * and is the object that is published by :meth:`Output.write`.
    *
-   * An Instance has an associated DDS Type, specified in the XML configuration, and
-   * it allows setting the values for the fields of the DDS Type.
+   * An Instance has an associated DDS Type, specified in the XML 
+   * configuration, and it allows setting the values for the fields of 
+   * the DDS Type.
    *
    * Attributes:
-   *  * ``output`` (:class:`Output`) - The :class:`Output` that owns this Instance.
-   *  * ``native`` (pointer) - Native handle to this Instance that allows for additional *Connext DDS Pro* C APIs to be called.
+   *  * ``output`` (:class:`Output`) - The :class:`Output` that owns 
+   *    this Instance.
+   *  * ``native`` (pointer) - Native handle to this Instance that allows 
+   *    for additional *Connext DDS Pro* C APIs to be called.
    */
   constructor (output) {
     this.output = output
@@ -1180,9 +1231,10 @@ class Instance {
   /**
    * Resets a member to its default value.
    *
-   * The effect is the same as that of :meth:`Output.clearMembers`, except that only
-   * one member is cleared.
-   * @param {string} fieldName The name of the field. It can be a complex member or a primitive member.
+   * The effect is the same as that of :meth:`Output.clearMembers`, except 
+   * that only one member is cleared.
+   * @param {string} fieldName The name of the field. It can be a complex 
+   *   member or a primitive member.
    */
   clearMember (fieldName) {
     if (!_isString(fieldName)) {
@@ -1200,7 +1252,8 @@ class Instance {
    * Sets a numeric field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A numeric value, or null, to unset an optional member.
+   * @param {number} value - A numeric value, or null, to unset an 
+   *   optional member.
    */
   setNumber (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1224,7 +1277,8 @@ class Instance {
    * Sets a boolean field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {boolean} value - A boolean value, or null, to unset an optional member.
+   * @param {boolean} value - A boolean value, or null, to unset an 
+   *   optional member.
    */
   setBoolean (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1249,7 +1303,8 @@ class Instance {
    * Sets a string field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A string  value, or null, to unset an optional member.
+   * @param {number} value - A string  value, or null, to unset an 
+   *   optional member.
    */
   setString (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1271,20 +1326,23 @@ class Instance {
   }
 
   /**
-   * Set the member values speciifed in a JSON object.
+   * Sets the member values specified in a JSON object.
    *
-   * The keys in the JSON object are the member names of the DDS Type associated with the Output,
-   * and the values are the values to set for those members.
+   * The keys in the JSON object are the member names of the DDS Type 
+   * associated with the Output, and the values are the values to set 
+   * for those members.
    *
-   * This method sets the values of those members that are explicitly specified
-   * in the JSON object. Any member that is not specified in the JSON object will retain its previous
-   * value.
+   * This method sets the values of those members that are explicitly 
+   * specified in the JSON object. Any member that is not specified in 
+   * the JSON object will retain its previous value.
    *
-   * To clear members that are not in the JSON object, call :meth:`Output.clearMembers` before this method.
-   * You can also explicitly set any value in the JSON object to *null* to reset that field
-   * to its default value.
+   * To clear members that are not in the JSON object, call 
+   * :meth:`Output.clearMembers` before this method. You can also 
+   * explicitly set any value in the JSON object to *null* to reset that 
+   * field to its default value.
    *
-   * @param {JSON} jsonObj - The JSON object containing the keys (field names) and values (values for the fields)
+   * @param {JSON} jsonObj - The JSON object containing the keys 
+   *   (field names) and values (values for the fields).
    */
   setFromJson (jsonObj) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_json_instance(
@@ -1294,17 +1352,19 @@ class Instance {
   }
 
   /**
-   * Sets the value of fieldName
+   * Sets the value of fieldName.
    *
-   * The type of the argument ``value`` must correspond with the type of the field
-   * with name ``fieldName`` (as defined in the configuration XML file).
+   * The type of the argument ``value`` must correspond with the type of the 
+   * field with name ``fieldName`` (as defined in the configuration XML file).
    *
-   * This method is an alternative to :meth:`Instance.setNumber`, :meth:`Instance.setString`
-   * and :meth:`Instance.setBoolean`. The main difference is that it is type-independent (in
-   * that the same method can be used for all fields).
+   * This method is an alternative to 
+   * :meth:`Instance.setNumber`, :meth:`Instance.setString` and 
+   * :meth:`Instance.setBoolean`. The main difference is that it is 
+   * type-independent (in that the same method can be used for all fields).
    *
    * @param {string} fieldName The name of the field.
-   * @param {number|boolean|string|null} value The value to set. Note that ``null`` is used to unset an optional member.
+   * @param {number|boolean|string|null} value The value to set. Note that 
+   *   ``null`` is used to unset an optional member.
    */
   set (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1330,7 +1390,7 @@ class Instance {
   }
 
   /**
-   * Depreacted, use setFromJson.
+   * Deprecated, use setFromJson.
    *
    * This method is supplied for backwards compatibility.
    * @private
@@ -1365,11 +1425,16 @@ class Output {
    * To get an Output object, use :meth:`Connector.getOutput`.
    *
    * Attributes:
-   *  * ``instance`` (:class:`Instance`) - The data that is written when :meth:`Output.write` is called.
-   *  * ``connector`` (:class:`Connector`) - The Connector that created this object.
-   *  * ``name`` (str) - The name of this Output (the name used in :meth:`Connector.getOutput`).
-   *  * ``native`` (pointer) - The native handle that allows accessing additional *Connext DDS* APIs in C.
-   *  * ``matchedSubscriptions`` (JSON) - Information about matched subscriptions (see below).
+   *  * ``instance`` (:class:`Instance`) - The data that is written when 
+   *    :meth:`Output.write` is called.
+   *  * ``connector`` (:class:`Connector`) - The :class:`Connector` object 
+   *    that created this object.
+   *  * ``name`` (str) - The name of this Output (the name used in 
+   *    :meth:`Connector.getOutput`).
+   *  * ``native`` (pointer) - The native handle that allows accessing 
+   *    additional *Connext DDS* APIs in C.
+   *  * ``matchedSubscriptions`` (JSON) - Information about matched 
+   *    subscriptions (see below).
    *
    */
   constructor (connector, name) {
@@ -1388,24 +1453,34 @@ class Output {
   /**
    * Publishes the values of the current Instance.
    *
-   * Note that after writing it, Instance's values remain unchanges. If for the
-   * next write you need to start from scratch you must first call :meth:`Output.clearMembers`.
+   * Note that after writing it, the Instance's values remain unchanged. 
+   * If, for the next write, you need to start from scratch, you must 
+   * first call :meth:`Output.clearMembers`.
    *
-   * This method accepts an optional JSON object as a parameter, that may specify the
-   * parameters to use in the `write` call.
-   * The supported parameters are a subset of those documented in the `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
-   * of the *Connext DDS Core Libraries* User's Manual. These are:
+   * This method accepts an optional JSON object as a parameter, which may 
+   * specify the parameters to use in the `write` call.
+   * The supported parameters are a subset of those documented in the 
+   * `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
+   * of the *RTI Connext DDS Core Libraries User's Manual*. These are:
    *
-   * * ``action`` – One of ``'write'`` (default), ``'dispose'`` or ``'unregister'``
-   * * ``source_timestamp`` – An integer representing the total number of nanoseconds
-   * * ``identity`` – A JSON object containing the fields ``'writer_guid'`` and ``'sequence_number'``
-   * * ``related_sample_identity`` – Used for request-reply communications. It has the same format as identity
+   * * ``action`` – One of ``write`` (default), ``dispose`` or ``unregister``
+   * * ``source_timestamp`` – An integer representing the total number of 
+   *   nanoseconds
+   * * ``identity`` – A JSON object containing the fields ``writer_guid`` and 
+   *   ``sequence_number``
+   * * ``related_sample_identity`` – Used for request-reply communications. 
+   *   It has the same format as identity
    *
    * @example output.write({ action: 'write', identity: { writer_guid: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], sequence_number: 1 } })
    *
-   * @param {JSON} [params] [Optional] The Write Parameters to use in the `write` call. Filled in by Connector by default.
-   * @throws {TimeoutError} The write method can block under multiple circumstances (see 'Blocking During a write()' in the *Connext DDS Core Libraries* User's Manual.)
-   * If the blocking time exceeds the *max_blocking_time* this method throws :class:`TimeoutError`.
+   * @param {JSON} [params] [Optional] The Write Parameters to use in the 
+   *   ``write`` call. Filled in by *Connector* by default.
+   * @throws {TimeoutError} The write method can block under multiple 
+   *   circumstances (see 'Blocking During a write()' in the `Writing Data section 
+   *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm>`__
+   *   of the *RTI Connext DDS Core Libraries User's Manual*.)
+   *   If the blocking time exceeds the ``max_blocking_time``, this method 
+   *   throws :class:`TimeoutError`.
    */
   write (params) {
     var cStr
@@ -1421,12 +1496,13 @@ class Output {
   }
 
   /**
-   * Resets the values of the memers of this :class:`Instance`.
+   * Resets the values of the members of this :class:`Instance`.
    *
-   * If the members is defined with *default* attribute in the configuration file, it gets
-   * that value. Otherwise, numbers are set to 0 and strings are set to empty. Sequences
-   * are cleared and optional members are set to 'null'.
-   * For example, if this Output's type is *ShapeType*, then clearMembers sets::
+   * If the member is defined with a *default* attribute in the configuration 
+   * file, it gets that value. Otherwise, numbers are set to 0 and strings are 
+   * set to empty. Sequences are cleared and optional members are set to 'null'.
+   * For example, if this Output's type is *ShapeType*, then ``clearMembers()`` 
+   * sets::
    *  color = 'RED'
    *  shapesize = 30
    *  x = 0
@@ -1439,17 +1515,22 @@ class Output {
   }
 
   /**
-   * Waits until all matching reliable subscriptions have acknowledged all the samples
-   * that have currently been written.
+   * Waits until all matching reliable subscriptions have acknowledged all the 
+   * samples that have currently been written.
    *
    * This method only waits if this Output is configured with a reliable QoS.
    *
    * .. note::
    *   This operation is asynchronous
    *
-   * @param {timeout} [timeout] The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before all matching reliable subscriptions acknowledge all the samples.
-   * @returns {Promise} Promise object which will be rejected if not all matching reliable subscriptions acknowledge all of the samples within the specified timeout.
+   * @param {timeout} [timeout] The maximum time to wait, in milliseconds. 
+   *   By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout
+   *   expires before all matching reliable subscriptions acknowledge all the 
+   *   samples.
+   * @returns {Promise} Promise object which will be rejected if not all matching 
+   *   reliable subscriptions acknowledge all of the samples within the specified 
+   *   timeout.
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1473,17 +1554,24 @@ class Output {
   }
 
   /**
-   * Wait for this Output to match or unmatch a compatible DDS Publication.
+   * Waits for this Output to match or unmatch a compatible DDS Publication.
    *
-   * This methods wait for the specified timeout (or if no timeout is specified, it waits forever),
-   * for a match (or unmatch) to occur.
+   * This method waits for the specified timeout (or if no timeout is 
+   * specified, it waits forever), for a match (or unmatch) to occur.
    *
    * .. note::
    *   This operation is asynchronous
    *
-   * @param {number} [timeout] - The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before a subscription is matched
-   * @returns {Promise} Promise object resolving with the change in the current number of matched inputs. If this is a positive number, the output has matched with new subscribers. If it is negative, the output has unmatched from a subscription. It is possible for multiple matches and/or unmatches to be returned (e.g., 0 could be returned, indicating that the output matched the same number of inputs as it unmatched).
+   * @param {number} [timeout] - The maximum time to wait, in milliseconds. 
+   *   By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the 
+   *   timeout expires before a subscription is matched.
+   * @returns {Promise} Promise object resolving with the change in the 
+   *   current number of matched inputs. If this is a positive number, the 
+   *   output has matched with new subscribers. If it is negative, the output 
+   *   has unmatched from a subscription. It is possible for multiple matches 
+   *   and/or unmatches to be returned (e.g., 0 could be returned, indicating 
+   *   that the output matched the same number of inputs as it unmatched).
    */
   waitForSubscriptions (timeout) {
     return new Promise((resolve, reject) => {
@@ -1521,15 +1609,15 @@ class Output {
   /**
    * Provides information about matched subscriptions.
    *
-   * This property returns a JSON array with each element of the array containing
-   * information about a matched subscription.
+   * This property returns a JSON array, with each element of the array 
+   * containing information about a matched subscription.
    *
-   * Currently the only information contained in this JSON object is the subscription name of
-   * the matched subscription. If the matched subscription doesn't have a name, the
-   * name for that specific subscription will be null.
+   * Currently the only information contained in this JSON object is the 
+   * subscription name of the matched subscription. If the matched subscription
+   * doesn't have a name, the name for that specific subscription will be null.
    *
-   * Note that Connector Inputs are automatically assigned a name from the *data_reader name*
-   * element in the XML configuration.
+   * Note that :class:`Connector` Inputs are automatically assigned a name from 
+   * the ``data_reader name`` element in the XML configuration.
    *
    * @type {JSON}
    */
@@ -1552,9 +1640,10 @@ class Output {
  * Loads a configuration and creates its Inputs and Outputs.
  *
  * .. note::
- *   The Connector class inherits from `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__.
- *   This allows us to support event-based notification for data, using the following
- *   syntax:
+ *   The :class:`Connector` class inherits from 
+ *   `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__.
+ *   This allows us to support event-based notification for data, using the 
+ *   following syntax:
  *
  *   .. code-block:: javascript
  *
@@ -1562,20 +1651,28 @@ class Output {
  *
  *   Please refer to :ref:`Reading data (Input)` for more information.
  *
- * A **Connector** instance loads a configuration file from an XML document.
- * For example::
+ * A :class:`Connector` instance loads a configuration file from an XML 
+ * document. For example::
  *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
  *
- * After creating it, the Connector's Inputs can be used to read data, and the Outputs to write data.
- * The methods :meth:`Connector.getOutput` and :meth:`Connector.getInput` return an :class:`Input` and
- * :class:`Output` respectively.
+ * After creating it, the :class:`Connector` object's Inputs can be used to 
+ * read data, and the Outputs to write data. The methods 
+ * :meth:`Connector.getOutput` and :meth:`Connector.getInput` return an 
+ * :class:`Input` and :class:`Output`, respectively.
  *
- * An application can create multiple **Connector** instances for the same or different configurations.
+ * An application can create multiple :class:`Connector` instances for the 
+ * same or different configurations.
  */
 class Connector extends EventEmitter {
   /**
-   * @arg {string} configName The configuration to load. The configName format is `LibraryName::ParticipantName`, where LibraryName is the name attribute of a <domain_participant_library> tag, and ParticipantName is the name attribute of a <domain_participant> tag within that library.
-   * @arg {string} url A URL locating the XML document. The url can be a file path (e.g., `/tmp/my_dds_config.xml`) or a string containing the full XML document with the following format: `str://"<dds>...</dds>"`.
+   * @arg {string} configName The configuration to load. The configName format 
+   *   is `LibraryName::ParticipantName`, where LibraryName is the name 
+   *   attribute of a ``<domain_participant_library>`` tag, and 
+   *   ParticipantName is the name attribute of a ``<domain_participant>`` tag 
+   *   within that library.
+   * @arg {string} url A URL locating the XML document. It can be a file path 
+   *   (e.g., ``/tmp/my_dds_config.xml``) or a string containing the full XML 
+   *   document with the following format: ``str://"<dds>...</dds>"``.
    */
   constructor (configName, url) {
     super()
@@ -1596,14 +1693,19 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * This method is used internally by the public APIs :meth:`Connector.close`
-   * and :meth:`Connector.waitForCallbackFinalization`. It should not be used
+   * This method is used internally by the public APIs 
+   * :meth:`Connector.close` and 
+   * :meth:`Connector.waitForCallbackFinalization`. It should not be used
    * directly by applications.
    *
-   * @param {function} resolve The resolve() callback to call once waitSetBusy is false.
-   * @param {function} reject The reject() callback to call if we timeout, or if another error occurs.
-   * @param {number} iterations Maximum number of iterations to perform before timing out
-   * @param {boolean} cleanup Whether or not the Connector object should be deleted once the waitset is no longer busy
+   * @param {function} resolve The resolve() callback to call once waitSetBusy 
+   *   is false.
+   * @param {function} reject The reject() callback to call if we timeout, 
+   *   or if another error occurs.
+   * @param {number} iterations Maximum number of iterations to perform 
+   *   before timing out.
+   * @param {boolean} cleanup Whether or not the :class:`Connector` object 
+   *   should be deleted once the waitset is no longer busy.
    * @private
    */
   closeImpl (resolve, reject, iterations, cleanup) {
@@ -1632,21 +1734,28 @@ class Connector extends EventEmitter {
    * by the :class:`Connector` are no longer in use.
    *
    * .. note::
-   *   This returned promise will be rejected fail if there are any listeners registered for the
-   *   ``'on_data_available'`` event. Ensure that they have all been removed before
-   *   calling this method using ``connector.removeAllListeners('on_data_available')``.
+   *   This returned promise will be rejected if there are any listeners 
+   *   registered for the ``on_data_available`` event. Ensure that they have 
+   *   all been removed before calling this method using 
+   *   ``connector.removeAllListeners(on_data_available)``.
    *
-   * It is currently only necessary to call this method if you remove all of the
-   * listeners for the ``'on_data_available'`` event and at some point in the future
-   * wish to use the same Connector object to get notifications of new data
-   * (be that, via the :meth:`Connector.wait` method, or by re-adding a listener
-   * for the ``'on_data_available'`` event).
+   * It is currently only necessary to call this method if you remove all of 
+   * the listeners for the ``on_data_available`` event and at some point in the
+   * future wish to use the same :class:`Connector` object to get notifications 
+   * of new data (via the :meth:`Connector.wait` method, or by re-adding a 
+   * listener for the ``on_data_available`` event).
    *
-   * This operation does **not** free any resources. It is still necessary to call
-   * :meth:`Connector.close` when the :class:`Connector` is no longer required.
+   * This operation does **not** free any resources. It is still necessary to 
+   * call :meth:`Connector.close` when the :class:`Connector` is no longer 
+   * required.
    *
-   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
-   * @returns {Promise} A Promise that will be resolved once the resources being used by internally by the Connector object are no longer in use.
+   * @argument {number} [timeout] Optional parameter to indicate the timeout 
+   *   of the operation, in seconds. By default, 10s. If this operation does 
+   *   not complete within the specified timeout, the returned Promise will 
+   *   be rejected.
+   * @returns {Promise} A Promise that will be resolved once the resources 
+   *   being used internally by the :class:`Connector` object are no longer 
+   *   in use.
    */
   waitForCallbackFinalization (timeout) {
     if (timeout === undefined) {
@@ -1659,10 +1768,15 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Frees all the resources created by this Connector instance.
+   * Frees all the resources created by this :class:`Connector` instance.
    *
-   * @argument {number} [timeout] Optional parameter to indicate the timeout of the operation in seconds. By default, 10s. If this operation does not complete within the specified timeout, the returned Promise will be rejected.
-   * @returns {Promise} Which resolves once the Connector object has been freed. It is only necessary to wait for this promise to resolve if you have attached a listener for the ``'on_data_available'``  event.
+   * @argument {number} [timeout] Optional parameter to indicate the timeout 
+   *   of the operation, in seconds. By default, 10s. If this operation does 
+   *   not complete within the specified timeout, the returned Promise will 
+   *   be rejected.
+   * @returns {Promise} Which resolves once the :class:`Connector` object has 
+   *   been freed. It is only necessary to wait for this promise to resolve 
+   *   if you have attached a listener for the ``on_data_available`` event.
    */
   close (timeout) {
     if (timeout === undefined) {
@@ -1688,7 +1802,8 @@ class Connector extends EventEmitter {
   /**
    * Returns the :class:`Input` named inputName.
    *
-   * ``inputName`` identifies a `<data_reader>` tag in the configuration loaded by the :class:`Connector`. For Example::
+   * ``inputName`` identifies a ``<data_reader>`` tag in the configuration 
+   * loaded by the :class:`Connector`. For example::
    *
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getInput('MySubscriber::MyReader')
@@ -1708,7 +1823,8 @@ class Connector extends EventEmitter {
    *       ...
    *     <domain_participant_library>
    *
-   * @param {string} inputName The name of the `data_reader` to load. With the format `SubscriberName::DataReaderName`
+   * @param {string} inputName The name of the ``data_reader`` to load, with the 
+   *   format `SubscriberName::DataReaderName`.
    * @returns {Input} The Input, if it exists.
    */
   getInput (inputName) {
@@ -1718,7 +1834,8 @@ class Connector extends EventEmitter {
   /**
    * Returns the :class:`Output` named outputName.
    *
-   * ``outputName`` identifies a <data_writer> tag in the configuration loaded by the :class:`Connector`. For Example::
+   * ``outputName`` identifies a ``<data_writer>`` tag in the configuration 
+   * loaded by the :class:`Connector`. For example::
    *
    *   const connector = new rti.Connector('MyParticipantLibrary::MyParticipant', 'MyExample.xml')
    *   connector.getOutput('MyPublisher::MyWriter')
@@ -1738,7 +1855,8 @@ class Connector extends EventEmitter {
    *       ...
    *     <domain_participant_library>
    *
-   * @param {string} outputName The name of the data_writer to load. With the format `PublisherName::DataWriterName`
+   * @param {string} outputName The name of the ``data_writer`` to load, with 
+   *   the format ``PublisherName::DataWriterName``.
    * @returns {Output} The Output, if it exists.
    */
   getOutput (outputName) {
@@ -1751,9 +1869,12 @@ class Connector extends EventEmitter {
    * .. note::
    *   This operation is asynchronous.
    *
-   * @param {number} timeout The maximum time to wait in milliseconds. By default, infinite.
-   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the timeout expires before data is received
-   * @returns {Promise} A ``Promise`` which will be resolved once data is available, or rejected once the timeout expires
+   * @param {number} timeout The maximum time to wait, in milliseconds. 
+   *   By default, infinite.
+   * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the 
+   *   timeout expires before data is received.
+   * @returns {Promise} A ``Promise`` which will be resolved once data 
+   *   is available, or rejected once the timeout expires.
    */
   wait (timeout) {
     return new Promise((resolve, reject) => {
@@ -1787,17 +1908,18 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Emits the 'on_data_available' event when any Inputs within this Connector object
-   * receive data.
+   * Emits the ``on_data_available`` event when any Inputs within this 
+   * :class:`Connector` object receive data.
    *
    * .. note::
    *   This operation is asynchronous
    *
-   * This API is used internally to emit the 'on_data_available' event when data is
-   * received on any of the Inputs contained within this Connector object.
+   * This API is used internally to emit the ``on_data_available`` event when 
+   * data is received on any of the Inputs contained within this 
+   * :class:`Connector` object.
    *
-   * The Connector class extends EventEmitter, meaning that callbacks can be
-   * registered for specific events using the following syntax:
+   * The :class:`Connector` class extends EventEmitter, meaning that callbacks 
+   * can be registered for specific events using the following syntax:
    *
    * .. code-block:: javascript
    *
@@ -1808,15 +1930,15 @@ class Connector extends EventEmitter {
    *    // ...
    *    connector.off('on_data_available', myCallback)
    *
-   * Once the ``'on_data_available'`` event has fired, either :meth:`Input.read` or
-   * :meth:`Input.take` should be called on the :class:`Input` which has new data.
-   * This will prevent the ``'on_data_available'`` being fired more than once
-   * for the same data.
+   * Once the ``on_data_available`` event has fired, either :meth:`Input.read` 
+   * or :meth:`Input.take` should be called on the :class:`Input` that has 
+   * new data. This will prevent ``on_data_available`` from being fired more 
+   * than once for the same data.
    *
    * @private
    */
   onDataAvailable () {
-    // Asynic FFI calls are not cancellable, so we wake up every second to check that
+    // Async FFI calls are not cancellable, so we wake up every second to check that
     // this event is still requested
     this.wait(500)
       .then(() => {
@@ -1848,7 +1970,7 @@ class Connector extends EventEmitter {
   // This callback was added for the 'newListener' event, meaning it is triggered
   // just before we add a new callback.
   // Since the onDataAvailable() function above is using an asynchronous function
-  // and the Connector binding is not thread-safe we have to ensure it is not
+  // and the :class:`Connector` binding is not thread-safe, we have to ensure it is not
   // called concurrently
   /**
    * @private
@@ -1875,19 +1997,23 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Allows increasing the number of Connector instances that can be created.
+   * Allows you to increase the number of :class:`Connector` instances that 
+   * can be created.
    *
-   * The default value is 1024 (which allows for approximately 8 instances of Connector
-   * to be created in a single application). If you need to create more than 8
-   * instances of Connector you can increase the value from the default.
+   * The default value is 1024 (which allows for approximately 8 instances 
+   * of :class:`Connector` to be created in a single application). If you need 
+   * to create more than 8 instances of :class:`Connector`, you can increase 
+   * the value from the default.
    *
    * .. note::
-   *   This is a static method. It can only be called before creating any Connector instance.
+   *   This is a static method. It can only be called before creating a 
+   *   :class:`Connector` instance.
    *
-   * See `SYSTEM_RESOURCE_LIMITS QoS Policy <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
-   * in the *RTI Connext DDS* User's Manual for more information.
+   * See `SYSTEM_RESOURCE_LIMITS QoS Policy 
+   * <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
+   * in the *RTI Connext DDS Core Libraries User's Manual* for more information.
    *
-   * @param {number} value The value for *max_objects_per_thread*
+   * @param {number} value The value for ``max_objects_per_thread``
    */
   static setMaxObjectsPerThread (value) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))

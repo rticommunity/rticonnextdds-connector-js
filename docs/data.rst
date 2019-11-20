@@ -3,15 +3,17 @@ Accessing the data
 
 .. highlight:: javascript
 
-The types you use to write or read data may included nested structs, sequences and
-arrays of primitive types or structs, etc.
+The types you use to write or read data may include nested structs, sequences 
+and arrays of primitive types or structs, etc.
 
 These types are defined in XML following the format of
-`RTI's XML-Based Application Creation <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm#XMLBasedAppCreation/UnderstandingPrototyper/XMLTagsConfigEntities.htm%3FTocPath%3D5.%2520Understanding%2520XML-Based%2520Application%2520Creation%7C5.5%2520XML%2520Tags%2520for%2520Configuring%2520Entities%7C_____0>`__.
+`RTI's XML-Based Application Creation feature
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm#XMLBasedAppCreation/UnderstandingPrototyper/XMLTagsConfigEntities.htm%3FTocPath%3D5.%2520Understanding%2520XML-Based%2520Application%2520Creation%7C5.5%2520XML%2520Tags%2520for%2520Configuring%2520Entities%7C_____0>`__.
 
 To access the data, :class:`Instance` and :class:`SampleIterator` provide
-setters and getters that expect a ``fieldName`` string, used to identify specific
-fields within the type. This section describes the format of this string.
+setters and getters that expect a ``fieldName`` string, used to identify 
+specific fields within the type. This section describes the format of this 
+string.
 
 We will use the following XML type definition of MyType:
 
@@ -89,7 +91,8 @@ Which corresponds to the following IDL definition:
     };
 
 .. hint::
-    You can get the XML definition of an IDL file with ``rtiddsgen -convertToXml MyType.idl``.
+    You can get the XML definition of an IDL file with 
+    ``rtiddsgen -convertToXml MyType.idl``.
 
 We will refer to an ``Output`` named ``output`` and
 ``Input`` named ``input`` such that ``input.samples.length > 0``.
@@ -97,18 +100,20 @@ We will refer to an ``Output`` named ``output`` and
 Using JSON objects vs accessing individual members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On an Input or an Output you can access the data all at once by using a JSON object,
-or member by member. Using a JSON object is usually more efficient if you intend
-to access most or all of the data members of a large type.
+On an Input or an Output, you can access the data all at once by using a 
+JSON object, or member-by-member. Using a JSON object is usually more 
+efficient if you intend to access most or all of the data members of 
+a large type.
 
 On an Output, :meth:`Instance.setFromJson` receives a JSON object with all, or
-some, of the Output type members, and in an Input, :meth:`SampleIterator.getJson`
-retrieves all of the members.
+some, of the Output type members, and in an Input, 
+:meth:`SampleIterator.getJson` retrieves all of the members.
 
-It is also possible to provide a ``memberName`` to :meth:`SampleIterator.getJson` to obtain
-a JSON object containing the fields of that nested member only.
+It is also possible to provide a ``memberName`` to 
+:meth:`SampleIterator.getJson` to obtain a JSON object containing the fields 
+of that nested member only.
 
-On the other hand the methods described in the following section receive a
+On the other hand, the methods described in the following section receive a
 ``fieldName`` argument to get or set a specific member.
 
 Accessing basic members (numbers, strings and booleans)
@@ -126,10 +131,11 @@ To set any numeric type, including enumerations:
 
 .. warning::
     The range of values for a numeric field is determined by the type
-    used to define that field in the configuration file. However, ``setNumber`` and
-    ``getNumber`` can't handle 64-bit integers (*int64* and *uint64*)
-    whose absolute values are larger than 2^53. This is a *Connector* limitation
-    due to the use of *double* as an intermediate representation.
+    used to define that field in the configuration file. However, 
+    ``setNumber`` and ``getNumber`` can't handle 64-bit integers 
+    (*int64* and *uint64*) whose absolute values are larger than 2^53. 
+    This is a *Connector* limitation due to the use of *double* as an 
+    intermediate representation.
 
     When ``setNumber`` or ``getNumber`` detect this situation, they will raise
     an :class:`DDSError`. ``getJson`` and ``setJson`` do not have this
@@ -162,7 +168,8 @@ of the field, as defined in the configuration file.
 
 Similarly, to get a field in a :class:`Input` sample, use the appropriate
 getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
-:meth:`SampleIterator.getString()`, or the type-independent :meth:`SampleIterator.get()`.
+:meth:`SampleIterator.getString()`, or the type-independent 
+:meth:`SampleIterator.get()`.
 ``getString`` also works with numeric fields, returning the number as a string:
 
 .. code-block::
@@ -191,7 +198,7 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
     (see previous section).
 
 .. note::
-    If a field *my_string*, defined as a string in the configuration file contains
+    If a field ``my_string``, defined as a string in the configuration file, contains
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
 
@@ -235,8 +242,8 @@ the following code after the previous call to ``setFromJson``:
 
     output.instance.setFromJson({ 'my_point': { 'y': 200 } })
 
-The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``. If you do not want the values
-to be retained you must clear the value first (as described above).
+The value of ``my_point`` is now ``{ 'x': 10, 'y':200 }``. If you do not want 
+the values to be retained you must clear the value first (as described above).
 
 It is possible to obtain the JSON object of a nested struct:
 
@@ -259,8 +266,8 @@ struct, value or union. If not, the call to ``getJson`` will fail:
        }
    }
 
-It is also possible to obtain the JSON of a struct using the :meth:`SampleIterator.get`
-method:
+It is also possible to obtain the JSON of a struct using the 
+:meth:`SampleIterator.get` method:
 
 .. code-block::
 
@@ -269,13 +276,14 @@ method:
         // point is a JSON object
    }
 
-The same limitations described in :ref:`Accessing basic members (numbers, strings and booleans)`
+The same limitations described in 
+:ref:`Accessing basic members (numbers, strings and booleans)`
 of using :meth:`SampleIterator.get` apply here.
 
 Accessing arrays and sequences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use ``'fieldName[index]'`` to access an element of a sequence or array,
+Use ``fieldName[index]`` to access an element of a sequence or array,
 where ``0 <= index < length``:
 
 .. code-block::
@@ -283,15 +291,16 @@ where ``0 <= index < length``:
     let value = input.samples.get(0).getNumber('my_int_sequence[1]')
     value = input.samples.get(0).getNumber('my_point_sequence[2].y')
 
-To obtain the length of a sequence in an :class:`Input` sample, append ``#`` to
-the ``fieldName``:
+To obtain the length of a sequence in an :class:`Input` sample, 
+append ``#`` to the ``fieldName``:
 
 .. code-block::
 
     let length = input.samples[0].getNumber('my_int_sequence#')
 
 Another option is to use ``SampleIterator.getJson('fieldName')`` to obtain
-a JSON object containing all of the elements of the array or sequence with name ``fieldName``:
+a JSON object containing all of the elements of the array or sequence with 
+name ``fieldName``:
 
 .. code-block::
 
@@ -299,7 +308,8 @@ a JSON object containing all of the elements of the array or sequence with name 
         let thePointSequence = sample.getJson('my_point_sequence')
     }
 
-You can also get a specific element as a dictionary (if the element type is complex):
+You can also get a specific element as a dictionary (if the element type 
+is complex):
 
 .. code-block::
 
@@ -329,9 +339,9 @@ In JSON objects, sequences and arrays are represented as lists. For example:
         my_point_sequence: [{ x: 1, y: 1 }, { x: 2, y: 2 }]
     })
 
-Arrays have a constant length that can't be changed. When you don't set all the elements
-of an array, the remaining elements retain their previous value. However, sequences
-are always overwritten. See the following example:
+Arrays have a constant length that can't be changed. When you don't set all 
+the elements of an array, the remaining elements retain their previous values. 
+However, sequences are always overwritten. See the following example:
 
 .. code-block::
 
@@ -351,9 +361,9 @@ Accessing optional members
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A optional member is a member that applications can decide to send or not as
-part of every published sample. Therefore, optional members may have a value or not.
-They are accessed the same way as non-optional members, except that ``null`` is
-a possible value.
+part of every published sample. Therefore, optional members may have a value 
+or not. They are accessed the same way as non-optional members, except that 
+``null`` is a possible value.
 
 On an Input, any of the getters may return ``null`` if the field is optional:
 
@@ -394,7 +404,8 @@ There are several ways to reset an optional member. If the type is primitive:
     output.instance.clearMember('my_optional_long') // Option 2
     output.instance.set('my_optional_long', null) // Option 3
 
-If the member type is complex, all the above options apart from option 1 are available:
+If the member type is complex, all the above options except option 1 are 
+available:
 
 .. code-block::
 
@@ -402,7 +413,7 @@ If the member type is complex, all the above options apart from option 1 are ava
     output.instance.set('my_optional_point', null)
 
 Note that :meth:`Instance.setFromJson()` doesn't clear those members that are
-not specified; their value remains. For example:
+not specified; their values remain. For example:
 
 .. code-block::
 
@@ -415,14 +426,16 @@ To clear a member, set it to ``null`` explicitly::
     output.instance.setFromJson({ my_double: 3.3, my_long: 4, my_optional_long: null })
 
 
-For more information about optional members in DDS, see the *Getting Started Guide
-Addendum for Extensible Types*,
-`section 3.2 Optional Members <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/getting_started_extras/html_files/RTI_ConnextDDS_CoreLibraries_GettingStarted_ExtensibleAddendum/index.htm#ExtensibleTypesAddendum/Optional_Members.htm#3.2_Optional_Members%3FTocPath%3D3.%2520Type%2520System%2520Enhancements%7C3.2%2520Optional%2520Members%7C_____0>`__. 
+For more information about optional members in DDS, see the 
+*Getting Started Guide Addendum for Extensible Types*,
+`Section 3.2 Optional Members 
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/getting_started_extras/html_files/RTI_ConnextDDS_CoreLibraries_GettingStarted_ExtensibleAddendum/index.htm#ExtensibleTypesAddendum/Optional_Members.htm#3.2_Optional_Members%3FTocPath%3D3.%2520Type%2520System%2520Enhancements%7C3.2%2520Optional%2520Members%7C_____0>`__. 
 
 Accessing unions
 ^^^^^^^^^^^^^^^^
 
-In an Output the union member is automatically selected when you set it:
+In an :class:`Output`, the union member is automatically selected when you 
+set it:
 
 .. code-block::
 

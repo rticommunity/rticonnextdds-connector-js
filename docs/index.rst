@@ -7,7 +7,7 @@
 Welcome to RTI Connector for JavaScript!
 ========================================
 
-RTI® Connext® DDS is a connectivity software framework for integrating data
+*RTI® Connext® DDS* is a connectivity software framework for integrating data
 sources of all types. At its core is the world's leading ultra-high performance,
 distributed networking databus.
 
@@ -33,6 +33,8 @@ Table of Contents
    output
    input
    advanced
+   release_notes
+   copyright_license
 
 * :ref:`genindex`
 * :ref:`search`
