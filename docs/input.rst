@@ -13,8 +13,8 @@ To read/take samples, first get a reference to the :class:`Input`:
    input = connector.getInput('MySubscriber::MySquareReader')
 
 :meth:`Connector.getInput()` returns an :class:`Input` object. This example,
-obtains the *input* defined by the *data_reader* named *MySquareReader* within
-the *subscriber* named *MySubscriber*:
+obtains the Input defined by the ``data_reader`` named *MySquareReader* within
+the ``<subscriber>`` named *MySubscriber*:
 
 .. code-block:: xml
 
@@ -22,23 +22,33 @@ the *subscriber* named *MySubscriber*:
      <data_reader name="MySquareReader" topic_ref="Square" />
    </subscriber>
 
-This *subscriber* is defined inside the *domain_participant* selected to create
-this :class:`Connector` (see :ref:`Creating a new Connector`).
+This ``<subscriber>`` is defined inside the ``<domain_participant>`` selected to 
+create this ``connector`` (see :ref:`Creating a new Connector`).
 
 Reading or taking the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Call :meth:`Input.take()` to access and remove the samples::
+
+   input.take()
+
+or :meth:`Input.read()` to access the samples but leave them available for
+a future ``read()`` or ``take()``::
+
+   input.read()
+
 The method :meth:`Input.wait()` can be used to identify when there is new data
 available on a specific :class:`Input`. It returns a ``Promise`` that will be
-resolved when new data is available, or rejected if the supplied timeout expires:
+resolved when new data is available, or rejected if the supplied timeout 
+expires.
 
-.. code-block::
+You can wait for the ``Promise`` using ``await`` in an async function::
 
-  // Within an async function
   await input.wait()
   input.take()
 
-  // Alternatively, using traditional Promise syntax (outside of an async function)
+Or using the ``then`` method::
+
   input.wait()
     .then(() => {
       input.take()
@@ -46,31 +56,29 @@ resolved when new data is available, or rejected if the supplied timeout expires
 
 The method :meth:`Connector.wait()` has the same behavior as :meth:`Input.wait()`,
 but the returned promise will be resolved when data is available on *any* of the
-:class:`Input` objects within the :class:`Connector`.
+:class:`Input` objects within the :class:`Connector`::
 
-.. code-block::
-
-  // Within an async function
   await connector.wait()
 
-The :class:`Connector` inherits from the `EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__
-class, which is defined and exposed in the `events module <https://nodejs.org/api/events.html>`__.
-If a listener for the ``'on_data_available'`` event is attached to a :class:`Connector`, this event will be emitted
-whenever new data is available on any of the :class:`Input`s defined within the :class:`Connector`.
-If using the ``'on_data_available'`` event, it is recommended that you read the
-:ref:`Additional considerations when using event-based functionality` section of the
-documentation.
+You can also install a listener in a :class:`Connector`. :class:`Connector`
+inherits from 
+`EventEmitter <https://nodejs.org/api/events.html#events_class_eventemitter>`__.
+If a listener for the ``on_data_available`` event is attached to a 
+:class:`Connector`, this event will be emitted whenever new data is available 
+on any :class:`Input defined within the :class:`Connector`.
 
 .. code-block::
 
-  // All of the Inputs are stored in the inputs array
+  // Store all the inputs in an array
   const inputs = [
     connector.getInput('MySubscriber::MySquareReader'),
     connector.getInput('MySubscriber::MyCircleReader'),
     connector.getInput('MySubscriber::MyTriangleReader')
   ]
+
+  // Install the listener
   connector.on('on_data_available', () => {
-    // One of the contained inputs has available data
+    // One or more inputs have data
     inputs.forEach(input => {
       input.take()
       for (const sample of input.samples.validDataIter) {
@@ -79,39 +87,29 @@ documentation.
     }
   })
 
-For more information on how to use the event-based notification, please refer to the
+For more information on how to use the event-based notification, refer to the
 `documentation of the events module <https://nodejs.org/api/events.html>`__.
 
-An example of this functionality is shown in `reader_websocket.js <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/web_socket/reader_websocket.js>`__
-within the `web_socket example <https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs/web_socket>`__.
+The `web_socket example 
+<https://github.com/rticommunity/rticonnextdds-connector-js/tree/master/examples/nodejs/web_socket>`__
+shows how to use this event.
 
 .. warning::
   There are additional threading concerns to take into account when using the
-  ``'on_data_available'`` event. Refer to :ref:`Additional considerations when using event-based functionality`
+  ``on_data_available`` event. Refer to 
+  :ref:`Additional considerations when using event-based functionality`
   for more information.
 
 .. note::
-  When using the event-based methods to be notified of available data, errors are
-  propagated using the ``'error'`` event. See :ref:`Error Handling` for more information.
-
-Call :meth:`Input.take()` to access and remove the samples.
-
-.. code-block::
-
-   input.take()
-
-Or, use :meth:`Input.read()` to access the samples but leave them available for
-a future :meth:`Input.read()` or :meth:`Input.take()`.
-
-.. code-block::
-
-   input.read()
+  When using the event-based methods to be notified of available data, errors 
+  are propagated using the ``error`` event. 
+  See :ref:`Error Handling` for more information.
 
 Accessing the data samples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-After calling :meth:`Input.read()` or :meth:`Input.take()`, :attr:`Input.samples` contains the data
-samples:
+After calling :meth:`Input.read()` or :meth:`Input.take()`, 
+:attr:`Input.samples` contains the data samples:
 
 .. code-block::
 
@@ -124,8 +122,8 @@ samples:
 :meth:`SampleIterator.getJson()` retrieves all the fields of a sample.
 
 If you don't need to access the meta-data (see :ref:`Accessing the SampleInfo`),
-the simplest way to access the data is to use :attr:`Samples.validDataIter`, to skip
-samples with invalid data:
+the simplest way to access the data is to use :attr:`Samples.validDataIter` 
+to skip samples with invalid data:
 
 .. code-block::
 
@@ -134,7 +132,7 @@ samples with invalid data:
       console.log(JSON.stringify(sample.getJson()))
    }
 
-It is possible to access an individual sample too:
+It is also possible to access an individual sample:
 
 .. code-block::
 
@@ -145,8 +143,8 @@ It is possible to access an individual sample too:
    }
 
 
-Both of the iterables shown above also provide iterator implementations, allowing them to
-be incremented outside of a ``for`` loop:
+Both of the iterables shown above also provide iterator implementations, 
+allowing them to be incremented outside of a ``for`` loop:
 
 .. code-block::
 
@@ -162,8 +160,8 @@ be incremented outside of a ``for`` loop:
    Calling read/take again invalidates all generators currently in
    use.
 
-:meth:`Samples.getJson` can receive a ``fieldName`` to only return the fields of a
-complex member. In addition to ``getJson``, you can get the values of
+:meth:`Samples.getJson` can receive a ``fieldName`` to only return the fields 
+of a complex member. In addition to ``getJson``, you can get the values of
 specific primitive fields using :meth:`SampleIterator.getNumber()`,
 :meth:`SampleIterator.getBoolean()` and :meth:`SampleIterator.getString()`,
 for example:
@@ -177,14 +175,15 @@ for example:
       const color = sample.getString('color')
    }
 
-For more ways to access the data, see :ref:`Accessing the data`.
+See more information and examples in :ref:`Accessing the data`.
 
 Accessing the SampleInfo
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Connext DDS* can produce samples with invalid data, which contain meta-data only.
-For more information about this, see `Valid Data Flag <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#receiving_2076951295_727613>`__
-in the *Connect DDS Core Libraries* User's Manual.
+For more information about this, see `Valid Data Flag 
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#receiving_2076951295_727613>`__
+in the *RTI Connext DDS Core Libraries User's Manual*.
 
 You can access a field of the sample meta-data, the *SampleInfo*, as follows:
 
@@ -194,21 +193,22 @@ You can access a field of the sample meta-data, the *SampleInfo*, as follows:
       const sourceTimestamp = sample.info.get('source_timestamp')
    }
 
-See :attr:`SampleIterator.info` for the list of meta-data fields available
+See :attr:`SampleIterator.info` for the list of available meta-data fields.
 
 Matching with a Publication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The method :meth:`Input.waitForPublications()` can be used to detect when a compatible
-DDS publication is matched or unmatched. It returns a promise which resolves to
-the change in the number of matched publications since the last time it was called::
+The method :meth:`Input.waitForPublications()` can be used to detect when a 
+compatible DDS publication is matched or unmatched. It returns a promise that 
+resolves to the change in the number of matched publications since the last 
+time it was called::
 
-   // From within an async function. Otherwise, use traditional .then() syntax
+   // From within an async function. Otherwise, use the .then() syntax
    let changeInMatches = await input.waitForPublications()
 
 For example, if 1 new compatible publication is discovered within the specified
-``timeout``, the promise will resolve to 1. If an existing, matched publication
-unmatched within the specified ``timeout``, the promise will resolve to -1.
+``timeout``, the promise will resolve to 1; if a previously matching 
+publication no longer matches, it resolves to -1.
 
 You can obtain information about the existing matched publications through the
 :attr:`Input.matchedPublications` property:
@@ -218,9 +218,6 @@ You can obtain information about the existing matched publications through the
    input.matchedPublications.forEach((match) => {
       pubName = match.name
    }
-
-:attr:`Input.matchedPublications` returns a JSON object containing meta-information
-about matched entities.
 
 Class reference: Input, Samples, SampleIterator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
