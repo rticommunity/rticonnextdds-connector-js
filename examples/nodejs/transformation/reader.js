@@ -11,8 +11,8 @@ const path = require('path')
 const fullpath = path.join(__dirname, '/../ShapeExample.xml')
 
 const run = async () => {
-  const connector = new rti.Connector('MyParticipantLibrary::TransformationParticipant', fullpath)
-  const input = connector.getInput('MySubscriber::MySquareReader')
+  const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
+  const input = connector.getInput('MySubscriber::MyCircleReader')
   try {
     for (;;) {
       await input.wait()
