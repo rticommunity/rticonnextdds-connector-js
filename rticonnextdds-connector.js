@@ -31,6 +31,7 @@ class _ConnectorBinding {
   constructor () {
     let libArch = ''
     let libName = ''
+    let additionalLib = null
 
     // Obtain the name of the library that contains the Connector binding
     if (os.arch() === 'x64') {
@@ -47,6 +48,7 @@ class _ConnectorBinding {
         case 'win32':
           libArch = 'x64Win64VS2013'
           libName = 'rtiddsconnector.dll'
+          additionalLib = 'msvcr120.dll'
           break
         default:
           throw new Error(os.platform() + ' not yet supported')
@@ -60,6 +62,7 @@ class _ConnectorBinding {
         case 'win32':
           libArch = 'i86Win32VS2010'
           libName = 'rtiddsconnector.dll'
+          additionalLib = 'msvcr100.dll'
           break
         default:
           throw new Error(os.platform() + ' not yet supported')
@@ -73,6 +76,10 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
+    }
+
+    if (additionalLib !== null) {
+      ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', additionalLib))
     }
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
