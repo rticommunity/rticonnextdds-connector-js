@@ -18,7 +18,7 @@ They can be installed using `npm install socket.io ol`
 `node ../simple/writer.js`; or run
 [RTI Shapes Demo](https://www.rti.com/free-trial/shapes-demo) and create a *Square*
 publisher.
-* Run the web server `node ./reader_web_socket.js`
+* Run the web server `node ./reader_websocket.js`
 * In a browser, navigate to [http:/localhost:7400](http://127.0.0.1:7400)
 * Select how you would like to visualize the data (simple or maps).
 * Navigating to [http://localhost:7400/simple](http://localhost:7400/simple) will show the simple visualization and
