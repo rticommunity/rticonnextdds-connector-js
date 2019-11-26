@@ -23,4 +23,4 @@ publisher.
 * Select how you would like to visualize the data (simple or maps).
 * Navigating to [http://localhost:7400/simple](http://localhost:7400/simple) will show the simple visualization and
 [http://localhost:7400/maps](http://localhost:7400/maps) will show the maps visualization.
-  * *Note* The simple visualization may not work in the Safari browser.
+  * Note: The simple visualization may not work in the Safari browser.

@@ -22,14 +22,6 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-In order to install connector using the following command:
-
-.. code:: bash
-
-   $ npm install https://www.github.com/rticommunity/rticonnextdds-connector-js.git
-
-A version of npm which supports git and this syntax is required.
-
 RTI Connext DDS Version
 ~~~~~~~~~~~~~~~~~~~~~~~
 The library used by *Connector* is built on top of *RTI Connext DDS* 6.0.1.
