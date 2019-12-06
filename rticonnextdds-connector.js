@@ -79,7 +79,11 @@ class _ConnectorBinding {
     }
 
     if (additionalLib !== null) {
-      ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', additionalLib))
+      try {
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', additionalLib))
+      } catch (_) {
+        // ignore this error and try to run without explicitly loading the VC++ runtime
+      }
     }
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
