@@ -17,6 +17,7 @@ To get started and learn more about *RTI Connector for JavaScript* see the
 ## Examples
 
 The `examples/nodejs` directory provides several examples:
+
 * `simple` shows how to create basic publisher and subscriber applications
 * In `transformation`, an application reads, transforms and publishes back the data
  * `web_http` shows how an HTTP client can request DDS data using REST
@@ -43,11 +44,6 @@ Some of the dependencies are shipped as source code and use [node-gyp](https://g
 ### C/C++ compiler dependency
 
 The dependency [ref](https://www.npmjs.com/package/ref) is shipped as source code and requires a C++11 compiler.
-
-## Version
-
-The library used by Connector is built on top of RTI® Connext® DDS, currently the version used is 6.0.1.
-This library is statically linked and a dynamically linked variant is not currently available.
 
 ## License
 
