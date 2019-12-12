@@ -22,12 +22,17 @@ Or the GitHub repository:
 
 In order to access the examples, run npm with the GitHub repository.
 
+*Connector* works with Node.js versions 8.x to 11.x. It currently doesn't work
+with versions 12+ because one of it dependencies is not compatible with this version.
+
 npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of *Connector*'s
 dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
 compiler (such as gcc 4.8+).
 
 On Windows systems, you can install the `Windows Build Tools <https://www.npmjs.com/package/windows-build-tools>`__,
 which include both the Visual C++ compiler and Python 2.7.
+
+For more information, see :ref:`Supported Platforms`.
 
 Running the examples
 ~~~~~~~~~~~~~~~~~~~~
