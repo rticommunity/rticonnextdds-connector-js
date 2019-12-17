@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "events": "*",
-    "ffi": "github:lxe/node-ffi#node-12",
-    "ref": "github:lxe/ref#node-12",
+    "ffi": "github:rticommunity/node-ffi#node-12",
+    "ref": "github:rticommunity/ref#node-12",
     "sleep": "*"
   },
   "keywords": [
