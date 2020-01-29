@@ -453,6 +453,9 @@ class SampleIterator {
    *   (see :meth:`Output.write`)
    * * ``'valid_data'`` returns a boolean (equivalent to 
    *   :attr:`SampleIterator.validData`)
+   * * ``'view_state'`` returns a string
+   * * ``'sample_state'`` returns a string
+   * * ``'instance_state'`` returns a string
    *
    * These fields are documented in `The SampleInfo Structure 
    * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
