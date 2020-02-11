@@ -207,4 +207,113 @@ describe('Test operations involving meta data', () => {
       expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
     }
   })
+
+  it('test getting sample_state', async () => {
+    testOutput.write()
+    try {
+        await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+        // Fail the test
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+    }
+
+    // Since this is the first time that we are accessing the sample, it should
+    // have a sample state of NOT_READ
+    testInput.read()
+    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('NOT_READ')
+    // Now that we have already accessed the sample once time, accessing it
+    // again should result in a sample state of READ
+    testInput.read()
+    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('READ')
+    // Taking after a read should also have a sample state of READ
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('READ')
+  })
+
+  it('test getting instance state', async () => {
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    // Instance is currently alive
+    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('ALIVE')
+    // Disposing the sample should update the instance state
+    testOutput.write({ action: 'dispose' })
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    // Writing the sample again should transition it back to alive
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    // Instance is currently alive
+    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('ALIVE')
+    // Unregister the instance to get NO_WRITERS
+    testOutput.write({ action: 'unregister' })
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('NOT_ALIVE_NO_WRITERS')
+  })
+
+  it('test getting sample view state', async () => {
+    // View state is per-instance
+    testOutput.instance.setString('my_key_string', 'Brown')
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NEW')
+    // Updating that instance should update the view state
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NOT_NEW')
+    // Writing a new instance should have a NEW view state
+    testOutput.instance.setString('my_key_string', 'Maroon')
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NEW')
+  })
 })
