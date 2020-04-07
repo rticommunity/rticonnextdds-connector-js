@@ -49,7 +49,8 @@ describe('Data access tests with a pre-populated input', function () {
     my_point_array: [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 5, y: 15 }],
     my_boolean: false,
     my_int64: -18014398509481984,
-    my_uint64: 18014398509481984
+    my_uint64: 18014398509481984,
+    my_key_string: 'hello'
   }
 
   beforeEach(async () => {
@@ -367,7 +368,8 @@ describe('Tests with a testOutput and testInput', () => {
     my_point_array: [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 5, y: 15 }],
     my_boolean: false,
     my_int64: -18014398509481984,
-    my_uint64: 18014398509481984
+    my_uint64: 18014398509481984,
+    my_key_string: 'hello'
   }
 
   beforeEach(async () => {
@@ -462,7 +464,8 @@ describe('Tests with a testOutput and testInput', () => {
       my_point_array: [{ x: '0', y: '0' }, { x: '0', y: '0' }, { x: '0', y: '0' }, { x: '0', y: '0' }, { x: '5', y: '15' }],
       my_boolean: false,
       my_int64: '-18014398509481984',
-      my_uint64: '18014398509481984'
+      my_uint64: '18014398509481984',
+      my_key_string: 'hello'
     })
     testOutput.write()
     try {
