@@ -16,8 +16,8 @@ APIs have been preserved for backward compatibility as much as possible.
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for JavaScript* has been tested with Node.js versions 8.7.0, 
-10.4.0 and 11.15.0. 
+*RTI Connector for JavaScript* has been tested with Node.js versions
+10.4.0, 11.15.0 and 12.13.0.
 
 *Connector* currently does not work with Node.js 12 because some of its 
 dependencies, such as *ffi* are not yet compatible with this version.
