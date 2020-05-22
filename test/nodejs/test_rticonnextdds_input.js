@@ -97,7 +97,7 @@ describe('Subscriber not automatically enabled tests', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 })

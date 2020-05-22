@@ -452,3 +452,49 @@ In an :class:`Input`, you can obtain the selected member as a string::
     if (input.samples.get(0).getString('my_union#') == 'point') {
         value = input.samples.get(0).getNumber('my_union.point.x')
     }
+
+Accessing key values of disposed samples
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Using the :meth:`Output.write` API, an :class:`Output` can perform write, dispose
+and unregister operations.
+Depending on which of these operations is performed, the ``instance_state`` of the
+received sample will be ``"ALIVE"``, ``"NOT_ALIVE_NO_WRITERS"`` or ``"NOT_ALIVE_DISPOSED"``.
+If the instance was disposed, this ``instance_state`` will be ``"NOT_ALIVE_DISPOSED"``.
+In this state, it is possible to access the key fields of the received sample.
+
+.. warning::
+    The ``valid_data`` flag will be false when the sample is in the ``"NOT_ALIVE_DISPOSED"``
+    state. This is the only situation where it is supported to access the received
+    sample's fields even though the ``valid_data`` flag is false.
+
+The key fields can be accessed as follows:
+
+.. code-block::
+
+    // The output and input are using the following type:
+    // struct ShapeType {
+    //     @key string<128> color;
+    //     long x;
+    //     long y;
+    //     long shapesize;
+    // }
+
+    output.instance.set('x', 4)
+    output.instance.set('color', 'Green')
+    // Assume that some data associated with this instance has already been sent
+    output.write({ action: 'dispose' })
+    await input.wait()
+    input.take()
+    let sample = input.samples.get(0)
+
+    if (sample.info.get('instance_state') === 'NOT_ALIVE_DISPOSED') {
+        // sample.info.get('valid_data') will be false in this situation
+        // Accessing a non-key field using get() or getType() API returns null
+        let x = sample.get('x') // null
+        x = sample.getNumber('x') // also null
+        let color = sample.get('color') // 'Green'
+        // Can also access use getJson() to get all of the key fields in a JSON object
+        // The obtained JSON object will not contain non-key fields
+        let keyValues = sample.getJson() // { 'color': 'Green' }
+    }

@@ -121,6 +121,12 @@ After calling :meth:`Input.read()` or :meth:`Input.take()`,
 
 :meth:`SampleIterator.getJson()` retrieves all the fields of a sample.
 
+Unless the :attr:`Samples.validDataIter` is used, it is necessary to check if the
+sample contains valid data before accessing the fields. The only exception to this
+rule is if the ``instance_state`` of the sample is ``"NOT_ALIVE_DISPOSED"``.
+See :ref:`Accessing key values of disposed samples` for more information on this use
+case.
+
 If you don't need to access the meta-data (see :ref:`Accessing the SampleInfo`),
 the simplest way to access the data is to use :attr:`Samples.validDataIter` 
 to skip samples with invalid data:

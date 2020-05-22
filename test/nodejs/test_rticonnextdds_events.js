@@ -78,7 +78,7 @@ describe('Connector EventEmitter tests', function () {
       .then(() => {
         // This should not have been possible
         console.log('Error occurred. Expected wait to fail due to waitSetBusy')
-        expect(true).to.deep.equals(false)
+        throw(err)
       })
       .catch((err) => {
         expect(err.message).to.deep.equals('Can not concurrently wait on the same Connector object')

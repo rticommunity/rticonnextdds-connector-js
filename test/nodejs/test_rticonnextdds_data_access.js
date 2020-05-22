@@ -70,7 +70,7 @@ describe('Data access tests with a pre-populated input', function () {
     } catch (err) {
       console.log('Caught err: ' + err)
       // Fail the test
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     // Write data on the the output
     output.instance.setFromJson(testJsonObject)
@@ -81,7 +81,7 @@ describe('Data access tests with a pre-populated input', function () {
     } catch (err) {
       console.log('Caught err: ' + err)
       // Fail the test
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     // Take the data on the input so that we can access it from the test
     prepopulatedInput.take()
@@ -388,7 +388,7 @@ describe('Tests with a testOutput and testInput', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -512,7 +512,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     testInput.take()
     const received = testInput.samples.get(0).get('my_int_sequence')
@@ -531,7 +531,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught error: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     testInput.take()
     const received = testInput.samples.get(0).get('my_point_sequence')
@@ -545,7 +545,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught error: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     testInput.take()
     const sample = testInput.samples.get(0)
@@ -1017,14 +1017,14 @@ describe('Tests with two readers and two writers', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     try {
       const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -1041,7 +1041,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await connector.wait(testExpectFailureTimeout)
       console.log('Expected connector.wait to timeout but it did not')
-      expect(true).to.deep.equals(false)
+      throw(err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1051,7 +1051,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput1.wait(testExpectFailureTimeout)
       console.log('Expected testInput1.wait to timeout but it did not')
-      expect(true).to.deep.equals(false)
+      throw(err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1061,7 +1061,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput2.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      expect(true).to.deep.equals(false)
+      throw(err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1073,7 +1073,7 @@ describe('Tests with two readers and two writers', () => {
       await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -1083,7 +1083,7 @@ describe('Tests with two readers and two writers', () => {
       await testInput1.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -1092,7 +1092,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput2.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      expect(true).to.deep.equals(false)
+      throw(err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1104,7 +1104,7 @@ describe('Tests with two readers and two writers', () => {
       await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -1114,7 +1114,7 @@ describe('Tests with two readers and two writers', () => {
       await testInput2.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 
@@ -1123,7 +1123,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput1.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      expect(true).to.deep.equals(false)
+      throw(err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
