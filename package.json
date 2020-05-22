@@ -16,12 +16,9 @@
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js.git"
   },
   "dependencies": {
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
     "events": "*",
     "ffi": "github:rticommunity/node-ffi#node-12",
     "ref": "github:rticommunity/ref#node-12",
-    "sinon": "^9.0.2",
     "sleep": "*"
   },
   "keywords": [
