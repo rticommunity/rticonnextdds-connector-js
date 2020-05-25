@@ -459,12 +459,12 @@ Accessing key values of disposed samples
 Using the :meth:`Output.write` API, an :class:`Output` can perform write, dispose
 and unregister operations.
 Depending on which of these operations is performed, the ``instance_state`` of the
-received sample will be ``"ALIVE"``, ``"NOT_ALIVE_NO_WRITERS"`` or ``"NOT_ALIVE_DISPOSED"``.
-If the instance was disposed, this ``instance_state`` will be ``"NOT_ALIVE_DISPOSED"``.
+received sample will be ``'ALIVE'``, ``'NOT_ALIVE_NO_WRITERS'`` or ``'NOT_ALIVE_DISPOSED'``.
+If the instance was disposed, this ``instance_state`` will be ``'NOT_ALIVE_DISPOSED'``.
 In this state, it is possible to access the key fields of the received sample.
 
 .. warning::
-    The ``valid_data`` flag will be false when the sample is in the ``"NOT_ALIVE_DISPOSED"``
+    The ``valid_data`` flag will be false when the sample is in the ``'NOT_ALIVE_DISPOSED'``
     state. This is the only situation where it is supported to access the received
     sample's fields even though the ``valid_data`` flag is false.
 
@@ -490,11 +490,16 @@ The key fields can be accessed as follows:
 
     if (sample.info.get('instance_state') === 'NOT_ALIVE_DISPOSED') {
         // sample.info.get('valid_data') will be false in this situation
-        // Accessing a non-key field using get() or getType() API returns null
-        let x = sample.get('x') // null
-        x = sample.getNumber('x') // also null
+        // Only the key-fields should be accessed
         let color = sample.get('color') // 'Green'
-        // Can also access use getJson() to get all of the key fields in a JSON object
-        // The obtained JSON object will not contain non-key fields
-        let keyValues = sample.getJson() // { 'color': 'Green' }
+        let x = sample.get('x') // unsupported
+        x = sample.getNumber('x') // also unsupported
+        // You can alsouse  getJson() to get all of the key fields in a JSON object.
+        // Again, only the key fields returned within the JSON object should
+        // be used.
+        let keyValues = sample.getJson() // { color: 'Green', x: 0, y: 0, shapesize: 0 }
     }
+
+.. note::
+    Only the key fields should be accessed when the sample has an instance state
+    of ``'NOT_ALIVE_DISPOSED'``.
