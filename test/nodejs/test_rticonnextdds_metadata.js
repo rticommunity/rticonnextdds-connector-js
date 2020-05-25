@@ -387,10 +387,8 @@ describe('accessing key values after instance disposal', () => {
         // It should be possible to access the key field
         expect(sample.get('color')).to.deep.equals('Yellow')
         expect(sample.getString('color')).to.deep.equals('Yellow')
-        console.log('3')
         // All non key fields should be default
         expect(sample.get('x')).to.deep.equals(0)
-        console.log('4')
         expect(sample.get('y')).to.deep.equals(0)
         expect(sample.get('z')).to.deep.equals(false)
         expect(sample.get('shapesize')).to.deep.equals(0)
