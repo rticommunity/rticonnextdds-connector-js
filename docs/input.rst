@@ -198,7 +198,7 @@ in the *RTI Connext DDS Core Libraries User's Manual*.
 These samples indicate a change in the instance state. Samples with invalid data
 still provide the following information:
 
-* The :attr:`SampleInfo`
+* The :class:`SampleInfo`
 * When an instance is disposed (``sample.info.get('instance_state')`` is
   ``'NOT_ALIVE_DISPOSED'``), the sample data contains the value of the key that
   has been disposed. You can access the key fields only. See

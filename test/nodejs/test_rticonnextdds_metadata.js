@@ -387,15 +387,7 @@ describe('accessing key values after instance disposal', () => {
         // It should be possible to access the key field
         expect(sample.get('color')).to.deep.equals('Yellow')
         expect(sample.getString('color')).to.deep.equals('Yellow')
-        // All non key fields should be default
-        expect(sample.get('x')).to.deep.equals(0)
-        expect(sample.get('y')).to.deep.equals(0)
-        expect(sample.get('z')).to.deep.equals(false)
-        expect(sample.get('shapesize')).to.deep.equals(0)
-        expect(sample.getNumber('x')).to.deep.equals(0)
-        expect(sample.getNumber('y')).to.deep.equals(0)
-        expect(sample.getNumber('shapesize')).to.deep.equals(0)
-        expect(sample.getBoolean('z')).to.deep.equals(false)
+        // All non key fields should not be accessed.
         // Can also obtain the JSON representation of the sample.
         const expectedJson = {
             color: 'Yellow',
@@ -467,11 +459,7 @@ describe('accessing key values after instance disposal', () => {
         expect(sample.getString('other_color')).to.deep.equals('Blue')
         expect(sample.getNumber('y')).to.deep.equals(9)
         expect(sample.getBoolean('z')).to.deep.equals(false)
-        // Check non-key fields (default values)
-        expect(sample.get('x')).to.deep.equals(0)
-        expect(sample.get('shapesize')).to.deep.equals(0)
-        expect(sample.getNumber('x')).to.deep.equals(0)
-        expect(sample.getNumber('shapesize')).to.deep.equals(0)
+        // Do not access non-key values
         // Check access via JSON object
         const expectedJson = {
             color: 'Brown',
@@ -553,26 +541,26 @@ describe('accessing key values after instance disposal', () => {
         }
         input.take()
         let sample = input.samples.get(0)
-        // The type we are using has set the struct 'shape' as a key.
-        // All of the fields within that struct should be accessible
         expect(sample.info.get('valid_data')).to.deep.equals(false)
         expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+        // Everything within keyed_shape is a key
         expect(sample.getNumber('keyed_shape.x')).to.deep.equals(2)
         expect(sample.getNumber('keyed_shape.y')).to.deep.equals(0)
         expect(sample.getNumber('keyed_shape.shapesize')).to.deep.equals(100)
         expect(sample.getBoolean('keyed_shape.z')).to.deep.equals(true)
-        expect(sample.getString('keyed_shape.color')).to.deep.equals('Black')
-        expect(sample.getNumber('keyed_toplevel_member')).to.deep.equals(1)
         expect(sample.get('keyed_shape.x')).to.deep.equals(2)
         expect(sample.get('keyed_shape.y')).to.deep.equals(0)
         expect(sample.get('keyed_shape.shapesize')).to.deep.equals(100)
         expect(sample.get('keyed_shape.z')).to.deep.equals(true)
         expect(sample.get('keyed_shape.color')).to.deep.equals('Black')
+        expect(sample.getString('keyed_shape.color')).to.deep.equals('Black')
+        // keyed_toplevel_member is also a key
+        expect(sample.getNumber('keyed_toplevel_member')).to.deep.equals(1)
+        expect(sample.get('keyed_toplevel_member')).to.deep.equals(1)
+        // Only the 'color' field in keyed_nested_member is keyed
         expect(sample.get('keyed_nested_member.color')).to.deep.equals('White')
         expect(sample.get('keyed_nested_member.x')).to.deep.equals(0)
-        expect(sample.get('keyed_toplevel_member')).to.deep.equals(1)
-        expect(sample.get('unkeyed_shape.color')).to.deep.equals('')
-        expect(sample.get('unkeyed_shape')).to.deep.equals({ color: '', x: 0, y: 0, shapesize: 0, z: false })
+        // Do not access any of the non-key values
         // The unkeyed_toplevel_member field has a default value explicitly set 
         // in the type. This should not effect the returned value (SamR confirm this)
         expect(sample.get('unkeyed_toplevel_member')).to.deep.equals(0)
@@ -623,17 +611,6 @@ describe('accessing key values after instance disposal', () => {
             z: false
         }
         expect(sample.getJson('keyed_nested_member')).to.deep.equals(expectedJson)
-        expectedJson = {
-            color: '',
-            x: 0,
-            y: 0,
-            shapesize: 0,
-            z: false
-        }
-        expect(sample.getJson('unkeyed_shape')).to.deep.equals(expectedJson)
-        expect(sample.getNumber('unkeyed_shape.x')).to.deep.equals(0)
-        expect(sample.getNumber('unkeyed_shape.shapesize')).to.deep.equals(0)
-        expect(sample.get('unkeyed_shape.shapesize')).to.deep.equals(0)
     })
 
     it('access the key fields using an iterator', async () => {
@@ -682,7 +659,6 @@ describe('accessing key values after instance disposal', () => {
         for (const sample of input.samples) {
             expect(sample.info.get('valid_data')).to.deep.equals(false)
             expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
-            expect(sample.getNumber('x')).to.deep.equals(0)
             expect(sample.getString('color')).to.deep.equals('Yellow')
             expect(sample.get('color')).to.deep.equals('Yellow')
             const expectedJson = {
@@ -696,6 +672,17 @@ describe('accessing key values after instance disposal', () => {
         }
     })
 
+    // struct ShapeType {
+    //     @key string<128> color;
+    //     long x;
+    //     long y;
+    //     bool z;
+    //     long shapesize;
+    // };
+    // struct ShapeTypeWithoutToplevelKeyType {
+    //     @key ShapeType keyed_shape;
+    //     ShapeType unkeyed_shape;
+    // };
     it('keys within nested structures are not keys unless tagged as keys in top level', async () => {
         let input = connector.getInput("MySubscriber::MySquareWithoutTopLevelKeyReader")
         expect(input).to.exist
@@ -738,12 +725,6 @@ describe('accessing key values after instance disposal', () => {
         // in the top-level type in order to be part of the key. This means that
         // nothing in this type should be non-default.
         let sample = input.samples.get(0)
-        expect(sample.get('unkeyed_shape.color')).to.deep.equals('')
-        expect(sample.getString('unkeyed_shape.color')).to.deep.equals('')
-        expect(sample.get('unkeyed_shape.z')).to.deep.equals(false)
-        expect(sample.getBoolean('unkeyed_shape.z')).to.deep.equals(false)
-        expect(sample.get('unkeyed_shape.x')).to.deep.equals(0)
-        expect(sample.getNumber('unkeyed_shape.x')).to.deep.equals(0)
         let expectedJson = {
             keyed_shape: {
                 color: 'Yellow',
