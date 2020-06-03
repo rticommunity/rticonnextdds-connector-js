@@ -188,7 +188,7 @@ describe('Discovery tests', function () {
       } catch (err) {
         console.log('Caught error: ' + err)
         // Fail the test
-        expect(true).to.deep.equals(false)
+        throw(err)
       }
     }
     expect(totalMatches).to.be.at.least(2)
@@ -223,7 +223,7 @@ describe('Discovery tests', function () {
       } catch (err) {
         console.log('Caught error: ' + err)
         // Fail the test
-        expect(true).to.deep.equals(false)
+        throw(err)
       }
     }
     expect(totalMatches).to.be.at.least(2)
@@ -369,7 +369,7 @@ describe('Discovery tests', function () {
     } catch (err) {
       console.log('Caught error: ' + err)
       // Fail the test
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
 
     // Get the entity names of the matched subs
@@ -395,7 +395,7 @@ describe('Discovery tests', function () {
     } catch (err) {
       console.log('Caught error: ' + err)
       // Fail the test
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
     const matches = output.matchedSubscriptions
     expect(matches.length).to.deep.equals(1)

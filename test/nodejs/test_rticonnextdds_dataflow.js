@@ -39,7 +39,7 @@ params.forEach((retrievalMethod) => {
         expect(matches).to.be.at.least(1)
       } catch (err) {
         console.log('Caught err: ' + err)
-        expect(true).to.deep.equals(false)
+        throw(err)
       }
     })
 
@@ -57,7 +57,7 @@ params.forEach((retrievalMethod) => {
         await input.wait(testExpectSuccessTimeout)
       } catch (err) {
         console.log('Caught err: ' + err)
-        expect(true).to.deep.equals(false)
+        throw(err)
       }
       input[retrievalMethod]()
       expect(input.samples.length).to.be.at.least(1)
