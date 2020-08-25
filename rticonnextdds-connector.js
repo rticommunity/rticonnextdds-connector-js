@@ -1706,8 +1706,12 @@ class Connector extends EventEmitter {
    *   ParticipantName is the name attribute of a ``<domain_participant>`` tag 
    *   within that library.
    * @arg {string} url A URL locating the XML document. It can be a file path 
-   *   (e.g., ``/tmp/my_dds_config.xml``) or a string containing the full XML 
-   *   document with the following format: ``str://"<dds>...</dds>"``.
+   *   (e.g., ``/tmp/my_dds_config.xml``), a string containing the full XML 
+   *   document with the following format: ``str://"<dds>...</dds>"``, or a
+   *   combination of multiple files or strings, as explained in the 
+   *   `URL Groups <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/URL_Groups.htm>`__
+   *   section of the *Connext DDS Core Libraries User's Manual*.
+   * 
    */
   constructor (configName, url) {
     super()
