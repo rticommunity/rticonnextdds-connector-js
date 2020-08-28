@@ -30,7 +30,7 @@ RTI Connector for JavaScript has the following dependencies, which are also list
 * [ffi](https://www.npmjs.com/package/ffi): used for loading and calling dynamic libraries using pure JavaScript
 * [events](https://www.npmjs.com/package/events): used for the 'EventEmitter' (legacy implementation of RTI Connector)
 
-Additionally to run the `web_socket` example, [socket.io](https://github.com/Automattic/socket.io) and [OpenLayers](hhttps://openlayers.org] are required.
+Additionally to run the `web_socket` example, [socket.io](https://github.com/Automattic/socket.io) and [OpenLayers](https://openlayers.org) are required.
 
 Additional dependencies are required to run the unit tests and some of the examples. Please see the README files in the appropriate directory.
 
