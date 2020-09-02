@@ -63,6 +63,20 @@ describe('Connector Tests', function () {
     })
   })
 
+  // Test for CON-163
+  it('Multiple Connector obejcts can be instantiated without participant QoS', function () {
+    const participantProfile = 'MyParticipantLibrary::MyParticipant'
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector3.xml')
+    const connectors = []
+    for (var i = 0; i < 3; i++) {
+        connectors.push(new rti.Connector(participantProfile, xmlProfile))
+    }
+    connectors.forEach((connector) => {
+      expect(connector).to.exist
+      expect(connector).to.be.instanceOf(rti.Connector)
+    })
+  })
+
   describe('Connector callback test', function () {
     let connector
 
