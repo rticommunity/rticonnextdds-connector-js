@@ -48,33 +48,48 @@ describe('Connector Tests', function () {
     const connector = new rti.Connector(participantProfile, xmlProfile)
     expect(connector).to.exist
     expect(connector).to.be.instanceOf(rti.Connector)
+    connector.close()
   })
 
-  it('Multiple Connector objects can be instantiated', function () {
+  it('Multiple Connector objects can be instantiated', () => {
     const participantProfile = 'MyParticipantLibrary::Zero'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     const connectors = []
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 3; i++) {
       connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
     connectors.forEach((connector) => {
       expect(connector).to.exist
       expect(connector).to.be.instanceOf(rti.Connector)
+      connector.close()
     })
   })
 
   // Test for CON-163
-  it('Multiple Connector obejcts can be instantiated without participant QoS', function () {
+  it('Multiple Connector obejcts can be instantiated without participant QoS', () => {
     const participantProfile = 'MyParticipantLibrary::MyParticipant'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector3.xml')
     const connectors = []
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 2; i++) {
         connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
-    connectors.forEach((connector) => {
+    connectors.forEach((connector)  => {
       expect(connector).to.exist
       expect(connector).to.be.instanceOf(rti.Connector)
+      connector.close()
     })
+  })
+
+  it('Load two XML files using the url group syntax', function () {
+      const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
+      const xmlProfile2 = path.join(__dirname, '/../xml/TestConnector2.xml')
+      const fullXmlPath = xmlProfile1 + ';' + xmlProfile2
+      const connector = new rti.Connector('MyParticipantLibrary2::MyParticipant2', fullXmlPath)
+      expect(connector).to.exist
+      expect(connector).to.be.instanceOf(rti.Connector)
+      const output = connector.getOutput('MyPublisher2::MySquareWriter2')
+      expect(output).to.exist
+      connector.close()
   })
 
   describe('Connector callback test', function () {
