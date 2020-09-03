@@ -92,6 +92,15 @@ describe('Connector Tests', function () {
       connector.close()
   })
 
+  it('Should be possible to create a Connector with participant qos', function () {
+      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+      const connector = new rti.Connector(
+           'MyParticipantLibrary::ConnectorWithParticipantQos',
+           xmlProfile)
+      expect(connector).to.exist
+      expect(connector).to.be.instanceOf(rti.Connector)
+  })
+
   describe('Connector callback test', function () {
     let connector
 
