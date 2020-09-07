@@ -306,5 +306,11 @@ This code contains trade secrets of Real-Time Innovations, Inc.
                 <data_writer name="TestWriter" topic_ref="SingleUseShape" />
             </publisher>
         </domain_participant>
+
+        <!-- Test for CON-214 -->
+        <domain_participant name="ConnectorWithParticipantQos"
+                            domain_ref="MyDomainLibrary::MyDomain">
+            <participant_qos/>
+        </domain_participant>
     </domain_participant_library>
 </dds>
