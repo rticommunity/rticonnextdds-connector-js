@@ -104,6 +104,8 @@ files:
 
   const connector = new rti.Connector("my_profiles.xml;my_types.xml;my_participants.xml", configName)
 
+[RTI Issue ID CON-209]
+
 Version 1.0.0
 ~~~~~~~~~~~~~
 
