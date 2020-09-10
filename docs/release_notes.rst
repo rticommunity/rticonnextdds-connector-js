@@ -59,7 +59,7 @@ been dropped for Node.js version 8 (which has been deprecated).
 
 [RTI Issue ID CON-173]
 
-What's Fixed in 1.10
+What's Fixed in 1.1.0
 ^^^^^^^^^^^^^^^^^^^^^
 
 Some larger integer values may have been corrupted by Connector's internal JSON parser
