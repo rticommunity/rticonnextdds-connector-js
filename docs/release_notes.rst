@@ -22,7 +22,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.1.0
 ~~~~~~~~~~~~~
 
-What's New in 2.0.0
+What's New in 1.10
 ^^^^^^^^^^^^^^^^^^^
 
 Sample state, instance state and view state can now be obtained in Connector
@@ -59,7 +59,7 @@ been dropped for Node.js version 8 (which has been deprecated).
 
 [RTI Issue ID CON-173]
 
-What's Fixed in 2.0.0
+What's Fixed in 1.10
 ^^^^^^^^^^^^^^^^^^^^^
 
 Some larger integer values may have been corrupted by Connector's internal JSON parser
