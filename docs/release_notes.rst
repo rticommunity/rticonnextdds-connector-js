@@ -20,7 +20,7 @@ macOS® platforms. It has been tested on the following systems:
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 Version 2.0.0 (TODO Numebring)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 What's New in 2.0.0
 ^^^^^^^^^^^^^^^^^^^
