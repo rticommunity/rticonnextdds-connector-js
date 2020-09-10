@@ -22,7 +22,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.1.0
 ~~~~~~~~~~~~~
 
-What's New in 1.10
+What's New in 1.1.0
 ^^^^^^^^^^^^^^^^^^^
 
 Sample state, instance state and view state can now be obtained in Connector
