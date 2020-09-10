@@ -36,7 +36,7 @@ JSON Object).
 
 [RTI Issue ID CON-177]
 
- Support for accessing the key values of disposed instances
+Support for accessing the key values of disposed instances
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Support for disposing instances was added in RTI Connector version 1.0.0.
@@ -92,6 +92,17 @@ the creation of the Connector would fail with a "license not found" error.
 This problem has been resolved.
 
 [RTI Issue ID CON-214]
+
+Support for loading multiple configuration files
+""""""""""""""""""""""""""""""""""""""""""""""""
+
+A Connector object now supports loading multiple files. This allows separating
+the definition of types, QoS profiles, and domain participants into different
+files:
+
+.. code-block::
+
+  const connector = new rti.Connector("my_profiles.xml;my_types.xml;my_participants.xml", configName)
 
 Version 1.0.0
 ~~~~~~~~~~~~~
