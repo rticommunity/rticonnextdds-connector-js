@@ -1,4 +1,4 @@
-Reading data (Input)
+Reading Data (Input)
 ====================
 
 .. highlight:: javascript
@@ -204,7 +204,7 @@ still provide the following information:
   has been disposed. You can access the key fields only. See
   :ref:`Accessing key values of disposed samples`.
 
-Matching with a Publication
+Matching with a publication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The method :meth:`Input.waitForPublications()` can be used to detect when a 

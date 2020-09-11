@@ -25,21 +25,31 @@ Version 1.1.0
 What's New in 1.1.0
 ^^^^^^^^^^^^^^^^^^^
 
+Support added for Node.js version 12
+""""""""""""""""""""""""""""""""""""
+.. CON-173 
+
+Previously, Node.js version 12 was not supported *Connector* for JavaScript.
+Support has been added for Node.js version 12 (the current LTS), and support has
+been dropped for Node.js version 8 (which has been deprecated).
+
+
 Sample state, instance state and view state can now be obtained in Connector
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-177 
 
-The SampleInfo class in Connector has been extended to provide access to the
-sample state, view state and instance state fields. These new fields work the
-same as the existing fields in the structure (in Connector for Python they are
-the keys to the dictionary, in Connector for JavaScript they are the keys to the
+The SampleInfo class in *Connector* has been extended to provide access to the
+sample state, view state, and instance state fields. These new fields work the
+same as the existing fields in the structure (in *Connector* for Python they are
+the keys to the dictionary, in *Connector* for JavaScript they are the keys to the
 JSON Object).
 
-[RTI Issue ID CON-177]
 
 Support for accessing the key values of disposed instances
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-188 
 
-Support for disposing instances was added in RTI Connector version 1.0.0.
+Support for disposing instances was added in *Connector* 1.0.0.
 However, it was not possible to access the key values of the disposed instance.
 This functionality is now available in the Python and JavaScript bindings.
 When a disposed sample is received, the key values can be accessed.
@@ -48,24 +58,25 @@ contains valid data (i.e., using type-specific getters, or obtaining the entire
 sample as an object). When the instance state is NOT_ALIVE_DISPOSED, only the
 key values in the sample should be accessed.
 
-[RTI Issue ID CON-188]
-
-Support added for Node.js version 12
-""""""""""""""""""""""""""""""""""""
-
-Previously, Node.js version 12 was not supported by RTI Connector for JavaScript.
-Support has been added for Node.js version 12 (the current LTS) and support has
-been dropped for Node.js version 8 (which has been deprecated).
-
-[RTI Issue ID CON-173]
 
 What's Fixed in 1.1.0
 ^^^^^^^^^^^^^^^^^^^^^
 
+Creating two instances of Connector resulted in a license error
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Under some circumstances, it was not possible to create two *Connector* objects.
+The creation of the second *Connector* object failed due to a license error.
+This issue affected all of the *Connector* APIs (Python, JavaScript).
+This issue has been fixed.
+
+[RTI Issue ID CON-163]
+
+
 Some larger integer values may have been corrupted by Connector's internal JSON parser
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The internal JSON parser used in Connector failed to identify integer numbers
+The internal JSON parser used in *Connector* failed to identify integer numbers
 from double-precision floating-point numbers for certain values.
 For example, if a number could not be represented as a 64-bit integer, the
 parser may have incorrectly identified it as an integer, causing the value to
@@ -73,31 +84,12 @@ become corrupted. This problem has been resolved.
 
 [RTI Issue ID CON-170]
 
-Creating two instances of Connector resulted in a license error
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Under some circumstances, it was not possible to create two Connector objects.
-The creation of the second Connector object failed due to a license error.
-This issue affected all of the Connector APIs (Python, JavaScript).
-This issue has been fixed.
-
-[RTI Issue ID CON-163]
-
-Creating a Connector instance with a participant_qos tag in the XML may have resulted in a license error
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-In some cases, if the XML configuration file of RTI Connector contained a
-`<participant_qos>` tag within the definition of the DomainParticipant,
-the creation of the Connector would fail with a "license not found" error.
-This problem has been resolved.
-
-[RTI Issue ID CON-214]
 
 Support for loading multiple configuration files
 """"""""""""""""""""""""""""""""""""""""""""""""
 
-A Connector object now supports loading multiple files. This allows separating
-the definition of types, QoS profiles, and domain participants into different
+A *Connector* object now supports loading multiple files. This allows separating
+the definition of types, QoS profiles, and *DomainParticipants* into different
 files:
 
 .. code-block::
@@ -105,6 +97,18 @@ files:
   const connector = new rti.Connector("my_profiles.xml;my_types.xml;my_participants.xml", configName)
 
 [RTI Issue ID CON-209]
+
+
+Creating a Connector instance with a participant_qos tag in the XML may have resulted in a license error
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+In some cases, if the XML configuration file of *Connector* contained a
+`<participant_qos>` tag within the definition of the *DomainParticipant*,
+the creation of the *Connector* would fail with a "license not found" error.
+This problem has been resolved.
+
+[RTI Issue ID CON-214]
+
 
 Version 1.0.0
 ~~~~~~~~~~~~~
