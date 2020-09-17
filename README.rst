@@ -33,18 +33,19 @@ Dependencies
 ------------
 
 RTI Connector for JavaScript has the following dependencies, which are
-also listed in ``package.json``: \*
-`ref-napi <https://www.npmjs.com/package/ref-napi>`__: turns Buffer instances into
-“pointers” \* `ref-struct-napi <https://www.npmjs.com/package/ref-struct-napi>`__:
-create ABI-compilant "Struct" instances on top of Buffers /*
-`ffi-napi <https://www.npmjs.com/package/ffi-napi>`__: used for
-loading and calling dynamic libraries using pure JavaScript \*
-`events <https://www.npmjs.com/package/events>`__: used for the
+also listed in ``package.json``:
+-  `ref-napi <https://www.npmjs.com/package/ref-napi>`__: turns Buffer instances into
+“pointers”
+-  `ref-struct-napi <https://www.npmjs.com/package/ref-struct-napi>`__:
+create ABI-compilant "Struct" instances on top of Buffers
+-  `ffi-napi <https://www.npmjs.com/package/ffi-napi>`__: used for
+loading and calling dynamic libraries using pure JavaScript
+-  `events <https://www.npmjs.com/package/events>`__: used for the
 ‘EventEmitter’ (legacy implementation of RTI Connector)
 
 Additionally to run the ``web_socket`` example,
 `socket.io <https://github.com/Automattic/socket.io>`__ and
-[OpenLayers](hhttps://openlayers.org] are required.
+[OpenLayers](https://openlayers.org] are required.
 
 Additional dependencies are required to run the unit tests and some of
 the examples. Please see the README files in the appropriate directory.
