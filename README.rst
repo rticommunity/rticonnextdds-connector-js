@@ -34,14 +34,15 @@ Dependencies
 
 RTI Connector for JavaScript has the following dependencies, which are
 also listed in ``package.json``:
+
 -  `ref-napi <https://www.npmjs.com/package/ref-napi>`__: turns Buffer instances into
-“pointers”
+   “pointers”
 -  `ref-struct-napi <https://www.npmjs.com/package/ref-struct-napi>`__:
-create ABI-compilant "Struct" instances on top of Buffers
+   create ABI-compilant "Struct" instances on top of Buffers
 -  `ffi-napi <https://www.npmjs.com/package/ffi-napi>`__: used for
-loading and calling dynamic libraries using pure JavaScript
+   loading and calling dynamic libraries using pure JavaScript
 -  `events <https://www.npmjs.com/package/events>`__: used for the
-‘EventEmitter’ (legacy implementation of RTI Connector)
+   ‘EventEmitter’ (legacy implementation of RTI Connector)
 
 Additionally to run the ``web_socket`` example,
 `socket.io <https://github.com/Automattic/socket.io>`__ and
