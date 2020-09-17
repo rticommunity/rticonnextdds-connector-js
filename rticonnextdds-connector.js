@@ -10,7 +10,7 @@ const os = require('os')
 const ref = require('ref-napi')
 const ffi = require('ffi-napi')
 const path = require('path')
-const StructType = require('ref-napi-struct')
+const StructType = require('ref-struct-napi')
 const EventEmitter = require('events').EventEmitter
 
 /**
