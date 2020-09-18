@@ -2039,7 +2039,7 @@ class Connector extends EventEmitter {
    * Allows you to increase the number of :class:`Connector` instances that 
    * can be created.
    *
-   * The default value is 1024 (which allows for approximately 8 instances 
+   * The default value is 2048 (which allows for approximately 15 instances 
    * of :class:`Connector` to be created in a single application). If you need 
    * to create more than 8 instances of :class:`Connector`, you can increase 
    * the value from the default.
