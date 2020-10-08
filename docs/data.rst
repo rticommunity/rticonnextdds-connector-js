@@ -8,7 +8,7 @@ and arrays of primitive types or structs, etc.
 
 These types are defined in XML following the format of
 `RTI's XML-Based Application Creation feature
-<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm#XMLBasedAppCreation/UnderstandingPrototyper/XMLTagsConfigEntities.htm%3FTocPath%3D5.%2520Understanding%2520XML-Based%2520Application%2520Creation%7C5.5%2520XML%2520Tags%2520for%2520Configuring%2520Entities%7C_____0>`__.
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/XMLTagsConfigEntities.htm>`__.
 
 To access the data, :class:`Instance` and :class:`SampleIterator` provide
 setters and getters that expect a ``fieldName`` string, used to identify 
@@ -428,8 +428,8 @@ To clear a member, set it to ``null`` explicitly::
 
 For more information about optional members in DDS, see the 
 *Getting Started Guide Addendum for Extensible Types*,
-`Section 3.2 Optional Members 
-<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/getting_started_extras/html_files/RTI_ConnextDDS_CoreLibraries_GettingStarted_ExtensibleAddendum/index.htm#ExtensibleTypesAddendum/Optional_Members.htm#3.2_Optional_Members%3FTocPath%3D3.%2520Type%2520System%2520Enhancements%7C3.2%2520Optional%2520Members%7C_____0>`__. 
+`Optional Members 
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/extensible_types_guide/index.htm#extensible_types/Optional_Members.htm>`__. 
 
 Accessing unions
 ^^^^^^^^^^^^^^^^
