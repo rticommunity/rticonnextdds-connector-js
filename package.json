@@ -17,8 +17,9 @@
   },
   "dependencies": {
     "events": "*",
-    "ffi": "github:rticommunity/node-ffi#node-12",
-    "ref": "github:rticommunity/ref#node-12",
+    "ref-napi": "*",
+    "ref-struct-napi": "*",
+    "ffi-napi": "*",
     "sleep": "*"
   },
   "keywords": [
