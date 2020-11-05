@@ -8,7 +8,7 @@
 
 const path = require('path')
 const os = require('os')
-const ffi = require('ffi')
+const ffi = require('ffi-napi')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const expect = chai.expect
