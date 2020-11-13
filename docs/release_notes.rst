@@ -22,6 +22,8 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.1.0
 ~~~~~~~~~~~~~
 
+*RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
+
 What's New in 1.1.0
 ^^^^^^^^^^^^^^^^^^^
 
@@ -31,18 +33,22 @@ Support added for Node.js version 12
 
 Previously, Node.js version 12 was not supported *Connector* for JavaScript.
 Support has been added for Node.js version 12 (the current LTS), and support has
-been dropped for Node.js version 8 (which has been deprecated).
+been dropped for Node.js version 8 (which has been deprecated). Note that Node.js
+version 12.19.0 is incompatible with Connecot for JavaScript due to a regression
+in that release of Node.js. Versions 12.18.x and 12.20.x are compatible with
+Connector for JavaScript.
 
 
 Sample state, instance state and view state can now be obtained in Connector
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-177 
 
-The SampleInfo class in *Connector* has been extended to provide access to the
+The :class:`SampleInfo` class in *Connector* has been extended to provide access to the
 sample state, view state, and instance state fields. These new fields work the
 same as the existing fields in the structure (in *Connector* for Python they are
 the keys to the dictionary, in *Connector* for JavaScript they are the keys to the
-JSON Object).
+JSON Object). See :ref:`Accessing sample meta-data` for more information on this
+new feature.
 
 
 Support for accessing the key values of disposed instances
@@ -57,6 +63,8 @@ The syntax for accessing these key values is the same as when the sample
 contains valid data (i.e., using type-specific getters, or obtaining the entire
 sample as an object). When the instance state is NOT_ALIVE_DISPOSED, only the
 key values in the sample should be accessed.
+See :ref:`Accessing key values of disposed samples` for more
+information on this new feature.
 
 
 What's Fixed in 1.1.0

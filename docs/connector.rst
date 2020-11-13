@@ -90,8 +90,8 @@ returns the :class:`Input` that allows reading data.
 
 For more information see:
 
-    * :ref:`Writing data (Output)`
-    * :ref:`Reading data (Input)`
+    * :ref:`Writing Data (Output)`
+    * :ref:`Reading Data (Input)`
 
 Class reference: Connector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
