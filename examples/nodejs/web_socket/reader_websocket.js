@@ -35,9 +35,19 @@ const server = http.createServer(function (req, res) {
         res.end(data, 'utf-8')
       }
     })
+  } else if (req.url === '/chart') {
+    fs.readFile(path.join(__dirname, 'indexChart.html'), (error, data) => {
+      if (error) {
+        console.log('Error: ' + error)
+        throw new Error(error)
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(data, 'utf-8')
+      }
+    })
   } else {
     res.writeHead(200, { 'Content-Type': 'text/html' })
-    res.write("Select your visualisation: <a href='simple'>simple</a> or <a href='maps'>maps</a>")
+    res.write("Select your visualisation: <a href='simple'>simple</a>, <a href='chart'>chart</a>  or <a href='maps'>maps</a>")
     res.end()
   }
 }).listen(7400, '127.0.0.1')
