@@ -46,7 +46,7 @@ console.log('Server running at http://127.0.0.1:7400/')
 // Create the DDS entities required for this example - a reader of Triangle, Circle
 // and Square (all under the same participant).
 const connector = new rti.Connector('MyParticipantLibrary::MySubParticipant', fullpath)
-const io = socketsio.listen(server)
+const io = socketsio(server)
 // Create an array of each input which we want to receive data on, and its associated
 // topic name. We will emit the topic name from the io object.
 const inputs = [
