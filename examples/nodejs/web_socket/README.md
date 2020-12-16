@@ -12,7 +12,7 @@ on how it should visualise the data. There are the following visualisation are a
 This example requires additional packages:
 * [socket.io](https://www.npmjs.com/package/socket.io)
 * [ol](https://www.npmjs.com/package/ol)
-They can be installed using `npm install socket.io ol`
+These additional dependencies can be installed using `npm install socket.io@^3.0.4 ol@^6.4.3`
 
 ## Running the example
 * Run any *DDS* application that publishes the *Square*, *Circle* or *Triangle* topic. For example run
