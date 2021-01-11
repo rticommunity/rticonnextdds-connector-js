@@ -34,7 +34,7 @@ Support added for Node.js version 12
 Previously, Node.js version 12 was not supported *Connector* for JavaScript.
 Support has been added for Node.js version 12 (the current LTS), and support has
 been dropped for Node.js version 8 (which has been deprecated). Note that Node.js
-version 12.19.0 is incompatible with Connecot for JavaScript due to a regression
+version 12.19.0 is incompatible with Connector for JavaScript due to a regression
 in that release of Node.js. Versions 12.18.x and 12.20.x are compatible with
 Connector for JavaScript.
 
