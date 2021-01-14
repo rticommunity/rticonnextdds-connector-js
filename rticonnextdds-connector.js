@@ -67,6 +67,15 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
+    } else if (os.arch() === 'arm64') {
+      switch (os.platform()) {
+        case 'linux':
+          libArch = 'armv8Linux4gcc7.3.0'
+          libName = 'librtiddsconnector.so'
+          break
+        default:
+          throw new Error(os.platform() + ' not yet supported')
+      }
     } else if (os.arch() === 'arm') {
       switch (os.platform()) {
         case 'linux':
@@ -76,6 +85,8 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
+    } else {
+      throw new Error(os.arch() + ' not yet supported')
     }
 
     if (additionalLib !== null) {
