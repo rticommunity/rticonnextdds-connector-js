@@ -8,13 +8,12 @@ This code contains trade secrets of Real-Time Innovations, Inc.
  -->
 
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/6.0.0/rti_dds_profiles.xsd"
-     version="6.0.0">
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/current/rti_dds_profiles.xsd">
 
     <!-- Qos Library -->
     <qos_library name="QosLibrary">
         <qos_profile name="DefaultProfile" is_default_qos="true">
-        	<participant_qos>
+        	<domain_participant_qos>
                 <transport_builtin>
                     <mask>UDPV4 | SHMEM</mask>
                 </transport_builtin>
@@ -24,7 +23,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
                         <nanosec>100000000</nanosec>
                     </shutdown_cleanup_period>
                 </database>
-            </participant_qos>
+            </domain_participant_qos>
             <datawriter_qos>
                 <reliability>
                     <kind> RELIABLE_RELIABILITY_QOS </kind>
@@ -310,7 +309,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
         <!-- Test for CON-214 -->
         <domain_participant name="ConnectorWithParticipantQos"
                             domain_ref="MyDomainLibrary::MyDomain">
-            <participant_qos/>
+            <domain_participant_qos/>
         </domain_participant>
     </domain_participant_library>
 </dds>
