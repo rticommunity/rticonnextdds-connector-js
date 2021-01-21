@@ -43,3 +43,12 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
+
+Support for Security, Monitoring and other Connext DDS add-on libraries
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. CON-221
+
+It is now possible to load additional Connext DDS libraries at runtime. This means
+that Connext DDS features such as Monitoring and Security Plugins are now supported.
+Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.

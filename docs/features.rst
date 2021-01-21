@@ -79,10 +79,10 @@ General features
      - API not available.
    * - `Transport Plugins <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/transports.htm>`__
      - Partial
-     - The built-in transports can be configured in XML, but add-ons cannot be loaded (see next).
+     - The built-in transports can be configured in XML.
    * - Add-on Libraries (`Monitoring <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/PartMonitoringLib.htm>`__, `Security Plugins <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/dds_security/html_files/RTI_SecurityPlugins_GettingStarted/index.htm>`__ ...)
-     - Not supported
-     - *Connector* can't currently load dynamically linked add-on libraries.
+     - Supported
+     - See :ref:`Loading Connext DDS Add-On Libraries`.
 
 Features related to sending data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -219,3 +219,29 @@ Features related to the type system
    * - `FlatData Language Binding <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SendingLDFlatData.htm%3FTocPath%3DPart%25203%253A%2520Advanced%2520Concepts%7C22.%2520Sending%2520Large%2520Data%7C22.4%2520FlatData%2520Language%2520Binding%7C_____0>`__
      - Not supported
      - However, an ``Input`` can receive data published by other *RTI Connext DDS* applications that use FlatData.
+
+Loading Connext DDS Add-On Libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Connector* supports features that require the loading of additional *Connext DDS*
+libraries, such as
+`Monitoring <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/PartMonitoringLib.htm>`__
+and `Security Plugins <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_secure/getting_started_guide/index.html>`__.
+
+The Monitoring and Security plugins are configured in XML, as described in the previous
+links.
+
+To use RTI Connext DDS add-ons you need an RTI Connext DDS installation. To
+configure your environment so that Connector can load these additional libraries:
+
+- Set your environment using::
+
+  $ source <Connext DDS installation directory>/resource/scripts/rtisetenv_<architecture>.bash
+
+  or::
+
+  > <Connext DDS installation directory>\resource\scripts\rtisetenv_<architecture>.bat
+
+- Or set your system's library path to::
+
+  <Connext DDS installation directory>\lib\<architecture>\
