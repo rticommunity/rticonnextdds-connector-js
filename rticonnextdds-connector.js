@@ -7,10 +7,10 @@
 ******************************************************************************/
 
 const os = require('os')
-const ref = require('ref')
-const ffi = require('ffi')
+const ref = require('ref-napi')
+const ffi = require('ffi-napi')
 const path = require('path')
-const StructType = require('ref-struct')
+const StructType = require('ref-struct-napi')
 const EventEmitter = require('events').EventEmitter
 
 /**
@@ -67,6 +67,15 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
+    } else if (os.arch() === 'arm64') {
+      switch (os.platform()) {
+        case 'linux':
+          libArch = 'armv8Linux4gcc7.3.0'
+          libName = 'librtiddsconnector.so'
+          break
+        default:
+          throw new Error(os.platform() + ' not yet supported')
+      }
     } else if (os.arch() === 'arm') {
       switch (os.platform()) {
         case 'linux':
@@ -76,6 +85,8 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
+    } else {
+      throw new Error(os.arch() + ' not yet supported')
     }
 
     if (additionalLib !== null) {

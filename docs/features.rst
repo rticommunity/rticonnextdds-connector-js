@@ -54,7 +54,7 @@ General features
      - Only :meth:`Input.wait` (data available), :meth:`Input.waitForPublications`, :meth:`Output.waitForSubscriptions` are supported
    * - `Managing Data Instances <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Managing_Data_Instances__Working_with_Ke.htm>`__
      - Partial
-     - It is possible to dispose or unregister an instance (see :meth:`Output.write`), and instances are automatically registered when first written, but on the ``Input`` side, the instance status is not currently exposed. Instance handles are not exposed.
+     - On an ``Output``, it is possible to dispose or unregister an instance (see :meth:`Output.write`). Instances are automatically registered when first written. On an ``Input`` the instance state can be obtained, alongside the key fields of a disposed instance (see :ref:`Accessing key values of disposed samples`). Instance handles are not exposed.
    * - `Application Acknowledgment <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Application_Acknowledgment.htm>`__
      - Partial
      - *DDS_APPLICATION_AUTO_ACKNOWLEDGMENT_MODE* is supported. If enabled, when a call to :meth:`Input.take` or :meth:`Input.read` is followed by another call, the second one automatically acknowledges the samples read in the first one.
@@ -79,11 +79,11 @@ General features
      - API not available.
    * - `Transport Plugins <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/transports.htm>`__
      - Partial
-     - The built-in transports can be configured in XML, but add-ons cannot be loaded (see next).
+     - The built-in transports can be configured in XML.
    * - Add-on Libraries (`Monitoring <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/PartMonitoringLib.htm>`__, 
        `Security Plugins <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_secure/getting_started_guide/index.html>`__ ...)
-     - Not supported
-     - *Connector* can't currently load dynamically linked add-on libraries.
+     - Supported
+     - See :ref:`Loading Connext DDS Add-On Libraries`.
 
 Features related to sending data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,3 +220,29 @@ Features related to the type system
    * - `FlatData Language Binding <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/SendingLDFlatData.htm>`__
      - Not supported
      - However, an ``Input`` can receive data published by other *RTI Connext DDS* applications that use FlatData.
+
+Loading Connext DDS Add-On Libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Connector* supports features that require the loading of additional *Connext DDS*
+libraries, such as
+`Monitoring <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/PartMonitoringLib.htm>`__
+and `Security Plugins <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_secure/getting_started_guide/index.html>`__.
+
+The Monitoring and Security plugins are configured in XML, as described in the previous
+links.
+
+To use RTI Connext DDS add-ons you need an RTI Connext DDS installation. To
+configure your environment so that Connector can load these additional libraries:
+
+- Set your environment using::
+
+  $ source <Connext DDS installation directory>/resource/scripts/rtisetenv_<architecture>.bash
+
+  or::
+
+  > <Connext DDS installation directory>\resource\scripts\rtisetenv_<architecture>.bat
+
+- Or set your system's library path to::
+
+  <Connext DDS installation directory>\lib\<architecture>\

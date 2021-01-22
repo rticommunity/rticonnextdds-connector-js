@@ -178,7 +178,7 @@ You can define the QoS for each individual entity:
 .. code-block:: xml
 
     <domain_participant name="MyPubParticipant" domain_ref="MyDomainLibrary::MyDomain">
-        <participant_qos> <!-- ... --> </participant_qos>
+        <domain_participant_qos> <!-- ... --> </domain_participant_qos>
         <publisher name="MyPublisher">
             <publisher_qos> <!-- ... --> </publisher_qos>
             <data_writer name="MySquareWriter" topic_ref="Square">
@@ -200,9 +200,9 @@ entity:
 .. code-block:: xml
 
     <domain_participant name="MyPubParticipant" domain_ref="MyDomainLibrary::MyDomain">
-        <participant_qos base_name="MyQosLibrary::MyQosProfile">
+        <domain_participant_qos base_name="MyQosLibrary::MyQosProfile">
             <!-- override or configure additional Qos policies -->
-        </participant_qos>
+        </domain_participant_qos>
         <publisher name="MyPublisher">
             <publisher_qos base_name="MyQosLibrary::MyQosProfile">
                 <!-- override or configure additional Qos policies -->
