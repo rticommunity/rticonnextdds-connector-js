@@ -53,20 +53,6 @@ class _ConnectorBinding {
         default:
           throw new Error(os.platform() + ' not yet supported')
       }
-    } else if (os.arch() === 'ia32') {
-      switch (os.platform()) {
-        case 'linux':
-          libDir = 'linux-x86'
-          libName = 'librtiddsconnector.so'
-          break
-        case 'win32':
-          libDir = 'win-x86'
-          libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr100.dll'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
     } else if (os.arch() === 'arm64') {
       switch (os.platform()) {
         case 'linux':
