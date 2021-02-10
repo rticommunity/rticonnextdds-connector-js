@@ -988,6 +988,47 @@ describe('Tests with a testOutput and testInput', () => {
     expect(testInput.samples.get(0).get('my_int_sequence')).to.deep.equals(intSeq)
     expect(testInput.samples.get(0).get('my_point_sequence')).to.deep.equals(pointSeq)
   })
+
+  it('Can clear an element of a complex sequence', async () => {
+    let pointSeq = [{ x: 100, y: 200 }, { x: 300, y: 400 }, { x: 500, y: 600 }]
+    testOutput.instance.set('my_point_sequence', pointSeq)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch(err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point_sequence')).to.deep.equals(pointSeq)
+    // Now we clear an element in the middle of the sequence
+    pointSeq = [{ x: 100, y: 200 }, null, { x: 500, y: 600 }]
+    testOutput.instance.set('my_point_sequence', pointSeq)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch(err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_point_sequence[0]')).to.deep.equals({ x: 100, y: 200 })
+    expect(testInput.samples.get(0).get('my_point_sequence[1]')).to.deep.equals({ x: 0, y: 0 })
+    expect(testInput.samples.get(0).get('my_point_sequence[2]')).to.deep.equals({ x: 500, y: 600 })
+  })
+
+  it('Can set enum via name', async () => {
+    testOutput.instance.setFromJson({ 'my_enum': 'GREEN' })
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch(err) {
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    expect(testInput.samples.get(0).get('my_enum')).to.deep.equals(1)
+  })
 })
 
 describe('Tests with two readers and two writers', () => {
