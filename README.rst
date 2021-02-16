@@ -17,6 +17,25 @@ the `documentation
 here. <https://community.rti.com/static/documentation/connector/current/api/javascript/index.html>`__
 
 Examples
+RTI Connector for JavaScript
+============================
+
+RTI® Connext® DDS is a connectivity software framework for integrating
+data sources of all types. At its core is the world’s leading ultra-high
+performance, distributed networking databus.
+
+*RTI Connector* provides a quick and easy way to write applications that
+publish and subscribe to the *RTI Connext DDS databus* in JavaScript and
+other languages.
+
+Documentation
+-------------
+
+To get started and learn more about *RTI Connector for JavaScript* see
+the `documentation
+here. <https://community.rti.com/static/documentation/connector/current/api/javascript/index.html>`__
+
+Examples
 --------
 
 The ``examples/nodejs`` directory provides several examples:
@@ -28,6 +47,8 @@ The ``examples/nodejs`` directory provides several examples:
 -  ``web_http`` shows how an HTTP client can request DDS data using REST
 -  ``web_socket`` shows how to push DDS data to a browser through
    `socket.io <https://github.com/Automattic/socket.io>`__
+-  ``request-reply`` shows how to create a basic application following
+   the request-reply pattern
 
 Dependencies
 ------------

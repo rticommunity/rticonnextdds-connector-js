@@ -22,6 +22,8 @@ The `examples/nodejs` directory provides several examples:
 * In `transformation`, an application reads, transforms and publishes back the data
  * `web_http` shows how an HTTP client can request DDS data using REST
  * `web_socket` shows how to push DDS data to a browser through [socket.io](https://github.com/Automattic/socket.io)
+ * `request-reply` shows how to create a basic application following
+   the request-reply pattern
 
 ## Dependencies
 
