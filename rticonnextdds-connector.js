@@ -86,8 +86,10 @@ class _ConnectorBinding {
     }
 
     // On Windows we need to explicitly load the dependent libraries
-    ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
-    ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
+    if (isWindows) {
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
+    }
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', libName)
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
