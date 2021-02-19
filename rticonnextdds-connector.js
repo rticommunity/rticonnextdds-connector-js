@@ -32,6 +32,7 @@ class _ConnectorBinding {
     let libDir = ''
     let libName = ''
     let additionalLib = null
+    let isWindows = false
 
     // Obtain the name of the library that contains the Connector binding
     if (os.arch() === 'x64') {
@@ -49,6 +50,7 @@ class _ConnectorBinding {
           libDir = 'win-x64'
           libName = 'rtiddsconnector.dll'
           additionalLib = 'msvcr120.dll'
+          isWindows = true
           break
         default:
           throw new Error(os.platform() + ' not yet supported')
@@ -82,6 +84,10 @@ class _ConnectorBinding {
         // ignore this error and try to run without explicitly loading the VC++ runtime
       }
     }
+
+    // On Windows we need to explicitly load the dependent libraries
+    ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
+    ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
 
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', libName)
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
