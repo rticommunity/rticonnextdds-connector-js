@@ -29,40 +29,28 @@ var _ConnectorOptions = StructType({
 
 class _ConnectorBinding {
   constructor () {
-    let libArch = ''
+    let libDir = ''
     let libName = ''
     let additionalLib = null
+    let isWindows = false
 
     // Obtain the name of the library that contains the Connector binding
     if (os.arch() === 'x64') {
       switch (os.platform()) {
         case 'darwin':
-          libArch = 'x64Darwin16clang8.0'
+          libDir = 'osx-x64'
           libName = 'librtiddsconnector.dylib'
           break
         case 'linux':
-          libArch = 'x64Linux2.6gcc4.4.5'
+          libDir = 'linux-x64'
           libName = 'librtiddsconnector.so'
           break
         // Windows returns win32 even on 64-bit platforms
         case 'win32':
-          libArch = 'x64Win64VS2013'
+          libDir = 'win-x64'
           libName = 'rtiddsconnector.dll'
           additionalLib = 'msvcr120.dll'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else if (os.arch() === 'ia32') {
-      switch (os.platform()) {
-        case 'linux':
-          libArch = 'i86Linux3.xgcc4.6.3'
-          libName = 'librtiddsconnector.so'
-          break
-        case 'win32':
-          libArch = 'i86Win32VS2010'
-          libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr100.dll'
+          isWindows = true
           break
         default:
           throw new Error(os.platform() + ' not yet supported')
@@ -70,7 +58,7 @@ class _ConnectorBinding {
     } else if (os.arch() === 'arm64') {
       switch (os.platform()) {
         case 'linux':
-          libArch = 'armv8Linux4gcc7.3.0'
+          libDir = 'linux-arm64'
           libName = 'librtiddsconnector.so'
           break
         default:
@@ -79,7 +67,7 @@ class _ConnectorBinding {
     } else if (os.arch() === 'arm') {
       switch (os.platform()) {
         case 'linux':
-          libArch = 'armv6vfphLinux3.xgcc4.7.2'
+          libDir = 'linux-arm'
           libName = 'librtiddsconnector.so'
           break
         default:
@@ -91,13 +79,19 @@ class _ConnectorBinding {
 
     if (additionalLib !== null) {
       try {
-        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', additionalLib))
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', additionalLib))
       } catch (_) {
         // ignore this error and try to run without explicitly loading the VC++ runtime
       }
     }
 
-    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
+    // On Windows we need to explicitly load the dependent libraries
+    if (isWindows) {
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
+    }
+
+    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', libName)
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
     // specifying the argument types and return types. If any of the types are
     // not builtin Node types then we have to use the ref module to represent them.
