@@ -16,16 +16,17 @@ macOS® platforms. It has been tested on the following systems:
   * SUSE® Linux Enterprise Server 12 SP2  (x64)
   * Ubuntu® 14.04, 18.04, 20.04 LTS (x64)
   * Ubuntu 18.04 LTS (64-bit Arm® v8)
+  * Ubuntu 18.04 LTS (32-bit Arm v7)
   * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
     
 **macOS**  
   * macOS 10.13-10.15 (x64)
     
 **Windows**    
-  * Windows 8 (Visual Studio® 2013) (x64)
-  * Windows 10 (Visual Studio 2015, 2017, 2019) (x64)
-  * Windows Server 2012 R2 (Visual Studio 2013) (x64)
-  * Windows Server 2016 (Visual Studio 2015, 2017, 2019) (x64)
+  * Windows 8 (x64)
+  * Windows 10 (x64)
+  * Windows Server 2012 R2 (x64)
+  * Windows Server 2016 (x64)
 
 *Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector
