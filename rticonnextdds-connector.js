@@ -2064,7 +2064,7 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Allows your to query the current version of Connector being used.
+   * Allows you to query the current version of Connector being used.
    *
    * .. note::
    *   This is a static method. It can be called before creating a 
