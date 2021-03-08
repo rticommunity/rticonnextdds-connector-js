@@ -2062,6 +2062,19 @@ class Connector extends EventEmitter {
   static setMaxObjectsPerThread (value) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))
   }
+
+  /**
+   * Allows your to query the current version of Connector being used.
+   *
+   * .. note::
+   *   This is a static method. It can be called before creating a 
+   *   :class:`Connector` instance.
+   *
+   * @returns {string} The version of Connector.
+   */
+  static version() {
+    return "1.1.0.rc2";
+  }
 }
 
 // Export the API
