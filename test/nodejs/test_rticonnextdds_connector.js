@@ -101,10 +101,6 @@ describe('Connector Tests', function () {
       expect(connector).to.be.instanceOf(rti.Connector)
   })
 
-  it('Should be possible to obtain current version of Connector', function () {
-      expect(rti.Connector.version()).to.deep.equals('1.1.0.rc2')
-  })
-
   describe('Connector callback test', function () {
     let connector
 
