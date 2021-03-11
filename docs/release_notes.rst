@@ -10,7 +10,7 @@ Supported Platforms
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
 
-  **Linux**
+**Linux**
   * CentOS™ 6.0, 6.2-6.4, 7.0 (x64)
   * Red Hat® Enterprise Linux 6.0-6.5, 6.7, 6.8, 7, 7.3, 7.5, 7.6, 8  (x64)
   * SUSE® Linux Enterprise Server 12 SP2  (x64)
@@ -18,11 +18,11 @@ macOS® platforms. It has been tested on the following systems:
   * Ubuntu 18.04 LTS (64-bit Arm® v8)
   * Ubuntu 18.04 LTS (32-bit Arm v7)
   * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
-    
-**macOS**  
+
+**macOS**
   * macOS 10.13-10.15 (x64)
-    
-**Windows**    
+
+**Windows**
   * Windows 8 (x64)
   * Windows 10 (x64)
   * Windows Server 2012 R2 (x64)
@@ -44,7 +44,7 @@ Support added for Node.js version 12
 """"""""""""""""""""""""""""""""""""
 .. CON-173 
 
-Previously, Node.js version 12 was not supported *Connector* for JavaScript.
+Previously, Node.js version 12 was not supported in *Connector* for JavaScript.
 Support has been added for Node.js version 12 (the current LTS), and support has
 been dropped for Node.js version 8 (which has been deprecated). Note that Node.js
 version 12.19.0 is incompatible with Connector for JavaScript due to a regression
