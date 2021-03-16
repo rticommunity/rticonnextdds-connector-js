@@ -14,8 +14,8 @@ macOS® platforms. It has been tested on the following systems:
   * CentOS™ 6.0, 6.2-6.4, 7.0 (x64)
   * Red Hat® Enterprise Linux 6.0-6.5, 6.7, 6.8, 7, 7.3, 7.5, 7.6, 8  (x64)
   * SUSE® Linux Enterprise Server 12 SP2  (x64)
-  * Ubuntu® 14.04, 18.04, 20.04 LTS (x64)
-  * Ubuntu 18.04 LTS (64-bit Arm® v8)
+  * Ubuntu® 14.04, 16.04, 18.04, 20.04 LTS (x64)
+  * Ubuntu 16.04, 18.04 LTS (64-bit Arm® v8)
   * Ubuntu 18.04 LTS (32-bit Arm v7)
   * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
 
@@ -39,6 +39,14 @@ Version 1.1.0
 
 What's New in 1.1.0
 ^^^^^^^^^^^^^^^^^^^
+
+Support added for ARMv8 architectures
+"""""""""""""""""""""""""""""""""""""
+.. CON-174 
+
+Connector for JavaScript now runs on ARMv8 architectures. Native libraries
+built for ARMv8 Ubuntu 16.04 are now shipped alongside Connector. These libraries
+have been tested on ARMv8 Ubuntu 16.04 and ARMv8 Ubuntu 18.04.
 
 Support added for Node.js version 12
 """"""""""""""""""""""""""""""""""""
