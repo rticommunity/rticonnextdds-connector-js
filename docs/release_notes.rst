@@ -87,6 +87,14 @@ key values in the sample should be accessed.
 See :ref:`Accessing key values of disposed samples` for more
 information on this new feature.
 
+Connector for Javascript dependencies now locked to specific versions
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-220 
+
+``package-lock.json`` has been committed, fixing the versions of *Connector for 
+Javascript's* dependencies.
+
+
 Support for Security, Monitoring and other Connext DDS add-on libraries
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -145,6 +153,16 @@ the creation of the *Connector* would fail with a "license not found" error.
 This problem has been resolved.
 
 [RTI Issue ID CON-214]
+
+
+Websocket example may have failed to run
+""""""""""""""""""""""""""""""""""""""""
+
+The websocket example (available only in *Connector for Javascript*) may have 
+failed to run due to one of its dependencies, socket.io, removing a public API. 
+This problem has been resolved.
+
+[RTI Issue ID CON-217]
 
 
 Version 1.0.0
