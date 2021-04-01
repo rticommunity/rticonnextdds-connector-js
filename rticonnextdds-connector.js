@@ -463,7 +463,7 @@ class SampleIterator {
    * * ``'sample_state'``, returns a string (either "READ" or "NOT_READ")
    *
    * These fields are documented in `The SampleInfo Structure 
-   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/The_SampleInfo_Structure.htm>`__
    * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
    * See :class:`SampleInfo`.
@@ -1006,7 +1006,7 @@ class SampleInfo {
    *   :attr:`SampleIterator.validData`)
    *
    * These fields are documented in `The SampleInfo Structure 
-   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/The_SampleInfo_Structure.htm>`__
    * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
    * @param {string} fieldName - The name of the ``SampleInfo`` field to obtain
@@ -1497,7 +1497,7 @@ class Output {
    * This method accepts an optional JSON object as a parameter, which may 
    * specify the parameters to use in the `write` call.
    * The supported parameters are a subset of those documented in the 
-   * `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
+   * `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
    * of the *RTI Connext DDS Core Libraries User's Manual*. These are:
    *
    * * ``action`` – One of ``write`` (default), ``dispose`` or ``unregister``
@@ -1517,7 +1517,7 @@ class Output {
    * @param {JSON} [params] [Optional] The optional parameters described above
    * @throws {TimeoutError} The write method can block under multiple 
    *   circumstances (see 'Blocking During a write()' in the `Writing Data section 
-   *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm>`__
+   *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Writing_Data.htm>`__
    *   of the *RTI Connext DDS Core Libraries User's Manual*.)
    *   If the blocking time exceeds the ``max_blocking_time``, this method 
    *   throws :class:`TimeoutError`.
@@ -2054,7 +2054,7 @@ class Connector extends EventEmitter {
    *   :class:`Connector` instance.
    *
    * See `SYSTEM_RESOURCE_LIMITS QoS Policy 
-   * <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
    * in the *RTI Connext DDS Core Libraries User's Manual* for more information.
    *
    * @param {number} value The value for ``max_objects_per_thread``
