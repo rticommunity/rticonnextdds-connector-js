@@ -6,10 +6,10 @@
 Copyrights and License
 **********************
 
-© 2019 Real-Time Innovations, Inc. |br|
+© 2021 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-November 2019. |br|
+April 2021. |br|
 
 .. rubric:: License
 
@@ -42,7 +42,10 @@ This is an independent publication and is neither affiliated with, nor
 authorized, sponsored, or approved by, Microsoft Corporation.
 
 The security features of this product include software developed by the
-OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/).
+OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/). 
+his product includes cryptographic software written by Eric Young 
+(eay@cryptsoft.com). This product includes software written by Tim Hudson 
+(tjh@cryptsoft.com).
 
 Technical Support |br|
 Real-Time Innovations, Inc. |br|
@@ -52,4 +55,4 @@ Phone: (408) 990-7444 |br|
 Email: support@rti.com |br|
 Website: https://support.rti.com/ |br|
 
-© 2019 RTI
+© 2021 RTI
