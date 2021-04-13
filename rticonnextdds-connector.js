@@ -53,7 +53,7 @@ class _ConnectorBinding {
         // Note that we are intentionally not checking if os.arch() is x64.
         // This allows somebody with access to 32-bit libraries to replace them
         // in the corresponding x64 directory and we will try to load them.
-        // This behaviour is not supported.
+        // This behaviour is not officially supported.
         switch (os.platform()) {
         case 'darwin':
             libDir = 'osx-x64'
