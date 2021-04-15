@@ -34,47 +34,52 @@ class _ConnectorBinding {
     let additionalLib = null
     let isWindows = false
 
-    // Obtain the name of the library that contains the Connector binding
-    if (os.arch() === 'x64') {
-      switch (os.platform()) {
+    // Obtain the name of the library that contains the Connector native libraries
+    if (os.arch() === 'arm64') {
+        if (os.platform() === 'linux') {
+            libDir = 'linux-arm64'
+            libName = 'librtiddsconnector.so'
+        } else {
+            throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
+        }
+      } else if (os.arch() === 'arm') {
+        if (os.platform() === 'linux') {
+            libDir = 'linux-arm'
+            libName = 'librtiddsconnector.so'
+        } else {
+            throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
+        }
+    } else {
+        // Note that we are intentionally not checking if os.arch() is x64.
+        // This allows somebody with access to 32-bit libraries to replace them
+        // in the corresponding x64 directory and we will try to load them.
+        // This behaviour is not officially supported.
+        switch (os.platform()) {
         case 'darwin':
-          libDir = 'osx-x64'
-          libName = 'librtiddsconnector.dylib'
-          break
+            libDir = 'osx-x64'
+            libName = 'librtiddsconnector.dylib'
+            break
         case 'linux':
-          libDir = 'linux-x64'
-          libName = 'librtiddsconnector.so'
-          break
+            libDir = 'linux-x64'
+            libName = 'librtiddsconnector.so'
+            break
         // Windows returns win32 even on 64-bit platforms
         case 'win32':
-          libDir = 'win-x64'
-          libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr120.dll'
-          isWindows = true
-          break
+            libDir = 'win-x64'
+            libName = 'rtiddsconnector.dll'
+            additionalLib = 'msvcr120.dll'
+            isWindows = true
+            break
         default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else if (os.arch() === 'arm64') {
-      switch (os.platform()) {
-        case 'linux':
-          libDir = 'linux-arm64'
-          libName = 'librtiddsconnector.so'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else if (os.arch() === 'arm') {
-      switch (os.platform()) {
-        case 'linux':
-          libDir = 'linux-arm'
-          libName = 'librtiddsconnector.so'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else {
-      throw new Error(os.arch() + ' not yet supported')
+            throw new Error(os.platform() + ' not yet supported')
+        }
+    }
+
+    // Connector is not supported on a (non ARM) 32-bit platform
+    // We continue, incase the user has manually replaced the libraries within
+    // the directory which we are going to load.
+    if (os.arch() === 'ia32') {
+        console.log('Warning: 32-bit ' + os.platform() + ' is not supported')
     }
 
     if (additionalLib !== null) {
