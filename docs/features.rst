@@ -246,3 +246,8 @@ configure your environment so that Connector can load these additional libraries
 - Or set your system's library path to::
 
   <Connext DDS installation directory>\lib\<architecture>\
+
+.. note::
+    Each version of Connector is compatible with a corresponding release of
+    Connext DDS Pro. It is not possible to load libraries from incompatible
+    Connext DDS Pro releases. Connector version 1.1.0 is only compatible with Connext DDS 6.1.0.
