@@ -1,4 +1,4 @@
-Writing data (Output)
+Writing Data (Output)
 =====================
 
 .. highlight:: javascript
@@ -94,7 +94,7 @@ In these two cases, only the *key* fields in the ``Output.instance`` are relevan
 
 See :meth:`Output.write` for more information on the supported parameters.
 
-Matching with a Subscription
+Matching with a subscription
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before writing, you can use the method :meth:`Output.waitForSubscriptions()` to

@@ -7,10 +7,10 @@
 ******************************************************************************/
 
 const os = require('os')
-const ref = require('ref')
-const ffi = require('ffi')
+const ref = require('ref-napi')
+const ffi = require('ffi-napi')
 const path = require('path')
-const StructType = require('ref-struct')
+const StructType = require('ref-struct-napi')
 const EventEmitter = require('events').EventEmitter
 
 /**
@@ -29,64 +29,74 @@ var _ConnectorOptions = StructType({
 
 class _ConnectorBinding {
   constructor () {
-    let libArch = ''
+    let libDir = ''
     let libName = ''
     let additionalLib = null
+    let isWindows = false
 
-    // Obtain the name of the library that contains the Connector binding
-    if (os.arch() === 'x64') {
-      switch (os.platform()) {
+    // Obtain the name of the library that contains the Connector native libraries
+    if (os.arch() === 'arm64') {
+        if (os.platform() === 'linux') {
+            libDir = 'linux-arm64'
+            libName = 'librtiddsconnector.so'
+        } else {
+            throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
+        }
+      } else if (os.arch() === 'arm') {
+        if (os.platform() === 'linux') {
+            libDir = 'linux-arm'
+            libName = 'librtiddsconnector.so'
+        } else {
+            throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
+        }
+    } else {
+        // Note that we are intentionally not checking if os.arch() is x64.
+        // This allows somebody with access to 32-bit libraries to replace them
+        // in the corresponding x64 directory and we will try to load them.
+        // This behaviour is not officially supported.
+        switch (os.platform()) {
         case 'darwin':
-          libArch = 'x64Darwin16clang8.0'
-          libName = 'librtiddsconnector.dylib'
-          break
+            libDir = 'osx-x64'
+            libName = 'librtiddsconnector.dylib'
+            break
         case 'linux':
-          libArch = 'x64Linux2.6gcc4.4.5'
-          libName = 'librtiddsconnector.so'
-          break
+            libDir = 'linux-x64'
+            libName = 'librtiddsconnector.so'
+            break
         // Windows returns win32 even on 64-bit platforms
         case 'win32':
-          libArch = 'x64Win64VS2013'
-          libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr120.dll'
-          break
+            libDir = 'win-x64'
+            libName = 'rtiddsconnector.dll'
+            additionalLib = 'msvcr120.dll'
+            isWindows = true
+            break
         default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else if (os.arch() === 'ia32') {
-      switch (os.platform()) {
-        case 'linux':
-          libArch = 'i86Linux3.xgcc4.6.3'
-          libName = 'librtiddsconnector.so'
-          break
-        case 'win32':
-          libArch = 'i86Win32VS2010'
-          libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr100.dll'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
-    } else if (os.arch() === 'arm') {
-      switch (os.platform()) {
-        case 'linux':
-          libArch = 'armv6vfphLinux3.xgcc4.7.2'
-          libName = 'librtiddsconnector.so'
-          break
-        default:
-          throw new Error(os.platform() + ' not yet supported')
-      }
+            throw new Error(os.platform() + ' not yet supported')
+        }
+    }
+
+    // Connector is not supported on a (non ARM) 32-bit platform
+    // We continue, incase the user has manually replaced the libraries within
+    // the directory which we are going to load.
+    if (os.arch() === 'ia32') {
+        console.log('Warning: 32-bit ' + os.platform() + ' is not supported')
     }
 
     if (additionalLib !== null) {
       try {
-        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', additionalLib))
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', additionalLib))
       } catch (_) {
         // ignore this error and try to run without explicitly loading the VC++ runtime
       }
     }
 
-    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libArch, '/', libName)
+    // On Windows we need to explicitly load the dependent libraries
+    if (isWindows) {
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
+        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
+    }
+
+    this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', libName)
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
     // specifying the argument types and return types. If any of the types are
     // not builtin Node types then we have to use the ref module to represent them.
@@ -453,9 +463,12 @@ class SampleIterator {
    *   (see :meth:`Output.write`)
    * * ``'valid_data'`` returns a boolean (equivalent to 
    *   :attr:`SampleIterator.validData`)
+   * * ``'view_state'``, returns a string (either "NEW" or "NOT_NEW")
+   * * ``'instance_state'``, returns a string (one of "ALIVE", "NOT_ALIVE_DISPOSED" or "NOT_ALIVE_NO_WRITERS")
+   * * ``'sample_state'``, returns a string (either "READ" or "NOT_READ")
    *
    * These fields are documented in `The SampleInfo Structure 
-   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/The_SampleInfo_Structure.htm>`__
    * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
    * See :class:`SampleInfo`.
@@ -998,7 +1011,7 @@ class SampleInfo {
    *   :attr:`SampleIterator.validData`)
    *
    * These fields are documented in `The SampleInfo Structure 
-   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/The_SampleInfo_Structure.htm>`__
    * section in the *RTI Connext DDS Core Libraries User's Manual*.
    *
    * @param {string} fieldName - The name of the ``SampleInfo`` field to obtain
@@ -1489,7 +1502,7 @@ class Output {
    * This method accepts an optional JSON object as a parameter, which may 
    * specify the parameters to use in the `write` call.
    * The supported parameters are a subset of those documented in the 
-   * `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
+   * `Writing Data section <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Writing_Data.htm?Highlight=DDS_WriteParams_t>`__
    * of the *RTI Connext DDS Core Libraries User's Manual*. These are:
    *
    * * ``action`` – One of ``write`` (default), ``dispose`` or ``unregister``
@@ -1509,7 +1522,7 @@ class Output {
    * @param {JSON} [params] [Optional] The optional parameters described above
    * @throws {TimeoutError} The write method can block under multiple 
    *   circumstances (see 'Blocking During a write()' in the `Writing Data section 
-   *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Writing_Data.htm>`__
+   *   <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Writing_Data.htm>`__
    *   of the *RTI Connext DDS Core Libraries User's Manual*.)
    *   If the blocking time exceeds the ``max_blocking_time``, this method 
    *   throws :class:`TimeoutError`.
@@ -1703,8 +1716,12 @@ class Connector extends EventEmitter {
    *   ParticipantName is the name attribute of a ``<domain_participant>`` tag 
    *   within that library.
    * @arg {string} url A URL locating the XML document. It can be a file path 
-   *   (e.g., ``/tmp/my_dds_config.xml``) or a string containing the full XML 
-   *   document with the following format: ``str://"<dds>...</dds>"``.
+   *   (e.g., ``/tmp/my_dds_config.xml``), a string containing the full XML 
+   *   document with the following format: ``str://"<dds>...</dds>"``, or a
+   *   combination of multiple files or strings, as explained in the 
+   *   `URL Groups <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/URL_Groups.htm>`__
+   *   section of the *Connext DDS Core Libraries User's Manual*.
+   * 
    */
   constructor (configName, url) {
     super()
@@ -2032,7 +2049,7 @@ class Connector extends EventEmitter {
    * Allows you to increase the number of :class:`Connector` instances that 
    * can be created.
    *
-   * The default value is 1024 (which allows for approximately 8 instances 
+   * The default value is 2048 (which allows for approximately 15 instances 
    * of :class:`Connector` to be created in a single application). If you need 
    * to create more than 8 instances of :class:`Connector`, you can increase 
    * the value from the default.
@@ -2042,7 +2059,7 @@ class Connector extends EventEmitter {
    *   :class:`Connector` instance.
    *
    * See `SYSTEM_RESOURCE_LIMITS QoS Policy 
-   * <https://community.rti.com/static/documentation/connext-dds/6.0.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
+   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
    * in the *RTI Connext DDS Core Libraries User's Manual* for more information.
    *
    * @param {number} value The value for ``max_objects_per_thread``

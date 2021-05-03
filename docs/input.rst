@@ -1,4 +1,4 @@
-Reading data (Input)
+Reading Data (Input)
 ====================
 
 .. highlight:: javascript
@@ -121,7 +121,7 @@ After calling :meth:`Input.read()` or :meth:`Input.take()`,
 
 :meth:`SampleIterator.getJson()` retrieves all the fields of a sample.
 
-If you don't need to access the meta-data (see :ref:`Accessing the SampleInfo`),
+If you don't need to access the meta-data (see :ref:`Accessing sample meta-data`),
 the simplest way to access the data is to use :attr:`Samples.validDataIter` 
 to skip samples with invalid data:
 
@@ -177,15 +177,11 @@ for example:
 
 See more information and examples in :ref:`Accessing the data`.
 
-Accessing the SampleInfo
-~~~~~~~~~~~~~~~~~~~~~~~~
+Accessing sample meta-data
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*Connext DDS* can produce samples with invalid data, which contain meta-data only.
-For more information about this, see `Valid Data Flag 
-<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/The_SampleInfo_Structure.htm#receiving_2076951295_727613>`__
-in the *RTI Connext DDS Core Libraries User's Manual*.
-
-You can access a field of the sample meta-data, the *SampleInfo*, as follows:
+Every sample contains an associated *SampleInfo* with meta-information about the
+sample:
 
 .. code-block::
 
@@ -195,7 +191,20 @@ You can access a field of the sample meta-data, the *SampleInfo*, as follows:
 
 See :attr:`SampleIterator.info` for the list of available meta-data fields.
 
-Matching with a Publication
+*Connext DDS* can produce samples with invalid data, which contain meta-data only.
+For more information about this, see `Valid Data Flag 
+<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/AccessingManagingInstances.htm#Valid>`__
+in the *RTI Connext DDS Core Libraries User's Manual*.
+These samples indicate a change in the instance state. Samples with invalid data
+still provide the following information:
+
+* The :class:`SampleInfo`
+* When an instance is disposed (``sample.info.get('instance_state')`` is
+  ``'NOT_ALIVE_DISPOSED'``), the sample data contains the value of the key that
+  has been disposed. You can access the key fields only. See
+  :ref:`Accessing key values of disposed samples`.
+
+Matching with a publication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The method :meth:`Input.waitForPublications()` can be used to detect when a 

@@ -1,7 +1,7 @@
 
 .. py:currentmodule:: rticonnextdds_connector
 
-Defining a DDS system in XML
+Defining a DDS System in XML
 ==============================
 
 *Connector* loads the definition of a DDS system from an XML configuration file
@@ -12,7 +12,7 @@ and *DataWriters*, data types and quality of service.
     :align: center
 
 *Connector* uses the XML schema defined by RTI's
-`XML-Based Application Creation feature <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm>`__.
+`XML-Based Application Creation feature <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/xml_application_creation/index.htm>`__.
 
 .. hint::
     The *Connext DDS* C, C++, Java and .NET APIs can also load the same XML files
@@ -75,11 +75,11 @@ and ``shapesize``:
 Types are associated with *Topics*, as explained in the next section, :ref:`Domain Library`.
 
 .. hint::
-    You can define your types in IDL and convert them to XML with `rtiddsgen <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/code_generator/html_files/RTI_CodeGenerator_UsersManual/index.htm#code_generator/UsersManual/UsersManual_Title.htm>`__.
+    You can define your types in IDL and convert them to XML with `rtiddsgen <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/code_generator/users_manual/index.htm>`__.
     For example: ``rtiddsgen -convertToXml MyTypes.idl``
 
 For more information about defining types, see
-`Creating User Data Types with XML <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/Creating_User_Data_Types_with_Extensible.htm>`__
+`Creating User Data Types with XML <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Creating_User_Data_Types_with_Extensible.htm>`__
 in the *Connext DDS Core Libraries User's Manual*.
 
 For more information about accessing the data samples, see :ref:`Accessing the data`.
@@ -89,10 +89,10 @@ Domain library
 
 A domain library is a collection of domains. A domain specifies:
 
-  * A `domain id <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/ChoosingDomainID.htm>`__.
+  * A `domain id <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/ChoosingDomainID.htm>`__.
   * A set of registered types (from a subset of the types in ``<types>``).
     A registered type can have a local name.
-  * A set of `topics <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/WorkingWithTopics.htm>`__,
+  * A set of `topics <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/WorkingWithTopics.htm>`__,
     which are used by *DataReaders* and *DataWriters*.
 
 .. code-block:: xml
@@ -106,7 +106,7 @@ A domain library is a collection of domains. A domain specifies:
     </domain_library>
 
 For more information about the format of a domain library, see
-`XML-Based Application Creation: Domain Library <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm#XMLBasedAppCreation/UnderstandingPrototyper/DomainLibrary.htm#5.5.1_Domain_Library%3FTocPath%3D5.%2520Understanding%2520XML-Based%2520Application%>`__.
+`XML-Based Application Creation: Domain Library <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/DomainLibrary.htm>`__.
 
 Participant library
 ~~~~~~~~~~~~~~~~~~~
@@ -139,12 +139,12 @@ as described in :ref:`Reading data (Input)`.
     </domain_participant_library>
 
 For more information about the format of a participant library, see
-`XML-Based Application Creation: Participant Library <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/xml_application_creation/html_files/RTI_ConnextDDS_CoreLibraries_XML_AppCreation_GettingStarted/index.htm>`__.
+`XML-Based Application Creation: Participant Library <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/ParticipantLibrary.htm>`__.
 
 Quality of service
 ~~~~~~~~~~~~~~~~~~
 
-All DDS entities have an associated `quality of service (QoS) <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/QosPolicies.htm>`__.
+All DDS entities have an associated `quality of service (QoS) <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/QosPolicies.htm>`__.
 There are several ways to configure it.
 
 You can define a QoS profile and make it the default. The following example
@@ -178,7 +178,7 @@ You can define the QoS for each individual entity:
 .. code-block:: xml
 
     <domain_participant name="MyPubParticipant" domain_ref="MyDomainLibrary::MyDomain">
-        <participant_qos> <!-- ... --> </participant_qos>
+        <domain_participant_qos> <!-- ... --> </domain_participant_qos>
         <publisher name="MyPublisher">
             <publisher_qos> <!-- ... --> </publisher_qos>
             <data_writer name="MySquareWriter" topic_ref="Square">
@@ -200,9 +200,9 @@ entity:
 .. code-block:: xml
 
     <domain_participant name="MyPubParticipant" domain_ref="MyDomainLibrary::MyDomain">
-        <participant_qos base_name="MyQosLibrary::MyQosProfile">
+        <domain_participant_qos base_name="MyQosLibrary::MyQosProfile">
             <!-- override or configure additional Qos policies -->
-        </participant_qos>
+        </domain_participant_qos>
         <publisher name="MyPublisher">
             <publisher_qos base_name="MyQosLibrary::MyQosProfile">
                 <!-- override or configure additional Qos policies -->
@@ -230,4 +230,23 @@ profile is equivalent to *MyQosProfile* above:
     </qos_library>
 
 You can read more in the *RTI Connext DDS Core Libraries User's Manual*, 
-`Configuring QoS with XML <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/index.htm#UsersManual/XMLConfiguration.htm>`__.
+`Configuring QoS with XML <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/XMLConfiguration.htm>`__.
+
+Logging
+^^^^^^^
+
+Logging can be configured as explained in `Configuring Logging via XML <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/Configuring_Logging_via_XML1.htm>`__.
+
+For example, to increase the logging verbosity from the default (ERROR) to
+WARNING, define a ``qos_profile`` with the attribute
+``is_default_participant_factory_profile="true"``:
+
+.. code-block:: xml
+
+    <qos_profile name="Logging" is_default_participant_factory_profile="true">
+        <participant_factory_qos>
+            <logging>
+                <verbosity>WARNING</verbosity>
+            </logging>
+        </participant_factory_qos>
+    </qos_profile>

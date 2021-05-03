@@ -8,7 +8,7 @@
 
 const path = require('path')
 const os = require('os')
-const ffi = require('ffi')
+const ffi = require('ffi-napi')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const expect = chai.expect
@@ -97,7 +97,7 @@ describe('Subscriber not automatically enabled tests', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      expect(true).to.deep.equals(false)
+      throw(err)
     }
   })
 })

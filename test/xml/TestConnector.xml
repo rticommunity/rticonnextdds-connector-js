@@ -8,13 +8,12 @@ This code contains trade secrets of Real-Time Innovations, Inc.
  -->
 
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/6.0.0/rti_dds_profiles.xsd"
-     version="6.0.0">
+     xsi:noNamespaceSchemaLocation="http://community.rti.com/schema/current/rti_dds_profiles.xsd">
 
     <!-- Qos Library -->
     <qos_library name="QosLibrary">
         <qos_profile name="DefaultProfile" is_default_qos="true">
-        	<participant_qos>
+        	<domain_participant_qos>
                 <transport_builtin>
                     <mask>UDPV4 | SHMEM</mask>
                 </transport_builtin>
@@ -24,7 +23,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
                         <nanosec>100000000</nanosec>
                     </shutdown_cleanup_period>
                 </database>
-            </participant_qos>
+            </domain_participant_qos>
             <datawriter_qos>
                 <reliability>
                     <kind> RELIABLE_RELIABILITY_QOS </kind>
@@ -39,6 +38,9 @@ This code contains trade secrets of Real-Time Innovations, Inc.
                     <initial_instances>1</initial_instances>
                     <max_instances>5</max_instances>
                 </resource_limits>
+                <writer_data_lifecycle>
+                    <autodispose_unregistered_instances>false</autodispose_unregistered_instances>
+                </writer_data_lifecycle>
             </datawriter_qos>
             <datareader_qos>
                 <reliability>
@@ -133,6 +135,33 @@ This code contains trade secrets of Real-Time Innovations, Inc.
             <member name="my_point_alias" type="nonBasic"  nonBasicTypeName= "PointAlias" optional="true"/>
             <member name="my_int64" type="int64"/>
             <member name="my_uint64" type="uint64"/>
+            <member name="my_key_string" stringMaxLength="128" type="string" key="true"/>
+        </struct>
+        <struct name="UnkeyedShapeType">
+            <member name="color" stringMaxLength="128" type="string"/>
+            <member name="x" type="long"/>
+            <member name="y" type="long"/>
+            <member name="shapesize" type="long"/>
+            <member name="z" type="boolean"/>
+        </struct>
+        <struct name="MultipleKeyedShapeType">
+            <member name="color" stringMaxLength="128" type="string" key="true"/>
+            <member name="other_color" stringMaxLength="128" type="string" key="true"/>
+            <member name="x" type="long"/>
+            <member name="y" type="long" key="true"/>
+            <member name="shapesize" type="long"/>
+            <member name="z" type="boolean" key="true"/>
+        </struct>
+        <struct name="NestedKeyedShapeType">
+            <member name="keyed_shape" type="nonBasic" nonBasicTypeName="UnkeyedShapeType" key="true"/>
+            <member name="unkeyed_shape" type="nonBasic" nonBasicTypeName="UnkeyedShapeType"/>
+            <member name="keyed_nested_member" type="nonBasic" nonBasicTypeName="ShapeType" key="true"/>
+            <member name="unkeyed_toplevel_member" type="long" default="12"/>
+            <member name="keyed_toplevel_member" type="long" key="true"/>
+        </struct>
+        <struct name="ShapeTypeWithoutToplevelKeyType">
+            <member name="unkeyed_shape" type="nonBasic" nonBasicTypeName="ShapeType"/>
+            <member name="keyed_shape" type="nonBasic" nonBasicTypeName="ShapeType" key="true"/>
         </struct>
     </types>
 
@@ -140,9 +169,17 @@ This code contains trade secrets of Real-Time Innovations, Inc.
     <domain_library name="MyDomainLibrary">
         <domain name="MyDomain" domain_id="229">
             <register_type name="ShapeType" type_ref="ShapeType" />
+            <register_type name="UnkeyedShapeType" type_ref="UnkeyedShapeType"/>
+            <register_type name="MultipleKeyedShapeType" type_ref="MultipleKeyedShapeType"/>
+            <register_type name="NestedKeyedShapeType" type_ref="NestedKeyedShapeType"/>
+            <register_type name="ShapeTypeWithoutToplevelKeyType" type_ref="ShapeTypeWithoutToplevelKeyType"/>
             <topic name="Square" register_type_ref="ShapeType"/>
             <topic name="Circle" register_type_ref="ShapeType"/>
             <topic name="SingleUseShape" register_type_ref="ShapeType"/>
+            <topic name="UnkeyedSquare" register_type_ref="UnkeyedShapeType"/>
+            <topic name="MultipleKeyedSquare" register_type_ref="MultipleKeyedShapeType"/>
+            <topic name="NestedKeyedSquare" register_type_ref="NestedKeyedShapeType"/>
+            <topic name="ShapeTypeWithoutToplevelKey" register_type_ref="ShapeTypeWithoutToplevelKeyType"/>
         </domain>
         <domain name="DataAccessDomain" domain_id="229">
             <register_type name="MyType" type_ref="MyType" />
@@ -163,10 +200,18 @@ This code contains trade secrets of Real-Time Innovations, Inc.
         <domain_participant name="Zero" domain_ref="MyDomainLibrary::MyDomain">
             <publisher name="MyPublisher">
                 <data_writer name="MySquareWriter" topic_ref="Square" />
+                <data_writer name="MyUnkeyedSquareWriter" topic_ref="UnkeyedSquare"/>
+                <data_writer name="MyMultipleKeyedSquareWriter" topic_ref="MultipleKeyedSquare"/>
+                <data_writer name="MyNestedKeyedSquareWriter" topic_ref="NestedKeyedSquare"/>
+                <data_writer name="MySquareWithoutTopLevelKeyWriter" topic_ref="ShapeTypeWithoutToplevelKey"/>
             </publisher>
 
             <subscriber name="MySubscriber">
                 <data_reader name="MySquareReader" topic_ref="Square" />
+                <data_reader name="MyUnkeyedSquareReader" topic_ref="UnkeyedSquare" />
+                <data_reader name="MyMultipleKeyedSquareReader" topic_ref="MultipleKeyedSquare" />
+                <data_reader name="MyNestedKeyedSquareReader" topic_ref="NestedKeyedSquare" />
+                <data_reader name="MySquareWithoutTopLevelKeyReader" topic_ref="ShapeTypeWithoutToplevelKey" />
             </subscriber>
         </domain_participant>
 
@@ -259,6 +304,12 @@ This code contains trade secrets of Real-Time Innovations, Inc.
             <publisher name="TestPublisher">
                 <data_writer name="TestWriter" topic_ref="SingleUseShape" />
             </publisher>
+        </domain_participant>
+
+        <!-- Test for CON-214 -->
+        <domain_participant name="ConnectorWithParticipantQos"
+                            domain_ref="MyDomainLibrary::MyDomain">
+            <domain_participant_qos/>
         </domain_participant>
     </domain_participant_library>
 </dds>

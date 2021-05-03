@@ -15,7 +15,7 @@ to the *Connext DDS* Databus in programming languages such as Python and JavaScr
 .. note::
 
     This documentation assumes you are already familiar with basic DDS concepts.
-    You can learn about DDS in the *RTI Connext DDS Core Libraries Getting Started Guide*,
+    You can learn about DDS in the *RTI Connext DDS Getting Started Guide*,
     *RTI Connext DDS Core Libraries User's Manual*, and the *Connext DDS* API documentation for C,
     C++, Java and .NET. These documents are available from the
     `RTI Community portal <https://community.rti.com/documentation>`__.
@@ -37,7 +37,7 @@ How to read this documentation
 
   * First learn how to install *Connector* and run the examples in :ref:`Getting Started`.
 
-  * Learn how to define the DDS system in XML in :ref:`Defining a DDS system in XML`.
+  * Learn how to define the DDS system in XML in :ref:`Defining a DDS System in XML`.
 
   * Learn how to write a *Connector* application in
     :ref:`Loading a Connector`, :ref:`Writing Data (Output)`, and :ref:`Reading Data (Input)`.
