@@ -2,7 +2,7 @@ RTI Connector for JavaScript
 ============================
 
 RTI® Connext® DDS is a connectivity software framework for integrating
-data sources of all types. At its core is the world’s leading ultra-high
+data sources of all types. At its core is the world's leading ultra-high
 performance, distributed networking databus.
 
 *RTI Connector* provides a quick and easy way to write applications that
@@ -33,20 +33,19 @@ Dependencies
 ------------
 
 RTI Connector for JavaScript has the following dependencies, which are
-also listed in ``package.json``:
-
--  `ref-napi <https://www.npmjs.com/package/ref-napi>`__: turns Buffer instances into
-   “pointers”
--  `ref-struct-napi <https://www.npmjs.com/package/ref-struct-napi>`__:
-   create ABI-compilant "Struct" instances on top of Buffers
--  `ffi-napi <https://www.npmjs.com/package/ffi-napi>`__: used for
-   loading and calling dynamic libraries using pure JavaScript
--  `events <https://www.npmjs.com/package/events>`__: used for the
-   ‘EventEmitter’ (legacy implementation of RTI Connector)
+also listed in ``package.json``: \*
+`ref-napi <https://www.npmjs.com/package/ref-napi>`__: turns Buffer
+instances into "pointers" \*
+`ref-struct-napi <https://www.npmjs.com/package/ref-struct-napi>`__:
+create ABI-compilant "Struct" instances on top of Buffers \*
+`ffi-napi <https://www.npmjs.com/package/ffi-napi>`__: used for loading
+and calling dynamic libraries using pure JavaScript \*
+`events <https://www.npmjs.com/package/events>`__: used for the
+'EventEmitter' (legacy implementation of RTI Connector)
 
 Additionally to run the ``web_socket`` example,
 `socket.io <https://github.com/Automattic/socket.io>`__ and
-[OpenLayers](https://openlayers.org] are required.
+`OpenLayers <https://openlayers.org>`__ are required.
 
 Additional dependencies are required to run the unit tests and some of
 the examples. Please see the README files in the appropriate directory.
