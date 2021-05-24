@@ -1593,8 +1593,7 @@ class Output {
         (err, res) => {
           if (err) {
             return reject(err)
-          }
-          else if (res === _ReturnCodes.ok) {
+          } else if (res === _ReturnCodes.ok) {
             return resolve()
           } else if (res === _ReturnCodes.timeout) {
             return reject(new TimeoutError('Timeout error'))
