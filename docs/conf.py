@@ -142,8 +142,8 @@ latex_use_modindex = True
 latex_documents = [
     (
         master_doc,
-        'rticonnectorforpython.tex',
-        'RTI Connector for Python',
+        'rticonnectorforjavascript.tex',
+        'RTI Connector for Javascript',
         '2021, Real-Time Innovations, Inc.',
         'manual'
     ),
