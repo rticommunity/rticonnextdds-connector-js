@@ -101,6 +101,18 @@ describe('Connector Tests', function () {
       expect(connector).to.be.instanceOf(rti.Connector)
   })
 
+  // Test for CON-200
+  it('Connector should not segfault if deleted twice', async function () {
+    const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile2 = path.join(__dirname, '/../xml/TestConnector2.xml')
+    const fullXmlPath = xmlProfile1 + ';' + xmlProfile2
+    const connector = new rti.Connector('MyParticipantLibrary2::MyParticipant2', fullXmlPath)
+    expect(connector).to.exist
+    expect(connector).to.be.instanceOf(rti.Connector)
+    await connector.close()
+    await connector.close()
+  })
+
   describe('Connector callback test', function () {
     let connector
 
