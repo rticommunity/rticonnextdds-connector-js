@@ -101,6 +101,41 @@ describe('Connector Tests', function () {
       expect(connector).to.be.instanceOf(rti.Connector)
   })
 
+  it('is possible to obtain the build ID of native libraries', function () {
+      const str = rti.Connector.nativeLibraryBuildString()
+      expect(str).to.exist
+      console.log(typeof(str))
+      expect(str).to.be.a('string')
+      expect(str).to.contain('RTICONNECTOR_BUILD_')
+  })
+
+  it('is possible to obtain the version of native libraries', function () {
+      const nativeVersion = rti.Connector.nativeLibraryVersion()
+      expect(nativeVersion.major).to.be.a('number')
+      expect(nativeVersion.minor).to.be.a('number')
+      expect(nativeVersion.release).to.be.a('number')
+      expect(nativeVersion.revision).to.be.a('number')
+      // Confirm that the to string method creates a string in correct format
+      const str = nativeVersion.toString()
+      // [major].[minor].[release].[revision]
+      const regex =/[0-9][.][0-9][.][0-9][.][0-9]/
+      expect(regex.test(str)).deep.equals(true)
+      console.log(str)
+  })
+
+  it('is possible to obtain the current version of Connector', function () {
+    const version = rti.Connector.version()
+    expect(version.major).to.be.a('number')
+    expect(version.minor).to.be.a('number')
+    expect(version.release).to.be.a('number')
+    expect(version.revision).to.be.a('number')
+    // Confirm that the to string method creates a string in correct format
+    const str = version.toString()
+    // [major].[minor].[release].[revision]
+    const regex =/[0-9][.][0-9][.][0-9][.][0-9]/
+    expect(regex.test(str)).deep.equals(true)
+  })
+
   describe('Connector callback test', function () {
     let connector
 
