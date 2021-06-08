@@ -101,39 +101,27 @@ describe('Connector Tests', function () {
       expect(connector).to.be.instanceOf(rti.Connector)
   })
 
-  it('is possible to obtain the build ID of native libraries', function () {
-      const str = rti.Connector.nativeLibraryBuildString()
-      expect(str).to.exist
-      console.log(typeof(str))
-      expect(str).to.be.a('string')
-      expect(str).to.contain('RTICONNECTOR_BUILD_')
-  })
-
-  it('is possible to obtain the version of native libraries', function () {
-      const nativeVersion = rti.Connector.nativeLibraryVersion()
-      expect(nativeVersion.major).to.be.a('number')
-      expect(nativeVersion.minor).to.be.a('number')
-      expect(nativeVersion.release).to.be.a('number')
-      expect(nativeVersion.revision).to.be.a('number')
-      // Confirm that the to string method creates a string in correct format
-      const str = nativeVersion.toString()
-      // [major].[minor].[release].[revision]
-      const regex =/[0-9][.][0-9][.][0-9][.][0-9]/
-      expect(regex.test(str)).deep.equals(true)
-      console.log(str)
-  })
-
   it('is possible to obtain the current version of Connector', function () {
-    const version = rti.Connector.version()
-    expect(version.major).to.be.a('number')
-    expect(version.minor).to.be.a('number')
-    expect(version.release).to.be.a('number')
-    expect(version.revision).to.be.a('number')
-    // Confirm that the to string method creates a string in correct format
-    const str = version.toString()
-    // [major].[minor].[release].[revision]
-    const regex =/[0-9][.][0-9][.][0-9][.][0-9]/
-    expect(regex.test(str)).deep.equals(true)
+    const version = rti.Connector.get_version()
+    expect(version).to.be.a.string
+
+    // The returned version string should contain four pieces of information:
+    // - the API version of Connector
+    // - the build ID of core.1.0
+    // - the build ID of dds_c.1.0
+    // - the build ID of lua_binding.1.0
+    // Expect "RTI Connector for JavaScript, version X.X.X"
+    let regex = /RTI Connector for JavaScript, version ([0-9][.]){2}[0-9]/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "NDDSCORE_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*NDDSCORE_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "NDDSC_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*NDDSC_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "RTICONNECTOR_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*RTICONNECTOR_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
   })
 
   describe('Connector callback test', function () {

@@ -98,9 +98,3 @@ Class reference: Connector
 
 .. autoclass:: Connector
    :members:
-
-Class reference: ConnectorVersion
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: ConnectorVersion
-   :members:

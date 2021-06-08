@@ -26,20 +26,6 @@ var _ConnectorOptions = StructType({
   enable_on_data_event: ref.types.int,
   one_based_sequence_indexing: ref.types.int
 })
-
-/**
- * The Node.js representation of the RTIDDSConnector_LibraryVersion structure
- * within the core.
- *
- * @private
- */
-var _NativeConnectorVersion = StructType({
-  major: ref.types.char,
-  minor: ref.types.char,
-  release: ref.types.char,
-  revision: ref.types.char
-})
-
 class _ConnectorBinding {
   constructor () {
     let libDir = ''
@@ -150,10 +136,9 @@ class _ConnectorBinding {
       RTI_Connector_free_string: ['void', ['char *']],
       RTI_Connector_set_max_objects_per_thread: ['int', ['int']],
       RTIDDSConnector_getJSONInstance:['char *', ['pointer', 'string']],
-      RTI_Connector_get_library_version:[ref.refType(_NativeConnectorVersion), []],
-      RTI_Connector_get_build_version_string:['char *', []],
       // This API is only used in the unit tests
-      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
+      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']],
+      RTI_Connector_get_build_versions: ['int', [ref.refType('char *'), ref.refType('char *')]]
     })
   }
 }
@@ -406,61 +391,6 @@ class Infos {
 }
 
 // Public API
-
-/**
- * Provides information about the version of Connector.
- */
-class ConnectorVersion {
-    /**
-     * This class provides information about the version of Connector being used.
-     *
-     * An instance of this class is returned by :meth:`Connector.nativeLibraryVersion`.
-     * In this case it will contain information regarding the release
-     * of the native Connext DDS Pro libraries being used by Connector (e.g.,
-     * 6.1.0).
-     *
-     * An instance of the class is also returned by :meth:`Connector.version`,
-     * providing information regarding the release of Connector
-     * (e.g., 1.1.0).
-     *
-     * The information is provided using 4 Number values. For example, the 1.1.0
-     * release of Connector would be described as: major = 1, minor = 1,
-     * release = 0, revision = 0.
-     *
-     * @param {Number} major The major release value
-     * @param {Number} minor The minor release value
-     * @param {Number} release The release release value
-     * @param {Number} revision The revision release value
-     */
-    constructor(major = 0, minor = 0, release = 0, revision = 0) {
-        this.major = new Number(major)
-        this.minor = new Number(minor)
-        this.release = new Number(release)
-        this.revision = new Number(revision)
-    }
-
-    /**
-     * This is an internal function used to convert the _NativeConnectorVersion
-     * returned by the core libraries into a ConnectorVersion.
-     *
-     * @param {_NativeConnectorVersion} native
-     * @returns {ConnectorVersion}
-     * @private
-     */
-    static fromNative(native) {
-        // Convert the char fields in the native version into numbers
-        return new ConnectorVersion(
-            new Number(native.major),
-            new Number(native.minor),
-            new Number(native.release),
-            new Number(0))
-    }
-
-    // Overload to string to print version in format x.x.x.x
-    toString() {
-      return this.major + '.' + this.minor + '.' + this.release + '.' + this.revision
-    }
-}
 
 /**
  * Iterates and provides access to a data sample.
@@ -2139,51 +2069,35 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Returns the build ID of the native libraries as a string.
+   * Returns the version of Connector.
+   *
+   * This static method provides the build IDs of the native libraries being used
+   * by Connector, as well as the version of the Connector API.
    *
    * .. note::
    *   This is a static method. It can be called before creating a 
    *   :class:`Connector` instance.
    *
-   * @returns {string} A ``string`` containing the build ID of the native libraries
-   * used by Connector.
+   * @returns {string} A string containing information about the version of Connector.
    */
-  static nativeLibraryBuildString() {
-      return ref.readCString(
-            connectorBinding.api.RTI_Connector_get_build_version_string())
-  }
-
-  /**
-   * Returns the version of the native libraries used by Connector in the format
-   * major.minor.release.revision (e.g., 6.1.0.0).
-   *
-   * .. note::
-   *   This is a static method. It can be called before creating a 
-   *   :class:`Connector` instance.
-   *
-   * @returns {ConnectorVersion} The version of the native libraries used by Connector.
-   */
-  static nativeLibraryVersion() {
-    return ConnectorVersion.fromNative(
-        (connectorBinding.api.RTI_Connector_get_library_version()).deref())
-  }
-
-  /**
-   * Returns the version of Connector currently in use, in the format
-   * major.minor.release.revision (e.g., 1.1.0.0).
-   *
-   * .. note::
-   *   This is a static method. It can be called before creating a 
-   *   :class:`Connector` instance.
-   *
-   * @returns {ConnectorVersion} The version of Connector.
-   */
-  static version() {
+  static get_version() {
       // Obtain version of Connector from package.json
       const versionString = require('./package.json').version
       // Parse numbers out of string
       const versionNumbers = versionString.split('.')
-      return new ConnectorVersion(versionNumbers[0], versionNumbers[1], versionNumbers[2])
+      // Now get the build IDs of the native libraries
+      const nativeConnectorVersion = ref.alloc('char *')
+      const nativeCoreCVersion = ref.alloc('char *')
+      _checkRetcode(connectorBinding.api.RTI_Connector_get_build_versions(
+          nativeCoreCVersion,
+          nativeConnectorVersion))
+
+      // Now create the string containing all of the above information
+      let versionStr = "RTI Connector for JavaScript, version "
+        + versionNumbers[0] + "." + versionNumbers[1] + "." + versionNumbers[2] + "\n"
+      versionStr += ref.readCString(nativeCoreCVersion.deref()) + "\n"
+      versionStr += ref.readCString(nativeConnectorVersion.deref())
+      return versionStr
   }
 }
 
