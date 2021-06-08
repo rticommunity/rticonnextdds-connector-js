@@ -2043,6 +2043,18 @@ class Connector extends EventEmitter {
       }
     }
   }
+
+  /**
+   * This method is deprecated since the max_objects_per_thread now grows
+   * dynamically.
+   *
+   * @private
+   *
+   * Note this method is deprecated in the Ironside release. This static method
+   * only exists to not break user's applications which are already using it.
+   */
+  static setMaxObjectsPerThread (value) {
+  }
 }
 
 // Export the API
