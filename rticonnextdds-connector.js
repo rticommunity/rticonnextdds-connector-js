@@ -140,8 +140,6 @@ class _ConnectorBinding {
       // This API is only used in the unit tests
       RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
     })
-    // The maximum integer representable by Lua layer
-    this.maxIntegerAsDouble = 2
   }
 }
 
