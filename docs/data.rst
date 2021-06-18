@@ -131,15 +131,17 @@ To set any numeric type, including enumerations:
 
 .. warning::
     The range of values for a numeric field is determined by the type
-    used to define that field in the configuration file. However, 
-    ``setNumber`` and ``getNumber`` can't handle 64-bit integers 
-    (*int64* and *uint64*) whose absolute values are larger than 2^53. 
-    This is a *Connector* limitation due to the use of *double* as an 
-    intermediate representation.
+    used to define that field in the configuration file.
 
-    When ``setNumber`` or ``getNumber`` detect this situation, they will raise
-    an :class:`DDSError`. ``getJson`` and ``setJson`` do not have this
-    limitation and can handle any 64-bit integer.
+.. note:: 
+    64-bit integers (*int64* and *uint64* in the type definitions) can only be
+    set via ``setJson`` or ``setNumber``. They must be provided as strings (i.e.,
+    the integer value surrounded by quotes).
+
+    64-bit integers can only be obtained via ``getJson``.
+
+    Attempting to set or get 64-bit integers via a different operation will raise
+    a :class:`DDSError`.
 
 To set booleans:
 
@@ -201,6 +203,9 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
     If a field ``my_string``, defined as a string in the configuration file, contains
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
+
+.. note::
+    ``getJson`` will always return 64-bit integers (*int64* and *uint64*) as strings.
 
 Accessing structs
 ^^^^^^^^^^^^^^^^^

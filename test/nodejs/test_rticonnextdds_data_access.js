@@ -48,8 +48,8 @@ describe('Data access tests with a pre-populated input', function () {
     my_int_sequence: [1, 2, 3],
     my_point_array: [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 5, y: 15 }],
     my_boolean: false,
-    my_int64: -18014398509481984,
-    my_uint64: 18014398509481984,
+    my_int64: '-18014398509481984',
+    my_uint64: '18014398509481984',
     my_key_string: 'hello'
   }
 
@@ -367,8 +367,8 @@ describe('Tests with a testOutput and testInput', () => {
     my_int_sequence: [1, 2, 3],
     my_point_array: [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 5, y: 15 }],
     my_boolean: false,
-    my_int64: -18014398509481984,
-    my_uint64: 18014398509481984,
+    my_int64: '-18014398509481984',
+    my_uint64: '18014398509481984',
     my_key_string: 'hello'
   }
 
@@ -1028,6 +1028,65 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     expect(testInput.samples.get(0).get('my_enum')).to.deep.equals(1)
+  })
+
+  it('Communicate 64-bit numbers via JSON', async () => {
+      const maxInt64 = '9223372036854775807'
+      const maxUint64 = '18446744073709551615'
+      testOutput.instance.setFromJson({'my_int64': maxInt64, 'my_uint64': maxUint64})
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch(err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      const jsonObj = testInput.samples.get(0).getJson()
+      expect(jsonObj.my_uint64).to.deep.equals(maxUint64)
+      expect(jsonObj.my_int64).to.deep.equals(maxInt64)
+  })
+
+  it('Communicate 64-bit numbers via setNumber', async () => {
+      const maxInt64 = '9223372036854775807'
+      const maxUint64 = '18446744073709551615'
+      testOutput.instance.setNumber('my_int64', maxInt64)
+      testOutput.instance.setNumber('my_uint64', maxUint64)
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch(err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      const jsonObj = testInput.samples.get(0).getJson()
+      expect(jsonObj.my_int64).to.deep.equals(maxInt64.toString())
+      expect(jsonObj.my_uint64).to.deep.equals(maxUint64.toString())
+  })
+
+  it('Can set numbers using a string', async () => {
+      const numberString = '123'
+      testOutput.instance.setNumber('my_long', numberString)
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch(err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).getNumber('my_long')).to.deep.equals(+numberString)
+  })
+
+  it('Can only set numbers using a string if string represents a valid number', async () => {
+      let invalidNumberString = '123a'
+      expect(() => {
+          testOutput.instance.setNumber('my_long', invalidNumberString)
+      }).to.throw(TypeError)
+      expect(() => {
+          testOutput.instance.setNumber('my_long', invalidNumberString)
+      }).to.throw(TypeError)
   })
 })
 

@@ -140,6 +140,8 @@ class _ConnectorBinding {
       // This API is only used in the unit tests
       RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
     })
+    // The maximum integer representable by Lua layer
+    this.maxIntegerAsDouble = 2
   }
 }
 
@@ -1277,8 +1279,8 @@ class Instance {
    * Sets a numeric field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A numeric value, or null, to unset an 
-   *   optional member.
+   * @param {number|string|null} value - A numeric value, a quoted numeric value
+   * (string), or null to unset an  optional member.
    */
   setNumber (fieldName, value) {
     if (!_isString(fieldName)) {
@@ -1286,8 +1288,15 @@ class Instance {
     } else if (!_isNumber(value)) {
       if (value === null) {
         this.clearMember(fieldName)
+      } else if (_isString(value)) {
+        // Set via JSON to workaround. Ensure that the string is an actual number
+        if (isNaN(value)) {
+          throw new TypeError('value must be a valid representation of a number')
+        }
+        const json = {[fieldName]: value}
+        this.setFromJson(json)
       } else {
-        throw new TypeError('value must be a number')
+        throw new TypeError('value must be either a number, a string, or null')
       }
     } else {
       _checkRetcode(connectorBinding.api.RTI_Connector_set_number_into_samples(
@@ -1338,7 +1347,7 @@ class Instance {
       if (value === null) {
         this.clearMember(fieldName)
       } else {
-        throw new TypeError('value must be a boolean')
+        throw new TypeError('value must be a string')
       }
     } else {
       const retcode = connectorBinding.api.RTI_Connector_set_string_into_samples(
@@ -1402,7 +1411,7 @@ class Instance {
     } else if (typeof value === 'boolean') {
       this.setBoolean(fieldName, value)
     } else if (typeof value === 'object') {
-      // We need to use computed property names to set use the variable 'fieldName'
+      // We need to use computed property names to use the variable 'fieldName'
       // as the key in a JSON object
       const json = { }
       json[fieldName] = value
