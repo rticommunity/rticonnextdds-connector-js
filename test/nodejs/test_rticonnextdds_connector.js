@@ -101,13 +101,20 @@ describe('Connector Tests', function () {
     expect(connector).to.be.instanceOf(rti.Connector)
   })
 
-  it('Is possible to set max objects per thread', function () {
-    rti.Connector.setMaxObjectsPerThread(2048)
-    const participantProfile = 'MyParticipantLibrary::Zero'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-    connector = new rti.Connector(participantProfile, xmlProfile)
+  // Test for CON-200
+  it('Connector should not segfault if deleted twice', async function () {
+    const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile2 = path.join(__dirname, '/../xml/TestConnector2.xml')
+    const fullXmlPath = xmlProfile1 + ';' + xmlProfile2
+    const connector = new rti.Connector('MyParticipantLibrary2::MyParticipant2', fullXmlPath)
+    expect(connector).to.exist
+    expect(connector).to.be.instanceOf(rti.Connector)
+    await connector.close()
+    await connector.close()
   })
-})
+
+  describe('Connector callback test', function () {
+    let connector
 
 describe('Connector callback test', function () {
   let connector
