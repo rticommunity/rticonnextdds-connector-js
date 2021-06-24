@@ -135,7 +135,6 @@ class _ConnectorBinding {
       RTI_Connector_get_last_error_message: ['char *', []],
       RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
       RTI_Connector_free_string: ['void', ['char *']],
-      RTI_Connector_set_max_objects_per_thread: ['int', ['int']],
       RTIDDSConnector_getJSONInstance:['char *', ['pointer', 'string']],
       // This API is only used in the unit tests
       RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
@@ -2046,26 +2045,15 @@ class Connector extends EventEmitter {
   }
 
   /**
-   * Allows you to increase the number of :class:`Connector` instances that 
-   * can be created.
+   * This method is deprecated since the max_objects_per_thread now grows
+   * dynamically.
    *
-   * The default value is 2048 (which allows for approximately 15 instances 
-   * of :class:`Connector` to be created in a single application). If you need 
-   * to create more than 8 instances of :class:`Connector`, you can increase 
-   * the value from the default.
+   * @private
    *
-   * .. note::
-   *   This is a static method. It can only be called before creating a 
-   *   :class:`Connector` instance.
-   *
-   * See `SYSTEM_RESOURCE_LIMITS QoS Policy 
-   * <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/users_manual/index.htm#users_manual/SYSTEM_RESOURCE_LIMITS_QoS.htm>`__
-   * in the *RTI Connext DDS Core Libraries User's Manual* for more information.
-   *
-   * @param {number} value The value for ``max_objects_per_thread``
+   * Note this method is deprecated in the Ironside release. This static method
+   * only exists to not break user's applications which are already using it.
    */
   static setMaxObjectsPerThread (value) {
-    _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))
   }
 }
 
