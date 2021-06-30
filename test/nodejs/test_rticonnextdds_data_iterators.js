@@ -186,6 +186,7 @@ describe('Test the iteration of Input Samples', () => {
     input.take()
     expect(input.samples.length).to.deep.equals(0)
     let hasData = false
+    // eslint-disable-next-line no-unused-vars
     for (const sample of input.samples.validDataIter) {
       hasData = true
     }
@@ -199,6 +200,7 @@ describe('Test the iteration of Input Samples', () => {
     input.take()
     expect(input.samples.length).to.deep.equals(0)
     let hasData = false
+    // eslint-disable-next-line no-unused-vars
     for (const sample of input.samples) {
       hasData = true
     }
