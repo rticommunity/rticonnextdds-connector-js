@@ -101,6 +101,29 @@ describe('Connector Tests', function () {
     expect(connector).to.be.instanceOf(rti.Connector)
   })
 
+  it('is possible to obtain the current version of Connector', function () {
+    const version = rti.Connector.get_version()
+    expect(version).to.be.a.string
+
+    // The returned version string should contain four pieces of information:
+    // - the API version of Connector
+    // - the build ID of core.1.0
+    // - the build ID of dds_c.1.0
+    // - the build ID of lua_binding.1.0
+    // Expect "RTI Connector for JavaScript, version X.X.X"
+    let regex = /RTI Connector for JavaScript, version ([0-9][.]){2}[0-9]/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "NDDSCORE_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*NDDSCORE_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "NDDSC_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*NDDSC_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
+    // Expect "RTICONNECTOR_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
+    regex = /.*RTICONNECTOR_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    expect(regex.test(version)).deep.equals(true)
+  })
+
   // Test for CON-200
   it('Connector should not segfault if deleted twice', async function () {
     const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
