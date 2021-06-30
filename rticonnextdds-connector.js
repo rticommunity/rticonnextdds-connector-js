@@ -2075,6 +2075,36 @@ class Connector extends EventEmitter {
   static setMaxObjectsPerThread (value) {
     _checkRetcode(connectorBinding.api.RTI_Connector_set_max_objects_per_thread(value))
   }
+
+  /**
+   * Returns the version of Connector.
+   *
+   * This static method provides the build IDs of the native libraries being used
+   * by Connector, as well as the version of the Connector API.
+   *   This is a static method. It can be called before creating a
+   *   :class:`Connector` instance.
+   *
+   * @returns {string} A string containing information about the version of Connector.
+   */
+  static getVersion () {
+    // Obtain version of Connector from package.json
+    const versionString = require('./package.json').version
+    // Parse numbers out of string
+    const versionNumbers = versionString.split('.')
+    // Now get the build IDs of the native libraries
+    const nativeConnectorVersion = ref.alloc('char *')
+    const nativeCoreCVersion = ref.alloc('char *')
+    _checkRetcode(connectorBinding.api.RTI_Connector_get_build_versions(
+      nativeCoreCVersion,
+      nativeConnectorVersion))
+
+    // Now create the string containing all of the above information
+    let versionStr = 'RTI Connector for JavaScript, version ' +
+        versionNumbers[0] + '.' + versionNumbers[1] + '.' + versionNumbers[2] + '\n'
+    versionStr += ref.readCString(nativeCoreCVersion.deref()) + '\n'
+    versionStr += ref.readCString(nativeConnectorVersion.deref())
+    return versionStr
+  }
 }
 
 // Export the API
