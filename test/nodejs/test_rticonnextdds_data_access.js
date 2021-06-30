@@ -70,7 +70,7 @@ describe('Data access tests with a pre-populated input', function () {
     } catch (err) {
       console.log('Caught err: ' + err)
       // Fail the test
-      throw(err)
+      throw (err)
     }
     // Write data on the the output
     output.instance.setFromJson(testJsonObject)
@@ -81,7 +81,7 @@ describe('Data access tests with a pre-populated input', function () {
     } catch (err) {
       console.log('Caught err: ' + err)
       // Fail the test
-      throw(err)
+      throw (err)
     }
     // Take the data on the input so that we can access it from the test
     prepopulatedInput.take()
@@ -101,14 +101,62 @@ describe('Data access tests with a pre-populated input', function () {
     expect(sample.get('my_long')).to.deep.equals(10).and.is.a('number')
   })
 
+  it('getNumber requires a valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getNumber('NAN', 'my_long')
+    }).to.throw(TypeError)
+  })
+
+  it('getNumber requires a valid field name', () => {
+    expect(() => {
+      prepopulatedInput.samples.getNumber(0, 1)
+    }).to.throw(TypeError)
+  })
+
   it('getString on a number field should return a string', () => {
     expect(sample.getString('my_long')).to.deep.equals('10').and.is.a('string')
     expect(sample.getString('my_double')).to.deep.equals('3.3').and.is.a('string')
   })
 
+  it('getString requires a valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getString('NAN', 'my_string')
+    }).to.throw(TypeError)
+  })
+
+  it('getString requires a valid field name', () => {
+    expect(() => {
+      prepopulatedInput.samples.getString(0, 1)
+    }).to.throw(TypeError)
+  })
+
   it('getBoolean should return a boolean', () => {
     expect(sample.getBoolean('my_optional_bool')).to.be.true.and.is.a('boolean')
     expect(sample.get('my_optional_bool')).to.be.true.and.is.a('boolean')
+  })
+
+  it('getBoolean requires a valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getBoolean('NAN', 'my_optional_bool')
+    }).to.throw(TypeError)
+  })
+
+  it('getBoolean requires a valid field name', () => {
+    expect(() => {
+      prepopulatedInput.samples.getBoolean(0, 1)
+    }).to.throw(TypeError)
+  })
+
+  it('getValue requires a valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getValue('NAN', 'my_optional_bool')
+    }).to.throw(TypeError)
+  })
+
+  it('getValue requires a valid field name', () => {
+    expect(() => {
+      prepopulatedInput.samples.getValue(0, 1)
+    }).to.throw(TypeError)
   })
 
   it('getNumber on a boolean field should return a number', () => {
@@ -197,6 +245,18 @@ describe('Data access tests with a pre-populated input', function () {
     expect(() => {
       sample.getJson('IDoNotExist')
     }).to.throw(rti.DDSError)
+  })
+
+  it('getJson requires valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getJson('NAN')
+    }).to.throw(TypeError)
+  })
+
+  it('if a member name is supplied to getJson, it must be a string', () => {
+    expect(() => {
+      prepopulatedInput.samples.getJson(1, 0)
+    }).to.throw(TypeError)
   })
 
   it('attempt to get non-complex members with getJson', () => {
@@ -344,8 +404,14 @@ describe('Data access tests with a pre-populated input', function () {
   })
 
   it('Obtain JSON string of dictionary', () => {
-      const jsonInstance = output.instance.getJson()
-      expect(jsonInstance).to.deep.equals(testJsonObject)
+    const jsonInstance = output.instance.getJson()
+    expect(jsonInstance).to.deep.equals(testJsonObject)
+  })
+
+  it('samples.getNative requires valid index', () => {
+    expect(() => {
+      prepopulatedInput.samples.getNative('NAN')
+    }).to.throw(TypeError)
   })
 })
 
@@ -388,7 +454,7 @@ describe('Tests with a testOutput and testInput', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -512,7 +578,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
     testInput.take()
     const received = testInput.samples.get(0).get('my_int_sequence')
@@ -531,7 +597,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught error: ' + err)
-      throw(err)
+      throw (err)
     }
     testInput.take()
     const received = testInput.samples.get(0).get('my_point_sequence')
@@ -545,7 +611,7 @@ describe('Tests with a testOutput and testInput', () => {
       await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught error: ' + err)
-      throw(err)
+      throw (err)
     }
     testInput.take()
     const sample = testInput.samples.get(0)
@@ -864,6 +930,59 @@ describe('Tests with a testOutput and testInput', () => {
     expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2)
   })
 
+  it('Can clear an entire instance on an output', async () => {
+    testOutput.instance.setBoolean('my_optional_bool', true)
+    testOutput.instance.setNumber('my_optional_point.x', 44)
+    testOutput.clearMembers()
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    sample = testInput.samples.get(0)
+    expect(sample.getBoolean('my_optional_bool')).to.be.null
+    expect(sample.getBoolean('my_optional_point')).to.be.null
+  })
+
+  it('Can clear a value via the generic set function', async () => {
+    testOutput.instance.setBoolean('my_optional_bool', true)
+    testOutput.instance.setNumber('my_optional_point.x', 44)
+    testOutput.instance.set('my_optional_bool', null)
+    testOutput.instance.set('my_optional_point', null)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    sample = testInput.samples.get(0)
+    expect(sample.getBoolean('my_optional_bool')).to.be.null
+    expect(sample.getBoolean('my_optional_point')).to.be.null
+  })
+
+  it('Can clear a value via setString', async () => {
+    testOutput.instance.setString('my_string', 'Hello, World!')
+    testOutput.instance.setString('my_string', null)
+    testOutput.write()
+    try {
+      await testInput.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
+    }
+    testInput.take()
+    sample = testInput.samples.get(0)
+    expect(sample.getString('my_string')).to.deep.equals('')
+  })
+
   it('Check that setFromJson shrinks a sequence when it receives a smaller one', async () => {
     // Set the length to 3
     testOutput.instance.setNumber('my_int_sequence[2]', 10)
@@ -995,7 +1114,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.write()
     try {
       await testInput.wait(testExpectSuccessTimeout)
-    } catch(err) {
+    } catch (err) {
       console.log('Error caught: ' + err)
       expect(false).to.deep.equals(true)
     }
@@ -1007,7 +1126,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.write()
     try {
       await testInput.wait(testExpectSuccessTimeout)
-    } catch(err) {
+    } catch (err) {
       console.log('Error caught: ' + err)
       expect(false).to.deep.equals(true)
     }
@@ -1018,11 +1137,11 @@ describe('Tests with a testOutput and testInput', () => {
   })
 
   it('Can set enum via name', async () => {
-    testOutput.instance.setFromJson({ 'my_enum': 'GREEN' })
+    testOutput.instance.setFromJson({ my_enum: 'GREEN' })
     testOutput.write()
     try {
       await testInput.wait(testExpectSuccessTimeout)
-    } catch(err) {
+    } catch (err) {
       console.log('Error caught: ' + err)
       expect(false).to.deep.equals(true)
     }
@@ -1058,14 +1177,14 @@ describe('Tests with two readers and two writers', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
     try {
       const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -1082,7 +1201,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await connector.wait(testExpectFailureTimeout)
       console.log('Expected connector.wait to timeout but it did not')
-      throw(err)
+      throw (err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1092,7 +1211,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput1.wait(testExpectFailureTimeout)
       console.log('Expected testInput1.wait to timeout but it did not')
-      throw(err)
+      throw (err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1102,7 +1221,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput2.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      throw(err)
+      throw (err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1114,7 +1233,7 @@ describe('Tests with two readers and two writers', () => {
       await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -1124,7 +1243,7 @@ describe('Tests with two readers and two writers', () => {
       await testInput1.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -1133,7 +1252,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput2.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      throw(err)
+      throw (err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }
@@ -1145,7 +1264,7 @@ describe('Tests with two readers and two writers', () => {
       await connector.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -1155,7 +1274,7 @@ describe('Tests with two readers and two writers', () => {
       await testInput2.wait(testExpectSuccessTimeout)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -1164,7 +1283,7 @@ describe('Tests with two readers and two writers', () => {
     try {
       await testInput1.wait(testExpectFailureTimeout)
       console.log('Expected testInput2.wait to timeout but it did not')
-      throw(err)
+      throw (err)
     } catch (err) {
       expect(err).to.be.an.instanceof(rti.TimeoutError)
     }

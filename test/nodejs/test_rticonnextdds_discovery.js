@@ -21,10 +21,10 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // Create the connector at this level so it can be automatically closed after
 // each test
-var discoveryConnector = null
-var discoveryConnectorNoEntityNames = null
-var readerOnlyConnector = null
-var writerOnlyConnector = null
+let discoveryConnector = null
+let discoveryConnectorNoEntityNames = null
+let readerOnlyConnector = null
+let writerOnlyConnector = null
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
 const testExpectSuccessTimeout = 10000
@@ -115,7 +115,7 @@ describe('Discovery tests', function () {
     cleanupConnectors()
   })
 
-  it('Create a Connector object with an input and no ouput', async function () {
+  it('Create a Connector object with an input and no output', async function () {
     const input = getDiscoveryReaderOnlyInput()
     // At this point we should not have matched anything
     const matches = input.matchedPublications
@@ -188,7 +188,7 @@ describe('Discovery tests', function () {
       } catch (err) {
         console.log('Caught error: ' + err)
         // Fail the test
-        throw(err)
+        throw (err)
       }
     }
     expect(totalMatches).to.be.at.least(2)
@@ -223,7 +223,7 @@ describe('Discovery tests', function () {
       } catch (err) {
         console.log('Caught error: ' + err)
         // Fail the test
-        throw(err)
+        throw (err)
       }
     }
     expect(totalMatches).to.be.at.least(2)
@@ -369,7 +369,7 @@ describe('Discovery tests', function () {
     } catch (err) {
       console.log('Caught error: ' + err)
       // Fail the test
-      throw(err)
+      throw (err)
     }
 
     // Get the entity names of the matched subs
@@ -395,7 +395,7 @@ describe('Discovery tests', function () {
     } catch (err) {
       console.log('Caught error: ' + err)
       // Fail the test
-      throw(err)
+      throw (err)
     }
     const matches = output.matchedSubscriptions
     expect(matches.length).to.deep.equals(1)
@@ -404,5 +404,33 @@ describe('Discovery tests', function () {
     //  It is not necessary to delete the entities created by the call to createTestScenario
     //  since they were all created from the same DomainParticipant as output,
     //  which will have delete_contained_entities called on it.
+  })
+
+  it('waitForPublications timeout defaults to infinity', async function () {
+    const input = getDiscoveryReaderOnlyInput()
+    // Create the writer in 600ms
+    setTimeout(() => {
+      getDiscoveryWriterOnlyOutput()
+    }, 600)
+    await input.waitForPublications()
+  })
+
+  it('waitForSubscriptions timeout defaults to infinity', async function () {
+    const output = getDiscoveryWriterOnlyOutput()
+    // Create the reader in 600ms
+    setTimeout(() => {
+      getDiscoveryReaderOnlyInput()
+    }, 600)
+    await output.waitForSubscriptions()
+  })
+
+  it('waitForPublications timeout must be a valid number', function () {
+    const input = getDiscoveryReaderOnlyInput()
+    return expect(input.waitForPublications('NAN')).to.be.rejectedWith(TypeError)
+  })
+
+  it('waitForSubscriptions timeout must be a valid number', function () {
+    const output = getDiscoveryWriterOnlyOutput()
+    return expect(output.waitForSubscriptions('NAN')).to.be.rejectedWith(TypeError)
   })
 })

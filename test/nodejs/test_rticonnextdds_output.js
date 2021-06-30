@@ -15,18 +15,25 @@ const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 
+// We provide a timeout of 10s to operations that we expect to succeed. This
+// is so that if they fail, we know for sure something went wrong
+const testExpectSuccessTimeout = 10000
+
 describe('Output Tests', function () {
+  this.timeout(testExpectSuccessTimeout)
   let connector = null
-  // Initialization before all tests execute
-  before(function () {
+  let output = null
+  let input = null
+  beforeEach(function () {
     const participantProfile = 'MyParticipantLibrary::Zero'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
+    output = connector.getOutput('MyPublisher::MySquareWriter')
+    input = connector.getInput('MySubscriber::MySquareReader')
   })
 
-  // Cleanup after all tests have executed
-  after(function () {
-    this.timeout(0)
+  afterEach(async () => {
+    input.take()
     connector.delete()
   })
 
@@ -39,146 +46,147 @@ describe('Output Tests', function () {
 
   it('Output object should get instantiated for valid ' +
       'Publication::DataWriter name', function () {
-    const validDW = 'MyPublisher::MySquareWriter'
-    const output = connector.getOutput(validDW)
     expect(output).to.exist
-    expect(output.name).to.equal(validDW)
+    expect(output.name).to.equal('MyPublisher::MySquareWriter')
     expect(output.connector).to.equal(connector)
   })
 
-  describe('Tests on Output\'s Instance', function () {
-    let output = null
-    // Initialization before all tests execute in this describe block
-    before(function () {
-      output = connector.getOutput('MyPublisher::MySquareWriter')
-    })
+  it('Can wait for acknowledgements on a reliable DataWriter', async () => {
+    // Write data on the writer, and wait for it to be ACK'd by the reader
+    output.write()
+    // Since the writer is reliable transient local, no need to to wait for
+    // discovery
+    await output.wait(testExpectSuccessTimeout)
+    await input.wait(testExpectSuccessTimeout)
+    input.take()
+    expect(input.samples.length).to.deep.equals(1)
+  })
 
-    it('output\'s instance should exist', function () {
-      expect(output.instance).to.exist
-    })
+  it('output\'s instance should exist', function () {
+    expect(output.instance).to.exist
+  })
 
-    it('setNumber on non-existent field should throw error and ' +
+  it('setNumber on non-existent field should throw error and ' +
       'subscriber should not get a message with default values', function () {
-      expect(function () {
-        output.instance.setNumber('invalid_field', 1)
-      }).to.throw(Error)
-    })
+    expect(function () {
+      output.instance.setNumber('invalid_field', 1)
+    }).to.throw(Error)
+  })
 
-    it('setString on non-existent field should throw error and ' +
+  it('setString on non-existent field should throw error and ' +
       'subscriber should not get a message with default values', function () {
-      expect(function () {
-        output.instance.setString('invalid_field', 'value')
-      }).to.throw(Error)
-    })
+    expect(function () {
+      output.instance.setString('invalid_field', 'value')
+    }).to.throw(Error)
+  })
 
-    it('setBoolean on non-existent field should throw error and ' +
-      'subscriber should not get a message with default values',function () {
-      expect(function () {
-        output.instance.setBoolean('invalid_field', true)
-      }).to.throw(Error)
-    })
+  it('setBoolean on non-existent field should throw error and ' +
+      'subscriber should not get a message with default values', function () {
+    expect(function () {
+      output.instance.setBoolean('invalid_field', true)
+    }).to.throw(Error)
+  })
 
-    it('setFromJSON should throw error for a JSON object ' +
+  it('setFromJSON should throw error for a JSON object ' +
       'with non-existent fields and subscriber should not get ' +
       'a message with default values', function () {
-      expect(function () {
-        const invalidData = '{"invalid_field":1}'
-        output.instance.setFromJSON(JSON.parse(invalidData))
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const invalidData = '{"invalid_field":1}'
+      output.instance.setFromJSON(JSON.parse(invalidData))
+    }).to.throw(Error)
+  })
 
-    it('setString with boolean value should throw Error', function () {
-      expect(function () {
-        const stringField = 'color'
-        output.instance.setString(stringField, true)
-      }).to.throw(Error)
-    })
+  it('setString with boolean value should throw Error', function () {
+    expect(function () {
+      const stringField = 'color'
+      output.instance.setString(stringField, true)
+    }).to.throw(Error)
+  })
 
-    it('setString with number value should throw Error', function () {
-      expect(function () {
-        const stringField = 'color'
-        output.instance.setString(stringField, 11)
-      }).to.throw(Error)
-    })
+  it('setString with number value should throw Error', function () {
+    expect(function () {
+      const stringField = 'color'
+      output.instance.setString(stringField, 11)
+    }).to.throw(Error)
+  })
 
-    it('setString with JSON value should throw Error', function () {
-      expect(function () {
-        const stringField = 'color'
-        output.instance.setString(stringField, { key: 'value' })
-      }).to.throw(Error)
-    })
+  it('setString with JSON value should throw Error', function () {
+    expect(function () {
+      const stringField = 'color'
+      output.instance.setString(stringField, { key: 'value' })
+    }).to.throw(Error)
+  })
 
-    it('setNumber with string value should throw Error and' +
+  it('setNumber with string value should throw Error and' +
       'subscriber should not get a message with erroneous field data', function () {
-      expect(function () {
-        const numberField = 'x'
-        output.instance.setNumber(numberField, 'value')
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const numberField = 'x'
+      output.instance.setNumber(numberField, 'value')
+    }).to.throw(Error)
+  })
 
-    it('Implicit type-conversion for setNumber with boolean value', function () {
-      expect(function () {
-        const numberField = 'x'
-        output.instance.setNumber(numberField, true)
-      }).to.throw(Error)
-    })
+  it('Implicit type-conversion for setNumber with boolean value', function () {
+    expect(function () {
+      const numberField = 'x'
+      output.instance.setNumber(numberField, true)
+    }).to.throw(Error)
+  })
 
-    it('setNumber with JSON value should throw Error and ' +
+  it('setNumber with JSON value should throw Error and ' +
       'subscriber should not get a message with erroneous field data', function () {
-      expect(function () {
-        const numberField = 'x'
-        output.instance.setNumber(numberField, { key: 'value' })
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const numberField = 'x'
+      output.instance.setNumber(numberField, { key: 'value' })
+    }).to.throw(Error)
+  })
 
-    it('setBoolean with string value should throw Error and ' +
+  it('setBoolean with string value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
-      expect(function () {
-        const booleanField = 'z'
-        output.instance.setBoolean(booleanField, 'value')
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const booleanField = 'z'
+      output.instance.setBoolean(booleanField, 'value')
+    }).to.throw(Error)
+  })
 
-    it('Implicit type-conversion for setBoolean with number value', function () {
-      expect(function () {
-        const booleanField = 'z'
-        output.instance.setBoolean(booleanField, 1)
-      }).to.throw(Error)
-    })
+  it('Implicit type-conversion for setBoolean with number value', function () {
+    expect(function () {
+      const booleanField = 'z'
+      output.instance.setBoolean(booleanField, 1)
+    }).to.throw(Error)
+  })
 
-    it('setBoolean with JSON value should throw Error and ' +
+  it('setBoolean with JSON value should throw Error and ' +
       'subscriber should not get a  message with erroneous field data', function () {
-      expect(function () {
-        const booleanField = 'z'
-        output.instance.setBoolean(booleanField, { key: 'value' })
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const booleanField = 'z'
+      output.instance.setBoolean(booleanField, { key: 'value' })
+    }).to.throw(Error)
+  })
 
-    it('setFromJSON for JSON object with incompatible value types ' +
+  it('setFromJSON for JSON object with incompatible value types ' +
     'should throw Error and subscriber should not get a message with ' +
     'erroneous field data', function () {
-      expect(function () {
-        const str = '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'
-        output.instance.setFromJSON(JSON.parse(str))
-      }).to.throw(Error)
-    })
+    expect(function () {
+      const str = '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'
+      output.instance.setFromJSON(JSON.parse(str))
+    }).to.throw(Error)
+  })
 
-    it('Use the type independent set with invalid fieldName', function () {
-      expect(function () {
-        output.instance.set(123, 123)
-      }).to.throw(TypeError)
-    })
+  it('Use the type independent set with invalid fieldName', function () {
+    expect(function () {
+      output.instance.set(123, 123)
+    }).to.throw(TypeError)
+  })
 
-    it('Calling the type-independent set with non-existent field name', function () {
-      expect(function () {
-        output.instance.set('non-existent-member', 123)
-      }).to.throw(rti.DDSError)
-    })
+  it('Calling the type-independent set with non-existent field name', function () {
+    expect(function () {
+      output.instance.set('non-existent-member', 123)
+    }).to.throw(rti.DDSError)
+  })
 
-    it('Try to set a bad JSON value', function () {
-      expect(function () {
-        output.instance.set('whatever', { x: 12, y: 30 })
-      }).to.throw(rti.DDSError)
-    })
+  it('Try to set a bad JSON value', function () {
+    expect(function () {
+      output.instance.set('whatever', { x: 12, y: 30 })
+    }).to.throw(rti.DDSError)
   })
 })
