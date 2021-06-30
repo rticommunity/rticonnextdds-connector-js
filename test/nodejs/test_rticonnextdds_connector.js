@@ -102,7 +102,7 @@ describe('Connector Tests', function () {
   })
 
   it('is possible to obtain the current version of Connector', function () {
-    const version = rti.Connector.get_version()
+    const version = rti.Connector.getVersion()
     expect(version).to.be.a.string
 
     // The returned version string should contain four pieces of information:
@@ -139,68 +139,66 @@ describe('Connector Tests', function () {
   describe('Connector callback test', function () {
     let connector
 
-describe('Connector callback test', function () {
-  let connector
+    // Initialization before all tests are executed
+    before(() => {
+      const participantProfile = 'MyParticipantLibrary::Zero'
+      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+      connector = new rti.Connector(participantProfile, xmlProfile)
+    })
 
-  // Initialization before all tests are executed
-  before(() => {
-    const participantProfile = 'MyParticipantLibrary::Zero'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-    connector = new rti.Connector(participantProfile, xmlProfile)
-  })
+    // Cleanup after all tests have executed
+    after(async () => {
+      await connector.delete()
+    })
 
-  // Cleanup after all tests have executed
-  after(async () => {
-    await connector.delete()
-  })
-
-  it('on_data_available callback gets called when data is available', function (done) {
+    it('on_data_available callback gets called when data is available', function (done) {
     // spies are used for testing callbacks
-    const spy = sinon.spy()
-    setTimeout(() => {
-      expect(spy.calledOnce).to.be.true
-      done() // Pattern for async testing: next test won't execute until done gets called.
-    }, 1000) // Expectation Test will execute after 1000 milisec
-    connector.once('on_data_available', spy)
-    output = connector.getOutput('MyPublisher::MySquareWriter')
-    testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
-    output.instance.setFromJson(JSON.parse(testMsg))
-    output.write()
-  })
-
-  it('on_data_available emits the error event on error', function (done) {
-    const errorSpy = sinon.spy()
-    // We expect the "error" event to be emitted within the next second
-    setTimeout(() => {
-      expect(errorSpy.calledOnce).to.be.true
-      connector.removeAllListeners('on_data_available')
-      done()
-    }, 1000)
-    connector.once('error', errorSpy)
-    // Need to cause the onDataAvailable callback to throw an error, we do
-    // this by concurrently waiting on the same connector object
-    connector.wait(500)
-    connector.once('on_data_available', () => {})
-  })
-
-  it('internal waitset is waited on repeatedly within on_data_available', function (done) {
-    const spy = sinon.spy()
-    // We expect the data to be received within the next second
-    setTimeout(() => {
-      expect(spy.calledOnce).to.be.true
-      done()
-    }, 1500)
-    // Set the listener
-    connector.once('on_data_available', spy)
-    // Internally, on_data_available calls connector.wait every 500ms.
-    // Test that if no data is received within the first 500ms, we call wait
-    // multiple times
-    output = connector.getOutput('MyPublisher::MySquareWriter')
-    testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
-    output.instance.setFromJson(JSON.parse(testMsg))
-    // In 500ms, write the data
-    setTimeout(() => {
+      const spy = sinon.spy()
+      setTimeout(() => {
+        expect(spy.calledOnce).to.be.true
+        done() // Pattern for async testing: next test won't execute until done gets called.
+      }, 1000) // Expectation Test will execute after 1000 milisec
+      connector.once('on_data_available', spy)
+      output = connector.getOutput('MyPublisher::MySquareWriter')
+      testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
+      output.instance.setFromJson(JSON.parse(testMsg))
       output.write()
-    }, 1000)
+    })
+
+    it('on_data_available emits the error event on error', function (done) {
+      const errorSpy = sinon.spy()
+      // We expect the "error" event to be emitted within the next second
+      setTimeout(() => {
+        expect(errorSpy.calledOnce).to.be.true
+        connector.removeAllListeners('on_data_available')
+        done()
+      }, 1000)
+      connector.once('error', errorSpy)
+      // Need to cause the onDataAvailable callback to throw an error, we do
+      // this by concurrently waiting on the same connector object
+      connector.wait(500)
+      connector.once('on_data_available', () => {})
+    })
+
+    it('internal waitset is waited on repeatedly within on_data_available', function (done) {
+      const spy = sinon.spy()
+      // We expect the data to be received within the next second
+      setTimeout(() => {
+        expect(spy.calledOnce).to.be.true
+        done()
+      }, 1500)
+      // Set the listener
+      connector.once('on_data_available', spy)
+      // Internally, on_data_available calls connector.wait every 500ms.
+      // Test that if no data is received within the first 500ms, we call wait
+      // multiple times
+      output = connector.getOutput('MyPublisher::MySquareWriter')
+      testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
+      output.instance.setFromJson(JSON.parse(testMsg))
+      // In 500ms, write the data
+      setTimeout(() => {
+        output.write()
+      }, 1000)
+    })
   })
 })
