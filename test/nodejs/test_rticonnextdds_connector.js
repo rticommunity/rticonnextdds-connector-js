@@ -55,7 +55,7 @@ describe('Connector Tests', function () {
     const participantProfile = 'MyParticipantLibrary::Zero'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     const connectors = []
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
       connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
     connectors.forEach((connector) => {
@@ -70,10 +70,10 @@ describe('Connector Tests', function () {
     const participantProfile = 'MyParticipantLibrary::MyParticipant'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector3.xml')
     const connectors = []
-    for (var i = 0; i < 2; i++) {
-        connectors.push(new rti.Connector(participantProfile, xmlProfile))
+    for (let i = 0; i < 2; i++) {
+      connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
-    connectors.forEach((connector)  => {
+    connectors.forEach((connector) => {
       expect(connector).to.exist
       expect(connector).to.be.instanceOf(rti.Connector)
       connector.close()
@@ -81,24 +81,24 @@ describe('Connector Tests', function () {
   })
 
   it('Load two XML files using the url group syntax', function () {
-      const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
-      const xmlProfile2 = path.join(__dirname, '/../xml/TestConnector2.xml')
-      const fullXmlPath = xmlProfile1 + ';' + xmlProfile2
-      const connector = new rti.Connector('MyParticipantLibrary2::MyParticipant2', fullXmlPath)
-      expect(connector).to.exist
-      expect(connector).to.be.instanceOf(rti.Connector)
-      const output = connector.getOutput('MyPublisher2::MySquareWriter2')
-      expect(output).to.exist
-      connector.close()
+    const xmlProfile1 = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile2 = path.join(__dirname, '/../xml/TestConnector2.xml')
+    const fullXmlPath = xmlProfile1 + ';' + xmlProfile2
+    const connector = new rti.Connector('MyParticipantLibrary2::MyParticipant2', fullXmlPath)
+    expect(connector).to.exist
+    expect(connector).to.be.instanceOf(rti.Connector)
+    const output = connector.getOutput('MyPublisher2::MySquareWriter2')
+    expect(output).to.exist
+    connector.close()
   })
 
   it('Should be possible to create a Connector with participant qos', function () {
-      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-      const connector = new rti.Connector(
-           'MyParticipantLibrary::ConnectorWithParticipantQos',
-           xmlProfile)
-      expect(connector).to.exist
-      expect(connector).to.be.instanceOf(rti.Connector)
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const connector = new rti.Connector(
+      'MyParticipantLibrary::ConnectorWithParticipantQos',
+      xmlProfile)
+    expect(connector).to.exist
+    expect(connector).to.be.instanceOf(rti.Connector)
   })
 
   // Test for CON-200
@@ -116,30 +116,68 @@ describe('Connector Tests', function () {
   describe('Connector callback test', function () {
     let connector
 
-    // Initialization before all tests are executed
-    before(() => {
-      const participantProfile = 'MyParticipantLibrary::Zero'
-      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-      connector = new rti.Connector(participantProfile, xmlProfile)
-    })
+describe('Connector callback test', function () {
+  let connector
 
-    // Cleanup after all tests have executed
-    after(async () => {
-      await connector.delete()
-    })
+  // Initialization before all tests are executed
+  before(() => {
+    const participantProfile = 'MyParticipantLibrary::Zero'
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    connector = new rti.Connector(participantProfile, xmlProfile)
+  })
 
-    it('on_data_available callback gets called when data is available', function (done) {
-      // spies are used for testing callbacks
-      const spy = sinon.spy()
-      setTimeout(() => {
-        expect(spy.calledOnce).to.be.true
-        done() // Pattern for async testing: next test won't execute until done gets called.
-      }, 1000) // Expectation Test will execute after 1000 milisec
-      connector.once('on_data_available', spy)
-      output = connector.getOutput('MyPublisher::MySquareWriter')
-      testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
-      output.instance.setFromJson(JSON.parse(testMsg))
+  // Cleanup after all tests have executed
+  after(async () => {
+    await connector.delete()
+  })
+
+  it('on_data_available callback gets called when data is available', function (done) {
+    // spies are used for testing callbacks
+    const spy = sinon.spy()
+    setTimeout(() => {
+      expect(spy.calledOnce).to.be.true
+      done() // Pattern for async testing: next test won't execute until done gets called.
+    }, 1000) // Expectation Test will execute after 1000 milisec
+    connector.once('on_data_available', spy)
+    output = connector.getOutput('MyPublisher::MySquareWriter')
+    testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
+    output.instance.setFromJson(JSON.parse(testMsg))
+    output.write()
+  })
+
+  it('on_data_available emits the error event on error', function (done) {
+    const errorSpy = sinon.spy()
+    // We expect the "error" event to be emitted within the next second
+    setTimeout(() => {
+      expect(errorSpy.calledOnce).to.be.true
+      connector.removeAllListeners('on_data_available')
+      done()
+    }, 1000)
+    connector.once('error', errorSpy)
+    // Need to cause the onDataAvailable callback to throw an error, we do
+    // this by concurrently waiting on the same connector object
+    connector.wait(500)
+    connector.once('on_data_available', () => {})
+  })
+
+  it('internal waitset is waited on repeatedly within on_data_available', function (done) {
+    const spy = sinon.spy()
+    // We expect the data to be received within the next second
+    setTimeout(() => {
+      expect(spy.calledOnce).to.be.true
+      done()
+    }, 1500)
+    // Set the listener
+    connector.once('on_data_available', spy)
+    // Internally, on_data_available calls connector.wait every 500ms.
+    // Test that if no data is received within the first 500ms, we call wait
+    // multiple times
+    output = connector.getOutput('MyPublisher::MySquareWriter')
+    testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
+    output.instance.setFromJson(JSON.parse(testMsg))
+    // In 500ms, write the data
+    setTimeout(() => {
       output.write()
-    })
+    }, 1000)
   })
 })

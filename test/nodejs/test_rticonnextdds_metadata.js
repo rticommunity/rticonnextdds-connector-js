@@ -45,7 +45,7 @@ describe('Test operations involving meta data', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 
@@ -211,11 +211,11 @@ describe('Test operations involving meta data', () => {
   it('test getting sample_state', async () => {
     testOutput.write()
     try {
-        await testInput.wait(testExpectSuccessTimeout)
+      await testInput.wait(testExpectSuccessTimeout)
     } catch (err) {
-        // Fail the test
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
+      // Fail the test
+      console.log('Error caught: ' + err)
+      expect(false).to.deep.equals(true)
     }
 
     // Since this is the first time that we are accessing the sample, it should
@@ -319,428 +319,429 @@ describe('Test operations involving meta data', () => {
 })
 
 describe('accessing key values after instance disposal', () => {
-    let connector = null
-    // Do not create inputs or outputs here since each of the tests
-    // requires a different type
+  let connector = null
+  // Do not create inputs or outputs here since each of the tests
+  // requires a different type
 
-    beforeEach(() => {
-        const participantProfile = 'MyParticipantLibrary::Zero'
-        const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-        connector = new rti.Connector(participantProfile, xmlProfile)
-        expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
-    })
+  beforeEach(() => {
+    const participantProfile = 'MyParticipantLibrary::Zero'
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    connector = new rti.Connector(participantProfile, xmlProfile)
+    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+  })
 
-    afterEach(() => {
-        connector.close()
-    })
+  afterEach(async () => {
+    connector.close()
+  })
 
-    // Uses the following type:
-    // struct ShapeType {
-    //     @key string<128> color;
-    //     long x;
-    //     long y;
-    //     bool z;
-    //     long shapesize;
-    // };
-    it('access key value of disposed instance', async () => {
-        let input = connector.getInput("MySubscriber::MySquareReader")
-        expect(input).to.exist
-        let output = connector.getOutput("MyPublisher::MySquareWriter")
-        expect(input).to.exist
-        // Wait for discovery between the 2 entities
-        try {
-            let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-            newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-        } catch (err) {
-            console.log('Caught err: ' + err)
-            throw(err)
-        }
-        // Set some of the fields within the shape type (including the key)
-        output.instance.setString('color', 'Yellow')
-        output.instance.setNumber('x', 2)
-        output.instance.setNumber('y', 5)
-        output.instance.setBoolean('z', true)
-        // Write the sample
-        output.write()
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // Now dispose the instance we just wrote
-        output.write({ action: 'dispose' })
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        let sample = input.samples.get(0)
-        // Sample should contain invalid data, and instance state disposed
-        expect(sample.info.get('valid_data')).to.deep.equals(false)
-        expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
-        // It should be possible to access the key field
-        expect(sample.get('color')).to.deep.equals('Yellow')
-        expect(sample.getString('color')).to.deep.equals('Yellow')
-        // All non key fields should not be accessed.
-        // Can also obtain the JSON representation of the sample.
-        const expectedJson = {
-            color: 'Yellow',
-            x: 0,
-            y: 0,
-            z: false,
-            shapesize: 0
-        }
-        expect(sample.getJson()).to.deep.equals(expectedJson)
-    })
+  // Uses the following type:
+  // struct ShapeType {
+  //     @key string<128> color;
+  //     long x;
+  //     long y;
+  //     bool z;
+  //     long shapesize;
+  // };
+  it('access key value of disposed instance', async () => {
+    const input = connector.getInput('MySubscriber::MySquareReader')
+    expect(input).to.exist
+    const output = connector.getOutput('MyPublisher::MySquareWriter')
+    expect(input).to.exist
+    // Wait for discovery between the 2 entities
+    try {
+      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      throw (err)
+    }
+    // Set some of the fields within the shape type (including the key)
+    output.instance.setString('color', 'Yellow')
+    output.instance.setNumber('x', 2)
+    output.instance.setNumber('y', 5)
+    output.instance.setBoolean('z', true)
+    // Write the sample
+    output.write()
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // Now dispose the instance we just wrote
+    output.write({ action: 'dispose' })
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    const sample = input.samples.get(0)
+    // Sample should contain invalid data, and instance state disposed
+    expect(sample.info.get('valid_data')).to.deep.equals(false)
+    expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    // It should be possible to access the key field
+    expect(sample.get('color')).to.deep.equals('Yellow')
+    expect(sample.getString('color')).to.deep.equals('Yellow')
+    // All non key fields should not be accessed.
+    // Can also obtain the JSON representation of the sample.
+    const expectedJson = {
+      color: 'Yellow',
+      x: 0,
+      y: 0,
+      z: false,
+      shapesize: 0
+    }
+    expect(sample.getJson()).to.deep.equals(expectedJson)
+  })
 
-    // Uses the following type:
-    // struct MultipleKeyedShapeType {
-    //     @key string<128> color;
-    //     @key string<128> other_color;
-    //     long x;
-    //     @key long y;
-    //     @key bool z;
-    //     long shapesize;
-    // };
-    it('access key values of disposed instance with multiple keys', async () => {
-        let input = connector.getInput("MySubscriber::MyMultipleKeyedSquareReader")
-        expect(input).to.exist
-        let output = connector.getOutput("MyPublisher::MyMultipleKeyedSquareWriter")
-        expect(input).to.exist
-        // Wait for discovery between the 2 entities
-        try {
-            let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-            newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-        } catch (err) {
-            console.log('Caught err: ' + err)
-            throw(err)
-        }
-        // This type has multiple key fields, set them all
-        output.instance.setString('color', 'Brown')
-        output.instance.setString('other_color', 'Blue')
-        output.instance.setNumber('y', 9)
-        output.instance.setBoolean('z', false)
-        // Also set some of the non-key fields
-        output.instance.setNumber('x', 12)
-        output.instance.setNumber('shapesize', 0)
-        // Write the sample and take it on the input
-        output.write()
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // Now dispose the instance we just wrote
-        output.write({ action: 'dispose' })
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        let sample = input.samples.get(0)
-        // Check key fields
-        expect(sample.get('color')).to.deep.equals('Brown')
-        expect(sample.get('other_color')).to.deep.equals('Blue')
-        expect(sample.get('y')).to.deep.equals(9)
-        expect(sample.get('z')).to.deep.equals(false)
-        expect(sample.getString('color')).to.deep.equals('Brown')
-        expect(sample.getString('other_color')).to.deep.equals('Blue')
-        expect(sample.getNumber('y')).to.deep.equals(9)
-        expect(sample.getBoolean('z')).to.deep.equals(false)
-        // Do not access non-key values
-        // Check access via JSON object
-        const expectedJson = {
-            color: 'Brown',
-            other_color: 'Blue',
-            y: 9,
-            x: 0,
-            z: false,
-            shapesize: 0
-        }
-        expect(sample.getJson()).to.deep.equals(expectedJson)
-    })
+  // Uses the following type:
+  // struct MultipleKeyedShapeType {
+  //     @key string<128> color;
+  //     @key string<128> other_color;
+  //     long x;
+  //     @key long y;
+  //     @key bool z;
+  //     long shapesize;
+  // };
+  it('access key values of disposed instance with multiple keys', async () => {
+    const input = connector.getInput('MySubscriber::MyMultipleKeyedSquareReader')
+    expect(input).to.exist
+    const output = connector.getOutput('MyPublisher::MyMultipleKeyedSquareWriter')
+    expect(input).to.exist
+    // Wait for discovery between the 2 entities
+    try {
+      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      throw (err)
+    }
+    // This type has multiple key fields, set them all
+    output.instance.setString('color', 'Brown')
+    output.instance.setString('other_color', 'Blue')
+    output.instance.setNumber('y', 9)
+    output.instance.setBoolean('z', false)
+    // Also set some of the non-key fields
+    output.instance.setNumber('x', 12)
+    output.instance.setNumber('shapesize', 0)
+    // Write the sample and take it on the input
+    output.write()
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // Now dispose the instance we just wrote
+    output.write({ action: 'dispose' })
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    const sample = input.samples.get(0)
+    // Check key fields
+    expect(sample.get('color')).to.deep.equals('Brown')
+    expect(sample.get('other_color')).to.deep.equals('Blue')
+    expect(sample.get('y')).to.deep.equals(9)
+    expect(sample.get('z')).to.deep.equals(false)
+    expect(sample.getString('color')).to.deep.equals('Brown')
+    expect(sample.getString('other_color')).to.deep.equals('Blue')
+    expect(sample.getNumber('y')).to.deep.equals(9)
+    expect(sample.getBoolean('z')).to.deep.equals(false)
+    // Do not access non-key values
+    // Check access via JSON object
+    const expectedJson = {
+      color: 'Brown',
+      other_color: 'Blue',
+      y: 9,
+      x: 0,
+      z: false,
+      shapesize: 0
+    }
+    expect(sample.getJson()).to.deep.equals(expectedJson)
+  })
 
-    // Uses the following type:
-    // struct ShapeType {
-    //     @key string<128> color;
-    //     long x;
-    //     long y;
-    //     bool z;
-    //     long shapesize;
-    // };
-    //
-    // struct UnkeyedShapeType {
-    //     string<128> color;
-    //     long x;
-    //     long y;
-    //     bool z;
-    //     long shapesize;
-    // };
-    //
-    // struct NestedKeyedShapeType {
-    //     @key UnkeyedShapeType keyed_shape;
-    //     UnkeyedShapeType unkeyed_shape;
-    //     @key ShapeType keyed_nested_member;
-    //     @default(12) long unkeyed_toplevel_member;
-    //     @key long keyed_toplevel_member;
-    // };
-    it('access the complex key of a disposed instance', async () => {
-        let input = connector.getInput("MySubscriber::MyNestedKeyedSquareReader")
-        expect(input).to.exist
-        let output = connector.getOutput("MyPublisher::MyNestedKeyedSquareWriter")
-        expect(input).to.exist
-        // Wait for discovery between the 2 entities
-        try {
-            let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-            newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-        } catch (err) {
-            console.log('Caught err: ' + err)
-            throw(err)
-        }
-        // Set the sample's fields
-        output.instance.setString('keyed_shape.color', 'Black')
-        output.instance.setNumber('keyed_shape.x', 2)
-        output.instance.setNumber('keyed_shape.y', 0)
-        output.instance.setNumber('keyed_shape.shapesize', 100)
-        output.instance.setBoolean('keyed_shape.z', true)
-        output.instance.setNumber('unkeyed_toplevel_member', 1)
-        output.instance.setNumber('keyed_toplevel_member', 1)
-        output.instance.setNumber('unkeyed_shape.shapesize', 100)
-        output.instance.setString('keyed_nested_member.color', 'White')
-        output.instance.setNumber('keyed_nested_member.x', 4)
-        // Write the sample and take it on the input
-        output.write()
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // Now dispose the instance we just wrote
-        output.write({ action: 'dispose' })
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        let sample = input.samples.get(0)
-        expect(sample.info.get('valid_data')).to.deep.equals(false)
-        expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
-        // Everything within keyed_shape is a key
-        expect(sample.getNumber('keyed_shape.x')).to.deep.equals(2)
-        expect(sample.getNumber('keyed_shape.y')).to.deep.equals(0)
-        expect(sample.getNumber('keyed_shape.shapesize')).to.deep.equals(100)
-        expect(sample.getBoolean('keyed_shape.z')).to.deep.equals(true)
-        expect(sample.get('keyed_shape.x')).to.deep.equals(2)
-        expect(sample.get('keyed_shape.y')).to.deep.equals(0)
-        expect(sample.get('keyed_shape.shapesize')).to.deep.equals(100)
-        expect(sample.get('keyed_shape.z')).to.deep.equals(true)
-        expect(sample.get('keyed_shape.color')).to.deep.equals('Black')
-        expect(sample.getString('keyed_shape.color')).to.deep.equals('Black')
-        // keyed_toplevel_member is also a key
-        expect(sample.getNumber('keyed_toplevel_member')).to.deep.equals(1)
-        expect(sample.get('keyed_toplevel_member')).to.deep.equals(1)
-        // Only the 'color' field in keyed_nested_member is keyed
-        expect(sample.get('keyed_nested_member.color')).to.deep.equals('White')
-        expect(sample.get('keyed_nested_member.x')).to.deep.equals(0)
-        // Do not access any of the non-key values
-        // The unkeyed_toplevel_member field has a default value explicitly set 
-        // in the type. This should not effect the returned value (SamR confirm this)
-        expect(sample.get('unkeyed_toplevel_member')).to.deep.equals(0)
-        expect(sample.getNumber('unkeyed_toplevel_member')).to.deep.equals(0)
-        let expectedJson = {
-            keyed_shape: {
-                color: 'Black',
-                x: 2,
-                y: 0,
-                shapesize: 100,
-                z: true
-            },
-            // unkeyed_shape not keyed -> default values
-            unkeyed_shape: {
-                color: '',
-                x: 0,
-                y: 0,
-                shapesize: 0,
-                z: false
-            },
-            keyed_nested_member: {
-                color: 'White',
-                // All other members default value
-                x: 0,
-                y: 0,
-                shapesize: 0,
-                z: false
-            },
-            // unkeyed_toplevel_member is unkeyed -> default value
-            unkeyed_toplevel_member: 0,
-            keyed_toplevel_member: 1
-        }
-        expect(sample.getJson()).to.deep.equals(expectedJson)
-        // Can also obtain the keyed members as a JSON since they are complex
-        expectedJson = {
-            color: 'Black',
-            x: 2,
-            y: 0,
-            shapesize: 100,
-            z: true
-        }
-        expect(sample.getJson('keyed_shape')).to.deep.equals(expectedJson)
-        expectedJson = {
-            color: 'White',
-            x: 0,
-            y: 0,
-            shapesize: 0,
-            z: false
-        }
-        expect(sample.getJson('keyed_nested_member')).to.deep.equals(expectedJson)
-    })
+  // Uses the following type:
+  // struct ShapeType {
+  //     @key string<128> color;
+  //     long x;
+  //     long y;
+  //     bool z;
+  //     long shapesize;
+  // };
+  //
+  // struct UnkeyedShapeType {
+  //     string<128> color;
+  //     long x;
+  //     long y;
+  //     bool z;
+  //     long shapesize;
+  // };
+  //
+  // struct NestedKeyedShapeType {
+  //     @key UnkeyedShapeType keyed_shape;
+  //     UnkeyedShapeType unkeyed_shape;
+  //     @key ShapeType keyed_nested_member;
+  //     @default(12) long unkeyed_toplevel_member;
+  //     @key long keyed_toplevel_member;
+  // };
+  it('access the complex key of a disposed instance', async () => {
+    const input = connector.getInput('MySubscriber::MyNestedKeyedSquareReader')
+    expect(input).to.exist
+    const output = connector.getOutput('MyPublisher::MyNestedKeyedSquareWriter')
+    expect(input).to.exist
+    // Wait for discovery between the 2 entities
+    try {
+      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      throw (err)
+    }
+    // Set the sample's fields
+    output.instance.setString('keyed_shape.color', 'Black')
+    output.instance.setNumber('keyed_shape.x', 2)
+    output.instance.setNumber('keyed_shape.y', 0)
+    output.instance.setNumber('keyed_shape.shapesize', 100)
+    output.instance.setBoolean('keyed_shape.z', true)
+    output.instance.setNumber('unkeyed_toplevel_member', 1)
+    output.instance.setNumber('keyed_toplevel_member', 1)
+    output.instance.setNumber('unkeyed_shape.shapesize', 100)
+    output.instance.setString('keyed_nested_member.color', 'White')
+    output.instance.setNumber('keyed_nested_member.x', 4)
+    // Write the sample and take it on the input
+    output.write()
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // Now dispose the instance we just wrote
+    output.write({ action: 'dispose' })
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    const sample = input.samples.get(0)
+    expect(sample.info.get('valid_data')).to.deep.equals(false)
+    expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    // Everything within keyed_shape is a key
+    expect(sample.getNumber('keyed_shape.x')).to.deep.equals(2)
+    expect(sample.getNumber('keyed_shape.y')).to.deep.equals(0)
+    expect(sample.getNumber('keyed_shape.shapesize')).to.deep.equals(100)
+    expect(sample.getBoolean('keyed_shape.z')).to.deep.equals(true)
+    expect(sample.get('keyed_shape.x')).to.deep.equals(2)
+    expect(sample.get('keyed_shape.y')).to.deep.equals(0)
+    expect(sample.get('keyed_shape.shapesize')).to.deep.equals(100)
+    expect(sample.get('keyed_shape.z')).to.deep.equals(true)
+    expect(sample.get('keyed_shape.color')).to.deep.equals('Black')
+    expect(sample.getString('keyed_shape.color')).to.deep.equals('Black')
+    // keyed_toplevel_member is also a key
+    expect(sample.getNumber('keyed_toplevel_member')).to.deep.equals(1)
+    expect(sample.get('keyed_toplevel_member')).to.deep.equals(1)
+    // Only the 'color' field in keyed_nested_member is keyed
+    expect(sample.get('keyed_nested_member.color')).to.deep.equals('White')
+    expect(sample.get('keyed_nested_member.x')).to.deep.equals(0)
+    // Do not access any of the non-key values
+    // The unkeyed_toplevel_member field has a default value explicitly set
+    // in the type. This should not effect the returned value.
+    expect(sample.get('unkeyed_toplevel_member')).to.deep.equals(0)
+    expect(sample.getNumber('unkeyed_toplevel_member')).to.deep.equals(0)
+    let expectedJson = {
+      keyed_shape: {
+        color: 'Black',
+        x: 2,
+        y: 0,
+        shapesize: 100,
+        z: true
+      },
+      // unkeyed_shape not keyed -> default values
+      unkeyed_shape: {
+        color: '',
+        x: 0,
+        y: 0,
+        shapesize: 0,
+        z: false
+      },
+      keyed_nested_member: {
+        color: 'White',
+        // All other members default value
+        x: 0,
+        y: 0,
+        shapesize: 0,
+        z: false
+      },
+      // unkeyed_toplevel_member is unkeyed -> default value
+      unkeyed_toplevel_member: 0,
+      keyed_toplevel_member: 1
+    }
+    expect(sample.getJson()).to.deep.equals(expectedJson)
+    // Can also obtain the keyed members as a JSON since they are complex
+    expectedJson = {
+      color: 'Black',
+      x: 2,
+      y: 0,
+      shapesize: 100,
+      z: true
+    }
+    expect(sample.getJson('keyed_shape')).to.deep.equals(expectedJson)
+    expectedJson = {
+      color: 'White',
+      x: 0,
+      y: 0,
+      shapesize: 0,
+      z: false
+    }
+    expect(sample.getJson('keyed_nested_member')).to.deep.equals(expectedJson)
+  })
 
-    it('access the key fields using an iterator', async () => {
-        let input = connector.getInput("MySubscriber::MySquareReader")
-        expect(input).to.exist
-        let output = connector.getOutput("MyPublisher::MySquareWriter")
-        expect(input).to.exist
-        // Wait for discovery between the 2 entities
-        try {
-            let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-            newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-        } catch (err) {
-            console.log('Caught err: ' + err)
-            throw(err)
-        }
-        // Set some of the fields within the shape type (including the key)
-        output.instance.setString('color', 'Yellow')
-        output.instance.setNumber('x', 2)
-        // Write the sample
-        output.write()
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // Now dispose the instance we just wrote
-        output.write({ action: 'dispose' })
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // There should be no samples accessible within the validDataIter
-        let hadData = false
-        for (const sample of input.samples.validDataIter) {
-            hadData = true;
-        }
-        expect(hadData).to.deep.equals(false)
-        // Should be possible to access key fields in the dataIter
-        for (const sample of input.samples) {
-            expect(sample.info.get('valid_data')).to.deep.equals(false)
-            expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
-            expect(sample.getString('color')).to.deep.equals('Yellow')
-            expect(sample.get('color')).to.deep.equals('Yellow')
-            const expectedJson = {
-                color: 'Yellow',
-                x: 0,
-                y: 0,
-                shapesize: 0,
-                z: false
-            }
-            expect(sample.getJson()).to.deep.equals(expectedJson)
-        }
-    })
+  it('access the key fields using an iterator', async () => {
+    const input = connector.getInput('MySubscriber::MySquareReader')
+    expect(input).to.exist
+    const output = connector.getOutput('MyPublisher::MySquareWriter')
+    expect(input).to.exist
+    // Wait for discovery between the 2 entities
+    try {
+      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      throw (err)
+    }
+    // Set some of the fields within the shape type (including the key)
+    output.instance.setString('color', 'Yellow')
+    output.instance.setNumber('x', 2)
+    // Write the sample
+    output.write()
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // Now dispose the instance we just wrote
+    output.write({ action: 'dispose' })
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // There should be no samples accessible within the validDataIter
+    let hadData = false
+    // eslint-disable-next-line no-unused-vars
+    for (const sample of input.samples.validDataIter) {
+      hadData = true
+    }
+    expect(hadData).to.deep.equals(false)
+    // Should be possible to access key fields in the dataIter
+    for (const sample of input.samples) {
+      expect(sample.info.get('valid_data')).to.deep.equals(false)
+      expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+      expect(sample.getString('color')).to.deep.equals('Yellow')
+      expect(sample.get('color')).to.deep.equals('Yellow')
+      const expectedJson = {
+        color: 'Yellow',
+        x: 0,
+        y: 0,
+        shapesize: 0,
+        z: false
+      }
+      expect(sample.getJson()).to.deep.equals(expectedJson)
+    }
+  })
 
-    // struct ShapeType {
-    //     @key string<128> color;
-    //     long x;
-    //     long y;
-    //     bool z;
-    //     long shapesize;
-    // };
-    // struct ShapeTypeWithoutToplevelKeyType {
-    //     @key ShapeType keyed_shape;
-    //     ShapeType unkeyed_shape;
-    // };
-    it('keys within nested structures are not keys unless tagged as keys in top level', async () => {
-        let input = connector.getInput("MySubscriber::MySquareWithoutTopLevelKeyReader")
-        expect(input).to.exist
-        let output = connector.getOutput("MyPublisher::MySquareWithoutTopLevelKeyWriter")
-        expect(input).to.exist
-        // Wait for discovery between the 2 entities
-        try {
-            let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-            newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-            expect(newMatches).to.deep.equals(1)
-        } catch (err) {
-            console.log('Caught err: ' + err)
-            throw(err)
-        }
-        // Set some of the fields within the shape type (including the key)
-        output.instance.setString('unkeyed_shape.color', 'Yellow')
-        output.instance.setNumber('unkeyed_shape.x', 2)
-        output.instance.setString('keyed_shape.color', 'Yellow')
-        output.instance.setNumber('keyed_shape.x', 2)
-        // Write the sample
-        output.write()
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // Now dispose the instance we just wrote
-        output.write({ action: 'dispose' })
-        try {
-            await input.wait(testExpectSuccessTimeout)
-        } catch (err) {
-            console.log('Error caught: ' + err)
-            throw(err)
-        }
-        input.take()
-        // The 'color' field we set is not actually a key. Fields need to be tagged
-        // in the top-level type in order to be part of the key. This means that
-        // nothing in this type should be non-default.
-        let sample = input.samples.get(0)
-        let expectedJson = {
-            keyed_shape: {
-                color: 'Yellow',
-                x: 0,
-                y: 0,
-                shapesize: 0,
-                z: false
-            },
-            unkeyed_shape: {
-                color: '',
-                x: 0,
-                y: 0,
-                shapesize: 0,
-                z: false
-            }
-        }
-        expect(sample.getJson()).to.deep.equals(expectedJson)
-    })
+  // struct ShapeType {
+  //     @key string<128> color;
+  //     long x;
+  //     long y;
+  //     bool z;
+  //     long shapesize;
+  // };
+  // struct ShapeTypeWithoutToplevelKeyType {
+  //     @key ShapeType keyed_shape;
+  //     ShapeType unkeyed_shape;
+  // };
+  it('keys within nested structures are not keys unless tagged as keys in top level', async () => {
+    const input = connector.getInput('MySubscriber::MySquareWithoutTopLevelKeyReader')
+    expect(input).to.exist
+    const output = connector.getOutput('MyPublisher::MySquareWithoutTopLevelKeyWriter')
+    expect(input).to.exist
+    // Wait for discovery between the 2 entities
+    try {
+      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+      expect(newMatches).to.deep.equals(1)
+    } catch (err) {
+      console.log('Caught err: ' + err)
+      throw (err)
+    }
+    // Set some of the fields within the shape type (including the key)
+    output.instance.setString('unkeyed_shape.color', 'Yellow')
+    output.instance.setNumber('unkeyed_shape.x', 2)
+    output.instance.setString('keyed_shape.color', 'Yellow')
+    output.instance.setNumber('keyed_shape.x', 2)
+    // Write the sample
+    output.write()
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // Now dispose the instance we just wrote
+    output.write({ action: 'dispose' })
+    try {
+      await input.wait(testExpectSuccessTimeout)
+    } catch (err) {
+      console.log('Error caught: ' + err)
+      throw (err)
+    }
+    input.take()
+    // The 'color' field we set is not actually a key. Fields need to be tagged
+    // in the top-level type in order to be part of the key. This means that
+    // nothing in this type should be non-default.
+    const sample = input.samples.get(0)
+    const expectedJson = {
+      keyed_shape: {
+        color: 'Yellow',
+        x: 0,
+        y: 0,
+        shapesize: 0,
+        z: false
+      },
+      unkeyed_shape: {
+        color: '',
+        x: 0,
+        y: 0,
+        shapesize: 0,
+        z: false
+      }
+    }
+    expect(sample.getJson()).to.deep.equals(expectedJson)
+  })
 })

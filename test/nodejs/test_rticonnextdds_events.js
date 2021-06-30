@@ -53,7 +53,7 @@ describe('Connector EventEmitter tests', function () {
   })
 
   it('Callback should be called when event is emitted', (done) => {
-    var spy = sinon.spy()
+    const spy = sinon.spy()
     connector.on('on_data_available', spy)
     connector.emit('on_data_available')
     expect(spy.calledOnce).to.be.true
@@ -62,7 +62,7 @@ describe('Connector EventEmitter tests', function () {
   })
 
   it('When no data is written, no event should be emitted', (done) => {
-    var spy = sinon.spy()
+    const spy = sinon.spy()
     connector.on('on_data_available', spy)
     setTimeout(() => {
       expect(spy.notCalled).to.be.true
@@ -71,14 +71,14 @@ describe('Connector EventEmitter tests', function () {
   })
 
   it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
-    var spy = sinon.spy()
+    const spy = sinon.spy()
     connector.on('on_data_available', spy)
     // Internally, the connector's waitset is now busy
     connector.wait(500)
       .then(() => {
         // This should not have been possible
         console.log('Error occurred. Expected wait to fail due to waitSetBusy')
-        throw(err)
+        throw (err)
       })
       .catch((err) => {
         expect(err.message).to.deep.equals('Can not concurrently wait on the same Connector object')
@@ -87,8 +87,8 @@ describe('Connector EventEmitter tests', function () {
   })
 
   it('Using .removeAllListeners() should remove all eventListeners', () => {
-    var spy1 = sinon.spy()
-    var spy2 = sinon.spy()
+    const spy1 = sinon.spy()
+    const spy2 = sinon.spy()
     connector.on('on_data_available', spy1)
     connector.on('on_data_available', spy2)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
@@ -97,7 +97,7 @@ describe('Connector EventEmitter tests', function () {
   })
 
   it('Should be possible to re-use a Connector after calling waitForCallbackFinalization', (done) => {
-    var spy = sinon.spy()
+    const spy = sinon.spy()
     connector.on('on_data_available', spy)
     expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
     connector.emit('on_data_available')
@@ -119,7 +119,7 @@ describe('Connector EventEmitter tests', function () {
   // test conditionally
   if (typeof events.once === 'function') {
     it('Event should be emitted when data is available on an input', (done) => {
-      var spy = sinon.spy()
+      const spy = sinon.spy()
       connector.on('on_data_available', spy)
       output.write()
       events.once(connector, 'on_data_available')
@@ -130,7 +130,7 @@ describe('Connector EventEmitter tests', function () {
     })
 
     it('Connector.once() should automatically unregister the callback after data is received', (done) => {
-      var spy = sinon.spy()
+      const spy = sinon.spy()
       connector.once('on_data_available', spy)
       output.write()
       events.once(connector, 'on_data_available')
@@ -149,8 +149,8 @@ describe('Connector EventEmitter tests', function () {
     })
 
     it('Should be possible to add multiple callbacks for the same event', (done) => {
-      var spy1 = sinon.spy()
-      var spy2 = sinon.spy()
+      const spy1 = sinon.spy()
+      const spy2 = sinon.spy()
       connector.on('on_data_available', spy1)
       connector.on('on_data_available', spy2)
       expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
@@ -164,7 +164,7 @@ describe('Connector EventEmitter tests', function () {
     })
 
     it('Possible to uninstall the eventListener with .off()', (done) => {
-      var spy = sinon.spy()
+      const spy = sinon.spy()
       connector.on('on_data_available', spy)
       output.write()
       events.once(connector, 'on_data_available')
@@ -183,8 +183,8 @@ describe('Connector EventEmitter tests', function () {
     })
 
     it('Using .off() should only unregister the supplied callback, if multiple are registered', (done) => {
-      var spy1 = sinon.spy()
-      var spy2 = sinon.spy()
+      const spy1 = sinon.spy()
+      const spy2 = sinon.spy()
       connector.on('on_data_available', spy1)
       connector.on('on_data_available', spy2)
       expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
