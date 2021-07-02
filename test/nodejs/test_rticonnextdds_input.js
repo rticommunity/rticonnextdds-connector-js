@@ -70,8 +70,8 @@ describe('Subscriber not automatically enabled tests', () => {
     expect(connector).to.exist.and.to.be.instanceOf(rti.Connector)
   })
 
-  after(() => {
-    connector.close()
+  after(async () => {
+    await connector.close()
   })
 
   it('Entities should not auto-discover each other if QoS is set appropriately', async () => {

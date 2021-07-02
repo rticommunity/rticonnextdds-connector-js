@@ -44,9 +44,9 @@ params.forEach((retrievalMethod) => {
     })
 
     // Clean-up after all tests execute
-    after(function () {
+    after(async function () {
       this.timeout(0)
-      connector.close()
+      await connector.close()
     })
 
     // Initialization done before each test executes

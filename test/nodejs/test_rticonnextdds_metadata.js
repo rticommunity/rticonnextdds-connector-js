@@ -49,10 +49,10 @@ describe('Test operations involving meta data', () => {
     }
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take all samples here to ensure that next test case has a clean input
     testInput.take()
-    connector.close()
+    await connector.close()
   })
 
   it('test write with source_timestamp', async () => {
@@ -199,7 +199,11 @@ describe('Test operations involving meta data', () => {
     testInput.take()
 
     for (const sample of testInput.samples.validDataIter) {
-      expect(sample.info.get('source_timestamp')).is.a('number')
+      // Source timestamp will either be returned as a string or as a number,
+      // depending on whether or not it is larger than 2^53.
+      expect(sample.info.get('source_timestamp')).satisfies((val) => {
+        return (typeof val === 'string' || typeof val === 'number')
+      })
       expect(sample.info.get('identity').writer_guid).is.an('array')
       expect(sample.info.get('identity').sequence_number).is.a('number')
       expect(sample.info.get('related_sample_identity').writer_guid).is.an('array')
@@ -331,7 +335,7 @@ describe('accessing key values after instance disposal', () => {
   })
 
   afterEach(async () => {
-    connector.close()
+    await connector.close()
   })
 
   // Uses the following type:

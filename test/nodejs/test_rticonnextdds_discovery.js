@@ -85,21 +85,21 @@ const getDiscoveryWriterOnlyOutput = () => {
   return output
 }
 
-const cleanupConnectors = () => {
+const cleanupConnectors = async () => {
   if (discoveryConnector !== null) {
-    discoveryConnector.close()
+    await discoveryConnector.close()
     discoveryConnector = null
   }
   if (discoveryConnectorNoEntityNames !== null) {
-    discoveryConnectorNoEntityNames.close()
+    await discoveryConnectorNoEntityNames.close()
     discoveryConnectorNoEntityNames = null
   }
   if (readerOnlyConnector !== null) {
-    readerOnlyConnector.close()
+    await readerOnlyConnector.close()
     readerOnlyConnector = null
   }
   if (writerOnlyConnector !== null) {
-    writerOnlyConnector.close()
+    await writerOnlyConnector.close()
     writerOnlyConnector = null
   }
 }
@@ -285,7 +285,7 @@ describe('Discovery tests', function () {
     expect(matches).to.deep.include.members([{ name: 'TestWriter' }])
 
     // Delete the Connector object that the input is within
-    readerOnlyConnector.close()
+    await readerOnlyConnector.close()
     readerOnlyConnector = null
 
     // The output should unmatch from the input
@@ -343,7 +343,7 @@ describe('Discovery tests', function () {
     expect(matches).to.deep.include.members([{ name: 'TestReader' }])
 
     // Delete the Connector object that the output is within
-    writerOnlyConnector.close()
+    await writerOnlyConnector.close()
     writerOnlyConnector = null
 
     // The input should unmatch from the output
