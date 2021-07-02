@@ -11,6 +11,7 @@ const os = require('os')
 const ffi = require('ffi-napi')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
+const { deepStrictEqual } = require('assert')
 const expect = chai.expect
 chai.config.includeStack = true
 chai.use(chaiAsPromised)
@@ -90,10 +91,10 @@ describe('Data access tests with a pre-populated input', function () {
     expect(sample.validData).to.be.true
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take all samples here to ensure that next test case has a clean input
     prepopulatedInput.take()
-    connector.close()
+    await connector.close()
   })
 
   it('getNumber should return a number', () => {
@@ -115,12 +116,13 @@ describe('Data access tests with a pre-populated input', function () {
 
   it('getString on a number field should return a string', () => {
     expect(sample.getString('my_long')).to.deep.equals('10').and.is.a('string')
-    expect(sample.getString('my_double')).to.deep.equals('3.3').and.is.a('string')
+    // Even though 3.3 was set, it cannot be perfectly represetned as a double
+    expect(sample.getString('my_double')).to.deep.equals('3.2999999999999998').and.is.a('string')
   })
 
   it('getString requires a valid index', () => {
     expect(() => {
-      prepopulatedInput.samples.getString('NAN', 'my_string')
+      prepopulatedInput.samples.getString('NaN', 'my_string')
     }).to.throw(TypeError)
   })
 
@@ -458,10 +460,10 @@ describe('Tests with a testOutput and testInput', () => {
     }
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take all samples here to ensure that next test case has a clean input
     testInput.take()
-    connector.close()
+    await connector.close()
   })
 
   if (os.platform() !== 'win32') {
@@ -645,8 +647,7 @@ describe('Tests with a testOutput and testInput', () => {
     }
     testInput.take()
     const theNumericString = testInput.samples.get(0).get('my_string')
-    // Due to CON-139 get returns strings as numbers if they represent a number
-    expect(theNumericString).to.be.a('number').and.deep.equals(1234)
+    expect(theNumericString).to.be.a('string').and.deep.equals('1234')
   })
 
   it('Test output sequences', async () => {
@@ -1148,6 +1149,78 @@ describe('Tests with a testOutput and testInput', () => {
     testInput.take()
     expect(testInput.samples.get(0).get('my_enum')).to.deep.equals(1)
   })
+
+  // Both Lua v5.2 (used within Connector native libraries) and JavaScript have
+  // the same restriction on 64-bit integers - their only Number type is a double
+  // precision floating point value, meaning they cannot accurately represent
+  // integers large than 2^53.
+  // These tests check that via the type-agnostic getter and setter, and getString
+  // and setString can be used to workaround this limitation.
+  describe('Tests with 64-bit integers', () => {
+    it('Can communicate large 64-bit numbers using getString and setString', async () => {
+      testOutput.instance.setString('my_uint64', '18446744073709551615')
+      testOutput.instance.setString('my_int64', '9223372036854775807')
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).getString('my_uint64')).to.deep.equals('18446744073709551615')
+      expect(testInput.samples.get(0).getString('my_int64')).to.deep.equals('9223372036854775807')
+    })
+
+    it('64-bit values larger than 2^53 are returned as strings by get', async () => {
+      const maxInt64 = '9223372036854775807'
+      const maxUint64 = '18446744073709551615'
+      testOutput.instance.setFromJson({ my_int64: maxInt64, my_uint64: maxUint64 })
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).get('my_uint64')).to.be.a.string
+      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(maxUint64)
+      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(maxInt64)
+      expect(testInput.samples.get(0).get('my_int64')).to.be.a.string
+    })
+
+    it('64-bit values smaller or equal to 2^53 are returned as numbers by get', async () => {
+      testOutput.instance.setFromJson({ my_int64: 123456, my_uint64: 123456 })
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(123456)
+      expect(testInput.samples.get(0).get('my_uint64')).to.be.a('number')
+      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(123456)
+      expect(testInput.samples.get(0).get('my_int64')).to.be.a('number')
+    })
+
+    it('Can communicate large 64-bit numbers using type-agnostic getters and setters', async () => {
+      testOutput.instance.set('my_uint64', '18446744073709551615')
+      testOutput.instance.set('my_int64', '9223372036854775807')
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals('18446744073709551615')
+      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals('9223372036854775807')
+    })
+  })
 })
 
 describe('Tests with two readers and two writers', () => {
@@ -1188,11 +1261,11 @@ describe('Tests with two readers and two writers', () => {
     }
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Take any data
     testInput1.take()
     testInput2.take()
-    connector.close()
+    await connector.close()
   })
 
   // Since we have not written any data, all different forms of wait for data

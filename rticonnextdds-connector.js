@@ -321,13 +321,17 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
     return !!boolVal.deref()
   } else if (selection === _AnyValueKind.connector_string) {
     const nodeStr = _moveCString(stringVal.deref())
-    // Try to convert the returned string to a JSON object. We can now return
-    // one of two things:
+    // If this is NOT a numeric string, try to convert the returned string to a
+    // JSON object. We can now return one of two things:
     // - An actual string (if the JSON.parse call fails)
     // - A JSON object (if the JSON.parse call succeeds)
-    try {
-      return JSON.parse(nodeStr)
-    } catch (err) {
+    if (isNaN(nodeStr)) {
+      try {
+        return JSON.parse(nodeStr)
+      } catch (err) {
+        return nodeStr
+      }
+    } else {
       return nodeStr
     }
   } else {
@@ -1331,7 +1335,7 @@ class Instance {
    * Sets a string field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A string  value, or null, to unset an
+   * @param {string|null} value - A string value, or null, to unset an
    *   optional member.
    */
   setString (fieldName, value) {
