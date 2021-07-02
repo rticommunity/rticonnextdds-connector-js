@@ -129,18 +129,6 @@ To set any numeric type, including enumerations:
     output.instance.setNumber('my_double', 2.14)
     output.instance.setNumber('my_enum', 2)
 
-.. warning::
-    The range of values for a numeric field is determined by the type
-    used to define that field in the configuration file. However, 
-    ``setNumber`` and ``getNumber`` can't handle 64-bit integers 
-    (*int64* and *uint64*) whose absolute values are larger than 2^53. 
-    This is a *Connector* limitation due to the use of *double* as an 
-    intermediate representation.
-
-    When ``setNumber`` or ``getNumber`` detect this situation, they will raise
-    an :class:`DDSError`. ``getJson`` and ``setJson`` do not have this
-    limitation and can handle any 64-bit integer.
-
 To set booleans:
 
 .. code-block::
@@ -201,6 +189,30 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
     If a field ``my_string``, defined as a string in the configuration file, contains
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
+
+Accessing 64-bit integers
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Internally, Connector relies on a framework that only contains a single number
+type that is IEEE-754 floating-point number. Additionally, we do not use JavaScript's
+BigInt representation for numbers, meaning JavaScript has this same limitation.
+Due to this, not all 64-bit integers can be represented with exact precision.
+If your type contains uint64 or int64 members, and you expect them to be larger
+than ``2^53`` then you must take the following into account.
+
+64-bit values larger than 2^53 can be set via:
+ - The type-agnostic setter (``instance.set()``), if they are supplied as strings, e.g., ``the_output.instance.set('my_uint64', '18446744073709551615')``
+ - The ``setString`` setter, e.g., ``the_output.instance.setString('my_uint64', '18446744073709551615')``
+ - Via a ``setFromJson`` if they are provided as strings, e.g., ``the_output.instance.setFromJson({my_uint64: '18446744073709551615'})``
+
+64-bit values larger than 2^53 can be retrieved via:
+ - The type-agnostic getter, ``getValue``. If the value is smaller than 2^53 it will be returned as a number, otherwise it will be returned as a string.
+   e.g., ``sample.get(0).get('my_int64') // e.g., '9223372036854775807' OR 1234``
+ - The ``getString`` method.
+   The value will be returned as a string, e.g., ``sample.getString(my_int64') // '9223372036854775807'``
+
+.. warning::
+
+  If getNumber or setNumber are used with values larger than 2^53 they will raise an ``Error``.
 
 Accessing structs
 ^^^^^^^^^^^^^^^^^
