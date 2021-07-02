@@ -192,27 +192,27 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
 
 Accessing 64-bit integers
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Internally, Connector relies on a framework that only contains a single number
-type that is IEEE-754 floating-point number. Additionally, we do not use JavaScript's
-BigInt representation for numbers, meaning JavaScript has this same limitation.
-Due to this, not all 64-bit integers can be represented with exact precision.
+Internally, *Connector* relies on a framework that only contains a single number
+type, which is an IEEE-754 floating-point number. Additionally, *Connector* does not use 
+JavaScript's BigInt representation for numbers, meaning JavaScript has this same limitation.
+As a result, not all 64-bit integers can be represented with exact precision.
 If your type contains uint64 or int64 members, and you expect them to be larger
-than ``2^53`` then you must take the following into account.
+than ``2^53``, then you must take the following into account.
 
 64-bit values larger than 2^53 can be set via:
- - The type-agnostic setter (``instance.set()``), if they are supplied as strings, e.g., ``the_output.instance.set('my_uint64', '18446744073709551615')``
- - The ``setString`` setter, e.g., ``the_output.instance.setString('my_uint64', '18446744073709551615')``
- - Via a ``setFromJson`` if they are provided as strings, e.g., ``the_output.instance.setFromJson({my_uint64: '18446744073709551615'})``
+ - The type-agnostic setter (``instance.set()``), if they are supplied as strings, e.g., ``the_output.instance.set('my_uint64', '18446744073709551615')``.
+ - The ``setString`` setter, e.g., ``the_output.instance.setString('my_uint64', '18446744073709551615')``.
+ - Via a ``setFromJson``, if they are provided as strings, e.g., ``the_output.instance.setFromJson({my_uint64: '18446744073709551615'})``.
 
 64-bit values larger than 2^53 can be retrieved via:
- - The type-agnostic getter, ``getValue``. If the value is smaller than 2^53 it will be returned as a number, otherwise it will be returned as a string.
-   e.g., ``sample.get(0).get('my_int64') // e.g., '9223372036854775807' OR 1234``
+ - The type-agnostic getter, ``getValue``. If the value is smaller than 2^53, it will be returned as a number; otherwise it will be returned as a string:
+   e.g., ``sample.get(0).get('my_int64') // e.g., '9223372036854775807' OR 1234``.
  - The ``getString`` method.
-   The value will be returned as a string, e.g., ``sample.getString(my_int64') // '9223372036854775807'``
+   The value will be returned as a string, e.g., ``sample.getString(my_int64') // '9223372036854775807'``.
 
 .. warning::
 
-  If getNumber or setNumber are used with values larger than 2^53 they will raise an ``Error``.
+  If getNumber or setNumber is used with a value larger than 2^53, that value will produce an ``Error``.
 
 Accessing structs
 ^^^^^^^^^^^^^^^^^
