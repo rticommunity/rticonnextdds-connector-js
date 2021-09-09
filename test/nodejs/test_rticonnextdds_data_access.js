@@ -1154,12 +1154,34 @@ describe('Tests with a testOutput and testInput', () => {
   // the same restriction on 64-bit integers - their only Number type is a double
   // precision floating point value, meaning they cannot accurately represent
   // integers large than 2^53.
-  // These tests check that via the type-agnostic getter and setter, and getString
-  // and setString can be used to workaround this limitation.
+  // Due to this, there are restrictions on how 64-bit numbers (uint64 and int64)
+  // can be communicated, the following verify that the behaviour is as follows:
+  // - The getNumber and setNumber operations throw an error if used with a value
+  //   outside of their supported range:
+  //     - Max |value| for setNumber is 2^53 - 1
+  //     - Max |value| for getNumber is 2^53
+  // - The type-agnostic setter can be used with numbers outside of this range,
+  //   if they are supplied as strings (note in Python we also accept numbers).
+  // - The type-agnostic getter can be used with numbers outside of the range.
+  //   If the value is <= 2^53 it will be returned as a Number, otherwise as a
+  //   string.
+  // - The getString and setString operations can be used on all number types
+  //   and has no restriction on size.
+  // - The setFromJson  operation can be used to set large integers, they must
+  //   be supplied as strings (otherwise they would be corrupted by JavaScript)
+  // - the getJSON operation should not be used to obtain large integers, the
+  //   largest integer it can be used with is the same as getNumber (2^53), however
+  //   we have no way of detecting if a value larger than this is being retrieved,
+  //   so no error will be thrown otherwise.
   describe('Tests with 64-bit integers', () => {
-    it('Can communicate large 64-bit numbers using getString and setString', async () => {
-      testOutput.instance.setString('my_uint64', '18446744073709551615')
-      testOutput.instance.setString('my_int64', '9223372036854775807')
+    it('getNumber throws an error if value is out of range', async () => {
+      // Highest value retrievable is 2^53, so set 1 higher. We set via Json
+      // to work around the limitation with setNumber (could also use setString,
+      // or setAnyValue)
+      testOutput.instance.setFromJson({
+        my_uint64: '9007199254740993',
+        my_int64: '9007199254740993'
+      })
       testOutput.write()
       try {
         await testInput.wait(testExpectSuccessTimeout)
@@ -1168,14 +1190,119 @@ describe('Tests with a testOutput and testInput', () => {
         expect(false).to.deep.equals(true)
       }
       testInput.take()
-      expect(testInput.samples.get(0).getString('my_uint64')).to.deep.equals('18446744073709551615')
-      expect(testInput.samples.get(0).getString('my_int64')).to.deep.equals('9223372036854775807')
+
+      // The values of the 64-bit integers is too large to retrieve with getNumber
+      expect(() => {
+        testInput.samples.get(0).getNumber('my_uint64')
+      }).to.throw(rti.DDSError)
+      expect(() => {
+        testInput.samples.get(0).getNumber('my_int64')
+      }).to.throw(rti.DDSError)
+
+      // Also check the most negative value
+      testOutput.instance.setFromJson({
+        my_int64: '-9007199254740993'
+      })
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(() => {
+        testInput.samples.get(0).getNumber('my_int64')
+      }).to.throw(rti.DDSError)
+    })
+
+    // Check that the getNumber API can handle values stated in documentation
+    it('getNumber can retrieve values up to 2^53', async () => {
+      testOutput.instance.setFromJson({
+        my_uint64: '9007199254740992',
+        my_int64: '-9007199254740992'
+      })
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+
+      // Obtain the values and confirm they are correct
+      const obtainedUint64 = testInput.samples.get(0).getNumber('my_uint64')
+      const obtainedInt64 = testInput.samples.get(0).getNumber('my_int64')
+      expect(obtainedUint64).to.deep.equals(Number.MAX_SAFE_INTEGER + 1)
+      expect(obtainedInt64).to.deep.equals(Number.MIN_SAFE_INTEGER - 1)
+    })
+
+    // Check that setNumber throws an error if value is too large
+    it('setNumber throws an error if value out of range', () => {
+      // Max value for set is 2^53 - 1, anything larger will throw an error
+      expect(() => {
+        testOutput.instance.setNumber('my_uint64', Number.MAX_SAFE_INTEGER + 1)
+      }).to.throw(rti.DDSError)
+      expect(() => {
+        testOutput.instance.setNumber('my_int64', Number.MAX_SAFE_INTEGER + 1)
+      }).to.throw(rti.DDSError)
+      expect(() => {
+        testOutput.instance.setNumber('my_int64', Number.MIN_SAFE_INTEGER - 1)
+      }).to.throw(rti.DDSError)
+    })
+
+    // Check that setNumber can handle the values stated in the documentation
+    it('setNumber can set values up to 2^53 - 1', async () => {
+      // setNumber can set up to 2^53 - 1 (which is === Number.MAX_SAFE_INTEGER)
+      testOutput.instance.setNumber('my_uint64', Number.MAX_SAFE_INTEGER)
+      testOutput.instance.setNumber('my_int64', Number.MAX_SAFE_INTEGER)
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      // Confirm that the values are correct and not corrupted
+      expect(testInput.samples.get(0).getNumber('my_uint64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
+      expect(testInput.samples.get(0).getNumber('my_int64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
+
+      // Also do same test with minimum value
+      testOutput.instance.setNumber('my_int64', Number.MIN_SAFE_INTEGER)
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).getNumber('my_int64')).to.deep.equals(Number.MIN_SAFE_INTEGER)
+    })
+
+    it('Can communicate large 64-bit numbers using getString and setString', async () => {
+      testOutput.instance.setString('my_uint64', '9007199254740993')
+      testOutput.instance.setString('my_int64', '-9007199254740993')
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+      expect(testInput.samples.get(0).getString('my_uint64')).to.deep.equals('9007199254740993')
+      expect(testInput.samples.get(0).getString('my_int64')).to.deep.equals('-9007199254740993')
     })
 
     it('64-bit values larger than 2^53 are returned as strings by get', async () => {
-      const maxInt64 = '9223372036854775807'
-      const maxUint64 = '18446744073709551615'
-      testOutput.instance.setFromJson({ my_int64: maxInt64, my_uint64: maxUint64 })
+      const largeIntAsString = '9007199254740993'
+      testOutput.instance.setFromJson({
+        my_int64: largeIntAsString,
+        my_uint64: largeIntAsString
+      })
       testOutput.write()
       try {
         await testInput.wait(testExpectSuccessTimeout)
@@ -1185,13 +1312,16 @@ describe('Tests with a testOutput and testInput', () => {
       }
       testInput.take()
       expect(testInput.samples.get(0).get('my_uint64')).to.be.a.string
-      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(maxUint64)
-      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(maxInt64)
+      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(largeIntAsString)
       expect(testInput.samples.get(0).get('my_int64')).to.be.a.string
+      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(largeIntAsString)
     })
 
     it('64-bit values smaller or equal to 2^53 are returned as numbers by get', async () => {
-      testOutput.instance.setFromJson({ my_int64: 123456, my_uint64: 123456 })
+      testOutput.instance.setFromJson({
+        my_uint64: Number.MAX_SAFE_INTEGER,
+        my_int64: Number.MIN_SAFE_INTEGER
+      })
       testOutput.write()
       try {
         await testInput.wait(testExpectSuccessTimeout)
@@ -1200,13 +1330,16 @@ describe('Tests with a testOutput and testInput', () => {
         expect(false).to.deep.equals(true)
       }
       testInput.take()
-      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(123456)
+      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
       expect(testInput.samples.get(0).get('my_uint64')).to.be.a('number')
-      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(123456)
+      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(Number.MIN_SAFE_INTEGER)
       expect(testInput.samples.get(0).get('my_int64')).to.be.a('number')
     })
 
-    it('Can communicate large 64-bit numbers using type-agnostic getters and setters', async () => {
+    it('Can set large 64-bit numbers using type-agnostic setter', async () => {
+      // Any integer value can be set via the type-agnostic setter when supplied
+      // as a string (this differs from Python, where you could also supply it as
+      // an int))
       testOutput.instance.set('my_uint64', '18446744073709551615')
       testOutput.instance.set('my_int64', '9223372036854775807')
       testOutput.write()
@@ -1217,8 +1350,33 @@ describe('Tests with a testOutput and testInput', () => {
         expect(false).to.deep.equals(true)
       }
       testInput.take()
+      // The values will be returned as strings since they are > 2^53
       expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals('18446744073709551615')
       expect(testInput.samples.get(0).get('my_int64')).to.deep.equals('9223372036854775807')
+    })
+
+    it('The JSON getter cannot handle large integers', async () => {
+      // Provided the values are supplied as strings to the JSON object, there should
+      // be no restriction on the size of the integer
+      const jsonTx = {
+        my_uint64: '18446744073709551615',
+        my_int64: '9223372036854775807'
+      }
+      testOutput.instance.setFromJson(jsonTx)
+      testOutput.write()
+      try {
+        await testInput.wait(testExpectSuccessTimeout)
+      } catch (err) {
+        console.log('Error caught: ' + err)
+        expect(false).to.deep.equals(true)
+      }
+      testInput.take()
+
+      // The JSON.parse() call done in getFromJSON will result in the
+      // values > Number.MAX_SAFE_INT being corrupted. We cannot detect this.
+      const jsonRx = testInput.samples.get(0).getJson()
+      expect(jsonRx.my_int64).to.not.deep.equal(jsonTx.my_int64)
+      expect(jsonRx.my_uint64).to.not.deep.equal(jsonTx.my_uint64)
     })
   })
 })
