@@ -70,7 +70,8 @@ def setup(app):
 # documentation.
 #
 html_theme_options = {
-    "collapse_navigation" : False
+    "collapse_navigation" : False,
+    "canonical_url" : "https://community.rti.com/static/documentation/connector/current/api/javascript/"
 }
 
 # The name of an image file (relative to this directory) to place at the top
