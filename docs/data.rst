@@ -198,7 +198,7 @@ type, an IEEE-754 floating-point number. Additionally, *Connector* does not use
 JavaScript's BigInt representation for numbers, meaning JavaScript has this same limitation.
 As a result, not all 64-bit integers can be represented with exact precision using all
 APIs.
-If your type contains uint64 or int64 members, and you expect them to be larger
+If your type contains ``uint64`` or ``int64`` members, and you expect them to be larger
 than ``Number.MAX_SAFE_INTEGER`` (or smaller than ``Number.MIN_SAFE_INTEGER``),
 then you must take the following into account.
 
