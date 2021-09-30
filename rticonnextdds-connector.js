@@ -321,13 +321,17 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
     return !!boolVal.deref()
   } else if (selection === _AnyValueKind.connector_string) {
     const nodeStr = _moveCString(stringVal.deref())
-    // Try to convert the returned string to a JSON object. We can now return
-    // one of two things:
+    // If this is NOT a numeric string, try to convert the returned string to a
+    // JSON object. We can now return one of two things:
     // - An actual string (if the JSON.parse call fails)
     // - A JSON object (if the JSON.parse call succeeds)
-    try {
-      return JSON.parse(nodeStr)
-    } catch (err) {
+    if (isNaN(nodeStr)) {
+      try {
+        return JSON.parse(nodeStr)
+      } catch (err) {
+        return nodeStr
+      }
+    } else {
       return nodeStr
     }
   } else {
@@ -495,6 +499,11 @@ class SampleIterator {
 
   /**
    * Gets the value of a numeric field in this sample.
+   *
+   * .. note::
+   *   This operation should not be used with values with an aboslute value
+   *   larger than `Number.MAX_SAFE_INTEGER`. See :ref:`Accessing 64-bit integers`
+   *   for more information.
    *
    * @param {string} fieldName - The name of the field.
    * @returns {number} The numeric value of the field.
@@ -1279,6 +1288,11 @@ class Instance {
   /**
    * Sets a numeric field.
    *
+   * .. note::
+   *   This operation should not be used with values with an aboslute value
+   *   larger than `Number.MAX_SAFE_INTEGER`. See :ref:`Accessing 64-bit integers`
+   *   for more information.
+   *
    * @param {string} fieldName - The name of the field.
    * @param {number} value - A numeric value, or null, to unset an
    *   optional member.
@@ -1331,7 +1345,7 @@ class Instance {
    * Sets a string field.
    *
    * @param {string} fieldName - The name of the field.
-   * @param {number} value - A string  value, or null, to unset an
+   * @param {string|null} value - A string value, or null, to unset an
    *   optional member.
    */
   setString (fieldName, value) {
@@ -1419,6 +1433,11 @@ class Instance {
 
   /**
    * Retrives the value of this instance as a JSON object.
+   *
+   * .. note::
+   *   This operation should not be used with values with an aboslute value
+   *   larger than `Number.MAX_SAFE_INTEGER`. See :ref:`Accessing 64-bit integers`
+   *   for more information.
    *
    * @returns {JSON} The value of this instance as a JSON object.
    */

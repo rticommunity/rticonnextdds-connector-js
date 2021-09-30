@@ -97,8 +97,8 @@ describe('Test the iteration of Input Samples', () => {
     expect(input.samples.length).to.deep.equals(expectedSampleCount)
   })
 
-  afterEach(() => {
-    connector.close()
+  afterEach(async () => {
+    await connector.close()
   })
 
   it('Check sample iterator and iterable', () => {
@@ -254,7 +254,7 @@ describe('Test dispose', () => {
   })
 
   afterEach(async () => {
-    connector.close()
+    await connector.close()
   })
 
   it('Dispose should not have validData set to true', () => {
@@ -325,7 +325,7 @@ describe('Test unregister', () => {
   })
 
   afterEach(async () => {
-    connector.close()
+    await connector.close()
   })
 
   it('Unregister should not have validData set to true', () => {
