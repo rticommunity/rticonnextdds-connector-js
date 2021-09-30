@@ -129,18 +129,6 @@ To set any numeric type, including enumerations:
     output.instance.setNumber('my_double', 2.14)
     output.instance.setNumber('my_enum', 2)
 
-.. warning::
-    The range of values for a numeric field is determined by the type
-    used to define that field in the configuration file. However, 
-    ``setNumber`` and ``getNumber`` can't handle 64-bit integers 
-    (*int64* and *uint64*) whose absolute values are larger than 2^53. 
-    This is a *Connector* limitation due to the use of *double* as an 
-    intermediate representation.
-
-    When ``setNumber`` or ``getNumber`` detect this situation, they will raise
-    an :class:`DDSError`. ``getJson`` and ``setJson`` do not have this
-    limitation and can handle any 64-bit integer.
-
 To set booleans:
 
 .. code-block::
@@ -170,7 +158,7 @@ Similarly, to get a field in a :class:`Input` sample, use the appropriate
 getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
 :meth:`SampleIterator.getString()`, or the type-independent 
 :meth:`SampleIterator.get()`.
-``getString`` also works with numeric fields, returning the number as a string:
+:meth:`SampleIterator.getString` also works with numeric fields, returning the number as a string:
 
 .. code-block::
 
@@ -191,16 +179,62 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
 
 
 .. note::
-    The typed getters and setters perform better than ``set``
-    and ``get`` in applications that write or read at high rates.
-    Also prefer ``getJson`` and ``setFromJson`` over ``set``
-    and ``get`` when accessing all or most of the fields of a sample
+    The typed getters and setters perform better than :meth:`Instance.set`
+    and :meth:`SampleIterator.get` in applications that write or read at high rates.
+    Also, prefer :meth:`SampleIterator.getJson` and :meth:`Instance.setFromJson`
+    over :meth:`Instance.set` and :meth:`SampleIterator.get` when accessing all
+    or most of the fields of a sample
     (see previous section).
 
 .. note::
     If a field ``my_string``, defined as a string in the configuration file, contains
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
+
+Accessing 64-bit integers
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Internally, *Connector* relies on a framework that only contains a single number
+type, an IEEE-754 floating-point number. Additionally, *Connector* does not use 
+JavaScript's BigInt representation for numbers, meaning JavaScript has this same limitation.
+As a result, not all 64-bit integers can be represented with exact precision using all
+APIs.
+If your type contains ``uint64`` or ``int64`` members, and you expect them to be larger
+than ``Number.MAX_SAFE_INTEGER`` (or smaller than ``Number.MIN_SAFE_INTEGER``),
+then you must take the following into account.
+
+64-bit values with an absolute value greater or equal to 2^53 can be set via:
+ - The type-agnostic setter, :meth:`Instance.set`. The values must be supplied
+   as strings, e.g., ``the_output.instance.set('my_uint64', '18446744073709551615')``.
+ - :meth:`Instance.setString`, e.g., ``the_output.instance.setString('my_uint64', '18446744073709551615')``.
+ - :meth:`Instance.setFromJson`, if the values are provided as strings, e.g., ``the_output.instance.setFromJson({my_uint64: '18446744073709551615'})``.
+
+64-bit values with an absolute value greater than 2^53 can be retrieved via:
+ - The type-agnostic getter, :meth:`SampleIterator.get`. If the absolute value of
+   the field is less than ``2^53`` it will be returned as a number; otherwise it will be
+   returned as a string, e.g., ``sample.get(0).get('my_int64') // '9223372036854775807' OR 1234``.
+ - Using :meth:`SampleIterator.getString`. The value will be returned as a string,
+   e.g., ``sample.getString(my_int64') // '9223372036854775807' OR '1234'``.
+
+.. warning::
+
+  If :meth:`SampleIterator.getNumber()` is used to retrieve a value > 2^53 it will
+  throw a :class:`DDSError`.
+
+.. warning::
+
+  If :meth:`Instance.setNumber()` is used to set a value >= 2^53 it will throw a
+  :class:`DDSError`.
+
+.. warning::
+
+  The :meth:`SampleIterator.getJson()` method should not be used to retrieve integer
+  values larger than  ``Number.MAX_SAFE_INTEGER`` (or smaller than ``Number.MIN_SAFE_INTEGER``).
+  The values returned may be corrupted **but no error will be thrown**.
+
+.. note::
+
+  The :meth:`Instance.setNumber()` operation can safely handle ``abs(value) < 2^53``,
+  whereas the :meth:`SampleIterator.getNumber()` operation can safely handle ``abs(value) <= 2^53``.
 
 Accessing structs
 ^^^^^^^^^^^^^^^^^

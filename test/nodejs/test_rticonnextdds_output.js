@@ -34,7 +34,7 @@ describe('Output Tests', function () {
 
   afterEach(async () => {
     input.take()
-    connector.delete()
+    await connector.close()
   })
 
   it('Output object should not get instantiated for invalid DataWriter', function () {
