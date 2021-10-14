@@ -141,7 +141,8 @@ class _ConnectorBinding {
       RTI_Connector_set_max_objects_per_thread: ['int', ['int']],
       RTIDDSConnector_getJSONInstance:['char *', ['pointer', 'string']],
       // This API is only used in the unit tests
-      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']]
+      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']],
+      RTI_Connector_get_build_versions: ['int', [ref.refType('char *'), ref.refType('char *')]]
     })
   }
 }
@@ -2100,6 +2101,8 @@ class Connector extends EventEmitter {
    *
    * This static method provides the build IDs of the native libraries being used
    * by Connector, as well as the version of the Connector API.
+   *
+   * .. note::
    *   This is a static method. It can be called before creating a
    *   :class:`Connector` instance.
    *
