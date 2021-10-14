@@ -138,7 +138,7 @@ describe('Connector Tests', function () {
   })
 
   it('is possible to obtain the current version of Connector', function () {
-    const version = rti.Connector.get_version()
+    const version = rti.Connector.getVersion()
     expect(version).to.be.a.string
 
     // The returned version string should contain four pieces of information:
