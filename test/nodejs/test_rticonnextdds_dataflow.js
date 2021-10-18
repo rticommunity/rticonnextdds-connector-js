@@ -24,7 +24,7 @@ const params = ['read', 'take']
 
 params.forEach((retrievalMethod) => {
   describe('DataflowTests for ' + retrievalMethod, function () {
-    var input, output, testMsg
+    let input, output, testMsg
 
     // Initialization before all tests execute
     before(async function () {
@@ -39,14 +39,14 @@ params.forEach((retrievalMethod) => {
         expect(matches).to.be.at.least(1)
       } catch (err) {
         console.log('Caught err: ' + err)
-        throw(err)
+        throw (err)
       }
     })
 
     // Clean-up after all tests execute
-    after(function () {
+    after(async function () {
       this.timeout(0)
-      connector.close()
+      await connector.close()
     })
 
     // Initialization done before each test executes
@@ -57,14 +57,14 @@ params.forEach((retrievalMethod) => {
         await input.wait(testExpectSuccessTimeout)
       } catch (err) {
         console.log('Caught err: ' + err)
-        throw(err)
+        throw (err)
       }
       input[retrievalMethod]()
       expect(input.samples.length).to.be.at.least(1)
     })
 
     afterEach(function () {
-      // take any samples from middleware chache
+      // take any samples from middleware cache
       input.take()
     })
 
@@ -82,6 +82,8 @@ params.forEach((retrievalMethod) => {
       const validity = input.infos.isValid(0)
       expect(validity).to.equal(1)
     })
+
+    it('')
 
     it('received JSON representation of data should be the same as ' +
       'the JSON object sent', function () {
