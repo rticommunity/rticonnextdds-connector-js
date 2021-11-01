@@ -1,5 +1,5 @@
-Release Notes
-=============
+Release Notes for Connector 1.2.0
+=================================
 
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
@@ -20,7 +20,7 @@ macOS® platforms. It has been tested on the following systems:
   * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
 
 **macOS**
-  * macOS 10.13-10.15 (x64)
+  * macOS 10.13-10.15, 11 (x64)
 
 **Windows**
   * Windows 8 (x64)
@@ -32,13 +32,23 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.1.0
-~~~~~~~~~~~~~
+What's New in 1.2.0
+~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
+*RTI Connector* 1.2.0 is built on `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
+
+New Platforms
+^^^^^^^^^^^^^
+
+RTI has validated that *Connector* can be used on macOS 11 (Big Sur) systems.
+
+Previous Releases
+~~~~~~~~~~~~~~~~~
 
 What's New in 1.1.0
 ^^^^^^^^^^^^^^^^^^^
+
+*RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
 
 Support added for ARMv8 architectures
 """""""""""""""""""""""""""""""""""""
@@ -166,7 +176,7 @@ This problem has been resolved.
 
 
 Version 1.0.0
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
 `RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
