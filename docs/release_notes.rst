@@ -1,5 +1,5 @@
-Release Notes for Connector 1.2.0
-=================================
+Release Notes
+=============
 
 Supported Platforms
 ~~~~~~~~~~~~~~~~~~~
