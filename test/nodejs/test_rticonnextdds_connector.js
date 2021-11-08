@@ -93,15 +93,15 @@ describe('Connector Tests', function () {
     await connector.close()
   })
 
-//   it('Should be possible to create a Connector with participant qos', async function () {
-//     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
-//     const connector = new rti.Connector(
-//       'MyParticipantLibrary::ConnectorWithParticipantQos',
-//       xmlProfile)
-//     expect(connector).to.exist
-//     expect(connector).to.be.instanceOf(rti.Connector)
-//     await connector.close()
-//   })
+  it('Should be possible to create a Connector with participant qos', async function () {
+    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const connector = new rti.Connector(
+      'MyParticipantLibrary::ConnectorWithParticipantQos',
+      xmlProfile)
+    expect(connector).to.exist
+    expect(connector).to.be.instanceOf(rti.Connector)
+    await connector.close()
+  })
 
   it('is possible to obtain the current version of Connector', function () {
     const version = rti.Connector.getVersion()
