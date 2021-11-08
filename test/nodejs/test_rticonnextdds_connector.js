@@ -112,17 +112,18 @@ describe('Connector Tests', function () {
     // - the build ID of core.1.0
     // - the build ID of dds_c.1.0
     // - the build ID of lua_binding.1.0
+    // Each build ID has either 3 or 4 version digits.
     // Expect "RTI Connector for JavaScript, version X.X.X"
     let regex = /RTI Connector for JavaScript, version ([0-9][.]){2}[0-9]/
     expect(regex.test(version)).deep.equals(true)
     // Expect "NDDSCORE_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
-    regex = /.*NDDSCORE_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    regex = /.*NDDSCORE_BUILD_([0-9][.]){2,3}[0-9]_[0-9]{8}T[0-9]{6}Z/
     expect(regex.test(version)).deep.equals(true)
     // Expect "NDDSC_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
-    regex = /.*NDDSC_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    regex = /.*NDDSC_BUILD_([0-9][.]){2,3}[0-9]_[0-9]{8}T[0-9]{6}Z/
     expect(regex.test(version)).deep.equals(true)
     // Expect "RTICONNECTOR_BUILD_<VERSION>_<DATE>T<TIMESTAMP>Z"
-    regex = /.*RTICONNECTOR_BUILD_([0-9][.]){2}[0-9]_[0-9]{8}T[0-9]{6}Z/
+    regex = /.*RTICONNECTOR_BUILD_([0-9][.]){2,3}[0-9]_[0-9]{8}T[0-9]{6}Z/
     expect(regex.test(version)).deep.equals(true)
   })
 
