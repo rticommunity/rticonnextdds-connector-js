@@ -1,6 +1,6 @@
 {
   "name": "rticonnextdds-connector",
-  "version": "1.2.0",
+  "version": "1.2.0.rc1",
   "description": "RTI Connector for JavaScript",
   "main": "rticonnextdds-connector.js",
   "files": [
@@ -15,7 +15,7 @@
   "dependencies": {
     "events": "^3.2.0",
     "ref-napi": "^3.0.1",
-    "ref-struct-napi": "^1.1.1",
+    "ref-struct-napi": "^1.2.0",
     "ffi-napi": "^3.1.0",
     "sleep": "^6.3.0"
   },
