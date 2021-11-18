@@ -2,7 +2,7 @@ Release Notes
 =============
 
 Supported Platforms
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 *RTI Connector for JavaScript* has been tested with Node.js versions
 10.22.0, 11.15.0 and 12.13.0.
@@ -34,7 +34,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 
 What's New in 1.2.0
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 *RTI Connector* 1.2.0 is built on `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
 
@@ -44,16 +44,58 @@ New Platforms
 RTI has validated that *Connector* can be used on macOS 11 (Big Sur) systems.
 
 
-Previous Release
-~~~~~~~~~~~~~~~~
+New API makes it easier to query what version of Connector is being used
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. CON-92 
+
+A new API has been added that provides the caller with the version of *Connector*
+and the version of the native libraries being used.
+
+
+What's Fixed in 1.2.0
+---------------------
+
+Support added for handling large 64-bit integers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Support has been improved for both getting and setting large (greater than 2^53)
+64-bit values. See :ref:`section-access-64-bit-integers-js` for more information.
+
+[RTI Issue ID CON-190]
+
+
+Promise returned by Output.wait did not resolve/reject
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Promise being returned by the Output.wait method (used to wait for
+acknowledgements on an output) was not being resolved or rejected. This
+is no longer the case; the returned Promise will now be resolved if all
+samples within the *DataWriter's* queue are acknowledged within the given
+timeout, or rejected if there are still outstanding samples after the
+supplied timeout has elapsed.
+
+[RTI Issue ID CON-227]
+
+
+Previous Releases
+-----------------
+
+Version 1.1.1
+^^^^^^^^^^^^^
+*Connector* 1.1.1 is built on *RTI Connext DDS* 6.1.0.3, which fixes several
+bugs in the Core Libraries. If you want more details on the bugs fixed in 6.1.0.3,
+contact support@rti.com. These bugs are also fixed in
+`RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__,
+upon which *RTI Connector* 1.2.0 is built.
+
+Version 1.1.0
+^^^^^^^^^^^^^
 
 What's New in 1.1.0
-^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 *RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
 
 Support added for ARMv8 architectures
-"""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++
 .. CON-174 
 
 Connector for JavaScript now runs on ARMv8 architectures. Native libraries
@@ -61,7 +103,7 @@ built for ARMv8 Ubuntu 16.04 are now shipped alongside Connector. These librarie
 have been tested on ARMv8 Ubuntu 16.04 and ARMv8 Ubuntu 18.04.
 
 Support added for Node.js version 12
-""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++
 .. CON-173 
 
 Previously, Node.js version 12 was not supported in *Connector* for JavaScript.
@@ -73,7 +115,7 @@ Connector for JavaScript.
 
 
 Sample state, instance state and view state can now be obtained in Connector
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-177 
 
 The :class:`SampleInfo` class in *Connector* has been extended to provide access to the
@@ -85,7 +127,7 @@ new feature.
 
 
 Support for accessing the key values of disposed instances
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-188 
 
 Support for disposing instances was added in *Connector* 1.0.0.
@@ -100,7 +142,7 @@ See :ref:`Accessing key values of disposed samples` for more
 information on this new feature.
 
 Connector for Javascript dependencies now locked to specific versions
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-220 
 
 ``package-lock.json`` has been committed, fixing the versions of *Connector for 
@@ -108,7 +150,7 @@ Javascript's* dependencies.
 
 
 Support for Security, Monitoring and other Connext DDS add-on libraries
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. CON-221
 
@@ -117,10 +159,10 @@ that Connext DDS features such as Monitoring and Security Plugins are now suppor
 Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.
 
 What's Fixed in 1.1.0
-^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""
 
 Creating two instances of Connector resulted in a license error
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Under some circumstances, it was not possible to create two *Connector* objects.
 The creation of the second *Connector* object failed due to a license error.
@@ -131,7 +173,7 @@ This issue has been fixed.
 
 
 Some larger integer values may have been corrupted by Connector's internal JSON parser
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The internal JSON parser used in *Connector* failed to identify integer numbers
 from double-precision floating-point numbers for certain values.
@@ -143,7 +185,7 @@ become corrupted. This problem has been resolved.
 
 
 Support for loading multiple configuration files
-""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++
 
 A *Connector* object now supports loading multiple files. This allows separating
 the definition of types, QoS profiles, and *DomainParticipants* into different
@@ -157,7 +199,7 @@ files:
 
 
 Creating a Connector instance with a participant_qos tag in the XML may have resulted in a license error
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 In some cases, if the XML configuration file of *Connector* contained a
 `<participant_qos>` tag within the definition of the *DomainParticipant*,
@@ -168,7 +210,7 @@ This problem has been resolved.
 
 
 Websocket example may have failed to run
-""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++
 
 The websocket example (available only in *Connector for Javascript*) may have 
 failed to run due to one of its dependencies, socket.io, removing a public API. 
