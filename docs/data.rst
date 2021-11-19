@@ -234,12 +234,6 @@ then you must take the following into account.
   values larger than  ``Number.MAX_SAFE_INTEGER`` (or smaller than ``Number.MIN_SAFE_INTEGER``).
   The values returned may be corrupted **but no error will be thrown**.
 
-.. warning::
-
-  On Windows systems, the string representations of Not a Number and infinity (e.g.,
-  ``'NaN'``, ``'Infinity'``) are not valid values for a Number. They are valid
-  inputs on other systems.
-
 .. note::
 
   The :meth:`Instance.setNumber()` operation can safely handle ``abs(value) < 2^53``,

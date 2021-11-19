@@ -1486,6 +1486,7 @@ class Instance {
 class Output {
   /**
    * This class is used to publish data for a DDS Topic.
+   *
    * To get an Output object, use :meth:`Connector.getOutput`.
    *
    * Attributes:
@@ -2076,10 +2077,10 @@ class Connector extends EventEmitter {
    * This method is deprecated since the max_objects_per_thread now grows
    * dynamically.
    *
-   * @private
-   *
    * Note this method is deprecated in the Ironside release. This static method
    * only exists to not break user's applications which are already using it.
+   *
+   * @private
    */
   static setMaxObjectsPerThread (value) {
   }
