@@ -8,7 +8,7 @@ and arrays of primitive types or structs, etc.
 
 These types are defined in XML following the format of
 `RTI's XML-Based Application Creation feature
-<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/XMLTagsConfigEntities.htm>`__.
+<https://community.rti.com/static/documentation/connext-dds/6.1.1/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/XMLTagsConfigEntities.htm>`__.
 
 To access the data, :class:`Instance` and :class:`SampleIterator` provide
 setters and getters that expect a ``fieldName`` string, used to identify 
@@ -460,10 +460,10 @@ To clear a member, set it to ``null`` explicitly::
     output.instance.setFromJson({ my_double: 3.3, my_long: 4, my_optional_long: null })
 
 
-For more information about optional members in DDS, see the 
-*Getting Started Guide Addendum for Extensible Types*,
+For more information about optional members in DDS, see 
 `Optional Members 
-<https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/extensible_types_guide/index.htm#extensible_types/Optional_Members.htm>`__. 
+<https://community.rti.com/static/documentation/connext-dds/6.1.1/doc/manuals/connext_dds_professional/extensible_types_guide/index.htm#extensible_types/Optional_Members.htm>`__ 
+in the *Extensible Types Guide*.
 
 Accessing unions
 ^^^^^^^^^^^^^^^^
