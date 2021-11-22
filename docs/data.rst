@@ -191,6 +191,9 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
 
+
+.. _section-access-64-bit-integers-js:
+
 Accessing 64-bit integers
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 Internally, *Connector* relies on a framework that only contains a single number
@@ -230,12 +233,6 @@ then you must take the following into account.
   The :meth:`SampleIterator.getJson()` method should not be used to retrieve integer
   values larger than  ``Number.MAX_SAFE_INTEGER`` (or smaller than ``Number.MIN_SAFE_INTEGER``).
   The values returned may be corrupted **but no error will be thrown**.
-
-.. warning::
-
-  On Windows systems, the string representations of Not a Number and infinity (e.g.,
-  ``'NaN'``, ``'Infinity'``) are not valid values for a Number. They are valid
-  inputs on other systems.
 
 .. note::
 
