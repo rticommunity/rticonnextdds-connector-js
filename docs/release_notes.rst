@@ -4,8 +4,11 @@ Release Notes
 Supported Platforms
 -------------------
 
-*RTI Connector for JavaScript* has been tested with Node.js versions
-10.22.0, 11.15.0 and 12.13.0.
+*RTI Connector for JavaScript* has been tested with Node.js versions 10.24.0 and 12.22.7.
+Connector support Node.JS 
+
+*Connector* works with Node.js versions 10.20.x [#f1]_ to 13.x.x [#f2]_. It currently doesn't work
+with versions 14+ because one of its dependencies is not yet compatible with that version.
 
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
@@ -31,6 +34,13 @@ macOS® platforms. It has been tested on the following systems:
 *Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
+
+.. rubric:: Footnotes
+.. [#f1] Note that Connector for JavaScript is not compatible with versions of 
+   Node.js prior to v10.20.x. It is also not compatible with any version of Node.js v11.
+.. [#f2] Note that Connector for JavaScript is not compatible with Node.js v12.19.0
+   due to a regression that was introduced in that version of Node.js. Connector for JavaScript
+   works with Node.js versions 12.18.x and 12.20.x. 
 
 What's New in 1.2.0
 -------------------
