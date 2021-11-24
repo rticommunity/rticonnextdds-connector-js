@@ -191,6 +191,9 @@ getter: :meth:`SampleIterator.getNumber()`, :meth:`SampleIterator.getBoolean()`,
     a value that can be interpreted as a number, ``sample.get('my_string')`` returns
     a number, not a string.
 
+
+.. _section-access-64-bit-integers-js:
+
 Accessing 64-bit integers
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 Internally, *Connector* relies on a framework that only contains a single number
