@@ -54,6 +54,21 @@ and the version of the native libraries being used.
 What's Fixed in 1.2.0
 ---------------------
 
+Error logged when accessing string longer than 128 bytes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Previously, on an input, when accessing a string longer than 128 bytes, the
+following error was printed:
+
+.. code-block::
+
+    Output buffer too small for member (name = "frame", id = 1). Provided size (128), requires size (x).
+
+This error message was innocuous; there was actually no issue with retrieving
+the string. The message is no longer printed.
+
+[RTI Issue ID CON-157]
+
+
 Support added for handling large 64-bit integers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Support has been improved for both getting and setting large (greater than 2^53)
