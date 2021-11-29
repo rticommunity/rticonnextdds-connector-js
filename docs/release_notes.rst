@@ -35,7 +35,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 .. rubric:: Footnotes
 .. [#f1] Note that Connector for JavaScript is not compatible with versions of 
    Node.js prior to v10.20.x nor with and version of Node.js v11. This is because
-   these versions of Node.js do not support n-api, which is used by some of our
+   these versions of Node.js do not support n-api, which is used by some of its
    dependencies.
 .. [#f2] Note that Connector for JavaScript is not compatible with Node.js v12.19.0
    due to a regression that was introduced in that version of Node.js. Connector for JavaScript
