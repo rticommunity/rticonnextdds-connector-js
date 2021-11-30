@@ -233,7 +233,7 @@ The Monitoring and Security plugins are configured in XML, as described in the p
 links.
 
 To use RTI Connext DDS add-ons you need an RTI Connext DDS installation. To
-configure your environment so that Connector can load these additional libraries:
+configure your environment so that *Connector* can load these additional libraries:
 
 - Set your environment using::
 
@@ -248,7 +248,7 @@ configure your environment so that Connector can load these additional libraries
   <Connext DDS installation directory>\lib\<architecture>\
 
 .. note::
-    Each version of Connector can only load add-on libraries from its
+    Each version of *Connector* can only load add-on libraries from its
     corresponding Connext DDS release. You can see this correspondence in the
-    :ref:`release notes`. For example, Connector 1.1.0 can only
+    :ref:`release notes`. For example, *Connector* 1.1.0 can only
     load Connext DDS 6.1.0 add-on libraries.

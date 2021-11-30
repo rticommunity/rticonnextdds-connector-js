@@ -4,8 +4,8 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* works with Node.js versions 10.20.x [#f1]_ to 13.x.x [#f2]_. It currently doesn't work
-with versions 14+ because one of its dependencies is not yet compatible with that version.
+*Connector* works with Node.js versions 10.20.x through 13.x.x,
+except for versions 11.x.x and 12.19.x [#f1]_.
 
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
@@ -33,13 +33,12 @@ macOS® platforms. It has been tested on the following systems:
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 .. rubric:: Footnotes
-.. [#f1] Note that Connector for JavaScript is not compatible with versions of 
-   Node.js prior to v10.20.x nor with and version of Node.js v11. This is because
-   these versions of Node.js do not support n-api, which is used by some of our
-   dependencies.
-.. [#f2] Note that Connector for JavaScript is not compatible with Node.js v12.19.0
-   due to a regression that was introduced in that version of Node.js. Connector for JavaScript
-   works with Node.js versions 12.18.x and 12.20.x. 
+.. [#f1] Versions of Node.js prior to v10.20.x and version v11.x.x do not support n-api,
+   which is used by some of *Connector's* dependencies. Node.js v12.19.0 is not
+   compatible with *Connector* because of a regression introduced in
+   that version of Node.js.
+   Node.js 14+ does not work with *Connector* because one of *Connector's*
+   dependencies is not yet compatible with that version.
 
 What's New in 1.2.0
 -------------------
