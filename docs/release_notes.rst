@@ -13,13 +13,13 @@ macOS® platforms. It has been tested on the following systems:
 **Linux**
   * CentOS™ 7.0 (x64)
   * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
-  * SUSE® Linux Enterprise Server 12 SP2  (x64)
-  * Ubuntu® 14.04, 18.04, 20.04 LTS (x64)
-  * Ubuntu 18.04 LTS (64-bit Arm® v8)
-  * Ubuntu 18.04 LTS (32-bit Arm v7)
+  * SUSE® Linux Enterprise Server 12 SP2 (x64)
+  * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
+  * Ubuntu 20.04 LTS (x64)
 
 **macOS**
-  * macOS 10.13-10.15, 11 (x64)
+  * macOS 10.13-10.15 (x64)
+  * macOS 11 (x64 and Arm v8 tested via x64 libraries)
 
 **Windows**
   * Windows 10 (x64)
@@ -47,16 +47,17 @@ What's New in 1.2.0
 New Platforms
 ^^^^^^^^^^^^^
 
-RTI has validated that *Connector* can be used on macOS 11 (Big Sur) systems
-on x64 CPUs.
+*Connector* has been validated on macOS 11 (Big Sur) systems on x64 and Arm v8 
+CPUs (via x64 libraries).
 
 
 New API makes it easier to query what version of Connector is being used
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-92 
 
-A new API, :meth:`Connector.getVersion`, has been added that provides the caller with the version of *Connector*
-and the version of the native libraries being used.
+A new API, :meth:`Connector.getVersion`, has been added that provides the
+caller with the version of *Connector* and the version of the native
+libraries being used.
 
 
 What's Fixed in 1.2.0
