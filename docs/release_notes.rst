@@ -4,26 +4,24 @@ Release Notes
 Supported Platforms
 -------------------
 
-*RTI Connector for JavaScript* has been tested with Node.js versions
-10.22.0, 11.15.0 and 12.13.0.
+*Connector* works with Node.js versions 10.20.x through 13.x.x,
+except for versions 11.x.x and 12.19.x [#f1]_.
 
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
 
 **Linux**
-  * CentOS™ 6.0, 6.2-6.4, 7.0 (x64)
-  * Red Hat® Enterprise Linux 6.0-6.5, 6.7, 6.8, 7, 7.3, 7.5, 7.6, 8  (x64)
-  * SUSE® Linux Enterprise Server 12 SP2  (x64)
-  * Ubuntu® 14.04, 16.04, 18.04, 20.04 LTS (x64)
-  * Ubuntu 16.04, 18.04 LTS (64-bit Arm® v8)
-  * Ubuntu 18.04 LTS (32-bit Arm v7)
-  * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
+  * CentOS™ 7.0 (x64)
+  * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
+  * SUSE® Linux Enterprise Server 12 SP2 (x64)
+  * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
+  * Ubuntu 20.04 LTS (x64)
 
 **macOS**
-  * macOS 10.13-10.15, 11 (x64)
+  * macOS 10.13-10.15 (x64)
+  * macOS 11 (x64 and Arm v8 tested via x64 libraries)
 
 **Windows**
-  * Windows 8 (x64)
   * Windows 10 (x64)
   * Windows Server 2012 R2 (x64)
   * Windows Server 2016 (x64)
@@ -32,23 +30,34 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
+.. rubric:: Footnotes
+.. [#f1] Versions of Node.js prior to v10.20.x and version v11.x.x do not support n-api,
+   which is used by some of *Connector's* dependencies. Node.js v12.19.0 is not
+   compatible with *Connector* because of a regression introduced in
+   that version of Node.js.
+   Node.js 14+ does not work with *Connector* because one of *Connector's*
+   dependencies is not yet compatible with that version.
+
 What's New in 1.2.0
 -------------------
 
-*RTI Connector* 1.2.0 is built on `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
+*RTI Connector* 1.2.0 is built on 
+`RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
 
 New Platforms
 ^^^^^^^^^^^^^
 
-RTI has validated that *Connector* can be used on macOS 11 (Big Sur) systems.
+*Connector* has been validated on macOS 11 (Big Sur) systems on x64 and Arm v8 
+CPUs (via x64 libraries).
 
 
 New API makes it easier to query what version of Connector is being used
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-92 
 
-A new API, :meth:`Connector.getVersion`, has been added that provides the caller with the version of *Connector*
-and the version of the native libraries being used.
+A new API, :meth:`Connector.getVersion`, has been added that provides the
+caller with the version of *Connector* and the version of the native
+libraries being used.
 
 
 What's Fixed in 1.2.0
