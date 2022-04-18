@@ -97,8 +97,8 @@ describe('Test the iteration of Input Samples', () => {
     expect(input.samples.length).to.deep.equals(expectedSampleCount)
   })
 
-  afterEach(() => {
-    connector.close()
+  afterEach(async () => {
+    await connector.close()
   })
 
   it('Check sample iterator and iterable', () => {
@@ -186,6 +186,7 @@ describe('Test the iteration of Input Samples', () => {
     input.take()
     expect(input.samples.length).to.deep.equals(0)
     let hasData = false
+    // eslint-disable-next-line no-unused-vars
     for (const sample of input.samples.validDataIter) {
       hasData = true
     }
@@ -199,6 +200,7 @@ describe('Test the iteration of Input Samples', () => {
     input.take()
     expect(input.samples.length).to.deep.equals(0)
     let hasData = false
+    // eslint-disable-next-line no-unused-vars
     for (const sample of input.samples) {
       hasData = true
     }
@@ -252,7 +254,7 @@ describe('Test dispose', () => {
   })
 
   afterEach(async () => {
-    connector.close()
+    await connector.close()
   })
 
   it('Dispose should not have validData set to true', () => {
@@ -323,7 +325,7 @@ describe('Test unregister', () => {
   })
 
   afterEach(async () => {
-    connector.close()
+    await connector.close()
   })
 
   it('Unregister should not have validData set to true', () => {

@@ -1,8 +1,10 @@
 
 .. highlight:: javascript
 
-.. image:: static/RTI_Launcher_Icon_Connector_JavaScript_100x100_0919_forDocumentation.png
-    :align: left
+.. only:: html
+
+    .. image:: static/RTI_Launcher_Icon_Connector_JavaScript_100x100_0919_forDocumentation.png
+        :align: left
 
 Welcome to RTI Connector for JavaScript!
 ========================================
@@ -18,9 +20,6 @@ and other languages.
 You can learn how to use *RTI Connector* by reading the following sections, which
 include examples and detailed API reference. You can also find a specific type
 or function in the :ref:`genindex`.
-
-Table of Contents
-=================
 
 .. toctree::
    :maxdepth: 2
@@ -40,5 +39,5 @@ Table of Contents
 * :ref:`search`
 
 To learn more about *RTI Connext DDS*, see the 
-`RTI Connext DDS Getting Started Guide <https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/getting_started_guide/index.html>`__. 
+`RTI Connext DDS Getting Started Guide <https://community.rti.com/static/documentation/connext-dds/6.1.1/doc/manuals/connext_dds_professional/getting_started_guide/index.html>`__. 
 More documentation is available in the `RTI Community Portal <https://community.rti.com/documentation>`__.
