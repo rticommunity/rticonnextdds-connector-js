@@ -2,28 +2,27 @@ Release Notes
 =============
 
 Supported Platforms
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
-*RTI Connector for JavaScript* has been tested with Node.js versions
-10.22.0, 11.15.0 and 12.13.0.
+*Connector* works with Node.js v17. It can also be used with
+Node.js versions 10.20.x through 13.x.x, except for versions
+11.x.x and 12.19.x [#f1]_.
 
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
 
 **Linux**
-  * CentOS™ 6.0, 6.2-6.4, 7.0 (x64)
-  * Red Hat® Enterprise Linux 6.0-6.5, 6.7, 6.8, 7, 7.3, 7.5, 7.6, 8  (x64)
-  * SUSE® Linux Enterprise Server 12 SP2  (x64)
-  * Ubuntu® 14.04, 16.04, 18.04, 20.04 LTS (x64)
-  * Ubuntu 16.04, 18.04 LTS (64-bit Arm® v8)
-  * Ubuntu 18.04 LTS (32-bit Arm v7)
-  * Wind River® Linux 8 (Arm v7) (Custom-supported platform)
+  * CentOS™ 7.0 (x64)
+  * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
+  * SUSE® Linux Enterprise Server 12 SP2 (x64)
+  * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
+  * Ubuntu 20.04 LTS (x64)
 
 **macOS**
   * macOS 10.13-10.15 (x64)
+  * macOS 11 (x64 and Arm v8 tested via x64 libraries)
 
 **Windows**
-  * Windows 8 (x64)
   * Windows 10 (x64)
   * Windows Server 2012 R2 (x64)
   * Windows Server 2016 (x64)
@@ -32,22 +31,102 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.1.1
-~~~~~~~~~~~~~
+.. rubric:: Footnotes
+.. [#f1] Versions of Node.js prior to v10.20.x and version v11.x.x do not support n-api,
+   which is used by some of *Connector's* dependencies. Node.js v12.19.0 is not
+   compatible with *Connector* because of a regression introduced in
+   that version of Node.js.
+   Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
+   dependencies is not compatible with those versions.
 
-*RTI Connector* 1.1.1 is built on RTI Connext DDS 6.1.0.3, which fixes several
-bugs in the Core Libraries. For details, contact support@rti.com.
+What's New in 1.2.0
+-------------------
+
+*RTI Connector* 1.2.0 is built on 
+`RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
+
+New Platforms
+^^^^^^^^^^^^^
+
+*Connector* has been validated on macOS 11 (Big Sur) systems on x64 and Arm v8 
+CPUs (via x64 libraries).
+
+
+New API makes it easier to query what version of Connector is being used
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. CON-92 
+
+A new API, :meth:`Connector.getVersion`, has been added that provides the
+caller with the version of *Connector* and the version of the native
+libraries being used.
+
+
+What's Fixed in 1.2.0
+---------------------
+
+Error logged when accessing string longer than 128 bytes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Previously, on an input, when accessing a string longer than 128 bytes, the
+following error was printed:
+
+.. code-block::
+
+    Output buffer too small for member (name = "frame", id = 1). Provided size (128), requires size (x).
+
+This error message was innocuous; there was actually no issue with retrieving
+the string. The message is no longer printed.
+
+[RTI Issue ID CON-157]
+
+
+Support added for handling large 64-bit integers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Support has been improved for both getting and setting large (greater than 2^53)
+64-bit values. See :ref:`section-access-64-bit-integers-js` for more information.
+
+[RTI Issue ID CON-190]
+
+
+Promise returned by Output.wait did not resolve/reject
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Promise being returned by the Output.wait method (used to wait for
+acknowledgements on an output) was not being resolved or rejected. This
+is no longer the case; the returned Promise will now be resolved if all
+samples within the *DataWriter's* queue are acknowledged within the given
+timeout, or rejected if there are still outstanding samples after the
+supplied timeout has elapsed.
+
+[RTI Issue ID CON-227]
+
+
+Vulnerability Assessments
+-------------------------
+Internally, *Connector* relies on Lua. RTI has assessed the current version of 
+Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
+affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
+
+
+Previous Releases
+-----------------
+
+Version 1.1.1
+^^^^^^^^^^^^^
+*Connector* 1.1.1 is built on *RTI Connext DDS* 6.1.0.3, which fixes several
+bugs in the Core Libraries. If you want more details on the bugs fixed in 6.1.0.3,
+contact support@rti.com. These bugs are also fixed in
+`RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__,
+upon which *RTI Connector* 1.2.0 is built.
 
 Version 1.1.0
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
+
+What's New in 1.1.0
+""""""""""""""""""""
 
 *RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
 
-What's New in 1.1.0
-^^^^^^^^^^^^^^^^^^^
-
 Support added for ARMv8 architectures
-"""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++
 .. CON-174 
 
 Connector for JavaScript now runs on ARMv8 architectures. Native libraries
@@ -55,7 +134,7 @@ built for ARMv8 Ubuntu 16.04 are now shipped alongside Connector. These librarie
 have been tested on ARMv8 Ubuntu 16.04 and ARMv8 Ubuntu 18.04.
 
 Support added for Node.js version 12
-""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++
 .. CON-173 
 
 Previously, Node.js version 12 was not supported in *Connector* for JavaScript.
@@ -67,7 +146,7 @@ Connector for JavaScript.
 
 
 Sample state, instance state and view state can now be obtained in Connector
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-177 
 
 The :class:`SampleInfo` class in *Connector* has been extended to provide access to the
@@ -79,7 +158,7 @@ new feature.
 
 
 Support for accessing the key values of disposed instances
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-188 
 
 Support for disposing instances was added in *Connector* 1.0.0.
@@ -94,7 +173,7 @@ See :ref:`Accessing key values of disposed samples` for more
 information on this new feature.
 
 Connector for Javascript dependencies now locked to specific versions
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-220 
 
 ``package-lock.json`` has been committed, fixing the versions of *Connector for 
@@ -102,7 +181,7 @@ Javascript's* dependencies.
 
 
 Support for Security, Monitoring and other Connext DDS add-on libraries
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. CON-221
 
@@ -111,10 +190,10 @@ that Connext DDS features such as Monitoring and Security Plugins are now suppor
 Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.
 
 What's Fixed in 1.1.0
-^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""
 
 Creating two instances of Connector resulted in a license error
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Under some circumstances, it was not possible to create two *Connector* objects.
 The creation of the second *Connector* object failed due to a license error.
@@ -125,7 +204,7 @@ This issue has been fixed.
 
 
 Some larger integer values may have been corrupted by Connector's internal JSON parser
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The internal JSON parser used in *Connector* failed to identify integer numbers
 from double-precision floating-point numbers for certain values.
@@ -137,7 +216,7 @@ become corrupted. This problem has been resolved.
 
 
 Support for loading multiple configuration files
-""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++
 
 A *Connector* object now supports loading multiple files. This allows separating
 the definition of types, QoS profiles, and *DomainParticipants* into different
@@ -151,7 +230,7 @@ files:
 
 
 Creating a Connector instance with a participant_qos tag in the XML may have resulted in a license error
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 In some cases, if the XML configuration file of *Connector* contained a
 `<participant_qos>` tag within the definition of the *DomainParticipant*,
@@ -162,7 +241,7 @@ This problem has been resolved.
 
 
 Websocket example may have failed to run
-""""""""""""""""""""""""""""""""""""""""
+++++++++++++++++++++++++++++++++++++++++
 
 The websocket example (available only in *Connector for Javascript*) may have 
 failed to run due to one of its dependencies, socket.io, removing a public API. 

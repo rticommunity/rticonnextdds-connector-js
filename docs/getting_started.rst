@@ -22,9 +22,6 @@ Or the GitHub repository:
 
 In order to access the examples, run npm with the GitHub repository.
 
-*Connector* works with Node.js versions 10.20.x [#f1]_ to 13.x.x [#f2]_. It currently doesn't work
-with versions 14+ because one of its dependencies is not yet compatible with that version.
-
 npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of *Connector*'s
 dependencies. This requires Python 2.7 (it will not work with Python 3) and a relatively recent C++
 compiler (such as gcc 4.8+).
@@ -71,10 +68,3 @@ You can run the reader and the writer in any order, and you can run multiple
 instances of each at the same time. You can also run any other *DDS* application
 that publishes or subscribes to the *Square* topic. For example, you can use
 `RTI Shapes Demo <https://www.rti.com/free-trial/shapes-demo>`__.
-
-.. rubric:: Footnotes
-.. [#f1] Note that Connector for JavaScript is not compatible with versions of 
-   Node.js prior to v10.20.x.
-.. [#f2] Note that Connector for JavaScript is not compatible with Node.js v12.19.0
-   due to a regression that was introduced in that version of Node.js. Connector for JavaScript
-   works with Node.js versions 12.18.x and 12.20.x.

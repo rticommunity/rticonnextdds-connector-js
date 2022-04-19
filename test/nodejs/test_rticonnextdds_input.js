@@ -38,9 +38,9 @@ describe('Input Tests', function () {
   })
 
   // cleanup after all tests have executed
-  after(function () {
+  after(async function () {
     this.timeout(0)
-    connector.delete()
+    await connector.close()
   })
 
   it('Input object should not get instantiated for invalid DataReader', function () {
@@ -70,8 +70,8 @@ describe('Subscriber not automatically enabled tests', () => {
     expect(connector).to.exist.and.to.be.instanceOf(rti.Connector)
   })
 
-  after(() => {
-    connector.close()
+  after(async () => {
+    await connector.close()
   })
 
   it('Entities should not auto-discover each other if QoS is set appropriately', async () => {
@@ -97,7 +97,7 @@ describe('Subscriber not automatically enabled tests', () => {
       expect(newMatches).to.deep.equals(1)
     } catch (err) {
       console.log('Caught err: ' + err)
-      throw(err)
+      throw (err)
     }
   })
 })
@@ -105,7 +105,7 @@ describe('Subscriber not automatically enabled tests', () => {
 describe('Native call on a DataReader', () => {
   // We do not run these tests on Windows since the symbols are not exported in the DLL
   if (os.platform() !== 'win32') {
-    it('Should be possible to call an API in the Connector library which is not in the binding ', () => {
+    it('Should be possible to call an API in the Connector library which is not in the binding ', async () => {
       const participantProfile = 'MyParticipantLibrary::Zero'
       const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
       const connector = new rti.Connector(participantProfile, xmlProfile)
@@ -114,10 +114,17 @@ describe('Native call on a DataReader', () => {
         DDS_DataReader_get_topicdescription: ['pointer', ['pointer']],
         DDS_TopicDescription_get_name: ['string', ['pointer']]
       })
-      const topic = additionalApi.DDS_DataReader_get_topicdescription(input.native)
-      expect(topic).not.to.be.null
-      const topicName = additionalApi.DDS_TopicDescription_get_name(topic)
-      expect(topicName).to.equal('Square')
+      try {
+        const topic = additionalApi.DDS_DataReader_get_topicdescription(input.native)
+        expect(topic).not.to.be.null
+        const topicName = additionalApi.DDS_TopicDescription_get_name(topic)
+        expect(topicName).to.equal('Square')
+      } catch (err) {
+        console.log('Caught err: ' + err)
+        throw (err)
+      } finally {
+        await connector.close()
+      }
     })
   }
 })
