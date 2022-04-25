@@ -10,3 +10,8 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
+    # For now, we only want dependabot updates for vulnerabilities, not for
+    # out-of-date dependencies. Setting this limit to 0 prevents dependabot
+    # from creating multiple PRs due to out-of-date dependencies (security
+    # related updates are not affected by this limit)
+    open-pull-requests-limit: 0
