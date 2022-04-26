@@ -23,7 +23,7 @@ Or the GitHub repository:
 In order to access the examples, run npm with the GitHub repository.
 
 npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of *Connector*'s
-dependencies. This requires a Python installation and a C++ compiler. Please refer
+dependencies. node-gyp requires a Python installation and a C++ compiler. Please refer
 to the `node-gyp documentation <https://github.com/nodejs/node-gyp#installation>`__
 for more details.
 
