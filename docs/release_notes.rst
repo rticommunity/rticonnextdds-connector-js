@@ -4,7 +4,7 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* works with Node.js v17. It can also be used with
+*Connector* works with Node.js v17-18. It can also be used with
 Node.js versions 10.20.x through 13.x.x, except for versions
 11.x.x and 12.19.x [#f1]_.
 
