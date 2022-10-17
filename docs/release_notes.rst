@@ -4,7 +4,7 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* works with Node.js v17. It can also be used with
+*Connector* works with Node.js v17-18. It can also be used with
 Node.js versions 10.20.x through 13.x.x, except for versions
 11.x.x and 12.19.x [#f1]_.
 
@@ -39,21 +39,33 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
    dependencies is not compatible with those versions.
 
+Version 1.2.1
+-------------
+
+*Connector* 1.2.1 updates some third party dependencies that were found to contain
+vulnerabilities. *Connector* was not affected by these vulnerabilities.
+
+Previous Releases
+-----------------
+
+Version 1.2.0
+^^^^^^^^^^^^^
+
 What's New in 1.2.0
--------------------
+"""""""""""""""""""
 
 *RTI Connector* 1.2.0 is built on 
 `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
 
 New Platforms
-^^^^^^^^^^^^^
++++++++++++++
 
 *Connector* has been validated on macOS 11 (Big Sur) systems on x64 and Arm v8 
 CPUs (via x64 libraries).
 
 
 New API makes it easier to query what version of Connector is being used
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. CON-92 
 
 A new API, :meth:`Connector.getVersion`, has been added that provides the
@@ -62,10 +74,11 @@ libraries being used.
 
 
 What's Fixed in 1.2.0
----------------------
+"""""""""""""""""""""
 
 Error logged when accessing string longer than 128 bytes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 Previously, on an input, when accessing a string longer than 128 bytes, the
 following error was printed:
 
@@ -80,7 +93,8 @@ the string. The message is no longer printed.
 
 
 Support added for handling large 64-bit integers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++++
+
 Support has been improved for both getting and setting large (greater than 2^53)
 64-bit values. See :ref:`section-access-64-bit-integers-js` for more information.
 
@@ -88,7 +102,8 @@ Support has been improved for both getting and setting large (greater than 2^53)
 
 
 Promise returned by Output.wait did not resolve/reject
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 The Promise being returned by the Output.wait method (used to wait for
 acknowledgements on an output) was not being resolved or rejected. This
 is no longer the case; the returned Promise will now be resolved if all
@@ -99,18 +114,9 @@ supplied timeout has elapsed.
 [RTI Issue ID CON-227]
 
 
-Vulnerability Assessments
--------------------------
-Internally, *Connector* relies on Lua. RTI has assessed the current version of 
-Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
-affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
-
-
-Previous Releases
------------------
-
 Version 1.1.1
 ^^^^^^^^^^^^^
+
 *Connector* 1.1.1 is built on *RTI Connext DDS* 6.1.0.3, which fixes several
 bugs in the Core Libraries. If you want more details on the bugs fixed in 6.1.0.3,
 contact support@rti.com. These bugs are also fixed in
@@ -261,3 +267,10 @@ more robust, modifies many APIs and adds new functionality. However the old
 APIs have been preserved for backward compatibility as much as possible.
 
 *RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
+
+
+Vulnerability Assessments
+-------------------------
+Internally, *Connector* relies on Lua. RTI has assessed the current version of 
+Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
+affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
