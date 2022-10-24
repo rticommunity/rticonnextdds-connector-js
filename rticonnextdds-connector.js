@@ -70,7 +70,7 @@ class _ConnectorBinding {
         case 'win32':
           libDir = 'win-x64'
           libName = 'rtiddsconnector.dll'
-          additionalLib = 'msvcr120.dll'
+          additionalLib = 'vcruntime140.dll'
           isWindows = true
           break
         default:
