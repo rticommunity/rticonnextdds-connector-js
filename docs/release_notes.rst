@@ -39,7 +39,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    dependencies is not compatible with those versions.
 
 Version 1.2.2
-^^^^^^^^^^^^^
+-----------------
 
 What's New in 1.2.2
 """""""""""""""""""
@@ -60,7 +60,7 @@ Previous Releases
 -----------------
 
 Version 1.2.1
--------------
+^^^^^^^^^^^^^
 
 *Connector* 1.2.1 updates some third party dependencies that were found to contain
 vulnerabilities. *Connector* was not affected by these vulnerabilities.
