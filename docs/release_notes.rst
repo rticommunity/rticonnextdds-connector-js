@@ -42,13 +42,13 @@ Version 1.2.2
 -----------------
 
 What's New in 1.2.2
-"""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.2.2 is built on 
 `RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
 
 Native Windows libraries updated to Visual Studio 2015
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-276
 
 Previously, the native libraries shipped with Connector were built using Visual
