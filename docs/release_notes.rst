@@ -41,7 +41,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.2.2
 ^^^^^^^^^^^^^
 
-What's New in 1.2.0
+What's New in 1.2.2
 """""""""""""""""""
 
 *RTI Connector* 1.2.2 is built on 
@@ -56,14 +56,14 @@ Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
 libraries are now built using Visual Studio 2015. The redistributable that is
 shipped has been updated accordingly.
 
+Previous Releases
+-----------------
+
 Version 1.2.1
 -------------
 
 *Connector* 1.2.1 updates some third party dependencies that were found to contain
 vulnerabilities. *Connector* was not affected by these vulnerabilities.
-
-Previous Releases
------------------
 
 Version 1.2.0
 ^^^^^^^^^^^^^
