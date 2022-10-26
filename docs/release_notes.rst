@@ -38,6 +38,15 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
    dependencies is not compatible with those versions.
 
+Version 1.2.2
+^^^^^^^^^^^^^
+
+What's New in 1.2.0
+"""""""""""""""""""
+
+*RTI Connector* 1.2.2 is built on 
+`RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
+
 Native Windows libraries updated to Visual Studio 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-276
