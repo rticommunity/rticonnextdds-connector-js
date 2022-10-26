@@ -16,15 +16,14 @@ macOS® platforms. It has been tested on the following systems:
   * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
   * SUSE® Linux Enterprise Server 12 SP2 (x64)
   * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
-  * Ubuntu 20.04 LTS (x64)
+  * Ubuntu 20.04, 22.04 LTS (x64)
 
 **macOS**
-  * macOS 10.13-10.15 (x64)
+  * macOS 10.13-10.15, 12 (x64)
   * macOS 11 (x64 and Arm v8 tested via x64 libraries)
 
 **Windows**
-  * Windows 10 (x64)
-  * Windows Server 2012 R2 (x64)
+  * Windows 10, 11 (x64)
   * Windows Server 2016 (x64)
 
 *Connector* is supported in other languages in addition to JavaScript, see
@@ -38,6 +37,15 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    that version of Node.js.
    Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
    dependencies is not compatible with those versions.
+
+Native Windows libraries updated to Visual Studio 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. CON-276
+
+Previously, the native libraries shipped with Connector were built using Visual
+Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
+libraries are now built using Visual Studio 2015. The redistributable that is
+shipped has been updated accordingly.
 
 Version 1.2.1
 -------------
