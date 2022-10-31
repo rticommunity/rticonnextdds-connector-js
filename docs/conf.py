@@ -21,8 +21,8 @@ copyright = '2022, Real-Time Innovations, Inc.'
 author = 'Real-Time Innovations, Inc.'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2.1'
-version = '1.2.1'
+release = '1.2.0'
+version = '1.2.0'
 
 master_doc = 'index'
 primary_domain = 'js'
