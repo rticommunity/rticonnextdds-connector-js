@@ -4,7 +4,7 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* works with Node.js v17-18. It can also be used with
+*Connector* works with Node.js v17.0.0-v18.7.0. It can also be used with
 Node.js versions 10.20.x through 13.x.x, except for versions
 11.x.x and 12.19.x [#f1]_.
 
@@ -37,6 +37,7 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    that version of Node.js.
    Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
    dependencies is not compatible with those versions.
+   Node.js versions greater than v18.7.0 are not currently supported.
 
 Native Windows libraries updated to Visual Studio 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
