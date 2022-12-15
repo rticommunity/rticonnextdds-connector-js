@@ -6,21 +6,11 @@ Getting Started
 Installing RTI Connector for JavaScript
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*RTI Connector for JavaScript* can be installed with npm in two ways:
-
-You can pass the package name:
+*RTI Connector for JavaScript* can be installed with npm:
 
 .. code:: bash
 
     $ npm install rticonnextdds-connector
-
-Or the GitHub repository:
-
-.. code:: bash
-
-   $ npm install https://www.github.com/rticommunity/rticonnextdds-connector-js.git
-
-In order to access the examples, run npm with the GitHub repository.
 
 npm uses `node-gyp <https://github.com/nodejs/node-gyp>`__ to locally compile some of *Connector*'s
 dependencies. node-gyp requires a Python installation and a C++ compiler. Please refer

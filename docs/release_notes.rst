@@ -4,7 +4,7 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* works with Node.js v17-18. It can also be used with
+*Connector* works with Node.js v17.0.0-v18.7.0. It can also be used with
 Node.js versions 10.20.x through 13.x.x, except for versions
 11.x.x and 12.19.x [#f1]_.
 
@@ -16,15 +16,14 @@ macOS® platforms. It has been tested on the following systems:
   * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
   * SUSE® Linux Enterprise Server 12 SP2 (x64)
   * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
-  * Ubuntu 20.04 LTS (x64)
+  * Ubuntu 20.04, 22.04 LTS (x64)
 
 **macOS**
-  * macOS 10.13-10.15 (x64)
+  * macOS 10.13-10.15, 12 (x64)
   * macOS 11 (x64 and Arm v8 tested via x64 libraries)
 
 **Windows**
-  * Windows 10 (x64)
-  * Windows Server 2012 R2 (x64)
+  * Windows 10, 11 (x64)
   * Windows Server 2016 (x64)
 
 *Connector* is supported in other languages in addition to JavaScript, see
@@ -38,15 +37,34 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    that version of Node.js.
    Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
    dependencies is not compatible with those versions.
+   Node.js versions greater than v18.7.0 are not currently supported.
 
-Version 1.2.1
--------------
+Version 1.2.2
+-----------------
 
-*Connector* 1.2.1 updates some third party dependencies that were found to contain
-vulnerabilities. *Connector* was not affected by these vulnerabilities.
+What's New in 1.2.2
+^^^^^^^^^^^^^^^^^^^
+
+*RTI Connector* 1.2.2 is built on 
+`RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
+
+Native Windows libraries updated to Visual Studio 2015
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-276
+
+Previously, the native libraries shipped with Connector were built using Visual
+Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
+libraries are now built using Visual Studio 2015. The redistributable that is
+shipped has been updated accordingly.
 
 Previous Releases
 -----------------
+
+Version 1.2.1
+^^^^^^^^^^^^^
+
+*Connector* 1.2.1 updates some third party dependencies that were found to contain
+vulnerabilities. *Connector* was not affected by these vulnerabilities.
 
 Version 1.2.0
 ^^^^^^^^^^^^^
