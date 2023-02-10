@@ -20,12 +20,7 @@
     "sleep": "^6.3.0"
   },
   "scripts": {
-    "test": "mocha ./test/nodejs/",
-    "test-ci": "mocha ./test/nodejs/ --reporter mocha-junit-reporter",
-    "coverage": "nyc --reporter=clover --reporter=lcov --reporter=text-summary --check-coverage npm run test",
-    "coverage-ci": "nyc --reporter=clover --reporter=lcov --reporter=text-summary --check-coverage npm run test-ci",
-    "lint": "eslint rticonnextdds-connector.js test/nodejs/ --ext .js",
-    "lint-fix": "eslint --fix rticonnextdds-connector.js test/nodejs/ --ext .js"
+    "test": "mocha ./test/nodejs/"
   },
   "keywords": [
     "rti",
