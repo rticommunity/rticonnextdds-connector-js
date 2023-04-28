@@ -9,6 +9,11 @@ jobs:
     name: Run Tests
 
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
