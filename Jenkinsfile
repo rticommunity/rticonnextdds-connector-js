@@ -22,13 +22,15 @@ pipeline {
 
         stage('Download bundles') {
             steps {
-                repo.getLatestBundles('x64Linux3gcc4.8.2')
+                script {
+                    repo.getLatestBundles('x64Linux3gcc4.8.2')
+                }
             }
-        }
 
-        post {
-            cleanup {
-                cleanWs()
+            post {
+                cleanup {
+                    cleanWs()
+                }
             }
         }
     }
