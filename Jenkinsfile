@@ -34,35 +34,35 @@ pipeline {
                 }
             }
         }
-    }
 
-    stage('Build doc') {
-        agent {
-            docker {
-                image 'python:3.8-slim'
+        stage('Build doc') {
+            agent {
+                docker {
+                    image 'python:3.8-slim'
+                }
             }
-        }
 
-        steps {
-            dir('docs') {
-                sh 'pip install -r requirements.txt'
-                sh 'make html'
+            steps {
+                dir('docs') {
+                    sh 'pip install -r requirements.txt'
+                    sh 'make html'
+                }
             }
-        }
 
-        post {
-            sucess {
-                publishHTML(
-                    [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: false,
-                        reportDir: 'docs/_build/html/',
-                        reportFiles: 'index.html',
-                        reportName: 'Connector Documentation',
-                        reportTitles: 'Connector Documentation'
-                    ]
-                )
+            post {
+                sucess {
+                    publishHTML(
+                        [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: false,
+                            keepAll: false,
+                            reportDir: 'docs/_build/html/',
+                            reportFiles: 'index.html',
+                            reportName: 'Connector Documentation',
+                            reportTitles: 'Connector Documentation'
+                        ]
+                    )
+                }
             }
         }
     }
