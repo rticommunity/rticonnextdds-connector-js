@@ -12,7 +12,7 @@
 FROM node:18.7-slim
 
 RUN apt-get update \
-    && apt-get install -y python3 \
+    && apt-get install -y python3 make \
     && groupadd -g 789 jenkins \
     && useradd -u 789 -g jenkins -m jenkins
 
