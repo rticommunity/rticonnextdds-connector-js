@@ -13,7 +13,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:lts-slim'
+            image 'node:18.7-slim'
             label 'docker'
         }
     }
@@ -31,6 +31,13 @@ pipeline {
                 cleanup {
                     cleanWs()
                 }
+            }
+        }
+
+        stage('Run tests') {
+            steps {
+                sh 'npm i'
+                sh 'npm test'
             }
         }
     }
