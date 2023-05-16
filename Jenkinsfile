@@ -14,15 +14,6 @@ pipeline {
     agent { dockerfile true }
 
     stages {
-
-        stage('Download bundles') {
-            steps {
-                script {
-                    repo.getLatestBundles('x64Linux3gcc4.8.2')
-                }
-            }
-        }
-
         stage('Run tests') {
             steps {
                 sh 'npm i'
