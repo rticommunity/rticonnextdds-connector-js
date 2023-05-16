@@ -16,6 +16,8 @@ RUN apt-get update \
     && groupadd -g 789 jenkins \
     && useradd -u 789 -g jenkins -m jenkins
 
+RUN npm install -g jsdoc
+
 USER jenkins
 
 ENV PATH="/home/jenkins/.local/bin:${PATH}"
