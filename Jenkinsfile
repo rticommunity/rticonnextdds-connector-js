@@ -11,7 +11,11 @@
  */
 
 pipeline {
-    agent none
+    agent {
+        node {
+            label 'docker'
+        }
+    }
 
     stages {
         stage('Run tests') {
