@@ -11,13 +11,23 @@
  */
 
 pipeline {
-    agent { dockerfile true }
+    agent none
 
     stages {
         stage('Run tests') {
+            agent { dockerfile true }
+
             steps {
                 sh 'npm install'
                 sh 'npm test'
+            }
+        }
+
+        post {
+            always {
+                junit(
+                    testResults: "test-results.xml"
+                )
             }
         }
     }

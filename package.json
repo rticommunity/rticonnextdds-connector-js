@@ -20,7 +20,7 @@
     "sleep": "^6.3.0"
   },
   "scripts": {
-    "test": "mocha ./test/nodejs/"
+    "test": "mocha ./test/nodejs/ --reporter mocha-junit-reporter --timeout 10000"
   },
   "keywords": [
     "rti",
@@ -41,6 +41,7 @@
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
+    "mocha-junit-reporter": "^2.2.0",
     "sinon": "^10.0.0"
   }
 }
