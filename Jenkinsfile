@@ -21,13 +21,13 @@ pipeline {
                 sh 'npm install'
                 sh 'npm test'
             }
-        }
 
-        post {
-            always {
-                junit(
-                    testResults: "test-results.xml"
-                )
+            post {
+                always {
+                    junit(
+                        testResults: "test-results.xml"
+                    )
+                }
             }
         }
     }
