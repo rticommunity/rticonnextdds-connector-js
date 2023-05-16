@@ -11,7 +11,9 @@
 
 FROM node:18.7-slim
 
-RUN groupadd -g 789 jenkins \
+RUN apt-get update \
+    && apt-get install -y python3 \
+    && groupadd -g 789 jenkins \
     && useradd -u 789 -g jenkins -m jenkins
 
 USER jenkins
