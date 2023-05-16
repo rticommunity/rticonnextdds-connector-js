@@ -11,16 +11,10 @@
  */
 
 pipeline {
-    agent {
-        node {
-            label 'docker'
-        }
-    }
+    agent { dockerfile true }
 
     stages {
         stage('Run tests') {
-            agent { dockerfile true }
-
             steps {
                 sh 'npm install'
                 sh 'npm test'
@@ -36,12 +30,6 @@ pipeline {
         }
 
         stage('Build doc') {
-            agent {
-                docker {
-                    image 'python:3.8-slim'
-                }
-            }
-
             steps {
                 dir('docs') {
                     sh 'pip install -r requirements.txt'
