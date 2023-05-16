@@ -11,12 +11,17 @@
  */
 
 pipeline {
-    agent { dockerfile true }
+    agent {
+        docker {
+            label 'docker'
+            image 'node:18.7'
+        }
+    }
 
     stages {
         stage('Run tests') {
             steps {
-                sh 'npm i'
+                sh 'npm install'
                 sh 'npm test'
             }
         }
