@@ -1,5 +1,5 @@
 /*
- * (c) Copyright, Real-Time Innovations, 2021.  All rights reserved.
+ * (c) Copyright, Real-Time Innovations, 2023.  All rights reserved.
  * RTI grants Licensee a license to use, modify, compile, and create derivative
  * works of the software solely for use with RTI Connext DDS. Licensee may
  * redistribute copies of the software provided that all such copies are subject
@@ -11,12 +11,7 @@
  */
 
 pipeline {
-    agent {
-        docker {
-            label 'docker'
-            image 'node:18.7'
-        }
-    }
+    agent { dockerfile true }
 
     stages {
         stage('Run tests') {
