@@ -11,12 +11,7 @@
  */
 
 pipeline {
-    agent {
-        docker {
-            image 'node:18.7-slim'
-            label 'docker'
-        }
-    }
+    agent { dockerfile true }
 
     stages {
 
@@ -26,12 +21,6 @@ pipeline {
                     repo.getLatestBundles('x64Linux3gcc4.8.2')
                 }
             }
-
-            post {
-                cleanup {
-                    cleanWs()
-                }
-            }
         }
 
         stage('Run tests') {
@@ -39,6 +28,12 @@ pipeline {
                 sh 'npm i'
                 sh 'npm test'
             }
+        }
+    }
+
+    post {
+        cleanup {
+            cleanWs()
         }
     }
 }
