@@ -50,7 +50,7 @@ pipeline {
             }
 
             post {
-                sucess {
+                success {
                     publishHTML(
                         [
                             allowMissing: false,
