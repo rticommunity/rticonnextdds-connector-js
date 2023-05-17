@@ -13,8 +13,8 @@ FROM node:18.7-slim
 
 RUN apt-get update \
     && apt-get install -y gcc g++ make python3 python3-pip \
-    && groupadd -g 789 jenkins \
-    && useradd -u 789 -g jenkins -m jenkins
+    && groupadd -g 986 jenkins \
+    && useradd -u 989 -g jenkins -m jenkins
 
 RUN npm install -g npm jsdoc
 
