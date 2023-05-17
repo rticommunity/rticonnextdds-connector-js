@@ -11,7 +11,11 @@
  */
 
 pipeline {
-    agent { dockerfile true }
+    agent {
+        dockerfile {
+            label 'docker'
+        }
+    }
 
     stages {
         stage ('Checkout') {
