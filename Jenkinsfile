@@ -13,7 +13,15 @@
 pipeline {
     agent { dockerfile true }
 
+    options {
+        skipDefaultCheckout()
+    }
+
     stages {
+        stage ('Checkout') {
+            checkout scm
+        }
+
         stage('Run tests') {
             steps {
                 sh 'npm install'
