@@ -13,10 +13,6 @@
 pipeline {
     agent { dockerfile true }
 
-    options {
-        skipDefaultCheckout()
-    }
-
     stages {
         stage ('Checkout') {
             steps {
