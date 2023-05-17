@@ -17,6 +17,4 @@ RUN apt-get update \
 
 RUN npm install -g npm jsdoc
 
-USER jenkins
-
 ENV PATH="/home/jenkins/.local/bin:${PATH}"
