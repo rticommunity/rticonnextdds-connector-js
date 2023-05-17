@@ -14,6 +14,7 @@ pipeline {
     agent {
         dockerfile {
             label 'docker'
+            args '-e USER=jenkins'
         }
     }
 
