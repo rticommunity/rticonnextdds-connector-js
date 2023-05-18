@@ -2,6 +2,16 @@ name: Connector - Build Doc
 
 on:
   push:
+    paths:
+      - 'docs/**'
+      - 'rticonnextdds-connector.js'
+      - '.github/workflows/build_doc.yml'
+
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'rticonnextdds-connector.js'
+      - '.github/workflows/build_doc.yml'
 
 jobs:
   test:

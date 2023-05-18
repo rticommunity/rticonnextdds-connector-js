@@ -3,18 +3,7 @@ name: Connector - Build & Test
 permissions:
   checks: write
 
-on:
-  push:
-    paths:
-      - 'docs/**'
-      - 'rticonnextdds-connector.js'
-      - '.github/workflows/build_doc.yml'
-
-  pull_request:
-    paths:
-      - 'docs/**'
-      - 'rticonnextdds-connector.js'
-      - '.github/workflows/build_doc.yml'
+on: [push, pull_request]
 
 jobs:
   test:
