@@ -15,9 +15,6 @@ RUN apt-get update \
     && apt-get install -y gcc g++ git make python3 python3-pip \
     && useradd -u 789 -m jenkins
 
-USER jenkins
-
-RUN npm config set prefix /home/jenkins/npm \
-    && npm install -g npm jsdoc
+RUN npm install -g npm jsdoc
 
 ENV PATH="/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
