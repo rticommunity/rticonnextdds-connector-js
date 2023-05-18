@@ -1,8 +1,5 @@
 name: Connector - Build & Test
 
-permissions:
-  checks: write
-
 on: [push, pull_request]
 
 jobs:
