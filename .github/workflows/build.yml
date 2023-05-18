@@ -2,7 +2,6 @@ name: Connector - Build & Test
 
 permissions:
   checks: write
-  pull-requests: write
 
 on:
   push:
@@ -39,9 +38,8 @@ jobs:
       - name: Run Tests
         run: npm test
 
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
         if: always()
         with:
-          files: |
-            test-results.xml
+          report_paths: 'rticonnextdds-connector.js'
