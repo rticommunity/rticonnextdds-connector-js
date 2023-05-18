@@ -26,7 +26,6 @@ jobs:
 
       - uses: dorny/test-reporter@v1
         with:
-          artifact: test-results
           name: Tests results
           path: 'test-results.json'
           reporter: mocha-json
