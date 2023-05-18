@@ -14,7 +14,7 @@ pipeline {
     agent {
         dockerfile {
             label 'docker'
-            args '-e USER=jenkins'
+            customWorkspace "/rti/jenkins/workspace/${UUID.randomUUID().toString().split('-')[-1]}"
         }
     }
 
