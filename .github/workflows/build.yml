@@ -22,7 +22,7 @@ jobs:
         run: npm install
 
       - name: Run Tests
-        run: npm test-json
+        run: npm run test-json
 
       - uses: dorny/test-reporter@v1
         with:
