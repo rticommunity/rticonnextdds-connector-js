@@ -20,7 +20,9 @@
     "sleep": "^6.3.0"
   },
   "scripts": {
-    "test": "mocha ./test/nodejs/ --reporter mocha-junit-reporter --timeout 10000"
+    "test": "mocha ./test/nodejs/",
+    "test-junit": "mocha ./test/nodejs/ --reporter mocha-junit-reporter",
+    "test-json": "mocha ./test/nodejs/ --reporter json --reporter-option output=test-results.json"
   },
   "keywords": [
     "rti",
