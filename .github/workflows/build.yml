@@ -22,11 +22,11 @@ jobs:
         run: npm install
 
       - name: Run Tests
-        run: npm test
+        run: npm test-json
 
       - uses: dorny/test-reporter@v1
         with:
           artifact: test-results
           name: Tests results
           path: 'test-results.json'
-          reporter: mocha.json
+          reporter: mocha-json
