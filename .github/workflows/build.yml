@@ -2,6 +2,9 @@ name: Connector - Build & Test
 
 on: [push, pull_request]
 
+permissions:
+  checks: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
