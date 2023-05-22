@@ -18,6 +18,33 @@ pipeline {
         }
     }
 
+    triggers {
+        // Build at least once a day
+        cron('H H(18-21) * * *')
+    }
+    options {
+        disableConcurrentBuilds()
+        skipDefaultCheckout()
+        /*
+            To avoid excessive resource usage in server, we limit the number
+            of builds to keep in pull requests
+        */
+        buildDiscarder(
+            logRotator(
+                artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '',
+                daysToKeepStr: '',
+                /*
+                   For pull requests only keep the last 10 builds, for regular
+                   branches keep up to 20 builds.
+                */
+                numToKeepStr: changeRequest() ? '10' : '20'
+            )
+        )
+        // Set a timeout for the entire pipeline
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
     stages {
         stage('Download libs') {
             steps {
