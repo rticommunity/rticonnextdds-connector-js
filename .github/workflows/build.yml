@@ -22,6 +22,10 @@ jobs:
           node-version: '18.7'
 
       - name: Download libs
+        run: pip install -r resources/scripts/requirements.txt
+        working-directory: ./rticonnextdds-connector
+
+      - name: Download libs
         run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.COMMUNITY_S3_PATH }} --storage-path ${{ secrets.COMMUNITY_S3_URL }} -o .
         working-directory: ./rticonnextdds-connector
 
