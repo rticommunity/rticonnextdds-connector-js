@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '18.7'
 
-      - name: Download libs
+      - name: Download Python Deps
         run: pip install -r resources/scripts/requirements.txt
         working-directory: ./rticonnextdds-connector
 
