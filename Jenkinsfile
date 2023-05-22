@@ -23,7 +23,9 @@ pipeline {
             steps {
                 dir ('rticonnextdds-connector') {
                     sh 'pip install -r resources/scripts/requirements.txt'
-                    sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path ${credentials('artifactory-path')} -o ."
+                    withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
+                        sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path ${ARTIFACTORY_PATH} -o ."
+                    }
                 }
             }
         }
