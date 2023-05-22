@@ -21,7 +21,7 @@ pipeline {
     stages {
         stage('Download libs') {
             steps {
-                publishInProgressCheck(
+                publishCheck.inProgress(
                     title: 'Downloading',
                     summary: ':arrow_down: Downloading RTI Connext DDS libraries...',
                 )
@@ -36,17 +36,17 @@ pipeline {
 
             post {
                 success {
-                    publishPassedCheck(
+                    publishCheck.passed(
                         summary: ':white_check_mark: RTI Connext DDS libraries downloaded.',
                     )
                 }
                 failure {
-                    publishFailedCheck(
+                    publishCheck.failed(
                         summary: ':warning: Failed downloading RTI Connext DDS libraries.',
                     )
                 }
                 aborted {
-                    publishAbortedCheck(
+                    publishCheck.aborted(
                         summary: ':no_entry: The download of RTI Connext DDS libraries was aborted.',
                     )
                 }
@@ -55,7 +55,7 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                publishInProgressCheck(
+                publishCheck.inProgress(
                     title: 'Running tests...',
                     summary: ':test_tube: Testing Connector JS...',
                 )
@@ -71,17 +71,17 @@ pipeline {
                     )
                 }
                 success {
-                    publishPassedCheck(
+                    publishCheck.passed(
                         summary: ':white_check_mark: Connector JS successfully tested.',
                     )
                 }
                 failure {
-                    publishFailedCheck(
+                    publishCheck.failed(
                         summary: ':warning: At least one test failed.',
                     )
                 }
                 aborted {
-                    publishAbortedCheck(
+                    publishCheck.aborted(
                         summary: ':no_entry: The tests were aborted.',
                     )
                 }
@@ -90,7 +90,7 @@ pipeline {
 
         stage('Build doc') {
             steps {
-                publishInProgressCheck(
+                publishCheck.inProgress(
                     title: 'Building documentation...',
                     summary: ':book: Building Connector JS Documentation...',
                 )
@@ -115,17 +115,17 @@ pipeline {
                         ]
                     )
 
-                    publishPassedCheck(
+                    publishCheck.passed(
                         summary: ':white_check_mark: Connector JS documentation generated sucessfully.',
                     )
                 }
                 failure {
-                    publishFailedCheck(
+                    publishCheck.failed(
                         summary: ':warning: Failed to build documentation.',
                     )
                 }
                 aborted {
-                    publishAbortedCheck(
+                    publishCheck.aborted(
                         summary: ':no_entry: The documentation generation was aborted.',
                     )
                 }
