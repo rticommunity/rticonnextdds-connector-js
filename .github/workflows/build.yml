@@ -1,6 +1,14 @@
 name: Connector - Build & Test
 
-on: [push, pull_request]
+on:
+  push:
+    # Pattern matched against refs/tags
+    tags:        
+      - 'v*'
+    branches:
+      - 'master'
+      - 'release/connector/*'
+      - 'support/connector/*'
 
 permissions:
   checks: write
@@ -40,3 +48,9 @@ jobs:
           name: Tests results
           path: 'test-results.json'
           reporter: mocha-json
+
+      - name: Publish npm package
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
