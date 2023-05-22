@@ -3,7 +3,7 @@ name: Connector - Build & Test
 on:
   push:
     # Pattern matched against v<MAJOR>.<MINOR>.<PATCH>
-    tags:        
+    tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
     branches:
       - 'master'
