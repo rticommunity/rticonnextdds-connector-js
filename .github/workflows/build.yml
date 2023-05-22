@@ -26,7 +26,7 @@ jobs:
         working-directory: ./rticonnextdds-connector
 
       - name: Download libs
-        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.COMMUNITY_S3_PATH }} --storage-path ${{ secrets.COMMUNITY_S3_URL }} -o .
+        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.COMMUNITY_S3_URL }} --storage-path ${{ secrets.COMMUNITY_S3_PATH }} -o .
         working-directory: ./rticonnextdds-connector
 
       - name: Install node dependencies
