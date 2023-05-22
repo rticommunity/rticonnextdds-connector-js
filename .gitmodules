@@ -1,3 +1,4 @@
 [submodule "rticonnextdds-connector"]
 	path = rticonnextdds-connector
-	url = https://github.com/rticommunity/rticonnextdds-connector.git
+	url = https://github.com/ManuelJNunez/rticonnextdds-connector.git
+	branch = feature/BUILD-3774
