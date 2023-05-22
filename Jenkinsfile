@@ -21,10 +21,12 @@ pipeline {
     stages {
         stage('Download libs') {
             steps {
-                publishCheck.inProgress(
-                    title: 'Downloading',
-                    summary: ':arrow_down: Downloading RTI Connext DDS libraries...',
-                )
+                script {
+                    publishCheck.inProgress(
+                        title: 'Downloading',
+                        summary: ':arrow_down: Downloading RTI Connext DDS libraries...',
+                    )
+                }
 
                 dir ('rticonnextdds-connector') {
                     sh 'pip install -r resources/scripts/requirements.txt'
@@ -36,29 +38,37 @@ pipeline {
 
             post {
                 success {
-                    publishCheck.passed(
-                        summary: ':white_check_mark: RTI Connext DDS libraries downloaded.',
-                    )
+                    script {
+                        publishCheck.passed(
+                            summary: ':white_check_mark: RTI Connext DDS libraries downloaded.',
+                        )
+                    }
                 }
                 failure {
-                    publishCheck.failed(
-                        summary: ':warning: Failed downloading RTI Connext DDS libraries.',
-                    )
+                    script {
+                        publishCheck.failed(
+                            summary: ':warning: Failed downloading RTI Connext DDS libraries.',
+                        )
+                    }
                 }
                 aborted {
-                    publishCheck.aborted(
-                        summary: ':no_entry: The download of RTI Connext DDS libraries was aborted.',
-                    )
+                    script {
+                        publishCheck.aborted(
+                            summary: ':no_entry: The download of RTI Connext DDS libraries was aborted.',
+                        )
+                    }
                 }
             }
         }
 
         stage('Run tests') {
             steps {
-                publishCheck.inProgress(
-                    title: 'Running tests...',
-                    summary: ':test_tube: Testing Connector JS...',
-                )
+                script {
+                    publishCheck.inProgress(
+                        title: 'Running tests...',
+                        summary: ':test_tube: Testing Connector JS...',
+                    )
+                }
 
                 sh 'npm install'
                 sh 'npm run test-junit'
@@ -71,29 +81,37 @@ pipeline {
                     )
                 }
                 success {
-                    publishCheck.passed(
-                        summary: ':white_check_mark: Connector JS successfully tested.',
-                    )
+                    script {
+                        publishCheck.passed(
+                            summary: ':white_check_mark: Connector JS successfully tested.',
+                        )
+                    }
                 }
                 failure {
-                    publishCheck.failed(
-                        summary: ':warning: At least one test failed.',
-                    )
+                    script {
+                        publishCheck.failed(
+                            summary: ':warning: At least one test failed.',
+                        )
+                    }
                 }
                 aborted {
-                    publishCheck.aborted(
-                        summary: ':no_entry: The tests were aborted.',
-                    )
+                    script {
+                        publishCheck.aborted(
+                            summary: ':no_entry: The tests were aborted.',
+                        )
+                    }
                 }
             }
         }
 
         stage('Build doc') {
             steps {
-                publishCheck.inProgress(
-                    title: 'Building documentation...',
-                    summary: ':book: Building Connector JS Documentation...',
-                )
+                script {
+                    publishCheck.inProgress(
+                        title: 'Building documentation...',
+                        summary: ':book: Building Connector JS Documentation...',
+                    )
+                }
 
                 dir('docs') {
                     sh 'pip install -r requirements.txt --no-cache-dir'
@@ -115,19 +133,25 @@ pipeline {
                         ]
                     )
 
-                    publishCheck.passed(
-                        summary: ':white_check_mark: Connector JS documentation generated sucessfully.',
-                    )
+                    script {
+                        publishCheck.passed(
+                            summary: ':white_check_mark: Connector JS documentation generated sucessfully.',
+                        )
+                    }
                 }
                 failure {
-                    publishCheck.failed(
-                        summary: ':warning: Failed to build documentation.',
-                    )
+                    script {
+                        publishCheck.failed(
+                            summary: ':warning: Failed to build documentation.',
+                        )
+                    }
                 }
                 aborted {
-                    publishCheck.aborted(
-                        summary: ':no_entry: The documentation generation was aborted.',
-                    )
+                    script {
+                        publishCheck.aborted(
+                            summary: ':no_entry: The documentation generation was aborted.',
+                        )
+                    }
                 }
             }
         }
