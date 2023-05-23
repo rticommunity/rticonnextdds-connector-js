@@ -19,7 +19,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Run Tests
+    name: Build doc
 
     steps:
       - name: Checkout repo
