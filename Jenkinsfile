@@ -22,6 +22,7 @@ pipeline {
         // Build at least once a day to test newly created libs.
         cron('H H(18-21) * * *')
     }
+
     options {
         disableConcurrentBuilds()
         skipDefaultCheckout()
