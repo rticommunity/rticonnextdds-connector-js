@@ -25,7 +25,6 @@ pipeline {
 
     options {
         disableConcurrentBuilds()
-        skipDefaultCheckout()
         /*
             To avoid excessive resource usage in server, we limit the number
             of builds to keep in pull requests
