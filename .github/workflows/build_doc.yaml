@@ -1,0 +1,67 @@
+name: Connector - Build Doc
+
+on:
+  push:
+    # Pattern matched against v<MAJOR>.<MINOR>.<PATCH>
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - 'master'
+      - 'release/connector/*'
+      - 'support/connector/*'
+
+  pull_request:
+    branches:
+      - 'master'
+      - 'release/connector/*'
+      - 'support/connector/*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Build doc
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.7'
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8' 
+
+      - name: Install jsdoc
+        run: npm install -g jsdoc
+
+      - name: Install Python Dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Build HTML
+        run: make html -C docs
+
+      - name: Archive HTML documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: HTML doc
+          path: docs/_build/html
+
+      - name: Getting version from tag
+        id: vars
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: echo "tag=${GITHUB_REF#refs/*/v}" >> $GITHUB_OUTPUT
+
+      - name: Publish HTML documentation
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_BUCKET }}
+          source_dir: 'docs/_build/html/'
+          destination_dir: "documentation/connector/${{ steps.vars.outputs.tag }}/api/javascript/"
