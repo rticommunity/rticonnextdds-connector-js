@@ -239,6 +239,13 @@ then you must take the following into account.
   The :meth:`Instance.setNumber()` operation can safely handle ``abs(value) < 2^53``,
   whereas the :meth:`SampleIterator.getNumber()` operation can safely handle ``abs(value) <= 2^53``.
 
+.. note::
+
+  The use of "Infinity", "-Infinity" and "-0" has some potential pitfalls and is
+  not recommended. If your application must use these values, refer to
+  `this knowledge base article <https://community.rti.com/kb/advanced-data-access-using-connector-javascript>`__
+  for more information.
+
 Accessing structs
 ^^^^^^^^^^^^^^^^^
 
