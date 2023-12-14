@@ -9,7 +9,9 @@
 # inability to use the software.
 # ------------------------------------------------------------------------------
 
-FROM node:18.7-slim
+ARG NODE_VERSION
+
+FROM node:${NODE_VERSION}
 
 RUN apt-get update \
     && apt-get install -y gcc g++ git make python3 python3-pip \
