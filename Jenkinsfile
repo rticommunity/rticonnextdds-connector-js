@@ -153,6 +153,13 @@ pipeline {
         }
 
         stage('Build doc') {
+            agent {
+                dockerfile {
+                    additionalBuildArgs  "--build-arg NODE_VERSION=lts"
+                    reuseNode true
+                } 
+            }
+
             steps {
                 script {
                     publishCheck.inProgress(
