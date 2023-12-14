@@ -99,8 +99,11 @@ jobs:
         working-directory: ./rticonnextdds-connector
 
       - name: Download libs
-        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.COMMUNITY_S3_URL }} --storage-path ${{ secrets.COMMUNITY_S3_PATH }} -o .
+        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.RTI_AWS_BUCKET }} --storage-path ${{ secrets.RTI_AWS_PATH }} -o .
         working-directory: ./rticonnextdds-connector
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Install node dependencies
         run: npm install
@@ -131,8 +134,12 @@ jobs:
         working-directory: ./rticonnextdds-connector
 
       - name: Download libs
-        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.COMMUNITY_S3_URL }} --storage-path ${{ secrets.COMMUNITY_S3_PATH }} -o .
+        run: python3 resources/scripts/download_latest_libs.py --storage-url ${{ secrets.RTI_AWS_BUCKET }} --storage-path ${{ secrets.RTI_AWS_PATH }} -o .
         working-directory: ./rticonnextdds-connector
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 
       - name: Publish npm package
         if: startsWith(github.ref, 'refs/tags/v')
