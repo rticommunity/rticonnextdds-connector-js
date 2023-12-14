@@ -62,6 +62,12 @@ pipeline {
                         values '18', '20', 'lts', 'latest'
                     }
                 }
+                stage("Checkout repo (Node ${NODE_VERSION})") {
+                    steps {
+                        checkout scm
+                    }
+                }
+
                 stages {
                     stage("Downloading dependencies (Node ${NODE_VERSION})") {
                         steps {
