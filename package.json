@@ -1,6 +1,6 @@
 {
   "name": "rticonnextdds-connector",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "RTI Connector for JavaScript",
   "main": "rticonnextdds-connector.js",
   "files": [
@@ -14,15 +14,18 @@
   },
   "dependencies": {
     "events": "^3.2.0",
-    "ffi-napi": "^3.1.0",
     "ref-napi": "^3.0.1",
     "ref-struct-napi": "^1.1.1",
+    "ffi-napi": "^3.1.0",
     "sleep": "^6.3.0"
   },
   "scripts": {
     "test": "mocha ./test/nodejs/",
-    "test-junit": "mocha ./test/nodejs/ --reporter mocha-junit-reporter",
-    "test-json": "mocha ./test/nodejs/ --reporter json --reporter-option output=test-results.json"
+    "test-ci": "mocha ./test/nodejs/ --reporter mocha-junit-reporter",
+    "coverage": "nyc --reporter=clover --reporter=lcov --reporter=text-summary --check-coverage npm run test",
+    "coverage-ci": "nyc --reporter=clover --reporter=lcov --reporter=text-summary --check-coverage npm run test-ci",
+    "lint": "eslint rticonnextdds-connector.js test/nodejs/ --ext .js",
+    "lint-fix": "eslint --fix rticonnextdds-connector.js test/nodejs/ --ext .js"
   },
   "keywords": [
     "rti",
@@ -40,8 +43,15 @@
   },
   "homepage": "https://github.com/rticommunity/rticonnextdds-connector-js",
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
+    "eslint": "^7.29.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "nyc": "^15.1.0",
     "mocha": "^10.2.0",
     "mocha-junit-reporter": "^2.2.0",
     "sinon": "^10.0.0"

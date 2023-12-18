@@ -8,7 +8,7 @@ and arrays of primitive types or structs, etc.
 
 These types are defined in XML following the format of
 `RTI's XML-Based Application Creation feature
-<https://community.rti.com/static/documentation/connext-dds/6.1.1/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/XMLTagsConfigEntities.htm>`__.
+<https://community.rti.com/static/documentation/connext-dds/6.1.2/doc/manuals/connext_dds_professional/xml_application_creation/index.htm#xml_based_app_creation_guide/UnderstandingXMLBased/XMLTagsConfigEntities.htm>`__.
 
 To access the data, :class:`Instance` and :class:`SampleIterator` provide
 setters and getters that expect a ``fieldName`` string, used to identify 
@@ -239,13 +239,6 @@ then you must take the following into account.
   The :meth:`Instance.setNumber()` operation can safely handle ``abs(value) < 2^53``,
   whereas the :meth:`SampleIterator.getNumber()` operation can safely handle ``abs(value) <= 2^53``.
 
-.. note::
-
-  The use of "Infinity", "-Infinity" and "-0" has some potential pitfalls and is
-  not recommended. If your application must use these values, refer to
-  `this knowledge base article <https://community.rti.com/kb/advanced-data-access-using-connector-javascript>`__
-  for more information.
-
 Accessing structs
 ^^^^^^^^^^^^^^^^^
 
@@ -472,7 +465,7 @@ To clear a member, set it to ``null`` explicitly::
 
 For more information about optional members in DDS, see 
 `Optional Members 
-<https://community.rti.com/static/documentation/connext-dds/6.1.1/doc/manuals/connext_dds_professional/extensible_types_guide/index.htm#extensible_types/Optional_Members.htm>`__ 
+<https://community.rti.com/static/documentation/connext-dds/6.1.2/doc/manuals/connext_dds_professional/extensible_types_guide/index.htm#extensible_types/Optional_Members.htm>`__ 
 in the *Extensible Types Guide*.
 
 Accessing unions
@@ -496,6 +489,57 @@ In an :class:`Input`, you can obtain the selected member as a string::
     if (input.samples.get(0).getString('my_union#') == 'point') {
         value = input.samples.get(0).getNumber('my_union.point.x')
     }
+
+Accessing key values of disposed samples
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Using :meth:`Output.write`, an :class:`Output` can write data, or dispose or 
+unregister an instance.
+Depending on which of these operations is performed, the ``instance_state`` of the
+received sample will be ``'ALIVE'``, ``'NOT_ALIVE_NO_WRITERS'`` or ``'NOT_ALIVE_DISPOSED'``.
+If the instance was disposed, this ``instance_state`` will be ``'NOT_ALIVE_DISPOSED'``.
+In this state, it is possible to access the key fields of the instance that was disposed.
+
+.. note::
+    :attr:`SampleInfo.valid_data` will be false when the :attr:`SampleInfo.instance_state`
+    is ``'NOT_ALIVE_DISPOSED'``. In this situation it's possible to access the
+    key fields in the received sample.
+
+The key fields can be accessed as follows:
+
+.. code-block::
+
+    // The output and input are using the following type:
+    // struct ShapeType {
+    //     @key string<128> color;
+    //     long x;
+    //     long y;
+    //     long shapesize;
+    // }
+
+    output.instance.set('x', 4)
+    output.instance.set('color', 'Green')
+    // Assume that some data associated with this instance has already been sent
+    output.write({ action: 'dispose' })
+    await input.wait()
+    input.take()
+    let sample = input.samples.get(0)
+
+    if (sample.info.get('instance_state') === 'NOT_ALIVE_DISPOSED') {
+        // sample.info.get('valid_data') will be false in this situation
+        // Only the key-fields should be accessed
+        let color = sample.get('color') // 'Green'
+        // The fields 'x','y' and 'shapesize' cannot be retrieved because they're
+        // not part of the key
+        // You can also call getJson() to get all of the key fields in a JSON object.
+        // Again, only the key fields returned within the JSON object should
+        // be used.
+        let keyValues = sample.getJson() // { color: 'Green', x: 0, y: 0, shapesize: 0 }
+    }
+
+.. warning::
+    When the sample has an instance state of ``'NOT_ALIVE_DISPOSED'`` only the
+    key fields should be accessed.
 
 Accessing key values of disposed samples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
