@@ -72,7 +72,7 @@ pipeline {
                     stage("Downloading dependencies") {
                         steps {
                             dir ('rticonnextdds-connector') {
-                                sh 'pip install -r resources/scripts/requirements.txt'
+                                sh 'pip3 install -r resources/scripts/requirements.txt'
 
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
@@ -114,7 +114,7 @@ pipeline {
 
             steps {
                 dir('docs') {
-                    sh 'pip install -r requirements.txt --no-cache-dir'
+                    sh 'pip3 install -r requirements.txt --no-cache-dir'
                     sh 'make html'
                 }
             }
