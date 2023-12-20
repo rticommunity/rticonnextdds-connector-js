@@ -72,16 +72,9 @@ pipeline {
 
                     stage("Downloading dependencies (Node ${NODE_VERSION})") {
                         steps {
-                            script {
-                                publishCheck.inProgress(
-                                    title: 'Downloading',
-                                    summary: ':arrow_down: Downloading RTI Connext DDS libraries...',
-                                )
-                            }
-
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
-                                
+
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
                                         message: "Library download failed",
@@ -95,70 +88,16 @@ pipeline {
 
                             sh 'npm install'
                         }
-
-                        post {
-                            success {
-                                script {
-                                    publishCheck.passed(
-                                        summary: ':white_check_mark: Connector JS dependencies downloaded.',
-                                    )
-                                }
-                            }
-                            unsuccessful {
-                                script {
-                                    publishCheck.failed(
-                                        summary: ':warning: Failed downloading Connector JS dependencies.',
-                                    )
-                                }
-                            }
-                            aborted {
-                                script {
-                                    publishCheck.aborted(
-                                        summary: ':no_entry: The download of Connector JS dependencies was aborted.',
-                                    )
-                                }
-                            }
-                        }
                     }
 
                     stage("Run tests (Node ${NODE_VERSION})") {
                         steps {
-                            script {
-                                publishCheck.inProgress(
-                                    title: 'Running tests...',
-                                    summary: ':test_tube: Testing Connector JS...',
-                                )
-                            }
-
                             sh 'npm run test-junit'
                         }
 
                         post {
                             always {
-                                junit(
-                                    testResults: "test-results.xml"
-                                )
-                            }
-                            success {
-                                script {
-                                    publishCheck.passed(
-                                        summary: ':white_check_mark: Connector JS successfully tested.',
-                                    )
-                                }
-                            }
-                            failure {
-                                script {
-                                    publishCheck.failed(
-                                        summary: ':warning: At least one test failed.',
-                                    )
-                                }
-                            }
-                            aborted {
-                                script {
-                                    publishCheck.aborted(
-                                        summary: ':no_entry: The tests were aborted.',
-                                    )
-                                }
+                                junit(testResults: "test-results.xml")
                             }
                         }
                     }
@@ -175,13 +114,6 @@ pipeline {
             }
 
             steps {
-                script {
-                    publishCheck.inProgress(
-                        title: 'Building documentation...',
-                        summary: ':book: Building Connector JS Documentation...',
-                    )
-                }
-
                 dir('docs') {
                     sh 'pip install -r requirements.txt --no-cache-dir'
                     sh 'make html'
@@ -201,26 +133,6 @@ pipeline {
                             reportTitles: 'Connector Documentation'
                         ]
                     )
-
-                    script {
-                        publishCheck.passed(
-                            summary: ':white_check_mark: Connector JS documentation generated sucessfully.',
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        publishCheck.failed(
-                            summary: ':warning: Failed to build documentation.',
-                        )
-                    }
-                }
-                aborted {
-                    script {
-                        publishCheck.aborted(
-                            summary: ':no_entry: The documentation generation was aborted.',
-                        )
-                    }
                 }
             }
         }
