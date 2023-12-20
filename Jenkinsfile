@@ -72,7 +72,9 @@ pipeline {
                     stage("Downloading dependencies") {
                         steps {
                             dir ('rticonnextdds-connector') {
-                                sh 'pip3 install -r resources/scripts/requirements.txt'
+                                withPythonEnv('python3') {
+                                    sh 'pip install -r resources/scripts/requirements.txt'
+                                }
 
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
@@ -80,7 +82,9 @@ pipeline {
                                         buildResult: "UNSTABLE",
                                         stageResult: "UNSTABLE"
                                     ) {
-                                        sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
+                                        withPythonEnv('python3') {
+                                            sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
+                                        }
                                     }
                                 }
                             }
@@ -114,7 +118,9 @@ pipeline {
 
             steps {
                 dir('docs') {
-                    sh 'pip3 install -r requirements.txt --no-cache-dir'
+                    withPythonEnv('python3') {
+                        sh 'pip3 install -r requirements.txt --no-cache-dir'
+                    }
                     sh 'make html'
                 }
             }

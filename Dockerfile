@@ -13,7 +13,7 @@ ARG NODE_VERSION
 FROM node:${NODE_VERSION}
 
 RUN apt-get update \
-    && apt-get install -y gcc g++ git make python3 python3-pip \
+    && apt-get install -y gcc g++ git make python3 python3-pip python3-venv \
     && useradd -u 789 -m jenkins
 
 RUN npm install -g npm jsdoc
