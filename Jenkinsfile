@@ -24,7 +24,6 @@ pipeline {
     }
 
     options {
-        skipDefaultCheckout()
         disableConcurrentBuilds()
         /*
             To avoid excessive resource usage in server, we limit the number
@@ -64,13 +63,13 @@ pipeline {
                 }
 
                 stages {
-                    stage("Checkout repo (Node ${NODE_VERSION})") {
+                    stage("Checkout repo") {
                         steps {
                             checkout scm
                         }
                     }
 
-                    stage("Downloading dependencies (Node ${NODE_VERSION})") {
+                    stage("Downloading dependencies") {
                         steps {
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
@@ -90,7 +89,7 @@ pipeline {
                         }
                     }
 
-                    stage("Run tests (Node ${NODE_VERSION})") {
+                    stage("Run tests") {
                         steps {
                             sh 'npm run test-junit'
                         }
