@@ -18,7 +18,7 @@ RUN apt-get update \
 
 RUN npm install -g npm jsdoc
 
-RUN python3 -m venv /opt/venv && \
-    chmod -R o+x /opt/venv
+RUN python3 -m venv /opt/venv \
+    && chmod -R o+x /opt/venv 
 
-ENV PATH="/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
+ENV PATH="/opt/venv/bin:/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
