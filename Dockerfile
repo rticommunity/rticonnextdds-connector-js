@@ -9,12 +9,16 @@
 # inability to use the software.
 # ------------------------------------------------------------------------------
 
-FROM node:18.7-slim
+ARG NODE_VERSION
+FROM node:${NODE_VERSION}
 
 RUN apt-get update \
-    && apt-get install -y gcc g++ git make python3 python3-pip \
+    && apt-get install -y gcc g++ git make python3 python3-pip python3-venv \
     && useradd -u 789 -m jenkins
 
 RUN npm install -g npm jsdoc
 
-ENV PATH="/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
+RUN python3 -m venv /opt/venv \
+    && chmod -R o+rwx /opt/venv 
+
+ENV PATH="/opt/venv/bin:/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"

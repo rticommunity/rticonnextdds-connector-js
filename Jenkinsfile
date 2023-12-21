@@ -12,9 +12,9 @@
 
 pipeline {
     agent {
-        dockerfile {
+        node {
             label 'docker'
-            customWorkspace "/rti/jenkins/workspace/${UUID.randomUUID().toString().split('-')[-1]}"
+            customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}"
         }
     }
 
@@ -46,100 +46,75 @@ pipeline {
     }
 
     stages {
-        stage('Download libs') {
-            steps {
-                script {
-                    publishCheck.inProgress(
-                        title: 'Downloading',
-                        summary: ':arrow_down: Downloading RTI Connext DDS libraries...',
-                    )
+        stage('Build & Test') {
+            matrix {
+                agent {
+                   dockerfile {
+                        additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                        customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
+                        label 'docker'
+                    } 
+                }
+                axes {
+                    axis {
+                        name 'NODE_VERSION'
+                        values '17', '18', '20', 'lts', 'latest'
+                    }
                 }
 
-                dir ('rticonnextdds-connector') {
-                    sh 'pip install -r resources/scripts/requirements.txt'
-                    withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
-                        sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
-                    }
-                }
-            }
+                stages {
+                    stage("Checkout repo") {
+                        steps {
+                            echo "[INFO] Building from ${pwd()}..."
 
-            post {
-                success {
-                    script {
-                        publishCheck.passed(
-                            summary: ':white_check_mark: RTI Connext DDS libraries downloaded.',
-                        )
+                            checkout scm
+                        }
                     }
-                }
-                failure {
-                    script {
-                        publishCheck.failed(
-                            summary: ':warning: Failed downloading RTI Connext DDS libraries.',
-                        )
-                    }
-                }
-                aborted {
-                    script {
-                        publishCheck.aborted(
-                            summary: ':no_entry: The download of RTI Connext DDS libraries was aborted.',
-                        )
-                    }
-                }
-            }
-        }
 
-        stage('Run tests') {
-            steps {
-                script {
-                    publishCheck.inProgress(
-                        title: 'Running tests...',
-                        summary: ':test_tube: Testing Connector JS...',
-                    )
-                }
+                    stage("Downloading dependencies") {
+                        steps {
+                            dir ('rticonnextdds-connector') {
+                                sh 'pip install -r resources/scripts/requirements.txt'
 
-                sh 'npm install'
-                sh 'npm run test-junit'
-            }
+                                withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
+                                    catchError(
+                                        message: "Library download failed",
+                                        buildResult: "UNSTABLE",
+                                        stageResult: "UNSTABLE"
+                                    ) {
+                                        sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
+                                    }
+                                }
+                            }
 
-            post {
-                always {
-                    junit(
-                        testResults: "test-results.xml"
-                    )
-                }
-                success {
-                    script {
-                        publishCheck.passed(
-                            summary: ':white_check_mark: Connector JS successfully tested.',
-                        )
+                            sh 'npm install'
+                        }
                     }
-                }
-                failure {
-                    script {
-                        publishCheck.failed(
-                            summary: ':warning: At least one test failed.',
-                        )
-                    }
-                }
-                aborted {
-                    script {
-                        publishCheck.aborted(
-                            summary: ':no_entry: The tests were aborted.',
-                        )
+
+                    stage("Run tests") {
+                        steps {
+                            sh 'npm run test-junit'
+                        }
+
+                        post {
+                            always {
+                                junit(testResults: "test-results.xml")
+                            }
+                        }
                     }
                 }
             }
         }
 
         stage('Build doc') {
-            steps {
-                script {
-                    publishCheck.inProgress(
-                        title: 'Building documentation...',
-                        summary: ':book: Building Connector JS Documentation...',
-                    )
-                }
+            agent {
+                dockerfile {
+                    additionalBuildArgs  "--build-arg NODE_VERSION=18"
+                    reuseNode true
+                } 
+            }
 
+            steps {
                 dir('docs') {
                     sh 'pip install -r requirements.txt --no-cache-dir'
                     sh 'make html'
@@ -159,26 +134,6 @@ pipeline {
                             reportTitles: 'Connector Documentation'
                         ]
                     )
-
-                    script {
-                        publishCheck.passed(
-                            summary: ':white_check_mark: Connector JS documentation generated sucessfully.',
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        publishCheck.failed(
-                            summary: ':warning: Failed to build documentation.',
-                        )
-                    }
-                }
-                aborted {
-                    script {
-                        publishCheck.aborted(
-                            summary: ':no_entry: The documentation generation was aborted.',
-                        )
-                    }
                 }
             }
         }
