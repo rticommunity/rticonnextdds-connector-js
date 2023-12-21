@@ -18,6 +18,4 @@ RUN apt-get update \
 
 RUN npm install -g npm jsdoc
 
-RUN python3 -m venv /opt/venv
-
 ENV PATH="/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
