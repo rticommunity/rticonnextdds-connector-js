@@ -26,7 +26,7 @@ const run = async () => {
       output.instance.setString('color', 'BLUE')
       output.write()
 
-      msleep(500)
+      await msleep(500)
     }
 
     console.log('Exiting...')
