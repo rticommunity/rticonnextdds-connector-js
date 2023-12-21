@@ -14,7 +14,7 @@ pipeline {
     agent {
         node {
             label 'docker'
-            customWorkspace "/rti/jenkins/workspace/${UUID.randomUUID().toString().split('-')[-1]}"
+            customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}"
         }
     }
 
@@ -51,8 +51,8 @@ pipeline {
                 agent {
                    dockerfile {
                         additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                        customWorkspace "${env.WORKSPACE}/${NODE_VERSION}"
-                        reuseNode true
+                        customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
+                        label 'docker'
                     } 
                 }
                 axes {
@@ -65,6 +65,8 @@ pipeline {
                 stages {
                     stage("Checkout repo") {
                         steps {
+                            echo "[INFO] Building from ${pwd()}..."
+
                             checkout scm
                         }
                     }
@@ -72,9 +74,7 @@ pipeline {
                     stage("Downloading dependencies") {
                         steps {
                             dir ('rticonnextdds-connector') {
-                                withPythonEnv('python3') {
-                                    sh 'pip install -r resources/scripts/requirements.txt'
-                                }
+                                sh 'pip install -r resources/scripts/requirements.txt'
 
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
@@ -82,9 +82,7 @@ pipeline {
                                         buildResult: "UNSTABLE",
                                         stageResult: "UNSTABLE"
                                     ) {
-                                        withPythonEnv('python3') {
-                                            sh "python3 resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
-                                        }
+                                        sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
                                     }
                                 }
                             }
@@ -111,16 +109,14 @@ pipeline {
         stage('Build doc') {
             agent {
                 dockerfile {
-                    additionalBuildArgs  "--build-arg NODE_VERSION=lts"
+                    additionalBuildArgs  "--build-arg NODE_VERSION=18"
                     reuseNode true
                 } 
             }
 
             steps {
                 dir('docs') {
-                    withPythonEnv('python3') {
-                        sh 'pip3 install -r requirements.txt --no-cache-dir'
-                    }
+                    sh 'pip install -r requirements.txt --no-cache-dir'
                     sh 'make html'
                 }
             }
