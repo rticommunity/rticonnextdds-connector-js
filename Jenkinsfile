@@ -62,7 +62,7 @@ pipeline {
                 }
 
                 stages {
-                    stage("Checkout repo") {
+                    stage('Checkout repo') {
                         steps {
                             echo "[INFO] Building from ${pwd()}..."
 
@@ -70,7 +70,7 @@ pipeline {
                         }
                     }
 
-                    stage("Downloading dependencies") {
+                    stage('Downloading dependencies') {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
@@ -97,11 +97,11 @@ pipeline {
                         }
                     }
 
-                    stage("Run tests") {
+                    stage('Run tests') {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                args "--network none"
+                                args '--network none'
                                 reuseNode true
                             }
                         }
@@ -112,7 +112,7 @@ pipeline {
 
                         post {
                             always {
-                                junit(testResults: "test-results.xml")
+                                junit(testResults: 'test-results.xml')
                             }
                         }
                     }
@@ -123,7 +123,7 @@ pipeline {
         stage('Build doc') {
             agent {
                 dockerfile {
-                    additionalBuildArgs  "--build-arg NODE_VERSION=18"
+                    additionalBuildArgs  '--build-arg NODE_VERSION=18'
                     reuseNode true
                 }
             }
