@@ -49,8 +49,7 @@ pipeline {
         stage('Build & Test') {
             matrix {
                 agent {
-                   dockerfile {
-                        additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                   node {
                         customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                         label 'docker'
                     } 
@@ -72,6 +71,14 @@ pipeline {
                     }
 
                     stage("Downloading dependencies") {
+                        agent {
+                            dockerfile {
+                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
+                                reuseNode true
+                            } 
+                        }
+
                         steps {
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
@@ -92,6 +99,15 @@ pipeline {
                     }
 
                     stage("Run tests") {
+                        agent {
+                            dockerfile {
+                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
+                                args "--network none"
+                                reuseNode true
+                            } 
+                        }
+
                         steps {
                             sh 'npm run test-junit'
                         }
