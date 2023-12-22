@@ -132,6 +132,7 @@ pipeline {
 
             steps {
                 dir('docs') {
+                    sh 'npm config set prefix \'/opt/node_deps\''
                     sh 'npm install -g jsdoc'
                     sh 'pip install -r requirements.txt --no-cache-dir'
                     sh 'make html'
