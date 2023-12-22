@@ -74,7 +74,6 @@ pipeline {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                                 reuseNode true
                             }
                         }
@@ -102,7 +101,6 @@ pipeline {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                                 args "--network none"
                                 reuseNode true
                             }
