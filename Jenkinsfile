@@ -52,7 +52,7 @@ pipeline {
                    node {
                         customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                         label 'docker'
-                    } 
+                    }
                 }
                 axes {
                     axis {
@@ -105,7 +105,7 @@ pipeline {
                                 customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                                 args "--network none"
                                 reuseNode true
-                            } 
+                            }
                         }
 
                         steps {
@@ -127,7 +127,7 @@ pipeline {
                 dockerfile {
                     additionalBuildArgs  "--build-arg NODE_VERSION=18"
                     reuseNode true
-                } 
+                }
             }
 
             steps {
