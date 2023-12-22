@@ -84,9 +84,9 @@ pipeline {
 
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
-                                        message: "Library download failed",
-                                        buildResult: "UNSTABLE",
-                                        stageResult: "UNSTABLE"
+                                        message: 'Library download failed',
+                                        buildResult: 'UNSTABLE',
+                                        stageResult: 'UNSTABLE'
                                     ) {
                                         sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
                                     }
