@@ -49,11 +49,10 @@ pipeline {
         stage('Build & Test') {
             matrix {
                 agent {
-                   dockerfile {
-                        additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                   node {
                         customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
                         label 'docker'
-                    } 
+                    }
                 }
                 axes {
                     axis {
@@ -63,7 +62,7 @@ pipeline {
                 }
 
                 stages {
-                    stage("Checkout repo") {
+                    stage('Checkout repo') {
                         steps {
                             echo "[INFO] Building from ${pwd()}..."
 
@@ -71,16 +70,23 @@ pipeline {
                         }
                     }
 
-                    stage("Downloading dependencies") {
+                    stage('Downloading dependencies') {
+                        agent {
+                            dockerfile {
+                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                reuseNode true
+                            }
+                        }
+
                         steps {
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
 
                                 withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
                                     catchError(
-                                        message: "Library download failed",
-                                        buildResult: "UNSTABLE",
-                                        stageResult: "UNSTABLE"
+                                        message: 'Library download failed',
+                                        buildResult: 'UNSTABLE',
+                                        stageResult: 'UNSTABLE'
                                     ) {
                                         sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
                                     }
@@ -91,14 +97,22 @@ pipeline {
                         }
                     }
 
-                    stage("Run tests") {
+                    stage('Run tests') {
+                        agent {
+                            dockerfile {
+                                args '--network none'
+                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                reuseNode true
+                            }
+                        }
+
                         steps {
                             sh 'npm run test-junit'
                         }
 
                         post {
                             always {
-                                junit(testResults: "test-results.xml")
+                                junit(testResults: 'test-results.xml')
                             }
                         }
                     }
@@ -109,13 +123,15 @@ pipeline {
         stage('Build doc') {
             agent {
                 dockerfile {
-                    additionalBuildArgs  "--build-arg NODE_VERSION=18"
+                    additionalBuildArgs  '--build-arg NODE_VERSION=18'
                     reuseNode true
-                } 
+                }
             }
 
             steps {
                 dir('docs') {
+                    sh 'npm config set prefix \'/opt/node_deps\''
+                    sh 'npm install -g jsdoc'
                     sh 'pip install -r requirements.txt --no-cache-dir'
                     sh 'make html'
                 }

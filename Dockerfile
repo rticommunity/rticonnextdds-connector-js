@@ -16,9 +16,11 @@ RUN apt-get update \
     && apt-get install -y gcc g++ git make python3 python3-pip python3-venv \
     && useradd -u 789 -m jenkins
 
-RUN npm install -g npm jsdoc
+RUN mkdir -p /opt/node_deps \
+    && npm config set prefix '/opt/node_deps' \
+    && chmod -R a+rwx /opt/node_deps
 
 RUN python3 -m venv /opt/venv \
     && chmod -R o+rwx /opt/venv 
 
-ENV PATH="/opt/venv/bin:/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
+ENV PATH="/opt/node_deps/bin:/opt/venv/bin:/home/jenkins/npm/bin:/home/jenkins/.local/bin:${PATH}"
