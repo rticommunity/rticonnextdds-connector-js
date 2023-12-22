@@ -100,8 +100,8 @@ pipeline {
                     stage('Run tests') {
                         agent {
                             dockerfile {
-                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
                                 args '--network none'
+                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
                                 reuseNode true
                             }
                         }
