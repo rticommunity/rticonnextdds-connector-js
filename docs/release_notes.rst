@@ -39,11 +39,15 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    dependencies is not compatible with those versions.
    Node.js versions greater than v18.7.0 are not currently supported.
 
-Version 1.2.2
+Version 1.3.0
 -----------------
 
-What's New in 1.2.2
-^^^^^^^^^^^^^^^^^^^
+
+Previous Releases
+-----------------
+
+Version 1.2.2
+^^^^^^^^^^^^^
 
 *RTI Connector* 1.2.2 is built on 
 `RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
@@ -56,9 +60,6 @@ Previously, the native libraries shipped with Connector were built using Visual
 Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
 libraries are now built using Visual Studio 2015. The redistributable that is
 shipped has been updated accordingly.
-
-Previous Releases
------------------
 
 Version 1.2.1
 ^^^^^^^^^^^^^
