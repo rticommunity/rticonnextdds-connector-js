@@ -42,6 +42,8 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.3.0
 -----------------
 
+*RTI Connector* 1.3.0 is built on 
+`RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
 
 Previous Releases
 -----------------
