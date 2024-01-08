@@ -45,6 +45,26 @@ Version 1.3.0
 *RTI Connector* 1.3.0 is built on 
 `RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
 
+
+Failed to create a Connector in certain Node versions (18.8 or greater)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-299
+
+Due to an incompatibility in some *Connector* dependencies, it was not 
+possible to create a *Connector* when using certain Node.js versions. Trying
+to create a *Connector* showed the following backtrace:
+
+.. code:: 
+
+  rticonnextdds-connector-js/node_modules/ffi-napi/lib/dynamic_library.js:67
+    if (match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*/)) {
+                    ^
+   TypeError: Cannot read properties of null (reading 'match')
+..
+
+This issue is known to have affected Node.js versions 18.8 and 20; other
+versions may also have been affected.
+
 Previous Releases
 -----------------
 
