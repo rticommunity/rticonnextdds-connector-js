@@ -39,6 +39,35 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
    dependencies is not compatible with those versions.
    Node.js versions greater than v18.7.0 are not currently supported.
 
+Version 1.3.0
+-----------------
+
+What's Fixed in 1.3.0
+^^^^^^^^^^^^^^^^^^^^^
+
+*RTI Connector* 1.3.0 is built on 
+`RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
+
+Failed to create a Connector in certain Node versions (18.8 or greater)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. CON-299
+
+Due to an incompatibility in some *Connector* dependencies, it was not 
+possible to create a *Connector* when using certain Node.js versions. Trying
+to create a *Connector* showed the following backtrace:
+
+.. code:: 
+
+  rticonnextdds-connector-js/node_modules/ffi-napi/lib/dynamic_library.js:67
+    if (match = err.match(/^(([^ \t()])+\.so([^ \t:()])*):([ \t])*/)) {
+                    ^
+   TypeError: Cannot read properties of null (reading 'match')
+..
+
+This issue is known to have affected Node.js versions 18.8 and 20; other
+versions may also have been affected.
+
+
 Version 1.2.2
 -----------------
 
@@ -52,7 +81,7 @@ Native Windows libraries updated to Visual Studio 2015
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-276
 
-Previously, the native libraries shipped with Connector were built using Visual
+Previously, the native libraries shipped with *Connector* were built using Visual
 Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
 libraries are now built using Visual Studio 2015. The redistributable that is
 shipped has been updated accordingly.
