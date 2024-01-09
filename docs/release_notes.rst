@@ -4,14 +4,14 @@ Release Notes
 Supported Platforms
 -------------------
 
-*Connector* has been validated to run with at least the following Node.js versions:
+*Connector* has been validated to run with the following Node.js versions:
   * v17
   * v18
   * v20
 
-Other versions can still work, but may have not been validated internally.
+Other versions may also work, but have not been validated internally.
 If you run into an issue, make sure that the issue can be reproduced
-in any of the versions mentioned above.
+in any of the versions listed above.
 
 *Connector* uses a native C library that works on most Windows®, Linux® and
 macOS® platforms. It has been tested on the following systems:
