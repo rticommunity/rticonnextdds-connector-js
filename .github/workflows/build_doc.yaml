@@ -58,11 +58,10 @@ jobs:
 
       - name: Publish HTML documentation
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: hkusu/s3-upload-action@v2
+        uses: shallwefootball/s3-upload-action@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key	: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-bucket: ${{ secrets.AWS_DOC_BUCKET }}
-          file-path: 'docs/_build/html/'
-          destination-dir: "documentation/connector/${{ steps.vars.outputs.version }}/api/javascript/"
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: ${{ secrets.AWS_DOC_BUCKET }}
+          source_dir: 'docs/_build/html/'
+          destination_dir: "documentation/connector/${{ steps.vars.outputs.version }}/api/javascript/"
