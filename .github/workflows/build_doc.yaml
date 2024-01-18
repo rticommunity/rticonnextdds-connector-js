@@ -65,4 +65,4 @@ jobs:
           aws_bucket: ${{ secrets.AWS_DOC_BUCKET }}
           source_dir: 'docs/_build/html/'
           destination_dir: "documentation/connector/${{ steps.vars.outputs.version }}/api/javascript/"
-          endpoint: https://${{ secrets.AWS_DOC_BUCKET }}.s3.${{ secrets.AWS_REGION }}.amazonaws.com/
+          endpoint: "https://${{ secrets.AWS_DOC_BUCKET }}.s3.${{ secrets.AWS_REGION }}.amazonaws.com/""
