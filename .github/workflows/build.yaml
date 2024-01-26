@@ -27,6 +27,7 @@ jobs:
       pr_number: ${{ steps.pr_number.outputs.PR_NUMBER }}
 
     strategy:
+      fail-fast: false
       matrix:
         version: [17, 18, 20, lts/*, latest]
 
