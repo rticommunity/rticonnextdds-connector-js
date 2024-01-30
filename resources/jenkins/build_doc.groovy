@@ -14,7 +14,6 @@ pipeline {
     agent {
         node {
             label 'docker'
-            customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}"
         }
     }
 
