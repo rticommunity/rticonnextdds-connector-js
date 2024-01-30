@@ -24,6 +24,7 @@ pipeline {
     }
 
     options {
+        skipDefaultCheckout()
         disableConcurrentBuilds()
         /*
             To avoid excessive resource usage in server, we limit the number
@@ -47,6 +48,8 @@ pipeline {
 
     stages {
         stage('Build & Test') {
+            failfast false
+
             matrix {
                 agent {
                    node {
@@ -121,40 +124,6 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
-
-        stage('Build doc') {
-            agent {
-                dockerfile {
-                    additionalBuildArgs  '--build-arg NODE_VERSION=18'
-                    reuseNode true
-                }
-            }
-
-            steps {
-                dir('docs') {
-                    sh 'npm config set prefix \'/opt/node_deps\''
-                    sh 'npm install -g jsdoc'
-                    sh 'pip install -r requirements.txt --no-cache-dir'
-                    sh 'make html'
-                }
-            }
-
-            post {
-                success {
-                    publishHTML(
-                        [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: false,
-                            keepAll: false,
-                            reportDir: 'docs/_build/html/',
-                            reportFiles: 'index.html',
-                            reportName: 'Connector Documentation',
-                            reportTitles: 'Connector Documentation'
-                        ]
-                    )
                 }
             }
         }
