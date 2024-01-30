@@ -48,7 +48,7 @@ pipeline {
 
     stages {
         stage('Build & Test') {
-            failfast false
+            failFast false
 
             matrix {
                 agent {
