@@ -82,13 +82,18 @@ pipeline {
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
 
-                                withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
-                                    catchError(
-                                        message: 'Library download failed',
-                                        buildResult: 'UNSTABLE',
-                                        stageResult: 'UNSTABLE'
-                                    ) {
-                                        sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
+                                withAWS(credentials:'community-aws', region: 'us-east-1') {
+                                    withCredentials([
+                                        string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                        string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                                    ]) {
+                                        catchError(
+                                            message: 'Library download failed',
+                                            buildResult: 'UNSTABLE',
+                                            stageResult: 'UNSTABLE'
+                                        ) {
+                                            sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                        }
                                     }
                                 }
                             }
