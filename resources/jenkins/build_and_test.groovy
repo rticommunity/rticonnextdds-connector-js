@@ -77,6 +77,7 @@ pipeline {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                dir 'resources/docker'
                                 reuseNode true
                             }
                         }
@@ -110,6 +111,7 @@ pipeline {
                             dockerfile {
                                 args '--network none'
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                dir 'resources/docker'
                                 reuseNode true
                             }
                         }
