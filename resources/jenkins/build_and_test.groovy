@@ -24,6 +24,7 @@ pipeline {
     }
 
     options {
+        skipDefaultCheckout()
         disableConcurrentBuilds()
         /*
             To avoid excessive resource usage in server, we limit the number
@@ -47,6 +48,8 @@ pipeline {
 
     stages {
         stage('Build & Test') {
+            failFast false
+
             matrix {
                 agent {
                    node {
@@ -74,6 +77,7 @@ pipeline {
                         agent {
                             dockerfile {
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                dir 'resources/docker'
                                 reuseNode true
                             }
                         }
@@ -82,13 +86,18 @@ pipeline {
                             dir ('rticonnextdds-connector') {
                                 sh 'pip install -r resources/scripts/requirements.txt'
 
-                                withCredentials([string(credentialsId: 'artifactory-path', variable: 'ARTIFACTORY_PATH')]) {
-                                    catchError(
-                                        message: 'Library download failed',
-                                        buildResult: 'UNSTABLE',
-                                        stageResult: 'UNSTABLE'
-                                    ) {
-                                        sh "python resources/scripts/download_latest_libs.py --storage-url ${servers.ARTIFACTORY_URL} --storage-path \$ARTIFACTORY_PATH -o ."
+                                withAWS(credentials:'community-aws', region: 'us-east-1') {
+                                    withCredentials([
+                                        string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                        string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                                    ]) {
+                                        catchError(
+                                            message: 'Library download failed',
+                                            buildResult: 'UNSTABLE',
+                                            stageResult: 'UNSTABLE'
+                                        ) {
+                                            sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                        }
                                     }
                                 }
                             }
@@ -102,6 +111,7 @@ pipeline {
                             dockerfile {
                                 args '--network none'
                                 additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
+                                dir 'resources/docker'
                                 reuseNode true
                             }
                         }
@@ -116,40 +126,6 @@ pipeline {
                             }
                         }
                     }
-                }
-            }
-        }
-
-        stage('Build doc') {
-            agent {
-                dockerfile {
-                    additionalBuildArgs  '--build-arg NODE_VERSION=18'
-                    reuseNode true
-                }
-            }
-
-            steps {
-                dir('docs') {
-                    sh 'npm config set prefix \'/opt/node_deps\''
-                    sh 'npm install -g jsdoc'
-                    sh 'pip install -r requirements.txt --no-cache-dir'
-                    sh 'make html'
-                }
-            }
-
-            post {
-                success {
-                    publishHTML(
-                        [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: false,
-                            keepAll: false,
-                            reportDir: 'docs/_build/html/',
-                            reportFiles: 'index.html',
-                            reportName: 'Connector Documentation',
-                            reportTitles: 'Connector Documentation'
-                        ]
-                    )
                 }
             }
         }
