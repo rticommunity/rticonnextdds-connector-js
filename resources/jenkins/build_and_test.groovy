@@ -10,6 +10,48 @@
  * to use the software.
  */
 
+def getBuildAndTestStages(String nodeVersion) {
+    return {
+        dir("${env.WORKSPACE}/${nodeVersion}") {
+            stage('Checkout repo') {
+                echo "[INFO] Building from ${pwd()}..."
+                checkout scm
+            }
+
+            stage('Downloading dependencies') {
+                dir ('rticonnextdds-connector') {
+                    sh 'pip install -r resources/scripts/requirements.txt'
+
+                    withAWS(credentials:'community-aws', region: 'us-east-1') {
+                        withCredentials([
+                            string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                            string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                        ]) {
+                            catchError(
+                                message: 'Library download failed',
+                                buildResult: 'UNSTABLE',
+                                stageResult: 'UNSTABLE'
+                            ) {
+                                sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                            }
+                        }
+                    }
+
+                    sh 'npm install'
+                }
+            }
+
+            stage('Run tests') {
+                try {
+                    sh 'npm run test-junit'
+                } finally {
+                    junit(testResults: 'test-results.xml')
+                }
+            }
+        }
+    }
+}
+
 pipeline {
     agent {
         node {
@@ -50,82 +92,10 @@ pipeline {
         stage('Build & Test') {
             failFast false
 
-            matrix {
-                agent {
-                   node {
-                        customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
-                        label 'docker'
-                    }
-                }
-                axes {
-                    axis {
-                        name 'NODE_VERSION'
-                        values '17', '18', '20', 'lts', 'latest'
-                    }
-                }
-
-                stages {
-                    stage('Checkout repo') {
-                        steps {
-                            echo "[INFO] Building from ${pwd()}..."
-
-                            checkout scm
-                        }
-                    }
-
-                    stage('Downloading dependencies') {
-                        agent {
-                            dockerfile {
-                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                dir 'resources/docker'
-                                reuseNode true
-                            }
-                        }
-
-                        steps {
-                            dir ('rticonnextdds-connector') {
-                                sh 'pip install -r resources/scripts/requirements.txt'
-
-                                withAWS(credentials:'community-aws', region: 'us-east-1') {
-                                    withCredentials([
-                                        string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                        string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                                    ]) {
-                                        catchError(
-                                            message: 'Library download failed',
-                                            buildResult: 'UNSTABLE',
-                                            stageResult: 'UNSTABLE'
-                                        ) {
-                                            sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-                                        }
-                                    }
-                                }
-                            }
-
-                            sh 'npm install'
-                        }
-                    }
-
-                    stage('Run tests') {
-                        agent {
-                            dockerfile {
-                                args '--network none'
-                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                dir 'resources/docker'
-                                reuseNode true
-                            }
-                        }
-
-                        steps {
-                            sh 'npm run test-junit'
-                        }
-
-                        post {
-                            always {
-                                junit(testResults: 'test-results.xml')
-                            }
-                        }
-                    }
+            steps {
+                script {
+                    buildStages = getBuildAndTestStages("20")
+                    buildStages.call()
                 }
             }
         }
