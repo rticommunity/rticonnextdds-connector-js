@@ -108,7 +108,7 @@ pipeline {
             steps {
                 script {
                     def nodeVersions = null
-                    def ciConfig = readYaml("ci_config.yaml")
+                    def ciConfig = readYaml(file: "ci_config.yaml")
                     nodeVersions = ciConfig["node_versions"]
 
                     def buildAndTestStages = [:]
