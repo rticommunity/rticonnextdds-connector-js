@@ -10,6 +10,8 @@
  * to use the software.
  */
 
+NODE_VERSIONS = ['17', '18', '20', 'lts']
+
 def getBuildAndTestStages(String nodeVersion) {
     def dockerImage = docker.build(
         "node-v${nodeVersion}",
@@ -18,12 +20,12 @@ def getBuildAndTestStages(String nodeVersion) {
 
     return {
         dir("${env.WORKSPACE}/${nodeVersion}") {
-            stage('Checkout repo') {
+            stage("Checkout repo (Node v${nodeVersion})") {
                 echo "[INFO] Building from ${pwd()}..."
                 checkout scm
             }
 
-            stage('Downloading dependencies') {
+            stage("Downloading dependencies (Node v${nodeVersion})") {
                 dockerImage.inside() {
                     dir ('rticonnextdds-connector') {
                         sh 'pip install -r resources/scripts/requirements.txt'
@@ -48,7 +50,7 @@ def getBuildAndTestStages(String nodeVersion) {
                 }
             }
 
-            stage('Run tests') {
+            stage("Run tests (Node v${nodeVersion})") {
                 dockerImage.inside('--network none') {
                     try {
                         sh 'npm run test-junit'
@@ -65,7 +67,6 @@ pipeline {
     agent {
         node {
             label 'docker'
-            customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}"
         }
     }
 
@@ -102,8 +103,17 @@ pipeline {
 
             steps {
                 script {
-                    buildStages = getBuildAndTestStages("20")
-                    buildStages.call()
+                    buildAndTestStages = [:]
+
+                    NODE_VERSIONS.each { version ->
+                        buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
+                    }
+
+                    if (env.BRANCH_NAME == "develop") {
+                        buildAndTestStages["Node latest"] = getBuildAndTestStages("latest")
+                    }
+
+                    parallel buildAndTestStages
                 }
             }
         }
