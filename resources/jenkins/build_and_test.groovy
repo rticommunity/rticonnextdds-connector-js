@@ -21,12 +21,12 @@ def getBuildAndTestStages(String nodeVersion) {
     return {
         stage("Node ${nodeVersion}") {
             dir("${env.WORKSPACE}/${nodeVersion}") {
-                stage("Checkout repo (Node v${nodeVersion})") {
+                stage("Checkout repo") {
                     echo "[INFO] Building from ${pwd()}..."
                     checkout scm
                 }
 
-                stage("Downloading dependencies (Node v${nodeVersion})") {
+                stage("Downloading dependencies") {
                     dockerImage.inside() {
                         dir ('rticonnextdds-connector') {
                             sh 'pip install -r resources/scripts/requirements.txt'
@@ -51,7 +51,7 @@ def getBuildAndTestStages(String nodeVersion) {
                     }
                 }
 
-                stage("Run tests (Node v${nodeVersion})") {
+                stage("Run tests") {
                     dockerImage.inside('--network none') {
                         try {
                             sh 'npm run test-junit'
