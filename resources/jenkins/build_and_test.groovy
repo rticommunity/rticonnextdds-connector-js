@@ -11,6 +11,11 @@
  */
 
 def getBuildAndTestStages(String nodeVersion) {
+    def dockerImage = docker.build(
+        "node-v${nodeVersion}",
+        "--pull -f resources/docker/Dockerfile --build-arg NODE_VERSION=${nodeVersion} ."
+    )
+
     return {
         dir("${env.WORKSPACE}/${nodeVersion}") {
             stage('Checkout repo') {
@@ -19,33 +24,37 @@ def getBuildAndTestStages(String nodeVersion) {
             }
 
             stage('Downloading dependencies') {
-                dir ('rticonnextdds-connector') {
-                    sh 'pip install -r resources/scripts/requirements.txt'
+                dockerImage.inside() {
+                    dir ('rticonnextdds-connector') {
+                        sh 'pip install -r resources/scripts/requirements.txt'
 
-                    withAWS(credentials:'community-aws', region: 'us-east-1') {
-                        withCredentials([
-                            string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                            string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                        ]) {
-                            catchError(
-                                message: 'Library download failed',
-                                buildResult: 'UNSTABLE',
-                                stageResult: 'UNSTABLE'
-                            ) {
-                                sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                        withAWS(credentials:'community-aws', region: 'us-east-1') {
+                            withCredentials([
+                                string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                            ]) {
+                                catchError(
+                                    message: 'Library download failed',
+                                    buildResult: 'UNSTABLE',
+                                    stageResult: 'UNSTABLE'
+                                ) {
+                                    sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                }
                             }
                         }
-                    }
 
-                    sh 'npm install'
+                        sh 'npm install'
+                    }
                 }
             }
 
             stage('Run tests') {
-                try {
-                    sh 'npm run test-junit'
-                } finally {
-                    junit(testResults: 'test-results.xml')
+                dockerImage.inside('--network none') {
+                    try {
+                        sh 'npm run test-junit'
+                    } finally {
+                        junit(testResults: 'test-results.xml')
+                    }
                 }
             }
         }
