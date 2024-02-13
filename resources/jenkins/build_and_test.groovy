@@ -113,6 +113,8 @@ pipeline {
 
                     def buildAndTestStages = [:]
 
+                    echo "Node versions: ${nodeVersions}"
+
                     nodeVersions.each { version ->
                         buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
                     }
