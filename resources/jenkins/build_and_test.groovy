@@ -64,7 +64,11 @@ def getBuildAndTestStages(String nodeVersion) {
 }
 
 def getNodeVersionFromJobName() {
-    def pattern =  /.*_node-(.*).*/
+    if ((m = env.JOB_NAME =~ /.*_node-(.*)_?.*/)) {
+        return m.group(1)
+    }
+
+    return null
 }
 
 pipeline {
@@ -107,9 +111,16 @@ pipeline {
 
             steps {
                 script {
-                    def nodeVersions = null
-                    def ciConfig = readYaml(file: "ci_config.yaml")
-                    nodeVersions = ciConfig["node_versions"]
+                    def nodeVersions = []
+                    def ciConfig = null
+                    def predefinedNodeversion = getNodeVersionFromJobName()
+
+                    if(predefinedNodeversion) {
+                        nodeVersions += nodeVersions
+                    } else {
+                        ciConfig = readYaml(file: "ci_config.yaml")
+                        nodeVersions = ciConfig["node_versions"]
+                    }
 
                     def buildAndTestStages = [:]
 
