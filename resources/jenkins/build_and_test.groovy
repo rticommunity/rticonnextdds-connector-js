@@ -10,8 +10,6 @@
  * to use the software.
  */
 
-NODE_VERSIONS = ['17', '18', '20', 'lts']
-
 def getBuildAndTestStages(String nodeVersion) {
     def dockerImage = docker.build(
         "node-v${nodeVersion}",
@@ -65,6 +63,10 @@ def getBuildAndTestStages(String nodeVersion) {
     }
 }
 
+def getNodeVersionFromJobName() {
+    def pattern =  /.*_node-(.*).*/)
+}
+
 pipeline {
     agent {
         node {
@@ -105,14 +107,14 @@ pipeline {
 
             steps {
                 script {
-                    buildAndTestStages = [:]
+                    def nodeVersions = null
+                    def ciConfig = readYAML("ci_config.yaml")
+                    nodeVersions = ciConfig["node_versions"]
 
-                    NODE_VERSIONS.each { version ->
+                    def buildAndTestStages = [:]
+
+                    nodeVersions.each { version ->
                         buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
-                    }
-
-                    if (env.BRANCH_NAME == "develop") {
-                        buildAndTestStages["Node latest"] = getBuildAndTestStages("latest")
                     }
 
                     parallel buildAndTestStages
