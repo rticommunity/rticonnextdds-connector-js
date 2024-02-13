@@ -19,43 +19,45 @@ def getBuildAndTestStages(String nodeVersion) {
     )
 
     return {
-        dir("${env.WORKSPACE}/${nodeVersion}") {
-            stage("Checkout repo (Node v${nodeVersion})") {
-                echo "[INFO] Building from ${pwd()}..."
-                checkout scm
-            }
+        stage("Node ${nodeVersion}") {
+            dir("${env.WORKSPACE}/${nodeVersion}") {
+                stage("Checkout repo (Node v${nodeVersion})") {
+                    echo "[INFO] Building from ${pwd()}..."
+                    checkout scm
+                }
 
-            stage("Downloading dependencies (Node v${nodeVersion})") {
-                dockerImage.inside() {
-                    dir ('rticonnextdds-connector') {
-                        sh 'pip install -r resources/scripts/requirements.txt'
+                stage("Downloading dependencies (Node v${nodeVersion})") {
+                    dockerImage.inside() {
+                        dir ('rticonnextdds-connector') {
+                            sh 'pip install -r resources/scripts/requirements.txt'
 
-                        withAWS(credentials:'community-aws', region: 'us-east-1') {
-                            withCredentials([
-                                string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                            ]) {
-                                catchError(
-                                    message: 'Library download failed',
-                                    buildResult: 'UNSTABLE',
-                                    stageResult: 'UNSTABLE'
-                                ) {
-                                    sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                            withAWS(credentials:'community-aws', region: 'us-east-1') {
+                                withCredentials([
+                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                                ]) {
+                                    catchError(
+                                        message: 'Library download failed',
+                                        buildResult: 'UNSTABLE',
+                                        stageResult: 'UNSTABLE'
+                                    ) {
+                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                    }
                                 }
                             }
-                        }
 
-                        sh 'npm install'
+                            sh 'npm install'
+                        }
                     }
                 }
-            }
 
-            stage("Run tests (Node v${nodeVersion})") {
-                dockerImage.inside('--network none') {
-                    try {
-                        sh 'npm run test-junit'
-                    } finally {
-                        junit(testResults: 'test-results.xml')
+                stage("Run tests (Node v${nodeVersion})") {
+                    dockerImage.inside('--network none') {
+                        try {
+                            sh 'npm run test-junit'
+                        } finally {
+                            junit(testResults: 'test-results.xml')
+                        }
                     }
                 }
             }
@@ -107,12 +109,7 @@ pipeline {
 
                     NODE_VERSIONS.each { version ->
                         def stageName = "Node ${version}"
-                        buildAndTestStages[stageName] = {
-                            stage(stageName) {
-                                getBuildAndTestStages(version)
-                            }
-                        }
-
+                        buildAndTestStages[stageName] = getBuildAndTestStages(version)
                     }
 
                     if (env.BRANCH_NAME == "develop") {
