@@ -64,7 +64,7 @@ def getBuildAndTestStages(String nodeVersion) {
 }
 
 def getNodeVersionFromJobName() {
-    def pattern =  /.*_node-(.*).*/)
+    def pattern =  /.*_node-(.*).*/
 }
 
 pipeline {
