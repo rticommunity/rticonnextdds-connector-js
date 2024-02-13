@@ -106,7 +106,13 @@ pipeline {
                     buildAndTestStages = [:]
 
                     NODE_VERSIONS.each { version ->
-                        buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
+                        def stageName = "Node ${version}"
+                        buildAndTestStages[stageName] = {
+                            stage(stageName) {
+                                getBuildAndTestStages(version)
+                            }
+                        }
+
                     }
 
                     if (env.BRANCH_NAME == "develop") {
