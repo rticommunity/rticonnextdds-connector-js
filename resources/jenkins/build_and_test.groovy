@@ -10,6 +10,12 @@
  * to use the software.
  */
 
+/*
+ * This function generates the stages to Build & Test connector using a specific Node-JS version.
+ *
+ * @param nodeVersion Version of Node-JS used to generate the build & test stage.
+ * @return The generated Build & Test stages
+ */
 def getBuildAndTestStages(String nodeVersion) {
     def dockerImage = docker.build(
         "node-v${nodeVersion}",
@@ -63,12 +69,16 @@ def getBuildAndTestStages(String nodeVersion) {
     }
 }
 
-def getNodeVersionFromJobName() {
-    if ((m = env.JOB_NAME =~ /.*_node-(.*)_?.*/)) {
-        return m.group(1)
-    }
+/*
+ * Get he Node-JS version from the job name if it is defined there. Example of job name:
+ * ci/connector-js/rticonnextdds-connector-js_node-20_latest.
+ *
+ * @return The list of node versions defined in the Job Name. An empty list if it is not defined in the job name.
+ */
+def getNodeVersionsFromJobName() {
+    def matcher = env.JOB_NAME =~ /.*_node-(.*)\/.*/
 
-    return null
+    return matcher ? matcher.group(1).split('_') : []
 }
 
 pipeline {
@@ -111,21 +121,18 @@ pipeline {
 
             steps {
                 script {
-                    def nodeVersions = []
+                    def nodeVersions = getNodeVersionsFromJobName()
                     def ciConfig = null
-                    def predefinedNodeversion = getNodeVersionFromJobName()
 
-                    if(predefinedNodeversion) {
-                        nodeVersions += nodeVersions
-                    } else {
+                    // If the node versions was not predefined in the job name, read them from the config file.
+                    if(!nodeVersions) {
                         ciConfig = readYaml(file: "ci_config.yaml")
                         nodeVersions = ciConfig["node_versions"]
                     }
 
                     def buildAndTestStages = [:]
 
-                    echo "Node versions: ${nodeVersions}"
-
+                    // Generate the Build & Test stages for every selected node version.
                     nodeVersions.each { version ->
                         buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
                     }
