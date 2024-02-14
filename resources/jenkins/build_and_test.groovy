@@ -18,7 +18,7 @@
  */
 def getBuildAndTestStages(String nodeVersion) {
     def dockerImage = docker.build(
-        UUID.randomUUID().toString(),
+        UUID.randomUUID().toString().split('-')[-1],
         "--pull -f resources/docker/Dockerfile --build-arg NODE_VERSION=${nodeVersion} ."
     )
 
