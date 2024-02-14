@@ -35,7 +35,7 @@ def getBuildAndTestStages(String nodeVersion) {
                         dir ('rticonnextdds-connector') {
                             sh 'pip install -r resources/scripts/requirements.txt'
 
-                            withAWS(credentials:'community-aws', region: 'us-east-1') {
+                            withAWSCredentials {
                                 withCredentials([
                                     string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
                                     string(credentialsId: 's3-path', variable: 'S3_PATH'),

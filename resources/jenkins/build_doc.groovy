@@ -80,7 +80,7 @@ pipeline {
                     def docVersion = env.TAG_NAME.split('-')[0]
                     docVersion = docVersion.replace('v', '')
 
-                    withAWS(credentials:'community-aws', region: 'us-east-1') {
+                    withAWSCredentials {
                         withCredentials([
                             string(credentialsId: 's3-doc-bucket', variable: 'S3_DOC_BUCKET'),
                         ]) {
