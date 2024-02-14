@@ -80,7 +80,7 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 's3-doc-bucket', variable: 'S3_DOC_BUCKET'),
                     ]) {
-                        sh "aws s3 sync --acl public-read docs/_build/html/ s3://\$S3_DOC_BUCKET/documentation/connector/${{ env.TAG_NAME.split('-')[0] }}/api/javascript/"
+                        sh "aws s3 sync --acl public-read docs/_build/html/ s3://\$S3_DOC_BUCKET/documentation/connector/${env.TAG_NAME.split('-')[0]}/api/javascript/"
                     }
                 }
             }
