@@ -12,7 +12,10 @@
 
 pipeline {
     agent {
-        node {
+        dockerfile {
+            additionalBuildArgs  '--build-arg NODE_VERSION=18'
+            dir 'resources/docker'
+            reuseNode true
             label 'docker'
         }
     }
@@ -41,14 +44,6 @@ pipeline {
 
     stages {
         stage('Build doc') {
-            agent {
-                dockerfile {
-                    additionalBuildArgs  '--build-arg NODE_VERSION=18'
-                    dir 'resources/docker'
-                    reuseNode true
-                }
-            }
-
             steps {
                 dir('docs') {
                     sh 'npm config set prefix \'/opt/node_deps\''
@@ -71,6 +66,22 @@ pipeline {
                             reportTitles: 'Connector Documentation'
                         ]
                     )
+                }
+            }
+        }
+
+        stage('Publish doc') {
+            when {
+                tag pattern: /v\d+\.\d+\.\d+-doc/, comparator: "REGEXP"
+            }
+
+            steps {
+                withAWS(credentials:'community-aws', region: 'us-east-1') {
+                    withCredentials([
+                        string(credentialsId: 's3-doc-bucket', variable: 'S3_DOC_BUCKET'),
+                    ]) {
+                        sh "aws s3 sync --acl public-read docs/_build/html/ s3://\$S3_DOC_BUCKET/documentation/connector/${{ env.TAG_NAME.split('-')[0] }}/api/javascript/"
+                    }
                 }
             }
         }
