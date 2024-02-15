@@ -13,7 +13,7 @@
 pipeline {
     agent {
         dockerfile {
-            additionalBuildArgs  '--build-arg NODE_VERSION=18'
+            additionalBuildArgs  '--build-arg NODE_VERSION=20'
             dir 'resources/docker'
             reuseNode true
             label 'docker'
