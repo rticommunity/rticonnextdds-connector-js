@@ -10,11 +10,81 @@
  * to use the software.
  */
 
+/*
+ * This function generates the stages to Build & Test connector using a specific Node-JS version.
+ *
+ * @param nodeVersion Version of Node-JS used to generate the build & test stage.
+ * @return The generated Build & Test stages
+ */
+def getBuildAndTestStages(String nodeVersion) {
+    def dockerImage = docker.build(
+        UUID.randomUUID().toString().split('-')[-1],
+        "--pull -f resources/docker/Dockerfile --build-arg NODE_VERSION=${nodeVersion} ."
+    )
+
+    return {
+        stage("Node ${nodeVersion}") {
+            dir("${env.WORKSPACE}/${nodeVersion}") {
+                stage("Checkout repo") {
+                    echo "[INFO] Building from ${pwd()}..."
+                    checkout scm
+                }
+
+                stage("Downloading dependencies") {
+                    dockerImage.inside() {
+                        dir ('rticonnextdds-connector') {
+                            sh 'pip install -r resources/scripts/requirements.txt'
+
+                            withAWSCredentials {
+                                withCredentials([
+                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                                ]) {
+                                    catchError(
+                                        message: 'Library download failed',
+                                        buildResult: 'UNSTABLE',
+                                        stageResult: 'UNSTABLE'
+                                    ) {
+                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                    }
+                                }
+                            }
+
+                            sh 'npm install'
+                        }
+                    }
+                }
+
+                stage("Run tests") {
+                    dockerImage.inside('--network none') {
+                        try {
+                            sh 'npm run test-junit'
+                        } finally {
+                            junit(testResults: 'test-results.xml')
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Get the Node-JS version from the job name if it is defined there. Example of job name:
+ * ci/connector-js/rticonnextdds-connector-js_node-20_latest.
+ *
+ * @return The list of node versions defined in the Job Name. An empty list if it is not defined in the job name.
+ */
+def getNodeVersionsFromJobName() {
+    def matcher = env.JOB_NAME =~ /.*_node-(.*)\/.*/
+
+    return matcher ? matcher.group(1).split('_') : []
+}
+
 pipeline {
     agent {
         node {
             label 'docker'
-            customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}"
         }
     }
 
@@ -24,7 +94,6 @@ pipeline {
     }
 
     options {
-        skipDefaultCheckout()
         disableConcurrentBuilds()
         /*
             To avoid excessive resource usage in server, we limit the number
@@ -50,82 +119,24 @@ pipeline {
         stage('Build & Test') {
             failFast false
 
-            matrix {
-                agent {
-                   node {
-                        customWorkspace "/rti/jenkins/workspace/${env.JOB_NAME}/${NODE_VERSION}"
-                        label 'docker'
-                    }
-                }
-                axes {
-                    axis {
-                        name 'NODE_VERSION'
-                        values '17', '18', '20', 'lts', 'latest'
-                    }
-                }
+            steps {
+                script {
+                    def nodeVersions = getNodeVersionsFromJobName()
 
-                stages {
-                    stage('Checkout repo') {
-                        steps {
-                            echo "[INFO] Building from ${pwd()}..."
-
-                            checkout scm
-                        }
+                    // If the node versions was not predefined in the job name, read them from the config file.
+                    if(!nodeVersions) {
+                        def ciConfig = readYaml(file: "ci_config.yaml")
+                        nodeVersions = ciConfig["node_versions"]
                     }
 
-                    stage('Downloading dependencies') {
-                        agent {
-                            dockerfile {
-                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                dir 'resources/docker'
-                                reuseNode true
-                            }
-                        }
+                    def buildAndTestStages = [:]
 
-                        steps {
-                            dir ('rticonnextdds-connector') {
-                                sh 'pip install -r resources/scripts/requirements.txt'
-
-                                withAWS(credentials:'community-aws', region: 'us-east-1') {
-                                    withCredentials([
-                                        string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                        string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                                    ]) {
-                                        catchError(
-                                            message: 'Library download failed',
-                                            buildResult: 'UNSTABLE',
-                                            stageResult: 'UNSTABLE'
-                                        ) {
-                                            sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-                                        }
-                                    }
-                                }
-                            }
-
-                            sh 'npm install'
-                        }
+                    // Generate the Build & Test stages for every selected node version.
+                    nodeVersions.each { version ->
+                        buildAndTestStages["Node ${version}"] = getBuildAndTestStages(version)
                     }
 
-                    stage('Run tests') {
-                        agent {
-                            dockerfile {
-                                args '--network none'
-                                additionalBuildArgs  "--build-arg NODE_VERSION=${NODE_VERSION}"
-                                dir 'resources/docker'
-                                reuseNode true
-                            }
-                        }
-
-                        steps {
-                            sh 'npm run test-junit'
-                        }
-
-                        post {
-                            always {
-                                junit(testResults: 'test-results.xml')
-                            }
-                        }
-                    }
+                    parallel buildAndTestStages
                 }
             }
         }
