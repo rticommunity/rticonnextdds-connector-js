@@ -70,7 +70,7 @@ def getBuildAndTestStages(String nodeVersion) {
 }
 
 /*
- * Get he Node-JS version from the job name if it is defined there. Example of job name:
+ * Get the Node-JS version from the job name if it is defined there. Example of job name:
  * ci/connector-js/rticonnextdds-connector-js_node-20_latest.
  *
  * @return The list of node versions defined in the Job Name. An empty list if it is not defined in the job name.
