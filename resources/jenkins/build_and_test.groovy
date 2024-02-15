@@ -122,11 +122,10 @@ pipeline {
             steps {
                 script {
                     def nodeVersions = getNodeVersionsFromJobName()
-                    def ciConfig = null
 
                     // If the node versions was not predefined in the job name, read them from the config file.
                     if(!nodeVersions) {
-                        ciConfig = readYaml(file: "ci_config.yaml")
+                        def ciConfig = readYaml(file: "ci_config.yaml")
                         nodeVersions = ciConfig["node_versions"]
                     }
 
