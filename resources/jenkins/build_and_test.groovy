@@ -168,6 +168,7 @@ pipeline {
             steps {
                 script {
                     def packageName = readJSON(file: 'package.json')['name']
+                    def tag = env.TAG_NAME.replace('v','')
 
                     withCredentials([
                         string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
@@ -175,7 +176,7 @@ pipeline {
                     ]) {
                         dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
                             sh 'npm config set registry $NPM_RESGISTRY'
-                            sh "npm unpublish ${packageName}@${env.TAG_NAME}"
+                            sh "npm unpublish ${packageName}@${tag}"
                             sh "npm publish"
                         }
                     }
