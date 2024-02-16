@@ -170,7 +170,7 @@ pipeline {
                     def packageName = readJSON(file: 'package.json')['name']
 
                     withCredentials([
-                        string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY')
+                        string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
                         string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
                     ]) {
                         sh 'npm config set registry $NPM_RESGISTRY'
