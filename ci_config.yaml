@@ -3,3 +3,4 @@ node_versions:
   - "19"
   - "20"
   - "lts"
+publish_version: "lts"

@@ -10,25 +10,7 @@
  * to use the software.
  */
 
-/*
- * This function will download the Connext Libraries from the storage
- */
-def downloadLibraries() {
-    withAWSCredentials {
-        withCredentials([
-            string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-            string(credentialsId: 's3-path', variable: 'S3_PATH'),
-        ]) {
-            catchError(
-                message: 'Library download failed',
-                buildResult: 'UNSTABLE',
-                stageResult: 'UNSTABLE'
-            ) {
-                sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-            }
-        }
-    }
-}
+CI_CONFIG = [:]
 
 /*
  * This function generates the stages to Build & Test connector using a specific Node-JS version.
@@ -55,7 +37,20 @@ def getBuildAndTestStages(String nodeVersion) {
                         dir ('rticonnextdds-connector') {
                             sh 'pip install -r resources/scripts/requirements.txt'
 
-                            downloadLibraries()
+                            withAWSCredentials {
+                                withCredentials([
+                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
+                                ]) {
+                                    catchError(
+                                        message: 'Library download failed',
+                                        buildResult: 'UNSTABLE',
+                                        stageResult: 'UNSTABLE'
+                                    ) {
+                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+                                    }
+                                }
+                            }
 
                             sh 'npm install'
                         }
@@ -124,6 +119,14 @@ pipeline {
     }
 
     stages {
+        stage('Read CI Config') {
+            steps {
+                script {
+                    CI_CONFIG = readYaml(file: "ci_config.yaml")
+                }
+            }
+        }
+
         stage('Build & Test') {
             failFast false
 
@@ -133,8 +136,7 @@ pipeline {
 
                     // If the node versions was not predefined in the job name, read them from the config file.
                     if(!nodeVersions) {
-                        def ciConfig = readYaml(file: "ci_config.yaml")
-                        nodeVersions = ciConfig["node_versions"]
+                        nodeVersions = CI_CONFIG["node_versions"]
                     }
 
                     def buildAndTestStages = [:]
@@ -152,7 +154,7 @@ pipeline {
         stage('Publish') {
             agent {
                 dockerfile {
-                    additionalBuildArgs  '--build-arg NODE_VERSION=lts'
+                    additionalBuildArgs  "--build-arg NODE_VERSION=${CI_CONFIG['publish_version']}"
                     dir 'resources/docker'
                     reuseNode true
                     label 'docker'
@@ -164,8 +166,6 @@ pipeline {
             }
 
             steps {
-                downloadLibraries()
-
                 script {
                     def packageName = readJSON(file: 'package.json')['name']
 
@@ -173,9 +173,11 @@ pipeline {
                         string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
                         string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
                     ]) {
-                        sh 'npm config set registry $NPM_RESGISTRY'
-                        sh "npm unpublish ${packageName}@${env.TAG_NAME}"
-                        sh "npm publish"
+                        dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
+                            sh 'npm config set registry $NPM_RESGISTRY'
+                            sh "npm unpublish ${packageName}@${env.TAG_NAME}"
+                            sh "npm publish"
+                        }
                     }
                 }
             }
