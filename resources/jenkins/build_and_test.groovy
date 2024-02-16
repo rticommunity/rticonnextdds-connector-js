@@ -11,6 +11,26 @@
  */
 
 /*
+ * This function will download the Connext Libraries from the storage
+ */
+def downloadLibraries() {
+    withAWSCredentials {
+        withCredentials([
+            string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
+            string(credentialsId: 's3-path', variable: 'S3_PATH'),
+        ]) {
+            catchError(
+                message: 'Library download failed',
+                buildResult: 'UNSTABLE',
+                stageResult: 'UNSTABLE'
+            ) {
+                sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
+            }
+        }
+    }
+}
+
+/*
  * This function generates the stages to Build & Test connector using a specific Node-JS version.
  *
  * @param nodeVersion Version of Node-JS used to generate the build & test stage.
@@ -35,20 +55,7 @@ def getBuildAndTestStages(String nodeVersion) {
                         dir ('rticonnextdds-connector') {
                             sh 'pip install -r resources/scripts/requirements.txt'
 
-                            withAWSCredentials {
-                                withCredentials([
-                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                                ]) {
-                                    catchError(
-                                        message: 'Library download failed',
-                                        buildResult: 'UNSTABLE',
-                                        stageResult: 'UNSTABLE'
-                                    ) {
-                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-                                    }
-                                }
-                            }
+                            downloadLibraries()
 
                             sh 'npm install'
                         }
@@ -89,8 +96,9 @@ pipeline {
     }
 
     triggers {
-        // Build at least once a day to test newly created libs.
-        cron('H H(18-21) * * *')
+        // If it is develop, build at least once a day to test newly created libs.
+        // If it is another branch, never build based on timer (31 February = Never).
+        cron(env.BRANCH_NAME == 'develop' ? 'H H(18-21) * * *' : '* * 31 2 *')
     }
 
     options {
@@ -137,6 +145,38 @@ pipeline {
                     }
 
                     parallel buildAndTestStages
+                }
+            }
+        }
+
+        stage('Publish') {
+            agent {
+                dockerfile {
+                    additionalBuildArgs  '--build-arg NODE_VERSION=lts'
+                    dir 'resources/docker'
+                    reuseNode true
+                    label 'docker'
+                }
+            }
+
+            when {
+                tag pattern: /v\d+\.\d+\.\d+/, comparator: "REGEXP"
+            }
+
+            steps {
+                downloadLibraries()
+
+                script {
+                    def packageName = readJSON(file: 'package.json')['name']
+
+                    withCredentials([
+                        string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY')
+                        string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
+                    ]) {
+                        sh 'npm config set registry $NPM_RESGISTRY'
+                        sh "npm unpublish ${packageName}@${env.TAG_NAME}"
+                        sh "npm publish"
+                    }
                 }
             }
         }
