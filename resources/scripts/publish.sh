@@ -12,7 +12,8 @@ if [ ${#so_files[@]} -eq 0 ]; then
 fi
 
 build_id=$(strings ${libs[0]} | grep -o 'BUILD_.*')
-version_to_publish=$package_version-$build_id
+modified_build_id=${build_id//_/\-}
+version_to_publish=$package_version-$modified_build_id
 
 sed -i "/version/c\  \"version\": \"$version_to_publish\"," ${json_name}
 npm unpublish ${package_name}@${version_to_publish} --registry https://$NPM_RESGISTRY
