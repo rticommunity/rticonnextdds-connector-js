@@ -172,7 +172,7 @@ pipeline {
                 ]) {
                     dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
                         sh 'echo "//\$NPM_RESGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
-                        sh './resource/scripts/publish.sh'
+                        sh './resources/scripts/publish.sh'
                     }
                 }
             }
