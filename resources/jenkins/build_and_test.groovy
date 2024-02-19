@@ -83,12 +83,6 @@ def getNodeVersionsFromJobName() {
     return matcher ? matcher.group(1).split('_') : []
 }
 
-def getBuildIdFromLib(String libPath) {
-    def output = sh(script: "strings ${libPath} | grep -o 'BUILD_.*'", returnStdout: true)
-
-    return output
-}
-
 pipeline {
     agent {
         node {
@@ -172,14 +166,13 @@ pipeline {
             }
 
             steps {
-                    withCredentials([
-                        string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
-                        string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
-                    ]) {
-                        dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
-                            sh 'echo "//\$NPM_RESGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
-                            sh './resource/scripts/publish.sh'
-                        }
+                withCredentials([
+                    string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
+                    string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
+                ]) {
+                    dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
+                        sh 'echo "//\$NPM_RESGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
+                        sh './resource/scripts/publish.sh'
                     }
                 }
             }
