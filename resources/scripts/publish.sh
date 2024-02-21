@@ -15,7 +15,7 @@ fi
 # If publishing to a repository other than the default one, add the Build ID to the
 # version string and unpublish the package in case it was already published to the
 # internal repo.
-if [[ -z "$NPM_REGISTRY" ]]; then
+if [[ -n "$NPM_REGISTRY" ]]; then
     build_id=$(strings ${libraries[0]} | grep -o 'BUILD_.*')
     modified_build_id=${build_id//_/\-}
     version_to_publish=$package_version-$modified_build_id
