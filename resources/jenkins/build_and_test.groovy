@@ -162,6 +162,7 @@ pipeline {
             }
 
             when {
+                beforeAgent true
                 tag pattern: /v\d+\.\d+\.\d+-dev/, comparator: "REGEXP"
             }
 
