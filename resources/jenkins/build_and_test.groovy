@@ -167,11 +167,11 @@ pipeline {
 
             steps {
                 withCredentials([
-                    string(credentialsId: 'npm-registry', variable: 'NPM_RESGISTRY'),
+                    string(credentialsId: 'npm-registry', variable: 'NPM_REGISTRY'),
                     string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
                 ]) {
                     dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
-                        sh 'echo "//\$NPM_RESGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
+                        sh 'echo "//\$NPM_REGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
                         sh './resources/scripts/publish.sh'
                     }
                 }

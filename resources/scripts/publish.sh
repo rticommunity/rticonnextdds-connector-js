@@ -17,5 +17,5 @@ version_to_publish=$package_version-$modified_build_id
 
 sed -i "/version/c\  \"version\": \"$version_to_publish\"," ${json_name}
 # Unpublish in case we are uploading the same version again
-npm unpublish ${package_name}@${version_to_publish} --registry https://$NPM_RESGISTRY
-npm publish --registry https://$NPM_RESGISTRY
+npm unpublish ${package_name}@${version_to_publish} --registry https://$NPM_REGISTRY
+npm publish --registry https://$NPM_REGISTRY
