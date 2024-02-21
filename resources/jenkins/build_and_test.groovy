@@ -162,17 +162,27 @@ pipeline {
             }
 
             when {
-                tag pattern: /v\d+\.\d+\.\d+/, comparator: "REGEXP"
+                tag pattern: /v\d+\.\d+\.\d+-dev/, comparator: "REGEXP"
             }
 
             steps {
-                withCredentials([
-                    string(credentialsId: 'npm-registry', variable: 'NPM_REGISTRY'),
-                    string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
-                ]) {
-                    dir("${env.WORKSPACE}/${CI_CONFIG['publish_version']}") {
-                        sh 'echo "//\$NPM_REGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
-                        sh './resources/scripts/publish.sh'
+                script {
+                    def publishDir = "${env.WORKSPACE}/${CI_CONFIG['publish_version']}"
+
+                    if(!fileExists(publishDir)) {
+                        error(
+                            "The node version ${CI_CONFIG['publish_version']} was not used to test connector. Please update the \"publish_version\" field in ci_config.yaml"
+                        )
+                    }
+
+                    withCredentials([
+                        string(credentialsId: 'npm-registry', variable: 'NPM_REGISTRY'),
+                        string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
+                    ]) {
+                        dir(publishDir) {
+                            sh 'echo "//\$NPM_REGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
+                            sh './resources/scripts/publish.sh'
+                        }
                     }
                 }
             }
