@@ -10,6 +10,8 @@
  * to use the software.
  */
 
+CI_CONFIG = [:]
+
 /*
  * This function generates the stages to Build & Test connector using a specific Node-JS version.
  *
@@ -89,8 +91,9 @@ pipeline {
     }
 
     triggers {
-        // Build at least once a day to test newly created libs.
-        cron('H H(18-21) * * *')
+        // If it is develop, build at least once a day to test newly created libs.
+        // If it is another branch, never build based on timer (31 February = Never).
+        cron(env.BRANCH_NAME == 'develop' ? 'H H(18-21) * * *' : '* * 31 2 *')
     }
 
     options {
@@ -116,6 +119,14 @@ pipeline {
     }
 
     stages {
+        stage('Read CI Config') {
+            steps {
+                script {
+                    CI_CONFIG = readYaml(file: "ci_config.yaml")
+                }
+            }
+        }
+
         stage('Build & Test') {
             failFast false
 
@@ -125,8 +136,7 @@ pipeline {
 
                     // If the node versions was not predefined in the job name, read them from the config file.
                     if(!nodeVersions) {
-                        def ciConfig = readYaml(file: "ci_config.yaml")
-                        nodeVersions = ciConfig["node_versions"]
+                        nodeVersions = CI_CONFIG["node_versions"]
                     }
 
                     def buildAndTestStages = [:]
@@ -137,6 +147,44 @@ pipeline {
                     }
 
                     parallel buildAndTestStages
+                }
+            }
+        }
+
+        stage('Publish') {
+            agent {
+                dockerfile {
+                    additionalBuildArgs  "--build-arg NODE_VERSION=${CI_CONFIG['publish_version']}"
+                    dir 'resources/docker'
+                    reuseNode true
+                    label 'docker'
+                }
+            }
+
+            when {
+                beforeAgent true
+                tag pattern: /v\d+\.\d+\.\d+-dev/, comparator: "REGEXP"
+            }
+
+            steps {
+                script {
+                    def publishDir = "${env.WORKSPACE}/${CI_CONFIG['publish_version']}"
+
+                    if(!fileExists(publishDir)) {
+                        error(
+                            "The node version ${CI_CONFIG['publish_version']} was not used to test connector. Please update the \"publish_version\" field in ci_config.yaml"
+                        )
+                    }
+
+                    withCredentials([
+                        string(credentialsId: 'npm-registry', variable: 'NPM_REGISTRY'),
+                        string(credentialsId: 'npm-token', variable: 'NPM_TOKEN')
+                    ]) {
+                        dir(publishDir) {
+                            sh 'echo "//\$NPM_REGISTRY:_authToken=${NPM_TOKEN}" > .npmrc'
+                            sh './resources/scripts/publish.sh'
+                        }
+                    }
                 }
             }
         }
