@@ -19,13 +19,11 @@ macOS® platforms. It has been tested on the following systems:
 **Linux**
   * CentOS™ 7.0 (x64)
   * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
-  * SUSE® Linux Enterprise Server 12 SP2 (x64)
   * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
   * Ubuntu 20.04, 22.04 LTS (x64)
 
 **macOS**
-  * macOS 10.13-10.15, 12 (x64)
-  * macOS 11 (x64 and Arm v8 tested via x64 libraries)
+  * macOS 11, 12, 13 (x64)
 
 **Windows**
   * Windows 10, 11 (x64)
@@ -35,14 +33,6 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-.. rubric:: Footnotes
-.. [#f1] Versions of Node.js prior to v10.20.x and version v11.x.x do not support n-api,
-   which is used by some of *Connector's* dependencies. Node.js v12.19.0 is not
-   compatible with *Connector* because of a regression introduced in
-   that version of Node.js.
-   Node.js v14 and Node.js v16 do not work with *Connector* because one of *Connector's*
-   dependencies is not compatible with those versions.
-   Node.js versions greater than v18.7.0 are not currently supported.
 
 Version 1.3.0
 -----------------
