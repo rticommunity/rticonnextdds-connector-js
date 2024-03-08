@@ -49,7 +49,7 @@ The dependency [ref](https://www.npmjs.com/package/ref) is shipped as source cod
 ## License
 
 RTI Connector for JavaScript is part of the Connext
-DDS Professional Package. If you have a valid license for the RTI Connext DDS
+Professional Package. If you have a valid license for the RTI Connext
 Professional Package, such license shall govern your use of
 RTI Connector for JavaScript. All other use of this software shall
 be governed solely by the terms of RTI’s Software License for Non-Commercial
