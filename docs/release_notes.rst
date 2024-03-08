@@ -18,9 +18,9 @@ macOS® platforms. It has been tested on the following systems:
 
 **Linux**
   * CentOS™ 7.0 (x64)
-  * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8 (x64)
+  * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8, 9 (x64)
   * Ubuntu® 18.04 (x64, Arm v7, Arm v8)
-  * Ubuntu 20.04, 22.04 LTS (x64)
+  * Ubuntu 20.04 (x64), 22.04 (x64, Arm v8)
 
 **macOS**
   * macOS 11, 12, 13 (x64)
