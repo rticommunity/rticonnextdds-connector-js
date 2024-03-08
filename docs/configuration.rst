@@ -50,7 +50,7 @@ how they are exposed in the *Connector* API:
 
 .. hint::
 
-  For an example configuration file, see `ShapeExample.xml <https://github.com/rticommunity/rticonnextdds-connector-py/blob/master/examples/python/ShapeExample.xml>`__.
+  For an example configuration file, see `ShapeExample.xml <https://github.com/rticommunity/rticonnextdds-connector-js/blob/master/examples/nodejs/ShapeExample.xml>`__.
 
 Data types
 ~~~~~~~~~~
