@@ -6,17 +6,17 @@
 Copyrights and License
 **********************
 
-© 2022 Real-Time Innovations, Inc. |br|
+© 2024 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-February 2022. |br|
+March 2024. |br|
 
 .. rubric:: License
 
-RTI Connector for JavaScript and RTI Connector for Python are part of the Connext
-DDS Professional Package. If you have a valid license for the RTI Connext DDS
-Professional Package, such license shall govern your use of RTI Connector for
-Python and RTI Connector for JavaScript. All other use of this software shall
+RTI Connector for JavaScript is part of the Connext
+Professional Package. If you have a valid license for the RTI Connext
+Professional Package, such license shall govern your use of
+RTI Connector for JavaScript. All other use of this software shall
 be governed solely by the terms of RTI’s Software License for Non-Commercial
 Use #4040, included at the top level of the `Connector for JavaScript repository
 <https://github.com/rticommunity/rticonnextdds-connector-js>`__.
@@ -90,9 +90,11 @@ Website: https://support.rti.com/ |br|
   * The source code of this software (from https://github.com/udp/json-parser) 
     is used to build the native libraries provided by *RTI Connector*.
 
+  * Version 1.1.0
+
   * License:
 
-    Copyright (C) 2012, 2013, 2014 James McLaughlin et al.  All rights reserved.
+    Copyright (C) 2012-2021 the json-parser authors  All rights reserved.
     https://github.com/udp/json-parser
 
     Redistribution and use in source and binary forms, with or without
