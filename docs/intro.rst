@@ -10,7 +10,7 @@ data distribution efficient and robust. At its core is the world's
 leading ultra-high performance, distributed networking databus.
 
 *RTI Connector* is a family of simplified APIs for publishing and subscribing
-to the *Connext DDS* Databus in programming languages such as Python and JavaScript.
+to the *Connext DDS* Databus in programming languages such as JavaScript.
 
 .. note::
 
