@@ -6,10 +6,10 @@
 Copyrights and License
 **********************
 
-© 2022 Real-Time Innovations, Inc. |br|
+© 2024 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-February 2022. |br|
+May 2024. |br|
 
 .. rubric:: License
 
@@ -90,9 +90,11 @@ Website: https://support.rti.com/ |br|
   * The source code of this software (from https://github.com/udp/json-parser) 
     is used to build the native libraries provided by *RTI Connector*.
 
+  * Version 1.1.0
+
   * License:
 
-    Copyright (C) 2012, 2013, 2014 James McLaughlin et al.  All rights reserved.
+    Copyright (C) 2012-2021 the json-parser authors  All rights reserved.
     https://github.com/udp/json-parser
 
     Redistribution and use in source and binary forms, with or without
