@@ -26,6 +26,7 @@ macOS® platforms. It has been tested on the following systems:
 
 **Windows**
   * Windows 10, 11 (x64)
+  * Windows Server 2016, 2022 (x64)
 
 *Connector* is supported in other languages in addition to JavaScript, see
 `the main Connector
