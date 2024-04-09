@@ -22,7 +22,7 @@ include examples and detailed API reference. You can also find a specific type
 or function in the :ref:`genindex`.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :numbered:
 
    intro
