@@ -1,5 +1,5 @@
 Release Notes
-=============
+*************
 
 Supported Platforms
 -------------------
@@ -39,15 +39,15 @@ macOS® platforms. It has been tested on the following systems:
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 
-Version 1.3.0
------------------
+What's New in 1.3.0
+-------------------
 
 *RTI Connector* 1.3.0 is built on 
 `RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
 
 
 Failed to create a Connector in certain Node versions (18.8 or greater)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-299
 
 Due to an incompatibility in some *Connector* dependencies, it was not 
@@ -68,8 +68,8 @@ versions may also have been affected.
 Previous Releases
 -----------------
 
-Version 1.2.2
-^^^^^^^^^^^^^
+What's New in 1.2.2
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.2.2 is built on 
 `RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
@@ -83,30 +83,28 @@ Studio 2013 (and accompanied by Microsoft's mscvr120 redistributable). These
 libraries are now built using Visual Studio 2015. The redistributable that is
 shipped has been updated accordingly.
 
-Version 1.2.1
-^^^^^^^^^^^^^
+What's New in 1.2.1
+-------------------
 
 *Connector* 1.2.1 updates some third party dependencies that were found to contain
 vulnerabilities. *Connector* was not affected by these vulnerabilities.
 
-Version 1.2.0
-^^^^^^^^^^^^^
 
 What's New in 1.2.0
-"""""""""""""""""""
+-------------------
 
 *RTI Connector* 1.2.0 is built on 
 `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__.
 
 New Platforms
-+++++++++++++
+^^^^^^^^^^^^^
 
 *Connector* has been validated on macOS 11 (Big Sur) systems on x64 and Arm v8 
 CPUs (via x64 libraries).
 
 
 New API makes it easier to query what version of Connector is being used
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-92 
 
 A new API, :meth:`Connector.getVersion`, has been added that provides the
@@ -115,10 +113,10 @@ libraries being used.
 
 
 What's Fixed in 1.2.0
-"""""""""""""""""""""
+---------------------
 
 Error logged when accessing string longer than 128 bytes
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Previously, on an input, when accessing a string longer than 128 bytes, the
 following error was printed:
@@ -134,7 +132,7 @@ the string. The message is no longer printed.
 
 
 Support added for handling large 64-bit integers
-++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Support has been improved for both getting and setting large (greater than 2^53)
 64-bit values. See :ref:`section-access-64-bit-integers-js` for more information.
@@ -143,7 +141,7 @@ Support has been improved for both getting and setting large (greater than 2^53)
 
 
 Promise returned by Output.wait did not resolve/reject
-++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Promise being returned by the Output.wait method (used to wait for
 acknowledgements on an output) was not being resolved or rejected. This
@@ -155,8 +153,8 @@ supplied timeout has elapsed.
 [RTI Issue ID CON-227]
 
 
-Version 1.1.1
-^^^^^^^^^^^^^
+What's New in 1.1.1
+-------------------
 
 *Connector* 1.1.1 is built on *RTI Connext DDS* 6.1.0.3, which fixes several
 bugs in the Core Libraries. If you want more details on the bugs fixed in 6.1.0.3,
@@ -164,16 +162,14 @@ contact support@rti.com. These bugs are also fixed in
 `RTI Connext DDS 6.1.1 <https://community.rti.com/documentation/rti-connext-dds-611>`__,
 upon which *RTI Connector* 1.2.0 is built.
 
-Version 1.1.0
-^^^^^^^^^^^^^
 
 What's New in 1.1.0
-""""""""""""""""""""
+-------------------
 
 *RTI Connector* 1.1.0 is built on `RTI Connext DDS 6.1.0 <https://community.rti.com/documentation/rti-connext-dds-610>`__.
 
 Support added for ARMv8 architectures
-+++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-174 
 
 Connector for JavaScript now runs on ARMv8 architectures. Native libraries
@@ -181,7 +177,7 @@ built for ARMv8 Ubuntu 16.04 are now shipped alongside Connector. These librarie
 have been tested on ARMv8 Ubuntu 16.04 and ARMv8 Ubuntu 18.04.
 
 Support added for Node.js version 12
-++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-173 
 
 Previously, Node.js version 12 was not supported in *Connector* for JavaScript.
@@ -193,7 +189,7 @@ Connector for JavaScript.
 
 
 Sample state, instance state and view state can now be obtained in Connector
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-177 
 
 The :class:`SampleInfo` class in *Connector* has been extended to provide access to the
@@ -205,7 +201,7 @@ new feature.
 
 
 Support for accessing the key values of disposed instances
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-188 
 
 Support for disposing instances was added in *Connector* 1.0.0.
@@ -220,7 +216,7 @@ See :ref:`Accessing key values of disposed samples` for more
 information on this new feature.
 
 Connector for Javascript dependencies now locked to specific versions
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-220 
 
 ``package-lock.json`` has been committed, fixing the versions of *Connector for 
@@ -228,7 +224,7 @@ Javascript's* dependencies.
 
 
 Support for Security, Monitoring and other Connext DDS add-on libraries
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. CON-221
 
@@ -237,10 +233,19 @@ that Connext DDS features such as Monitoring and Security Plugins are now suppor
 Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.
 
 What's Fixed in 1.1.0
-""""""""""""""""""""""
+---------------------
+
+1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
+`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
+
+If you had access to previous experimental releases, this release makes the product
+more robust, modifies many APIs and adds new functionality. However the old 
+APIs have been preserved for backward compatibility as much as possible.
+
+*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
 
 Creating two instances of Connector resulted in a license error
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Under some circumstances, it was not possible to create two *Connector* objects.
 The creation of the second *Connector* object failed due to a license error.
@@ -251,7 +256,7 @@ This issue has been fixed.
 
 
 Some larger integer values may have been corrupted by Connector's internal JSON parser
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The internal JSON parser used in *Connector* failed to identify integer numbers
 from double-precision floating-point numbers for certain values.
@@ -263,7 +268,7 @@ become corrupted. This problem has been resolved.
 
 
 Support for loading multiple configuration files
-++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A *Connector* object now supports loading multiple files. This allows separating
 the definition of types, QoS profiles, and *DomainParticipants* into different
@@ -277,7 +282,7 @@ files:
 
 
 Creating a Connector instance with a participant_qos tag in the XML may have resulted in a license error
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In some cases, if the XML configuration file of *Connector* contained a
 `<participant_qos>` tag within the definition of the *DomainParticipant*,
@@ -288,26 +293,13 @@ This problem has been resolved.
 
 
 Websocket example may have failed to run
-++++++++++++++++++++++++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The websocket example (available only in *Connector for Javascript*) may have 
 failed to run due to one of its dependencies, socket.io, removing a public API. 
 This problem has been resolved.
 
 [RTI Issue ID CON-217]
-
-
-Version 1.0.0
-^^^^^^^^^^^^^
-
-1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
-`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
-
-If you had access to previous experimental releases, this release makes the product
-more robust, modifies many APIs and adds new functionality. However the old 
-APIs have been preserved for backward compatibility as much as possible.
-
-*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
 
 
 Vulnerability Assessments
