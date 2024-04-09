@@ -13,6 +13,7 @@ Supported Platforms
   Due to an upstream change in Node.js, **some versions will fail when building
   Connector dependencies**. This issue affects, at the very least,
   Node.js versions 18.20, 20.12 and 21.6.
+  This is tracked in `Github Issue #198 <https://github.com/rticommunity/rticonnextdds-connector-js/issues/198>`_.
 
 Other versions may also work, but have not been validated internally.
 If you run into an issue, make sure that the issue can be reproduced
