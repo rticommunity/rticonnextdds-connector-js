@@ -9,6 +9,11 @@ Supported Platforms
   * v18
   * v20
 
+.. warning::
+  Due to an upstream change in Node.js, **some versions will fail when building
+  Connector dependencies**. This issue affects, at the very least,
+  Node.js versions :code:`18.20`, :code:`20.12` and :code:`21.6`.
+
 Other versions may also work, but have not been validated internally.
 If you run into an issue, make sure that the issue can be reproduced
 in any of the versions listed above.
