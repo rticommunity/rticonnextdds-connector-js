@@ -2,7 +2,7 @@ Release Notes
 *************
 
 Supported Platforms
--------------------
+===================
 
 *Connector* has been validated to run with the following Node.js versions:
   * v18
@@ -40,14 +40,14 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 
 What's New in 1.3.0
--------------------
+===================
 
 *RTI Connector* 1.3.0 is built on 
 `RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
 
 
 Failed to create a Connector in certain Node versions (18.8 or greater)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------------------------------------
 .. CON-299
 
 Due to an incompatibility in some *Connector* dependencies, it was not 
@@ -66,16 +66,16 @@ This issue is known to have affected Node.js versions 18.8 and 20; other
 versions may also have been affected.
 
 Previous Releases
------------------
+=================
 
 What's New in 1.2.2
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 *RTI Connector* 1.2.2 is built on 
 `RTI Connext DDS 6.1.2 <https://community.rti.com/documentation/rti-connext-dds-612>`__.
 
 Native Windows libraries updated to Visual Studio 2015
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. CON-276
 
 Previously, the native libraries shipped with Connector were built using Visual
