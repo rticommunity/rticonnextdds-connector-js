@@ -39,10 +39,10 @@ macOS® platforms. It has been tested on the following systems:
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 
-Version 1.2.2
+Version 1.3.0
 =============
 
-What's New in 1.2.2
+What's New in 1.3.0
 -------------------
 
 *RTI Connector* 1.3.0 is built on 
