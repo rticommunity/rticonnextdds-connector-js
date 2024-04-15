@@ -2,5 +2,4 @@ node_versions:
   - "18"
   - "19"
   - "20"
-  - "lts"
 publish_version: "20"
