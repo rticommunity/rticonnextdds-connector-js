@@ -80,7 +80,7 @@ params.forEach((retrievalMethod) => {
 
     it('data received should be valid', function () {
       const validity = input.infos.isValid(0)
-      expect(validity).to.equal(1)
+      expect(validity).to.equal(true)
     })
 
     it('')
