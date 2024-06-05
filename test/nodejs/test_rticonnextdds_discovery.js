@@ -382,7 +382,7 @@ describe('Discovery tests', function () {
     const output = getDiscoveryWriterOnlyOutput()
     // Create a matching remote reader which has no entity name (this isn't possible
     // with XML application creation)
-    const retcode = rti.connectorBinding.api.RTI_Connector_create_test_scenario(
+    const retcode = rti.connectorBinding.RTI_Connector_create_test_scenario(
       output.connector.native,
       0, // RTI_Connector_testScenario_createReader
       output.native)
