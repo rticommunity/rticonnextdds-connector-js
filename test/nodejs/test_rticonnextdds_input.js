@@ -8,7 +8,6 @@
 
 const path = require('path')
 const os = require('os')
-const ffi = require('ffi-napi')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const expect = chai.expect
@@ -110,14 +109,12 @@ describe('Native call on a DataReader', () => {
       const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
       const connector = new rti.Connector(participantProfile, xmlProfile)
       const input = connector.getInput('MySubscriber::MySquareReader')
-      const additionalApi = ffi.Library(rti.connectorBinding.library, {
-        DDS_DataReader_get_topicdescription: ['pointer', ['pointer']],
-        DDS_TopicDescription_get_name: ['string', ['pointer']]
-      })
+      const DDS_DataReader_get_topicdescription = rti.connectorBinding.api.func('DDS_DataReader_get_topicdescription', 'RTI_HANDLE', ['RTI_HANDLE'])
+      const DDS_TopicDescription_get_name = rti.connectorBinding.api.func('DDS_TopicDescription_get_name', 'string', ['RTI_HANDLE'])
       try {
-        const topic = additionalApi.DDS_DataReader_get_topicdescription(input.native)
+        const topic = DDS_DataReader_get_topicdescription(input.native)
         expect(topic).not.to.be.null
-        const topicName = additionalApi.DDS_TopicDescription_get_name(topic)
+        const topicName = DDS_TopicDescription_get_name(topic)
         expect(topicName).to.equal('Square')
       } catch (err) {
         console.log('Caught err: ' + err)

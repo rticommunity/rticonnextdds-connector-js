@@ -26,21 +26,12 @@ The `examples/nodejs` directory provides several examples:
 ## Dependencies
 
 RTI Connector for JavaScript has the following dependencies, which are also listed in `package.json`:
-* [ref-napi](https://www.npmjs.com/package/ref-napi): turns Buffer instances into "pointers"
-* [ref-struct-napi](https://www.npmjs.com/package/ref-struct-napi): create ABI-compilant "Struct" instances on top of Buffers
-* [ffi-napi](https://www.npmjs.com/package/ffi-napi): used for loading and calling dynamic libraries using pure JavaScript
+* [koffi](https://koffi.dev/): used for loading and calling dynamic libraries using pure JavaScript
 * [events](https://www.npmjs.com/package/events): used for the 'EventEmitter' (legacy implementation of RTI Connector)
 
 Additionally to run the `web_socket` example, [socket.io](https://github.com/Automattic/socket.io) and [OpenLayers](https://openlayers.org) are required.
 
 Additional dependencies are required to run the unit tests and some of the examples. Please see the README files in the appropriate directory.
-
-### Python dependency
-
-Some of the dependencies are shipped as source code and use [node-gyp](https://github.com/nodejs/node-gyp) to be compiled locally. `node-gyp` requires Python 2.7 and does not work with Python 3. The requirements for `node-gyp` can be found at:
-* [unix](https://github.com/nodejs/node-gyp#on-unix)
-* [darwin](https://github.com/nodejs/node-gyp#on-macos)
-* [windows](https://github.com/nodejs/node-gyp#on-windows)
 
 ### C/C++ compiler dependency
 
