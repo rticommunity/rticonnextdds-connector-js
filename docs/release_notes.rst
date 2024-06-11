@@ -247,15 +247,6 @@ Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.
 What's Fixed in 1.1.0
 ^^^^^^^^^^^^^^^^^^^^^
 
-1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
-`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
-
-If you had access to previous experimental releases, this release makes the product
-more robust, modifies many APIs and adds new functionality. However the old 
-APIs have been preserved for backward compatibility as much as possible.
-
-*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
-
 Creating two instances of Connector resulted in a license error
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -319,3 +310,16 @@ Vulnerability Assessments
 Internally, *Connector* relies on Lua. RTI has assessed the current version of 
 Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
 affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
+
+
+Version 1.0.0
+-------------
+
+1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
+`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
+
+If you had access to previous experimental releases, this release makes the product
+more robust, modifies many APIs and adds new functionality. However the old 
+APIs have been preserved for backward compatibility as much as possible.
+
+*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
