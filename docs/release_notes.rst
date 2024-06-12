@@ -305,13 +305,6 @@ This problem has been resolved.
 [RTI Issue ID CON-217]
 
 
-Vulnerability Assessments
-=========================
-Internally, *Connector* relies on Lua. RTI has assessed the current version of 
-Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
-affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
-
-
 Version 1.0.0
 -------------
 
@@ -323,3 +316,13 @@ more robust, modifies many APIs and adds new functionality. However the old
 APIs have been preserved for backward compatibility as much as possible.
 
 *RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
+
+
+Vulnerability Assessments
+=========================
+Internally, *Connector* relies on Lua. RTI has assessed the current version of 
+Lua used by *Connector*, version 5.2, and found that *Connector* is not currently 
+affected by any of the publicly disclosed vulnerabilities in Lua 5.2.
+
+
+
