@@ -6,7 +6,7 @@
 * This code contains trade secrets of Real-Time Innovations, Inc.             *
 ******************************************************************************/
 
-const sleep = require('sleep')
+const msleep = require('util').promisify(setTimeout)
 const path = require('path')
 const rti = require('rticonnextdds-connector')
 const configFile = path.join(__dirname, '/../ShapeExample.xml')
@@ -26,7 +26,7 @@ const run = async () => {
       output.instance.setString('color', 'BLUE')
       output.write()
 
-      sleep.msleep(500)
+      await msleep(500)
     }
 
     console.log('Exiting...')

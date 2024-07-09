@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'RTI Connector for JavaScript'
-copyright = '2022, Real-Time Innovations, Inc.'
+copyright = '2024, Real-Time Innovations, Inc.'
 author = 'Real-Time Innovations, Inc.'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2.2'
-version = '1.2.2'
+release = '1.3.0'
+version = '1.3.0'
 
 master_doc = 'index'
 primary_domain = 'js'
@@ -145,7 +145,7 @@ latex_documents = [
         master_doc,
         'rticonnectorforjavascript.tex',
         'RTI Connector for Javascript',
-        '2022, Real-Time Innovations, Inc.',
+        '2024, Real-Time Innovations, Inc.',
         'manual'
     ),
 ]
