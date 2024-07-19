@@ -9,12 +9,6 @@ Supported Platforms
   * v19
   * v20
 
-.. warning::
-  Due to an upstream change in Node.js, **some versions will fail when building
-  Connector dependencies**. This issue affects, at the very least,
-  Node.js versions 18.20, 20.12 and 21.6.
-  For more information, see `Github Issue #198 <https://github.com/rticommunity/rticonnextdds-connector-js/issues/198>`_.
-
 Other versions may also work, but have not been validated internally.
 If you run into an issue, make sure that the issue can be reproduced
 in any of the versions listed above.
@@ -38,6 +32,24 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
+Version 1.3.1
+=============
+
+What's New in 1.3.1
+-------------------
+
+*RTI Connector* 1.3.1 is built on *RTI Connext DDS* 7.3.0.2.
+For details on what's new and fixed in 6.1.2.17, contact support@rti.com.
+
+
+Replaced Foreign Function Interface third-party library
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this release, Connector has replaced ``node-ffi-napi`` with ``koffi`` as the
+Foreign Function Interface library. This change shouldn't affect your use of
+Connector, but makes the product more stable and reliable.
+
+This change addresses `Github Issue #198 <https://github.com/rticommunity/rticonnextdds-connector-js/issues/198>`_.
 
 Version 1.3.0
 =============
@@ -247,15 +259,6 @@ Refer to :ref:`Loading Connext DDS Add-On Libraries` for more information.
 What's Fixed in 1.1.0
 ^^^^^^^^^^^^^^^^^^^^^
 
-1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
-`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
-
-If you had access to previous experimental releases, this release makes the product
-more robust, modifies many APIs and adds new functionality. However the old 
-APIs have been preserved for backward compatibility as much as possible.
-
-*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
-
 Creating two instances of Connector resulted in a license error
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -312,6 +315,19 @@ failed to run due to one of its dependencies, socket.io, removing a public API.
 This problem has been resolved.
 
 [RTI Issue ID CON-217]
+
+
+Version 1.0.0
+-------------
+
+1.0.0 is the first official release of *RTI Connector for JavaScript* as well as
+`RTI Connector for Python <https://community.rti.com/static/documentation/connector/1.0.0/api/python/index.html>`__.
+
+If you had access to previous experimental releases, this release makes the product
+more robust, modifies many APIs and adds new functionality. However the old 
+APIs have been preserved for backward compatibility as much as possible.
+
+*RTI Connector* 1.0.0 is built on `RTI Connext DDS 6.0.1 <https://community.rti.com/documentation/rti-connext-dds-601>`__.
 
 
 Vulnerability Assessments
