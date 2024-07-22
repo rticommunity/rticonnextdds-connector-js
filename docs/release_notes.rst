@@ -39,7 +39,7 @@ What's New in 1.3.1
 -------------------
 
 *RTI Connector* 1.3.1 is built on *RTI Connext DDS* 7.3.0.2.
-For details on what's new and fixed in 6.1.2.17, contact support@rti.com.
+For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 
 Replaced Foreign Function Interface third-party library
@@ -51,18 +51,22 @@ Connector, but makes the product more stable and reliable.
 
 This change addresses `Github Issue #198 <https://github.com/rticommunity/rticonnextdds-connector-js/issues/198>`_.
 
+
+Previous Releases
+=================
+
 Version 1.3.0
-=============
+-------------
 
 What's New in 1.3.0
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.3.0 is built on 
 `RTI Connext DDS 7.3.0 <https://community.rti.com/documentation/rti-connext-dds-730>`__.
 
 
 Failed to create a Connector in certain Node versions (18.8 or greater)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-299
 
 Due to an incompatibility in some *Connector* dependencies, it was not 
@@ -79,9 +83,6 @@ to create a *Connector* showed the following backtrace:
 
 This issue is known to have affected Node.js versions 18.8 and 20; other
 versions may also have been affected.
-
-Previous Releases
-=================
 
 Version 1.2.2
 -------------
