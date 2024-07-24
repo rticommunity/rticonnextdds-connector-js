@@ -38,7 +38,7 @@ Version 1.3.1
 What's New in 1.3.1
 -------------------
 
-*RTI Connector* 1.3.1 is built on *RTI Connext DDS* 7.3.0.2.
+*RTI Connector* 1.3.1 is built on *RTI Connext* 7.3.0.2.
 For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 
