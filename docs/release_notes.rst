@@ -44,12 +44,29 @@ For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 Replaced Foreign Function Interface third-party library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. CON-304
 
-In this release, Connector has replaced ``node-ffi-napi`` with ``koffi`` as the
+In this release, *Connector* has replaced ``node-ffi-napi`` with ``koffi`` as the
 Foreign Function Interface library. This change shouldn't affect your use of
-Connector, but makes the product more stable and reliable.
+*Connector*, but makes the product more stable and reliable.
 
 This change addresses `Github Issue #198 <https://github.com/rticommunity/rticonnextdds-connector-js/issues/198>`_.
+
+
+What's Fixed in 1.3.1
+---------------------
+
+Failed to create Connectors for configurations using Types containing empty structs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using a configuration that included Types containing empty structs, a
+Connector failed to be created, with the following error:
+
+.. code:: 
+
+   DDS_DynamicData2_allocateMembers: Could not reserve buffer of 0 bytes for values
+
+[RTI Issue ID CON-318]
 
 
 Previous Releases
