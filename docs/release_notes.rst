@@ -53,11 +53,9 @@ to create a *Connector* showed the following backtrace:
 
 This issue is known to have affected Node.js versions 18.8 and 20; other
 versions may also have been affected.
-<<<<<<< HEAD
 
 Previous Releases
 =================
-=======
 
 Version 1.2.2
 -------------
