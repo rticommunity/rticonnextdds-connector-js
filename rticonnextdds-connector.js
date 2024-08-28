@@ -7,25 +7,16 @@
 ******************************************************************************/
 
 const os = require('os')
-const ref = require('ref-napi')
-const ffi = require('ffi-napi')
 const path = require('path')
-const StructType = require('ref-struct-di')(ref)
+const koffi = require('koffi');
 const EventEmitter = require('events').EventEmitter
 
-/**
- * The Node.js representation of the RTI_Connector_Options structure within
- * the core.
- *
- * We define it here using the module ref-struct (require above). This allows
- * us to pass it by value into the Core when creating a :class:`Connector` object.
- *
- * @private
- */
-const _ConnectorOptions = StructType({
-  enable_on_data_event: ref.types.int,
-  one_based_sequence_indexing: ref.types.int
-})
+const _ConnectorOptions = koffi.struct('RTI_Connector_Options', {
+  enable_on_data_event: 'int',
+  one_based_sequence_indexing: 'int'
+});
+
+const RTI_HANDLE = koffi.pointer('RTI_HANDLE', koffi.opaque());
 
 // We ignore the loading of the libraries in code coverage since it is
 // not easily testable
@@ -70,7 +61,6 @@ class _ConnectorBinding {
         case 'win32':
           libDir = 'win-x64'
           libName = 'rtiddsconnector.dll'
-          additionalLib = 'vcruntime140.dll'
           isWindows = true
           break
         default:
@@ -85,21 +75,10 @@ class _ConnectorBinding {
       console.log('Warning: 32-bit ' + os.platform() + ' is not supported')
     }
 
-    if (additionalLib !== null) {
-      try {
-        ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', additionalLib))
-      } catch (_) {
-        // ignore this error and try to run without explicitly loading the VC++ runtime
-      }
-    }
-
-    // On Windows we need to explicitly load the dependent libraries
-    if (isWindows) {
-      ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddscore.dll'))
-      ffi.Library(path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', 'nddsc.dll'))
-    }
-
     this.library = path.join(__dirname, '/rticonnextdds-connector/lib/', libDir, '/', libName)
+
+    this.api = koffi.load(this.library);
+
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
     // specifying the argument types and return types. If any of the types are
     // not builtin Node types then we have to use the ref module to represent them.
@@ -139,10 +118,49 @@ class _ConnectorBinding {
       RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
       RTI_Connector_free_string: ['void', ['char *']],
       RTIDDSConnector_getJSONInstance: ['char *', ['pointer', 'string']],
+=======
+    
+    const RTI_Connector_free_string = this.api.func('RTI_Connector_free_string', 'void', ['char *']);
+    const AllocatedString = koffi.disposable('AllocatedString', 'string', RTI_Connector_free_string);
+    
+    this.RTI_Connector_new = this.api.func('RTI_Connector_new', RTI_HANDLE, ['string', 'string', koffi.pointer(_ConnectorOptions)]);
+      this.RTI_Connector_delete = this.api.func('RTI_Connector_delete', 'void', ['RTI_HANDLE']);
+      this.RTI_Connector_get_datawriter = this.api.func('RTI_Connector_get_datawriter', 'RTI_HANDLE', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_get_datareader = this.api.func('RTI_Connector_get_datareader', 'RTI_HANDLE', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_get_native_sample = this.api.func('RTI_Connector_get_native_sample', 'RTI_HANDLE', ['RTI_HANDLE', 'string', 'int']);
+      this.RTI_Connector_set_number_into_samples = this.api.func('RTI_Connector_set_number_into_samples', 'int', ['RTI_HANDLE', 'string', 'string', 'double']);
+      this.RTI_Connector_set_boolean_into_samples = this.api.func('RTI_Connector_set_boolean_into_samples', 'int', ['RTI_HANDLE', 'string', 'string', 'bool']);
+      this.RTI_Connector_set_string_into_samples = this.api.func('RTI_Connector_set_string_into_samples', 'int', ['RTI_HANDLE', 'string', 'string', 'string']);
+      this.RTI_Connector_clear_member = this.api.func('RTI_Connector_clear_member', 'int', ['RTI_HANDLE', 'string', 'string']);
+      this.RTI_Connector_write = this.api.func('RTI_Connector_write', 'int', ['RTI_HANDLE', 'string', 'string']);
+      this.RTI_Connector_wait_for_acknowledgments = this.api.func('RTI_Connector_wait_for_acknowledgments', 'int', ['RTI_HANDLE', 'int']);
+      this.RTI_Connector_read = this.api.func('RTI_Connector_read', 'int', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_take = this.api.func('RTI_Connector_take', 'int', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_wait_for_data = this.api.func('RTI_Connector_wait_for_data', 'int', ['RTI_HANDLE', 'int']);
+      this.RTI_Connector_wait_for_data_on_reader = this.api.func('RTI_Connector_wait_for_data_on_reader', 'int', ['RTI_HANDLE', 'int']);
+      this.RTI_Connector_wait_for_matched_publication = this.api.func('RTI_Connector_wait_for_matched_publication', 'int', ['RTI_HANDLE', 'int', koffi.out(koffi.pointer('int'))]);
+      this.RTI_Connector_wait_for_matched_subscription = this.api.func('RTI_Connector_wait_for_matched_subscription', 'int', ['RTI_HANDLE', 'int', koffi.out(koffi.pointer('int'))]);
+      this.RTI_Connector_get_matched_subscriptions = this.api.func('RTI_Connector_get_matched_subscriptions', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer(AllocatedString))]);
+      this.RTI_Connector_get_matched_publications = this.api.func('RTI_Connector_get_matched_publications', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer(AllocatedString))]);
+      this.RTI_Connector_clear = this.api.func('RTI_Connector_clear', 'int', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_get_boolean_from_infos = this.api.func('RTI_Connector_get_boolean_from_infos', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer('bool')), 'string', 'int', 'string']);
+      this.RTI_Connector_get_json_from_infos = this.api.func('RTI_Connector_get_json_from_infos', 'int', ['RTI_HANDLE', 'string', 'int', 'string', koffi.out(koffi.pointer(AllocatedString))]);
+      this.RTI_Connector_get_sample_count = this.api.func('RTI_Connector_get_sample_count', 'int', ['RTI_HANDLE', 'string', koffi.out(koffi.pointer('double'))]);
+      this.RTI_Connector_get_number_from_sample = this.api.func('RTI_Connector_get_number_from_sample', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer('double')), 'string', 'int', 'string']);
+      this.RTI_Connector_get_boolean_from_sample = this.api.func('RTI_Connector_get_boolean_from_sample', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer('int')), 'string', 'int', 'string']);
+      this.RTI_Connector_get_string_from_sample = this.api.func('RTI_Connector_get_string_from_sample', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer(AllocatedString)), 'string', 'int', 'string']);
+      this.RTI_Connector_get_any_from_sample = this.api.func('RTI_Connector_get_any_from_sample', 'int', ['RTI_HANDLE',koffi.out(koffi.pointer('double')), koffi.out(koffi.pointer('int')), koffi.out(koffi.pointer(AllocatedString)), koffi.out(koffi.pointer('int')), 'string', 'int', 'string']);
+      this.RTI_Connector_get_any_from_info = this.api.func('RTI_Connector_get_any_from_info', 'int', ['RTI_HANDLE', koffi.out(koffi.pointer('double')), koffi.out(koffi.pointer('int')), koffi.out(koffi.pointer(AllocatedString)), koffi.out(koffi.pointer('int')), 'string', 'int', 'string']);
+      this.RTI_Connector_get_json_sample = this.api.func('RTI_Connector_get_json_sample', 'int', ['RTI_HANDLE', 'string', 'int', koffi.out(koffi.pointer(AllocatedString))]);
+      this.RTI_Connector_get_json_member = this.api.func('RTI_Connector_get_json_member', 'int', ['RTI_HANDLE', 'string', 'int', 'string', koffi.out(koffi.pointer(AllocatedString))]);
+      this.RTI_Connector_set_json_instance = this.api.func('RTI_Connector_set_json_instance', 'int', ['RTI_HANDLE', 'string', 'string']);
+      this.RTI_Connector_get_last_error_message = this.api.func('RTI_Connector_get_last_error_message', AllocatedString, []);
+      this.RTI_Connector_get_native_instance = this.api.func('RTI_Connector_get_native_instance', 'int', ['RTI_HANDLE', 'string', koffi.out(koffi.pointer(RTI_HANDLE))]);
+      this.RTIDDSConnector_getJSONInstance = this.api.func('RTIDDSConnector_getJSONInstance', AllocatedString, ['RTI_HANDLE', 'string']);
+>>>>>>> release/connector/1.3.1
       // This API is only used in the unit tests
-      RTI_Connector_create_test_scenario: ['int', ['pointer', 'int', 'pointer']],
-      RTI_Connector_get_build_versions: ['int', [ref.refType('char *'), ref.refType('char *')]]
-    })
+      this.RTI_Connector_create_test_scenario = this.api.func('RTI_Connector_create_test_scenario', 'int', ['RTI_HANDLE', 'int', 'RTI_HANDLE']);
+      this.RTI_Connector_get_build_versions = this.api.func('RTI_Connector_get_build_versions', 'int', [koffi.out(koffi.pointer('string')), koffi.out(koffi.pointer('string'))]);
   }
 }
 
@@ -150,30 +168,11 @@ class _ConnectorBinding {
 const connectorBinding = new _ConnectorBinding()
 
 /**
- * Copies a natively allocated string into a Node.js string and frees the
- * native memory.
- *
- * @param {Buffer} cstring - The string returned by the core
- *
- * @private
- */
-function _moveCString (cstring) {
-  const ret = ref.readCString(cstring)
-  connectorBinding.api.RTI_Connector_free_string(cstring)
-  return ret
-}
-
-/**
  * Obtains the last error message from the *RTI Connext DDS* Core
  * @private
  */
 function _getLastDdsErrorMessage () {
-  const cStr = connectorBinding.api.RTI_Connector_get_last_error_message()
-  if (cStr !== null) {
-    return _moveCString(cStr)
-  } else {
-    return ''
-  }
+  return connectorBinding.RTI_Connector_get_last_error_message()
 }
 
 /**
@@ -297,10 +296,10 @@ function _isNumber (value) {
  * @private
  */
 function _getAnyValue (getter, connector, inputName, index, fieldName) {
-  const numberVal = ref.alloc('double')
-  const boolVal = ref.alloc('int')
-  const stringVal = ref.alloc('char *')
-  let selection = ref.alloc('int')
+  let numberVal = [null]
+  let boolVal = [null]
+  let stringVal = [null]
+  let selection = [null]
   const retcode = getter(
     connector,
     numberVal,
@@ -314,13 +313,13 @@ function _getAnyValue (getter, connector, inputName, index, fieldName) {
   if (retcode === _ReturnCodes.noData) {
     return null
   }
-  selection = selection.deref()
+  selection = selection[0]
   if (selection === _AnyValueKind.connector_number) {
-    return numberVal.deref()
+    return numberVal[0]
   } else if (selection === _AnyValueKind.connector_boolean) {
-    return !!boolVal.deref()
+    return !!boolVal[0]
   } else if (selection === _AnyValueKind.connector_string) {
-    const nodeStr = _moveCString(stringVal.deref())
+    const nodeStr = stringVal[0]
     // If this is NOT a numeric string, try to convert the returned string to a
     // JSON object. We can now return one of two things:
     // - An actual string (if the JSON.parse call fails)
@@ -358,13 +357,13 @@ class Infos {
    * @private
    */
   getLength () {
-    const length = ref.alloc('double')
-    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
+    let length = [null];
+    const retcode = connectorBinding.RTI_Connector_get_sample_count(
       this.input.connector.native,
       this.input.name,
       length)
     _checkRetcode(retcode)
-    return length.deref()
+    return length[0]
   }
 
   /**
@@ -381,8 +380,8 @@ class Infos {
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
-      const value = ref.alloc('int')
-      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_infos(
+      let value = [null]
+      const retcode = connectorBinding.RTI_Connector_get_boolean_from_infos(
         this.input.connector.native,
         value,
         this.input.name,
@@ -392,7 +391,7 @@ class Infos {
       if (retcode === _ReturnCodes.noData) {
         return null
       }
-      return value.deref()
+      return value[0]
     }
   }
 }
@@ -427,7 +426,7 @@ class SampleIterator {
    *   contains valid data.
    * @property {SampleInfo} infos - The meta-data associated with the
    *   current sample.
-   * @property {pointer} native - A native handle that allows accessing
+   * @property {RTI_HANDLE} native - A native handle that allows accessing
    *   additional *Connext DDS* APIs in C.
    */
   constructor (input, index) {
@@ -553,9 +552,9 @@ class SampleIterator {
   }
 
   /**
-   * The native pointer to the DynamicData sample.
+   * The native RTI_HANDLE to the DynamicData sample.
    *
-   * @type {pointer}
+   * @type {RTI_HANDLE}
    * @private
    */
   get native () {
@@ -774,8 +773,8 @@ class Samples {
    * @private
    */
   getLength () {
-    const length = ref.alloc('double')
-    const retcode = connectorBinding.api.RTI_Connector_get_sample_count(
+    let length = [null]
+    const retcode = connectorBinding.RTI_Connector_get_sample_count(
       this.input.connector.native,
       this.input.name,
       length)
@@ -783,7 +782,7 @@ class Samples {
     // We use ~~ to convert from double -> int. This is required to allow:
     // for (var i =0; i < input.samples.getLength(); ++i)
     // It works since we are doing a bitwise complement (double not).
-    return ~~length.deref()
+    return ~~length[0]
   }
 
   /**
@@ -803,8 +802,8 @@ class Samples {
     } else {
       // Increment index since C API is based on Lua with 1-based indexes
       index += 1
-      const value = ref.alloc('double')
-      const retcode = connectorBinding.api.RTI_Connector_get_number_from_sample(
+      let value = [null]
+      const retcode = connectorBinding.RTI_Connector_get_number_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
@@ -815,7 +814,7 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        return value.deref()
+        return value[0]
       }
     }
   }
@@ -837,8 +836,8 @@ class Samples {
     } else {
       // Increment index since C API is based on Lua with 1-based indexes
       index += 1
-      const value = ref.alloc('int')
-      const retcode = connectorBinding.api.RTI_Connector_get_boolean_from_sample(
+      let value = [null]
+      const retcode = connectorBinding.RTI_Connector_get_boolean_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
@@ -849,7 +848,7 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        return value.deref()
+        return value[0]
       }
     }
   }
@@ -871,8 +870,8 @@ class Samples {
     } else {
       // Increment index since C API is based on Lua with 1-based indexes
       index += 1
-      const value = ref.alloc('char *')
-      const retcode = connectorBinding.api.RTI_Connector_get_string_from_sample(
+      let value = [null]
+      const retcode = connectorBinding.RTI_Connector_get_string_from_sample(
         this.input.connector.native,
         value,
         this.input.name,
@@ -882,7 +881,7 @@ class Samples {
       if (retcode === _ReturnCodes.noData) {
         return null
       } else {
-        return _moveCString(value.deref())
+        return value[0]
       }
     }
   }
@@ -905,7 +904,7 @@ class Samples {
       throw new TypeError('fieldName must be a string')
     } else {
       return _getAnyValue(
-        connectorBinding.api.RTI_Connector_get_any_from_sample,
+        connectorBinding.RTI_Connector_get_any_from_sample,
         this.input.connector.native,
         this.input.name,
         index,
@@ -930,7 +929,7 @@ class Samples {
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
-      const cStr = ref.alloc('char *')
+      let str = [null]
       let retcode = _ReturnCodes.noData
       // memberName is "optional" - if supplied we will get the JSON object for
       // a specific complex member in the sample
@@ -938,25 +937,25 @@ class Samples {
         if (!_isString(memberName)) {
           throw new TypeError('memberName must be a string')
         } else {
-          retcode = connectorBinding.api.RTI_Connector_get_json_member(
+          retcode = connectorBinding.RTI_Connector_get_json_member(
             this.input.connector.native,
             this.input.name,
             index,
             memberName,
-            cStr)
+            str)
         }
       } else {
-        retcode = connectorBinding.api.RTI_Connector_get_json_sample(
+        retcode = connectorBinding.RTI_Connector_get_json_sample(
           this.input.connector.native,
           this.input.name,
           index,
-          cStr)
+          str)
       }
       _checkRetcode(retcode)
       if (retcode === _ReturnCodes.noData) {
         return null
       }
-      return JSON.parse(_moveCString(cStr.deref()))
+      return JSON.parse(str[0])
     }
   }
 
@@ -965,8 +964,8 @@ class Samples {
    * additional *Connext DDS* APIs in C.
    *
    * @param {number} index The index of the sample for which to obtain
-   *   the native pointer.
-   * @returns {pointer} A native pointer to the sample.
+   *   the native RTI_HANDLE.
+   * @returns {RTI_HANDLE} A native RTI_HANDLE to the sample.
    */
   getNative (index) {
     if (!_isValidIndex(index)) {
@@ -974,7 +973,7 @@ class Samples {
     } else {
       // Increment index since Lua arrays are 1-indexed
       index += 1
-      return connectorBinding.api.RTI_Connector_get_native_sample(
+      return connectorBinding.RTI_Connector_get_native_sample(
         this.input.connector.native,
         this.input.name,
         index)
@@ -1035,7 +1034,7 @@ class SampleInfo {
       throw new TypeError('fieldName must be a string')
     } else {
       return _getAnyValue(
-        connectorBinding.api.RTI_Connector_get_any_from_info,
+        connectorBinding.RTI_Connector_get_any_from_info,
         this.input.connector.native,
         this.input.name,
         this.index,
@@ -1057,7 +1056,7 @@ class Input {
    *  * connector (:class:`Connector`) - The Connector creates this Input.
    *  * name (string) - The name of the Input (the name used in
    *    :meth:`Connector.getInput`).
-   *  * native (pointer) - A native handle that allows accessing additional
+   *  * native (RTI_HANDLE) - A native handle that allows accessing additional
    *    *Connext DDS* APIs in C.
    *  * matchedPublications (JSON) - A JSON object containing information
    *    about all the publications currently matched with this Input.
@@ -1065,10 +1064,10 @@ class Input {
   constructor (connector, name) {
     this.connector = connector
     this.name = name
-    this.native = connectorBinding.api.RTI_Connector_get_datareader(
+    this.native = connectorBinding.RTI_Connector_get_datareader(
       this.connector.native,
       this.name)
-    if (this.native.isNull()) {
+    if (this.native == null) {
       throw new Error('Invalid Subscription::DataReader name')
     }
     // We use the '_' since samples is the name of the property and we want
@@ -1092,7 +1091,7 @@ class Input {
    * operation has been called.
    */
   read () {
-    _checkRetcode(connectorBinding.api.RTI_Connector_read(
+    _checkRetcode(connectorBinding.RTI_Connector_read(
       this.connector.native,
       this.name))
   }
@@ -1104,7 +1103,7 @@ class Input {
    * :meth:`Input.samples`.
    */
   take () {
-    _checkRetcode(connectorBinding.api.RTI_Connector_take(
+    _checkRetcode(connectorBinding.RTI_Connector_take(
       this.connector.native,
       this.name))
   }
@@ -1152,8 +1151,8 @@ class Input {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitSetBusy = true
-        const currentChangeCount = ref.alloc('int')
-        connectorBinding.api.RTI_Connector_wait_for_matched_publication.async(
+        let currentChangeCount = [null]
+        connectorBinding.RTI_Connector_wait_for_matched_publication.async(
           this.native,
           timeout,
           currentChangeCount,
@@ -1162,7 +1161,7 @@ class Input {
             if (err) {
               return reject(err)
             } else if (res === _ReturnCodes.ok) {
-              return resolve(currentChangeCount.deref())
+              return resolve(currentChangeCount[0])
             } else if (res === _ReturnCodes.timeout) {
               return reject(new TimeoutError('Timeout error'))
             } else {
@@ -1191,12 +1190,12 @@ class Input {
    * @type {JSON}
    */
   get matchedPublications () {
-    const cStr = ref.alloc('char *')
-    const retcode = connectorBinding.api.RTI_Connector_get_matched_publications(
+    let str = [null]
+    const retcode = connectorBinding.RTI_Connector_get_matched_publications(
       this.native,
-      cStr)
+      str)
     _checkRetcode(retcode)
-    return JSON.parse(_moveCString(cStr.deref()))
+    return JSON.parse(str[0])
   }
 
   /**
@@ -1224,7 +1223,7 @@ class Input {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitSetBusy = true
-        connectorBinding.api.RTI_Connector_wait_for_data_on_reader.async(
+        connectorBinding.RTI_Connector_wait_for_data_on_reader.async(
           this.native,
           timeout,
           (err, res) => {
@@ -1258,7 +1257,7 @@ class Instance {
    * Attributes:
    *  * ``output`` (:class:`Output`) - The :class:`Output` that owns
    *    this Instance.
-   *  * ``native`` (pointer) - Native handle to this Instance that allows
+   *  * ``native`` (RTI_HANDLE) - Native handle to this Instance that allows
    *    for additional *Connext DDS Pro* C APIs to be called.
    */
   constructor (output) {
@@ -1277,7 +1276,7 @@ class Instance {
     if (!_isString(fieldName)) {
       throw new TypeError('fieldName must be a string')
     } else {
-      const retcode = connectorBinding.api.RTI_Connector_clear_member(
+      const retcode = connectorBinding.RTI_Connector_clear_member(
         this.output.connector.native,
         this.output.name,
         fieldName)
@@ -1307,7 +1306,7 @@ class Instance {
         throw new TypeError('value must be a number')
       }
     } else {
-      _checkRetcode(connectorBinding.api.RTI_Connector_set_number_into_samples(
+      _checkRetcode(connectorBinding.RTI_Connector_set_number_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
@@ -1332,7 +1331,7 @@ class Instance {
         throw new TypeError('value must be a boolean')
       }
     } else {
-      const retcode = connectorBinding.api.RTI_Connector_set_boolean_into_samples(
+      const retcode = connectorBinding.RTI_Connector_set_boolean_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
@@ -1358,7 +1357,7 @@ class Instance {
         throw new TypeError('value must be a boolean')
       }
     } else {
-      const retcode = connectorBinding.api.RTI_Connector_set_string_into_samples(
+      const retcode = connectorBinding.RTI_Connector_set_string_into_samples(
         this.output.connector.native,
         this.output.name,
         fieldName,
@@ -1387,7 +1386,7 @@ class Instance {
    *   (field names) and values (values for the fields).
    */
   setFromJson (jsonObj) {
-    _checkRetcode(connectorBinding.api.RTI_Connector_set_json_instance(
+    _checkRetcode(connectorBinding.RTI_Connector_set_json_instance(
       this.output.connector.native,
       this.output.name,
       JSON.stringify(jsonObj)))
@@ -1442,14 +1441,13 @@ class Instance {
    * @returns {JSON} The value of this instance as a JSON object.
    */
   getJson () {
-    const nativeStr = connectorBinding.api.RTIDDSConnector_getJSONInstance(
+    const result = connectorBinding.RTIDDSConnector_getJSONInstance(
       this.output.connector.native,
       this.output.name)
-    // Now move the native string
-    if (nativeStr === null) {
+    if (result === null) {
       throw new Error('Failed to create JSON object of instance')
     } else {
-      return JSON.parse(_moveCString(nativeStr))
+      return JSON.parse(result)
     }
   }
 
@@ -1467,16 +1465,16 @@ class Instance {
    * The native C object.
    *
    * This property allows accessing additional *Connext DDS* APIs in C.
-   * @type {pointer}
+   * @type {RTI_HANDLE}
    */
   get native () {
-    const nativePointer = ref.alloc('pointer')
-    const retcode = connectorBinding.api.RTI_Connector_get_native_instance(
+    let nativePointer = [null]
+    const retcode = connectorBinding.RTI_Connector_get_native_instance(
       this.output.connector.native,
       this.output.name,
       nativePointer)
     _checkRetcode(retcode)
-    return nativePointer.deref()
+    return nativePointer[0]
   }
 }
 
@@ -1496,7 +1494,7 @@ class Output {
    *    that created this object.
    *  * ``name`` (str) - The name of this Output (the name used in
    *    :meth:`Connector.getOutput`).
-   *  * ``native`` (pointer) - The native handle that allows accessing
+   *  * ``native`` (RTI_HANDLE) - The native handle that allows accessing
    *    additional *Connext DDS* APIs in C.
    *  * ``matchedSubscriptions`` (JSON) - Information about matched
    *    subscriptions (see below).
@@ -1505,10 +1503,10 @@ class Output {
   constructor (connector, name) {
     this.connector = connector
     this.name = name
-    this.native = connectorBinding.api.RTI_Connector_get_datawriter(
+    this.native = connectorBinding.RTI_Connector_get_datawriter(
       this.connector.native,
       this.name)
-    if (this.native.isNull()) {
+    if (this.native == null) {
       throw new Error('Invalid Publisher::DataWriter name')
     }
     this.instance = new Instance(this)
@@ -1551,16 +1549,16 @@ class Output {
    *   throws :class:`TimeoutError`.
    */
   write (params) {
-    let cStr
+    let str
     if (params === undefined) {
-      cStr = null
+      str = null
     } else {
-      cStr = JSON.stringify(params)
+      str = JSON.stringify(params)
     }
-    _checkRetcode(connectorBinding.api.RTI_Connector_write(
+    _checkRetcode(connectorBinding.RTI_Connector_write(
       this.connector.native,
       this.name,
-      cStr))
+      str))
   }
 
   /**
@@ -1577,7 +1575,7 @@ class Output {
    *  y = 0
    */
   clearMembers () {
-    _checkRetcode(connectorBinding.api.RTI_Connector_clear(
+    _checkRetcode(connectorBinding.RTI_Connector_clear(
       this.connector.native,
       this.name))
   }
@@ -1607,7 +1605,7 @@ class Output {
       } else if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
-      connectorBinding.api.RTI_Connector_wait_for_acknowledgments.async(
+      connectorBinding.RTI_Connector_wait_for_acknowledgments.async(
         this.native,
         timeout,
         (err, res) => {
@@ -1655,9 +1653,9 @@ class Output {
       if (this.waitsetBusy) {
         throw new Error('Can not concurrently wait on the same Output')
       } else {
-        const currentChangeCount = ref.alloc('int')
+        let currentChangeCount = [null]
         this.waitsetBusy = true
-        connectorBinding.api.RTI_Connector_wait_for_matched_subscription.async(
+        connectorBinding.RTI_Connector_wait_for_matched_subscription.async(
           this.native,
           timeout,
           currentChangeCount,
@@ -1666,7 +1664,7 @@ class Output {
             if (err) {
               return reject(err)
             } else if (res === _ReturnCodes.ok) {
-              return resolve(currentChangeCount.deref())
+              return resolve(currentChangeCount[0])
             } else if (res === _ReturnCodes.timeout) {
               return reject(new TimeoutError('Timeout error'))
             } else {
@@ -1694,12 +1692,12 @@ class Output {
    * @type {JSON}
    */
   get matchedSubscriptions () {
-    const cStr = ref.alloc('char *')
-    const retcode = connectorBinding.api.RTI_Connector_get_matched_subscriptions(
+    let str = [null]
+    const retcode = connectorBinding.RTI_Connector_get_matched_subscriptions(
       this.native,
-      cStr)
+      str)
     _checkRetcode(retcode)
-    return JSON.parse(_moveCString(cStr.deref()))
+    return JSON.parse(str[0])
   }
 
   /* istanbul ignore next */
@@ -1753,14 +1751,15 @@ class Connector extends EventEmitter {
    */
   constructor (configName, url) {
     super()
-    const options = new _ConnectorOptions()
-    options.one_based_sequence_indexing = 0
-    options.enable_on_data_event = 1
-    this.native = connectorBinding.api.RTI_Connector_new(
+    const options = {
+      one_based_sequence_indexing: 0, 
+      enable_on_data_event: 1
+    };
+    this.native = connectorBinding.RTI_Connector_new(
       configName,
       url,
-      options.ref())
-    if (this.native.isNull()) {
+      options)
+    if (this.native == null) {
       throw new Error('Invalid participant profile, xml path or xml profile')
     }
     this.on('newListener', this.newListenerCallBack)
@@ -1798,7 +1797,7 @@ class Connector extends EventEmitter {
       // is also used by the waitForCallbackFinalization API, and in that case we
       // should not delete anything
       if (cleanup) {
-        connectorBinding.api.RTI_Connector_delete(this.native)
+        connectorBinding.RTI_Connector_delete(this.native)
         this.native = null
       }
       // Call the resolve() callback of the passed promise
@@ -1965,7 +1964,7 @@ class Connector extends EventEmitter {
         throw new Error('Can not concurrently wait on the same Connector object')
       } else {
         this.waitSetBusy = true
-        connectorBinding.api.RTI_Connector_wait_for_data.async(
+        connectorBinding.RTI_Connector_wait_for_data.async(
           this.native,
           timeout,
           (err, res) => {
@@ -2103,17 +2102,17 @@ class Connector extends EventEmitter {
     // Parse numbers out of string
     const versionNumbers = versionString.split('.')
     // Now get the build IDs of the native libraries
-    const nativeConnectorVersion = ref.alloc('char *')
-    const nativeCoreCVersion = ref.alloc('char *')
-    _checkRetcode(connectorBinding.api.RTI_Connector_get_build_versions(
+    let nativeConnectorVersion = [null]
+    let nativeCoreCVersion = [null]
+    _checkRetcode(connectorBinding.RTI_Connector_get_build_versions(
       nativeCoreCVersion,
       nativeConnectorVersion))
 
     // Now create the string containing all of the above information
     let versionStr = 'RTI Connector for JavaScript, version ' +
         versionNumbers[0] + '.' + versionNumbers[1] + '.' + versionNumbers[2] + '\n'
-    versionStr += ref.readCString(nativeCoreCVersion.deref()) + '\n'
-    versionStr += ref.readCString(nativeConnectorVersion.deref())
+    versionStr += nativeCoreCVersion[0] + '\n'
+    versionStr += nativeConnectorVersion[0]
     return versionStr
   }
 }

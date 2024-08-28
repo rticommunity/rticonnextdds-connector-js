@@ -8,8 +8,8 @@
 
 const path = require('path')
 const os = require('os')
-const ffi = require('ffi-napi')
 const chai = require('chai')
+const koffi = require('koffi')
 const chaiAsPromised = require('chai-as-promised')
 const { deepStrictEqual } = require('assert')
 const expect = chai.expect
@@ -328,10 +328,8 @@ describe('Data access tests with a pre-populated input', function () {
   // We do not run these tests on Windows since the symbols are not exported in the DLL
   if (os.platform() !== 'win32') {
     it('access native dynamic data pointer', () => {
-      const additionalApi = ffi.Library(rti.connectorBinding.library, {
-        DDS_DynamicData_get_member_count: ['uint', ['pointer']]
-      })
-      const memberCount = additionalApi.DDS_DynamicData_get_member_count(sample.native)
+      const DDS_DynamicData_get_member_count = rti.connectorBinding.api.func('DDS_DynamicData_get_member_count', 'uint', ['RTI_HANDLE'])
+      const memberCount = DDS_DynamicData_get_member_count(sample.native)
       expect(memberCount).to.be.greaterThan(0)
     })
   }
@@ -468,10 +466,8 @@ describe('Tests with a testOutput and testInput', () => {
 
   if (os.platform() !== 'win32') {
     it('test native API on output', () => {
-      const additionalApi = ffi.Library(rti.connectorBinding.library, {
-        DDS_DynamicData_get_member_count: ['uint', ['pointer']]
-      })
-      const memberCount = additionalApi.DDS_DynamicData_get_member_count(testOutput.instance.native)
+      const DDS_DynamicData_get_member_count = rti.connectorBinding.api.func('DDS_DynamicData_get_member_count', 'uint', ['RTI_HANDLE'])
+      const memberCount = DDS_DynamicData_get_member_count(testOutput.instance.native)
       expect(memberCount).to.be.greaterThan(0)
     })
   }
