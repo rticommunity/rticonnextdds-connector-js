@@ -82,43 +82,6 @@ class _ConnectorBinding {
     // Obtain FFI'd methods for all of the APIs which we require from the binding,
     // specifying the argument types and return types. If any of the types are
     // not builtin Node types then we have to use the ref module to represent them.
-    this.api = ffi.Library(this.library, {
-      RTI_Connector_new: ['pointer', ['string', 'string', ref.refType(_ConnectorOptions)]],
-      RTI_Connector_delete: ['void', ['pointer']],
-      RTI_Connector_get_datawriter: ['pointer', ['pointer', 'string']],
-      RTI_Connector_get_datareader: ['pointer', ['pointer', 'string']],
-      RTI_Connector_get_native_sample: ['pointer', ['pointer', 'string', 'int']],
-      RTI_Connector_set_number_into_samples: ['int', ['pointer', 'string', 'string', 'double']],
-      RTI_Connector_set_boolean_into_samples: ['int', ['pointer', 'string', 'string', 'int']],
-      RTI_Connector_set_string_into_samples: ['int', ['pointer', 'string', 'string', 'string']],
-      RTI_Connector_clear_member: ['int', ['pointer', 'string', 'string']],
-      RTI_Connector_write: ['int', ['pointer', 'string', 'string']],
-      RTI_Connector_wait_for_acknowledgments: ['int', ['pointer', 'int']],
-      RTI_Connector_read: ['int', ['pointer', 'string']],
-      RTI_Connector_take: ['int', ['pointer', 'string']],
-      RTI_Connector_wait_for_data: ['int', ['pointer', 'int']],
-      RTI_Connector_wait_for_data_on_reader: ['int', ['pointer', 'int']],
-      RTI_Connector_wait_for_matched_publication: ['int', ['pointer', 'int', 'pointer']],
-      RTI_Connector_wait_for_matched_subscription: ['int', ['pointer', 'int', 'pointer']],
-      RTI_Connector_get_matched_subscriptions: ['int', ['pointer', ref.refType('char *')]],
-      RTI_Connector_get_matched_publications: ['int', ['pointer', ref.refType('char *')]],
-      RTI_Connector_clear: ['int', ['pointer', 'string']],
-      RTI_Connector_get_boolean_from_infos: ['int', ['pointer', ref.refType('int'), 'string', 'int', 'string']],
-      RTI_Connector_get_json_from_infos: ['int', ['pointer', 'string', 'int', 'string', ref.refType('char *')]],
-      RTI_Connector_get_sample_count: ['int', ['pointer', 'string', ref.refType('double')]],
-      RTI_Connector_get_number_from_sample: ['int', ['pointer', ref.refType('double'), 'string', 'int', 'string']],
-      RTI_Connector_get_boolean_from_sample: ['int', ['pointer', ref.refType('int'), 'string', 'int', 'string']],
-      RTI_Connector_get_string_from_sample: ['int', ['pointer', ref.refType('char *'), 'string', 'int', 'string']],
-      RTI_Connector_get_any_from_sample: ['int', ['pointer', ref.refType('double'), ref.refType('int'), ref.refType('char *'), ref.refType('int'), 'string', 'int', 'string']],
-      RTI_Connector_get_any_from_info: ['int', ['pointer', ref.refType('double'), ref.refType('int'), ref.refType('char *'), ref.refType('int'), 'string', 'int', 'string']],
-      RTI_Connector_get_json_sample: ['int', ['pointer', 'string', 'int', ref.refType('char *')]],
-      RTI_Connector_get_json_member: ['int', ['pointer', 'string', 'int', 'string', ref.refType('char *')]],
-      RTI_Connector_set_json_instance: ['int', ['pointer', 'string', 'string']],
-      RTI_Connector_get_last_error_message: ['char *', []],
-      RTI_Connector_get_native_instance: ['int', ['pointer', 'string', ref.refType('pointer')]],
-      RTI_Connector_free_string: ['void', ['char *']],
-      RTIDDSConnector_getJSONInstance: ['char *', ['pointer', 'string']],
-=======
     
     const RTI_Connector_free_string = this.api.func('RTI_Connector_free_string', 'void', ['char *']);
     const AllocatedString = koffi.disposable('AllocatedString', 'string', RTI_Connector_free_string);
@@ -157,7 +120,6 @@ class _ConnectorBinding {
       this.RTI_Connector_get_last_error_message = this.api.func('RTI_Connector_get_last_error_message', AllocatedString, []);
       this.RTI_Connector_get_native_instance = this.api.func('RTI_Connector_get_native_instance', 'int', ['RTI_HANDLE', 'string', koffi.out(koffi.pointer(RTI_HANDLE))]);
       this.RTIDDSConnector_getJSONInstance = this.api.func('RTIDDSConnector_getJSONInstance', AllocatedString, ['RTI_HANDLE', 'string']);
->>>>>>> release/connector/1.3.1
       // This API is only used in the unit tests
       this.RTI_Connector_create_test_scenario = this.api.func('RTI_Connector_create_test_scenario', 'int', ['RTI_HANDLE', 'int', 'RTI_HANDLE']);
       this.RTI_Connector_get_build_versions = this.api.func('RTI_Connector_get_build_versions', 'int', [koffi.out(koffi.pointer('string')), koffi.out(koffi.pointer('string'))]);
