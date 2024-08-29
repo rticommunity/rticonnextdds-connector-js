@@ -1,6 +1,6 @@
 {
   "name": "rticonnextdds-connector",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "RTI Connector for JavaScript",
   "main": "rticonnextdds-connector.js",
   "files": [
@@ -14,9 +14,7 @@
   },
   "dependencies": {
     "events": "^3.2.0",
-    "ffi-napi": "^3.1.0",
-    "ref-napi": "^3.0.1",
-    "ref-struct-di": "^1.1.1"
+    "koffi": "^2.8.9"
   },
   "scripts": {
     "test": "mocha ./test/nodejs/",
