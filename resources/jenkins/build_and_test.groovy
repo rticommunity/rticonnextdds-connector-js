@@ -10,6 +10,8 @@
  * to use the software.
  */
 
+@Library("rticommunity-jenkins-pipelines@feature/COMMUNITY-95") _
+
 CI_CONFIG = [:]
 
 /*
@@ -37,20 +39,10 @@ def getBuildAndTestStages(String nodeVersion) {
                         dir ('rticonnextdds-connector') {
                             sh 'pip install -r resources/scripts/requirements.txt'
 
-                            withAWSCredentials {
-                                withCredentials([
-                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                                ]) {
-                                    catchError(
-                                        message: 'Library download failed',
-                                        buildResult: 'UNSTABLE',
-                                        stageResult: 'UNSTABLE'
-                                    ) {
-                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-                                    }
-                                }
-                            }
+                            downloadAndExtract(
+                                installDirectory: '.',
+                                flavour: 'connectorlibs'
+                            )
 
                             sh 'npm install'
                         }
