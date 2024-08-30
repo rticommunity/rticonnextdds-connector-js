@@ -111,6 +111,11 @@ pipeline {
             steps {
                 script {
                     CI_CONFIG = readYaml(file: "ci_config.yaml")
+
+                    downloadAndExtract(
+                        installDirectory: 'rticonnextdds-connector/',
+                        flavour: 'connectorlibs'
+                    )
                 }
             }
         }
