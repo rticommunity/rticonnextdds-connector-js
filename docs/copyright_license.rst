@@ -9,7 +9,7 @@ Copyrights and License
 © 2024 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-March 2024. |br|
+August 2024. |br|
 
 .. rubric:: License
 
@@ -24,22 +24,23 @@ Use #4040, included at the top level of the `Connector for JavaScript repository
 
 .. rubric:: Trademarks
 
-RTI, Real-Time Innovations, Connext, NDDS, the RTI logo, 1RTI and the
-phrase, “Your Systems. Working as one.” are registered trademarks, trademarks
-or service marks of Real-Time Innovations, Inc. All other trademarks belong to
-their respective owners.
+RTI, Real-Time Innovations, Connext, Connext Drive, NDDS, the RTI logo, 
+1RTI and the phrase, “Your Systems. Working as one.” are registered 
+trademarks, trademarks or service marks of Real-Time Innovations, Inc. 
+All other trademarks belong to their respective owners.
 
 .. rubric:: Copy and Use Restrictions
 
-No part of this publication may be reproduced, stored in a retrieval system,
-or transmitted in any form (including electronic, mechanical, photocopy, and
-facsimile) without the prior written permission of Real-Time Innovations, Inc.
-The software described in this document is furnished under and subject to the
-RTI software license agreement. The software may be used or copied only under
-the terms of the license agreement.
+No part of this publication may be reproduced, stored in a retrieval 
+system, or transmitted in any form (including electronic, mechanical, 
+photocopy, and facsimile) without the prior written permission of Real-Time 
+Innovations, Inc. The software described in this document is furnished 
+solely under and subject to RTI’s standard terms and conditions available 
+at https://www.rti.com/terms and in accordance with your License 
+Acknowledgement Certificate (LAC) and Maintenance and Support Certificate 
+(MSC), except to the extent otherwise agreed to in writing by RTI.
 
-This is an independent publication and is neither affiliated with, nor
-authorized, sponsored, or approved by, Microsoft Corporation.
+
 
 The security features of this product include software developed by the
 OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/). 
@@ -55,17 +56,15 @@ Phone: (408) 990-7444 |br|
 Email: support@rti.com |br|
 Website: https://support.rti.com/ |br|
 
-© 2022 RTI
-
 .. rubric:: External Third-Party Software Used in Connector
 
 **Lua**
   * The source code of this software is used to build the native libraries
     provided by *RTI Connector*.
 
-  * Version 5.2.
+  * Version 5.2
 
-  * License (https://www.lua.org/license.html):
+  * License (https://www.lua.org/license.html) |br|
     Copyright © 1994–2021 Lua.org, PUC-Rio.
 
     Permission is hereby granted, free of charge, to any person obtaining a 
@@ -95,7 +94,6 @@ Website: https://support.rti.com/ |br|
   * License:
 
     Copyright (C) 2012-2021 the json-parser authors  All rights reserved.
-    https://github.com/udp/json-parser
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions
