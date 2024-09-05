@@ -13,7 +13,7 @@ ARG NODE_VERSION
 FROM node:${NODE_VERSION}
 
 RUN apt-get update \
-    && apt-get install -y gcc g++ git jq make python3 python3-pip python3-venv \
+    && apt-get install -y gcc g++ git jq cmake make python3 python3-pip python3-venv \
     && useradd -u 789 -m jenkins
 
 RUN mkdir -p /opt/node_deps \
