@@ -50,8 +50,6 @@ Phone: (408) 990-7444 |br|
 Email: support@rti.com |br|
 Website: https://support.rti.com/ |br|
 
-© 2022 RTI
-
 .. rubric:: External Third-Party Software Used in Connector
 
 **Lua**
