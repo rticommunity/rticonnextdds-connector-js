@@ -13,17 +13,20 @@ August 2024. |br|
 
 .. rubric:: License
 
+RTI Connector for JavaScript is part of the Connext
+Professional Package. If you have a valid license for the RTI Connext
+Professional Package, such license shall govern your use of
+RTI Connector for JavaScript. All other use of this software shall
+be governed solely by the terms of RTI's Software License for Non-Commercial
+Use #4040, included at the top level of the `Connector for JavaScript repository
+<https://github.com/rticommunity/rticonnextdds-connector-js>`__.
+
+.. rubric:: Trademarks
+
 RTI, Real-Time Innovations, Connext, Connext Drive, NDDS, the RTI logo, 
 1RTI and the phrase, “Your Systems. Working as one.” are registered 
 trademarks, trademarks or service marks of Real-Time Innovations, Inc. 
 All other trademarks belong to their respective owners.
-
-.. rubric:: Trademarks
-
-RTI, Real-Time Innovations, Connext, NDDS, the RTI logo, 1RTI and the
-phrase, “Your Systems. Working as one.” are registered trademarks, trademarks
-or service marks of Real-Time Innovations, Inc. All other trademarks belong to
-their respective owners.
 
 .. rubric:: Copy and Use Restrictions
 
@@ -113,3 +116,13 @@ Website: https://support.rti.com/ |br|
     OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
     SUCH DAMAGE.
 
+.. rubric:: Notices
+
+Any deprecations or removals noted in this document serve as notice under 
+the Real-Time Innovations, Inc. Maintenance Policy #4220 and/or any other 
+agreements by and between RTI and customer regarding maintenance and support 
+of RTI's software.
+
+*Deprecated* means that the item is still supported in the release, but will 
+be removed in a future release. *Removed* means that the item is discontinued 
+or no longer supported. 
