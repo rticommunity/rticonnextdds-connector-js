@@ -19,6 +19,17 @@ for more details.
 
 For more information, see :ref:`Supported Platforms`.
 
+The above command installs the latest version of *Connector* by default. To
+install a specific version, use this command:
+
+.. code-block:: console
+
+    $ npm install rticonnextdds-connector@<version>
+
+where ``<version>`` is any valid *Connector* version on the
+`npm rticonnextdds-connector versions <https://www.npmjs.com/package/rticonnextdds-connector?activeTab=versions>`__
+page.
+
 Running the examples
 ~~~~~~~~~~~~~~~~~~~~
 
