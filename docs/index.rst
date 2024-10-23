@@ -6,14 +6,6 @@
     .. image:: static/RTI_Launcher_Icon_Connector_JavaScript_100x100_0919_forDocumentation.png
         :align: left
 
-.. raw:: html
-
-
-   <style> .contents {color:#000000; font-weight:bold; font-size:24px} </style>
-
-
-.. role:: contents
-
 Welcome to RTI Connector for JavaScript!
 ========================================
 
@@ -28,8 +20,6 @@ and other languages.
 You can learn how to use *RTI Connector* by reading the following sections, which
 include examples and detailed API reference. You can also find a specific type
 or function in the :ref:`genindex`.
-
-:contents:`Contents` 
 
 .. toctree::
    :maxdepth: 2

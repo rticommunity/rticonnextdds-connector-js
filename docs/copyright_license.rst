@@ -61,7 +61,7 @@ Website: https://support.rti.com/ |br|
   * The source code of this software is used to build the native libraries
     provided by *RTI Connector*.
 
-  * Version 5.2.
+  * Version 5.2
 
   * License (https://www.lua.org/license.html):
     Copyright © 1994-2021 Lua.org, PUC-Rio.
