@@ -6,10 +6,10 @@
 Copyrights and License
 **********************
 
-© 2024 Real-Time Innovations, Inc. |br|
+© 2020-2025 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-March 2024. |br|
+April 2025. |br|
 
 .. rubric:: License
 
@@ -55,18 +55,16 @@ Phone: (408) 990-7444 |br|
 Email: support@rti.com |br|
 Website: https://support.rti.com/ |br|
 
-© 2022 RTI
-
 .. rubric:: External Third-Party Software Used in Connector
 
 **Lua**
   * The source code of this software is used to build the native libraries
     provided by *RTI Connector*.
 
-  * Version 5.2.
+  * Version 5.2
 
   * License (https://www.lua.org/license.html):
-    Copyright © 1994–2021 Lua.org, PUC-Rio.
+    Copyright © 1994-2021 Lua.org, PUC-Rio.
 
     Permission is hereby granted, free of charge, to any person obtaining a 
     copy of this software and associated documentation files (the "Software"), 
@@ -87,15 +85,15 @@ Website: https://support.rti.com/ |br|
     THE SOFTWARE.
 
 **json-parser**
-  * The source code of this software (from https://github.com/udp/json-parser) 
+  * The source code of this software (from https://github.com/json-parser) 
     is used to build the native libraries provided by *RTI Connector*.
 
   * Version 1.1.0
 
   * License:
 
-    Copyright (C) 2012-2021 the json-parser authors  All rights reserved.
-    https://github.com/udp/json-parser
+    Copyright (C) 2012-2021 the json-parser authors.  All rights reserved.
+    https://github.com/json-parser
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions

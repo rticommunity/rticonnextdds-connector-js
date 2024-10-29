@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'RTI Connector for JavaScript'
-copyright = '2024, Real-Time Innovations, Inc.'
+copyright = '2020-2025, Real-Time Innovations, Inc.'
 author = 'Real-Time Innovations, Inc.'
 
 # The full version, including alpha/beta/rc tags
@@ -62,7 +62,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['static']
 
 def setup(app):
-    app.add_stylesheet('theme_overrides.css')
+    app.add_css_file('theme_overrides.css')
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -145,7 +145,7 @@ latex_documents = [
         master_doc,
         'rticonnectorforjavascript.tex',
         'RTI Connector for Javascript',
-        '2024, Real-Time Innovations, Inc.',
+        '2020-2025, Real-Time Innovations, Inc.',
         'manual'
     ),
 ]

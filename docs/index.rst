@@ -21,6 +21,9 @@ You can learn how to use *RTI Connector* by reading the following sections, whic
 include examples and detailed API reference. You can also find a specific type
 or function in the :ref:`genindex`.
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
    :numbered:
