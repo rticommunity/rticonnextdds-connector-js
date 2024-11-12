@@ -32,6 +32,12 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
+What's New in 1.4.0
+-------------------
+
+Previous Releases
+=================
+
 Version 1.3.1
 =============
 
@@ -67,10 +73,6 @@ Connector failed to be created, with the following error:
    DDS_DynamicData2_allocateMembers: Could not reserve buffer of 0 bytes for values
 
 [RTI Issue ID CON-318]
-
-
-Previous Releases
-=================
 
 Version 1.3.0
 -------------
