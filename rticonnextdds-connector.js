@@ -33,6 +33,9 @@ class _ConnectorBinding {
       if (os.platform() === 'linux') {
         libDir = 'linux-arm64'
         libName = 'librtiddsconnector.so'
+      } else if (os.platform() === 'darwin') {
+        libDir = 'osx-arm64'
+        libName = 'librtiddsconnector.dylib'
       } else {
         throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
       }
