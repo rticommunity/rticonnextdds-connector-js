@@ -148,8 +148,12 @@ pipeline {
             }
 
             when {
+                anyOf {
+                    branch comparator: 'GLOB', pattern: 'release/connector/*'
+                    branch comparator: 'GLOB', pattern: 'support/connector/*'
+                    branch comparator: 'EQUALS', pattern: 'master'
+                }
                 beforeAgent true
-                tag pattern: /v\d+\.\d+\.\d+-dev/, comparator: "REGEXP"
             }
 
             steps {
