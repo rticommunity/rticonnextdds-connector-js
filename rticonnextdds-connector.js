@@ -257,29 +257,6 @@ function _isObject (value) {
   return typeof value === 'object' && value !== null
 }
 
-
-/**
- * Parses arguments into an options object with values based on the supplied
- * keys. The order of keys determines the order of the arguments being parsed.
- *
- * @param {Array} args - The arguments to parse
- * @param {Array} keys - The in-order keys to use to parse the arguments
- * @return {object} The options object with the parsed values
- */
-function _parseOptions (args, keys) {
-  let options = {};
-  let i = 0;
-
-  for (let key of keys) {
-    if (i >= args.length) break;
-    if (args[i] === undefined) break;
-    options[key] = args[i];
-    i++;
-  }
-
-  return options;
-}
-
 /**
  * Function used to get any value from either the samples or infos (depending
  * on the supplied getter). The type of the fieldName need not be specified.
@@ -1228,18 +1205,16 @@ class Input {
    * @returns {Promise} A ``Promise`` which will be resolved once data is
    *   available, or rejected if the timeout expires.
    */
-  wait ({timeout = -1, returnSamples = false} = {}) {
+  wait({ timeout, returnSamples } = {}) {
     return new Promise((resolve, reject) => {
       /* if the first parameter was not an object, parse it */
       if (!_isObject(arguments[0])) {
-        ({
-          timeout = -1,
-          returnSamples = false,
-        }) = _parseOptions(arguments, [
-          'timeout',
-          'returnSamples'
-        ])
+        [ timeout, returnSamples ] = arguments
       }
+
+      /* Assign defaults */
+      timeout ??= -1
+      returnSamples ??= false
 
       if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
