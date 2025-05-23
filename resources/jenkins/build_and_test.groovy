@@ -77,9 +77,9 @@ pipeline {
     }
 
     triggers {
-        // If it is develop, build at least once a day to test newly created libs.
+        // If it is master, build at least once a day to test newly created libs.
         // If it is another branch, never build based on timer (31 February = Never).
-        cron(env.BRANCH_NAME == 'develop' ? 'H H(18-21) * * *' : '* * 31 2 *')
+        cron(env.BRANCH_NAME == 'master' ? 'H H(18-21) * * *' : '* * 31 2 *')
     }
 
     options {
