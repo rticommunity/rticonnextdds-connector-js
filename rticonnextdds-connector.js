@@ -1198,7 +1198,6 @@ class Input {
    *   By default, infinite.
    * @param {boolean} [options.returnSamples] Whether to return samples before waiting.
    *   By default ``True``. Set it to ``False`` for backwards compatibility.
-   * @
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the
    *   timeout expires before data is received.
    * @returns {Promise} A ``Promise`` which will be resolved once data is
