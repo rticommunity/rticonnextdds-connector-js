@@ -1197,8 +1197,7 @@ class Input {
    * @param {number} [options.timeout] The maximum time to wait, in milliseconds.
    *   By default, infinite.
    * @param {boolean} [options.returnSamples] Whether to return samples before waiting.
-   *   By default and for backwards compatibility, ``False``.
-   *   It is recommended to set it to ``True`` for most scenarios.
+   *   By default ``True``. Set it to ``False`` for backwards compatibility.
    * @
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the
    *   timeout expires before data is received.
@@ -1214,7 +1213,7 @@ class Input {
 
       /* Assign defaults */
       timeout ??= -1
-      returnSamples ??= false
+      returnSamples ??= true
 
       if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
