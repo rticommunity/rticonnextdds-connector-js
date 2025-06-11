@@ -177,6 +177,27 @@ for example:
 
 See more information and examples in :ref:`Accessing the data`.
 
+Returning data and meta-data samples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The methods :meth:`Input.take()` and :meth:`Input.read()` make data accesible
+through the :meth:`Input.samples` collection. This data is available until the
+next call to :meth:`Input.take()` or :meth:`Input.read()`.
+
+In some situations, data may need to be returned sooner so that new data can be
+received. To do that, you can explicitly call :meth:`Input.returnSamples()`:
+
+.. testcode::
+
+   input.returnSamples()
+
+It is also possible to return samples when calling
+:meth:`Input.wait()` with the ``returnSamples`` parameter set to ``true``:
+
+.. testcode::
+
+   input.wait({ returnSamples: true })
+
 Accessing sample meta-data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
