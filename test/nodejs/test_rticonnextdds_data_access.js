@@ -759,6 +759,41 @@ describe('Tests with a testOutput and testInput', () => {
     expect(unsetOptional).to.deep.equals(null)
   })
 
+  it('Returns samples', async () => {
+    testOutput.instance.setNumber('my_long', 33)
+    testOutput.write()
+    await testInput.wait(testExpectSuccessTimeout)
+    testInput.take()
+    expect(testInput.samples.length).to.deep.equals(1)
+    expect(testInput.samples.get(0).getNumber('my_long')).to.deep.equals(33)
+    testInput.returnSamples()
+    expect(testInput.samples.length).to.deep.equals(0)
+  })
+
+  it('Returns samples with a timeout', async () => {
+    testOutput.instance.setNumber('my_long', 33)
+
+    // Initial set-up
+    testOutput.write() // Write1
+    await testInput.wait(testExpectSuccessTimeout)
+    testInput.take()
+    expect(testInput.samples.length).to.deep.equals(1) // Write1
+
+    // Wait without returning samples
+    testOutput.write() // Write2
+    await testInput.wait({timeout: testExpectSuccessTimeout, returnSamples: false})
+    expect(testInput.samples.length).to.deep.equals(1) // Write1 was not returned
+    testInput.take()
+    expect(testInput.samples.length).to.deep.equals(1) // Write2
+
+    // Wait with returning samples
+    testOutput.write() // Write3
+    await testInput.wait({timeout: testExpectSuccessTimeout, returnSamples: true})
+    expect(testInput.samples.length).to.deep.equals(0) // Write2 was returned
+    testInput.take()
+    expect(testInput.samples.length).to.deep.equals(1) // Write3
+  })
+
   it('Reset an optional number', async () => {
     testOutput.instance.setNumber('my_optional_long', 33)
     testOutput.instance.setNumber('my_optional_long', null)

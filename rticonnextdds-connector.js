@@ -102,6 +102,7 @@ class _ConnectorBinding {
       this.RTI_Connector_wait_for_acknowledgments = this.api.func('RTI_Connector_wait_for_acknowledgments', 'int', ['RTI_HANDLE', 'int']);
       this.RTI_Connector_read = this.api.func('RTI_Connector_read', 'int', ['RTI_HANDLE', 'string']);
       this.RTI_Connector_take = this.api.func('RTI_Connector_take', 'int', ['RTI_HANDLE', 'string']);
+      this.RTI_Connector_return_loan = this.api.func('RTI_Connector_return_loan', 'int', ['RTI_HANDLE', 'string']);
       this.RTI_Connector_wait_for_data = this.api.func('RTI_Connector_wait_for_data', 'int', ['RTI_HANDLE', 'int']);
       this.RTI_Connector_wait_for_data_on_reader = this.api.func('RTI_Connector_wait_for_data_on_reader', 'int', ['RTI_HANDLE', 'int']);
       this.RTI_Connector_wait_for_matched_publication = this.api.func('RTI_Connector_wait_for_matched_publication', 'int', ['RTI_HANDLE', 'int', koffi.out(koffi.pointer('int'))]);
@@ -246,6 +247,14 @@ function _isValidIndex (value) {
  */
 function _isNumber (value) {
   return typeof value === 'number' && isFinite(value)
+}
+
+/**
+ * Checks if a value is an object
+ * @param {any} value - The value to check the type of
+ */
+function _isObject (value) {
+  return typeof value === 'object' && value !== null
 }
 
 /**
@@ -1164,30 +1173,57 @@ class Input {
   }
 
   /**
+   * Returns any samples held by this Input
+   *
+   * After calling this method, the samples are no longer accessible from :meth:`Input.samples`.
+   */
+  returnSamples () {
+    _checkRetcode(connectorBinding.RTI_Connector_return_loan(
+      this.connector.native,
+      this.name))
+  }
+
+  /**
    * Wait for this Input to receive data.
    *
    * .. note::
    *   This operation is asynchronous.
    *
-   * @param {number} [timeout] The maximum time to wait, in milliseconds.
+   * .. note::
+   *   If no object is provided as the first parameter and for backwards compatibility,
+   *   the arguments are interpreted sequentially as defined in the documentation.
+   *
+   * @param {Object} [options] Options for the wait operation.
+   * @param {number} [options.timeout] The maximum time to wait, in milliseconds.
    *   By default, infinite.
+   * @param {boolean} [options.returnSamples] Whether to return samples before waiting.
+   *   By default ``True``. Set it to ``False`` for backwards compatibility.
    * @throws {TimeoutError} :class:`TimeoutError` will be thrown if the
    *   timeout expires before data is received.
    * @returns {Promise} A ``Promise`` which will be resolved once data is
    *   available, or rejected if the timeout expires.
    */
-  wait (timeout) {
+  wait({ timeout, returnSamples } = {}) {
     return new Promise((resolve, reject) => {
-      // timeout is defaulted to -1 (infinite) if not supplied
-      if (timeout === undefined) {
-        timeout = -1
-      } else if (!_isNumber(timeout)) {
+      /* if the first parameter was not an object, parse it */
+      if (!_isObject(arguments[0])) {
+        [ timeout, returnSamples ] = arguments
+      }
+
+      /* Assign defaults */
+      timeout ??= -1
+      returnSamples ??= true
+
+      if (!_isNumber(timeout)) {
         throw new TypeError('timeout must be a number')
       }
       if (this.waitSetBusy) {
         throw new Error('Can not concurrently wait on the same Input')
       } else {
         this.waitSetBusy = true
+        if (returnSamples) {
+          this.returnSamples()
+        }
         connectorBinding.RTI_Connector_wait_for_data_on_reader.async(
           this.native,
           timeout,
