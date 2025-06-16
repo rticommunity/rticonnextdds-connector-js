@@ -8,6 +8,8 @@ Supported Platforms
   * v18
   * v19
   * v20
+  * v22
+  * v24
 
 Other versions may also work, but have not been validated internally.
 If you run into an issue, make sure that the issue can be reproduced
@@ -32,18 +34,68 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.3.1
+Current Release
 =============
 
+Version 1.4.0
+-------------
+
+*RTI Connector* 1.4.0 is built on *RTI Connext 7.6.0*.
+For more details on what's new and fixed in 7.6.0, see
+`RTI Connext 7.6.0 Release Notes <https://community.rti.com/documentation/rti-connext-dds-760>`__.
+
+What's New in 1.4.0
+^^^^^^^^^^^^^^^^^^^
+
+Support for Node.js 22
+""""""""""""""""""""""
+
+*Connector* 1.4.0 adds support for Node.js 22, which is the current LTS version.
+
+What's Fixed in 1.4.0
+^^^^^^^^^^^^^^^^^^^^^
+
+Potential errors when copying strings when using JSON
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+We were not checking the return value of ``snprintf``, which could fail in scenarios where, for example,
+the input buffer is not big enough. This affected code related to:
+
+* Getting JSON list of matched publication names
+* Getting JSON list of matched subscription names
+* Getting JSON representation of sample identity
+
+This issue was fixed for theprevious release, 1.3.1, but it was never documented.
+
+[RTI Issue ID CON-307]
+
+Connector did not perform range checks when setting numbers into samples
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+When setting numeric values into a sample that natively used the ``RTI_Connector_set_number_into_samples``
+function, Connector did not perform any type of range checking.
+This issue could have led to unexpected values in fields that couldn't represent the given numeric
+values. For example, if the value ``364`` was set in a char field.
+
+An error is now raised when a provided value does not fit into the selected field, preventing unexpected values.
+
+[RTI Issue ID CON-324]
+
+Previous Releases
+=================
+
+Version 1.3.1
+--------------
+
 What's New in 1.3.1
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.3.1 is built on *RTI Connext* 7.3.0.2.
 For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 
 Replaced Foreign Function Interface third-party library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-304
 
 In this release, *Connector* has replaced ``node-ffi-napi`` with ``koffi`` as the
@@ -54,10 +106,10 @@ This change addresses `Github Issue #198 <https://github.com/rticommunity/rticon
 
 
 What's Fixed in 1.3.1
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Failed to create Connectors for configurations using Types containing empty structs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When using a configuration that included Types containing empty structs, a
 Connector failed to be created, with the following error:
@@ -68,9 +120,6 @@ Connector failed to be created, with the following error:
 
 [RTI Issue ID CON-318]
 
-
-Previous Releases
-=================
 
 Version 1.3.0
 -------------
