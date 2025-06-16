@@ -55,17 +55,17 @@ Support for Node.js 22
 What's Fixed in 1.4.0
 ^^^^^^^^^^^^^^^^^^^^^
 
-Potential errors when copying strings when using JSON
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
+Potential errors on copying strings when using JSON
+"""""""""""""""""""""""""""""""""""""""""""""""""""
+*This issue was fixed in version 1.3.0 but not documented at that time*
 
-We were not checking the return value of ``snprintf``, which could fail in scenarios where, for example,
-the input buffer is not big enough. This affected code related to:
+*Connector* did not check the return value of snprintf, which could fail 
+in scenarios where, for example, the input buffer was not big enough. 
+This issue affected code related to:
 
 * Getting JSON list of matched publication names
 * Getting JSON list of matched subscription names
 * Getting JSON representation of sample identity
-
-This issue was fixed for theprevious release, 1.3.1, but it was never documented.
 
 [RTI Issue ID CON-307]
 
@@ -73,7 +73,7 @@ Connector did not perform range checks when setting numbers into samples
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When setting numeric values into a sample that natively used the ``RTI_Connector_set_number_into_samples``
-function, Connector did not perform any type of range checking.
+function, *Connector* did not perform any type of range checking.
 This issue could have led to unexpected values in fields that couldn't represent the given numeric
 values. For example, if the value ``364`` was set in a char field.
 
