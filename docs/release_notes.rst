@@ -24,7 +24,8 @@ macOS® platforms. It has been tested on the following systems:
   * Ubuntu® 18.04 LTS (x64, Arm v7, Arm v8), 20.04 LTS (x64), 22.04 LTS (x64, Arm v8)
 
 **macOS**
-  * macOS 11, 12, 13 (x64)
+  * macOS 11, 12, 13, 14, 15 (x64)
+  * macOS 11, 12, 13, 14, 15 (Arm v8)
 
 **Windows**
   * Windows 10, 11 (x64)
