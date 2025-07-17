@@ -40,22 +40,13 @@ class _ConnectorBinding {
         throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
       }
     } else if (os.arch() === 'arm') {
-      if (os.platform() === 'linux') {
-        libDir = 'linux-arm'
-        libName = 'librtiddsconnector.so'
-      } else {
-        throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
-      }
+      throw new Error('This platform (' + os.platform() + ' ' + os.arch() + ') is not supported')
     } else {
       // Note that we are intentionally not checking if os.arch() is x64.
       // This allows somebody with access to 32-bit libraries to replace them
       // in the corresponding x64 directory and we will try to load them.
       // This behaviour is not officially supported.
       switch (os.platform()) {
-        case 'darwin':
-          libDir = 'osx-x64'
-          libName = 'librtiddsconnector.dylib'
-          break
         case 'linux':
           libDir = 'linux-x64'
           libName = 'librtiddsconnector.so'
