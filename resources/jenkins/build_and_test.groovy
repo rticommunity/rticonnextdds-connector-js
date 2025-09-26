@@ -35,7 +35,7 @@ def getBuildAndTestStages(String nodeVersion) {
                 stage("Downloading dependencies") {
                     dockerImage.inside() {
                         downloadAndExtract(
-                            installDirectory: './rticonnextdds-connector',
+                            installDirectory: '.',
                             flavour: 'connectorlibs'
                         )
 
