@@ -34,26 +34,12 @@ def getBuildAndTestStages(String nodeVersion) {
 
                 stage("Downloading dependencies") {
                     dockerImage.inside() {
-                        dir ('rticonnextdds-connector') {
-                            sh 'pip install -r resources/scripts/requirements.txt'
+                        downloadAndExtract(
+                            installDirectory: '.',
+                            flavour: 'connectorlibs'
+                        )
 
-                            withAWSCredentials {
-                                withCredentials([
-                                    string(credentialsId: 's3-bucket', variable: 'S3_BUCKET'),
-                                    string(credentialsId: 's3-path', variable: 'S3_PATH'),
-                                ]) {
-                                    catchError(
-                                        message: 'Library download failed',
-                                        buildResult: 'UNSTABLE',
-                                        stageResult: 'UNSTABLE'
-                                    ) {
-                                        sh "python resources/scripts/download_libs.py --storage-url \$S3_BUCKET --storage-path \$S3_PATH -o ."
-                                    }
-                                }
-                            }
-
-                            sh 'npm install'
-                        }
+                        sh 'npm install'
                     }
                 }
 
@@ -91,9 +77,9 @@ pipeline {
     }
 
     triggers {
-        // If it is develop, build at least once a day to test newly created libs.
+        // If it is master, build at least once a day to test newly created libs.
         // If it is another branch, never build based on timer (31 February = Never).
-        cron(env.BRANCH_NAME == 'develop' ? 'H H(18-21) * * *' : '* * 31 2 *')
+        cron(env.BRANCH_NAME == 'master' ? 'H H(18-21) * * *' : '* * 31 2 *')
     }
 
     options {
@@ -162,8 +148,12 @@ pipeline {
             }
 
             when {
+                anyOf {
+                    branch comparator: 'GLOB', pattern: 'release/connector/*'
+                    branch comparator: 'GLOB', pattern: 'support/connector/*'
+                    branch comparator: 'EQUALS', pattern: 'master'
+                }
                 beforeAgent true
-                tag pattern: /v\d+\.\d+\.\d+-dev/, comparator: "REGEXP"
             }
 
             steps {
