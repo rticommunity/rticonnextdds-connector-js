@@ -1,5 +1,4 @@
 node_versions:
-  - "18"
-  - "19"
-  - "20"
+  - "17"
+  - "18.19"
 publish_version: "20"
