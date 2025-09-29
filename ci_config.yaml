@@ -1,0 +1,4 @@
+node_versions:
+  - "17"
+  - "18.19"
+publish_version: "17"
