@@ -34,6 +34,9 @@ if [[ ! "$current_branch" =~ ^release/connector ]]; then
 
     package_version=$new_version
     echo "Updated version to ${package_version} for non-release branch"
+
+    # Update version in package-lock.json
+    npm i --package-lock-only
 else
     echo "Release branch detected, keeping original version: $package_version"
 fi
@@ -47,8 +50,5 @@ if [[ -n "$NPM_REGISTRY" ]]; then
     # Unpublish in case we are uploading the same version again
     npm unpublish ${package_name}@${package_version} ${registry_opt}
 fi
-
-# Update version in package-lock.json
-npm i --package-lock-only
 
 npm publish ${registry_opt}
