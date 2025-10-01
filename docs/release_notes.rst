@@ -32,6 +32,27 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
+Version 1.3.2
+=============
+
+What's New in 1.3.2
+-------------------
+
+Potential errors on copying strings when using JSON
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. CON-307
+
+*Connector* did not check the return value of ``snprintf``, which could 
+fail in scenarios where, for example, the input buffer was not big enough. 
+This issue affected code related to:
+
+* Getting JSON list of matched publication names
+
+* Getting JSON list of matched subscription names
+
+* Getting JSON representation of sample identity
+
+
 Version 1.3.1
 =============
 
