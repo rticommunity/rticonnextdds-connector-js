@@ -35,12 +35,15 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Version 1.3.2
 =============
 
-What's New in 1.3.2
--------------------
+What's Fixed in 1.3.2
+---------------------
+
+*RTI Connector* 1.3.2 is built on `RTI Connext 7.3.1 <https://community.rti.com/documentation/rti-connext-dds-731>`__.
 
 Potential errors on copying strings when using JSON
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. CON-307
+
+*This issue was fixed in Connector 1.3.0, but not documented at that time.*
 
 *Connector* did not check the return value of ``snprintf``, which could 
 fail in scenarios where, for example, the input buffer was not big enough. 
@@ -52,19 +55,24 @@ This issue affected code related to:
 
 * Getting JSON representation of sample identity
 
+[RTI Issue ID CON-307]
+
+
+Previous Releases
+=================
 
 Version 1.3.1
-=============
+-------------
 
 What's New in 1.3.1
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.3.1 is built on *RTI Connext* 7.3.0.2.
 For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 
 Replaced Foreign Function Interface third-party library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-304
 
 In this release, *Connector* has replaced ``node-ffi-napi`` with ``koffi`` as the
@@ -75,10 +83,10 @@ This change addresses `Github Issue #198 <https://github.com/rticommunity/rticon
 
 
 What's Fixed in 1.3.1
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Failed to create Connectors for configurations using Types containing empty structs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When using a configuration that included Types containing empty structs, a
 Connector failed to be created, with the following error:
@@ -88,10 +96,6 @@ Connector failed to be created, with the following error:
    DDS_DynamicData2_allocateMembers: Could not reserve buffer of 0 bytes for values
 
 [RTI Issue ID CON-318]
-
-
-Previous Releases
-=================
 
 Version 1.3.0
 -------------
