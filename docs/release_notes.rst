@@ -19,10 +19,11 @@ macOS® platforms. It has been tested on the following systems:
 **Linux**
   * CentOS™ 7.0 (x64)
   * Red Hat® Enterprise Linux 7, 7.3, 7.5, 7.6, 8, 9 (x64)
-  * Ubuntu® 18.04 LTS (x64, Arm v7, Arm v8), 20.04 LTS (x64), 22.04 LTS (x64, Arm v8)
+  * Ubuntu® 18.04 LTS (x64, Arm v7, Arm v8), 20.04 LTS (x64), 
+    22.04 LTS (x64, Arm v8), 24.04 LTS (x64, Arm v8)
 
 **macOS**
-  * macOS 11, 12, 13 (x64)
+  * macOS 11, 12, 13 (x64), 14 (x64)
 
 **Windows**
   * Windows 10, 11 (x64)
@@ -32,18 +33,47 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.3.1
+Version 1.3.2
 =============
 
+What's Fixed in 1.3.2
+---------------------
+
+*RTI Connector* 1.3.2 is built on `RTI Connext 7.3.1 <https://community.rti.com/documentation/rti-connext-dds-731>`__.
+
+Potential errors on copying strings when using JSON
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+*This issue was fixed in Connector 1.3.0, but not documented at that time.*
+
+*Connector* did not check the return value of ``snprintf``, which could 
+fail in scenarios where, for example, the input buffer was not big enough. 
+This issue affected code related to:
+
+* Getting JSON list of matched publication names
+
+* Getting JSON list of matched subscription names
+
+* Getting JSON representation of sample identity
+
+[RTI Issue ID CON-307]
+
+
+Previous Releases
+=================
+
+Version 1.3.1
+-------------
+
 What's New in 1.3.1
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.3.1 is built on *RTI Connext* 7.3.0.2.
 For details on what's new and fixed in 7.3.0.2, contact support@rti.com.
 
 
 Replaced Foreign Function Interface third-party library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 .. CON-304
 
 In this release, *Connector* has replaced ``node-ffi-napi`` with ``koffi`` as the
@@ -54,10 +84,10 @@ This change addresses `Github Issue #198 <https://github.com/rticommunity/rticon
 
 
 What's Fixed in 1.3.1
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Failed to create Connectors for configurations using Types containing empty structs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When using a configuration that included Types containing empty structs, a
 Connector failed to be created, with the following error:
@@ -67,10 +97,6 @@ Connector failed to be created, with the following error:
    DDS_DynamicData2_allocateMembers: Could not reserve buffer of 0 bytes for values
 
 [RTI Issue ID CON-318]
-
-
-Previous Releases
-=================
 
 Version 1.3.0
 -------------

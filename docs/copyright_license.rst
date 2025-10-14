@@ -6,10 +6,10 @@
 Copyrights and License
 **********************
 
-© 2024 Real-Time Innovations, Inc. |br|
+© 2019-2025 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-August 2024. |br|
+October 2025. |br|
 
 .. rubric:: License
 
@@ -41,7 +41,7 @@ Acknowledgement Certificate (LAC) and Maintenance and Support Certificate
 
 The security features of this product include software developed by the
 OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/). 
-his product includes cryptographic software written by Eric Young 
+This product includes cryptographic software written by Eric Young 
 (eay@cryptsoft.com). This product includes software written by Tim Hudson 
 (tjh@cryptsoft.com).
 
