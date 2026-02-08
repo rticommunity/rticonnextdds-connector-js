@@ -17,8 +17,13 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'RTI Connector for JavaScript'
-copyright = '2020-2025, Real-Time Innovations, Inc.'
+import datetime
+year = datetime.date.today().year
+copyright = f'2020-{year}, Real-Time Innovations, Inc'
 author = 'Real-Time Innovations, Inc.'
+
+from datetime import date
+today = date.today().strftime("%B %Y")
 
 # The full version, including alpha/beta/rc tags
 release = '1.5.0'
