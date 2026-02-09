@@ -155,7 +155,16 @@ latex_documents = [
     ),
 ]
 
+
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
 #
 html_logo = "static/rti-logo-FINALv2-White-OrangeDot.png"
+
+rst_prolog = """
+.. role:: critical
+.. role:: major
+.. role:: minor
+.. role:: trivial
+.. |current_year| replace:: {0}
+""".format(year)
