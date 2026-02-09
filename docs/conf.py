@@ -23,7 +23,7 @@ copyright = f'2020-{year}, Real-Time Innovations, Inc'
 author = 'Real-Time Innovations, Inc.'
 
 from datetime import date
-today = date.today().strftime("%B %Y")
+today_fmt = "%B %Y"
 
 # The full version, including alpha/beta/rc tags
 release = '1.5.0'
