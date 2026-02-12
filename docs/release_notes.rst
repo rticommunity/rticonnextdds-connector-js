@@ -41,7 +41,7 @@ Version 1.5.0
 -------------
 
 *RTI Connector* 1.5.0 is built on *RTI Connext 7.7.0*.
-For more details on what's new and fixed in 7.6.0, see
+For more details on what's new and fixed in 7.7.0, see
 `RTI Connext 7.7.0 Release Notes <https://community.rti.com/documentation/rti-connext-dds-770>`__.
 
 What's New in 1.5.0
