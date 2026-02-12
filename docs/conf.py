@@ -17,8 +17,13 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'RTI Connector for JavaScript'
-copyright = '2020-2025, Real-Time Innovations, Inc.'
+import datetime
+year = datetime.date.today().year
+copyright = f'2020-{year}, Real-Time Innovations, Inc'
 author = 'Real-Time Innovations, Inc.'
+
+from datetime import date
+today_fmt = "%B %Y"
 
 # The full version, including alpha/beta/rc tags
 release = '1.5.0'
@@ -150,7 +155,16 @@ latex_documents = [
     ),
 ]
 
+
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
 #
 html_logo = "static/rti-logo-FINALv2-White-OrangeDot.png"
+
+rst_prolog = """
+.. role:: critical
+.. role:: major
+.. role:: minor
+.. role:: trivial
+.. |current_year| replace:: {0}
+""".format(year)
