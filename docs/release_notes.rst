@@ -5,8 +5,6 @@ Supported Platforms
 ===================
 
 *Connector* has been validated to run with the following Node.js versions:
-  * v18
-  * v19
   * v20
   * v22
   * v24
