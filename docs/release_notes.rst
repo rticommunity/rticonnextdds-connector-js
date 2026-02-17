@@ -33,14 +33,42 @@ macOS® platforms. It has been tested on the following systems:
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
 Current Release
-=============
+===============
 
-Version 1.4.0
+Version 1.5.0
 -------------
 
-*RTI Connector* 1.4.0 is built on *RTI Connext 7.6.0*.
-For more details on what's new and fixed in 7.6.0, see
-`RTI Connext 7.6.0 Release Notes <https://community.rti.com/documentation/rti-connext-dds-760>`__.
+*RTI Connector* 1.5.0 is built on *RTI Connext 7.7.0*.
+For more details on what's new and fixed in 7.7.0, see
+`RTI Connext 7.7.0 Release Notes <https://community.rti.com/documentation/rti-connext-dds-770>`__.
+
+What's New in 1.5.0
+^^^^^^^^^^^^^^^^^^^
+
+Added support for instance handles to enhance sample metadata
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+*RTI Connector* libraries have been updated to provide deeper visibility 
+into your data samples. To access the unique identifier for a data source, 
+you can now fetch the ``instance_handle`` field directly from a Sample's 
+``info`` metadata.
+
+The handle is returned as a JSON string containing an array of 16 integers 
+in the 8-bit unsigned range (uint8). This allows for precise tracking and 
+management of keyed samples within your data streams. 
+
+When querying a keyed sample, the library will return the handle in the 
+following format: 
+
+.. code:: json
+
+[48,33,155,66,147,186,107,63,238,106,79,224,41,129,56,130]
+
+.. [RTI Issue ID CON-317]
+
+
+Previous Releases
+=================
 
 What's New in 1.4.0
 ^^^^^^^^^^^^^^^^^^^
@@ -78,9 +106,6 @@ values. For example, if the value ``364`` was set in a char field.
 An error is now raised when a provided value does not fit into the selected field, preventing unexpected values.
 
 [RTI Issue ID CON-324]
-
-Previous Releases
-=================
 
 Version 1.3.1
 --------------
