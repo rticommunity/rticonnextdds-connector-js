@@ -1,6 +1,6 @@
 {
   "name": "rticonnextdds-connector",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "RTI Connector for JavaScript",
   "main": "rticonnextdds-connector.js",
   "files": [
