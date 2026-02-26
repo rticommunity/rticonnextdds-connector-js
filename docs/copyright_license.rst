@@ -6,10 +6,10 @@
 Copyrights and License
 **********************
 
-© 2019-2025 Real-Time Innovations, Inc. |br|
+© 2019-2026 Real-Time Innovations, Inc. |br|
 All rights reserved.  |br|
 Printed in U.S.A. First printing.  |br|
-October 2025. |br|
+March 2026. |br|
 
 .. rubric:: License
 
