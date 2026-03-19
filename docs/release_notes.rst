@@ -33,16 +33,24 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.3.2
+Version 1.3.3
 =============
+*RTI Connector* 1.3.3 is built on *RTI Connext* 7.3.1.1.
+For details on what's new and fixed in 7.3.1.1, contact support@rti.com.
+
+Previous Releases
+=================
+
+Version 1.3.2
+-------------
 
 What's Fixed in 1.3.2
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 *RTI Connector* 1.3.2 is built on `RTI Connext 7.3.1 <https://community.rti.com/documentation/rti-connext-dds-731>`__.
 
 Potential errors on copying strings when using JSON
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""""""""""""""""
 
 *This issue was fixed in Connector 1.3.0, but not documented at that time.*
 
@@ -58,9 +66,6 @@ This issue affected code related to:
 
 [RTI Issue ID CON-307]
 
-
-Previous Releases
-=================
 
 Version 1.3.1
 -------------
