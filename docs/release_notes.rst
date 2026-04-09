@@ -33,13 +33,18 @@ macOS® platforms. It has been tested on the following systems:
 `the main Connector
 repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 
-Version 1.3.3
+Version 1.3.4
 =============
-*RTI Connector* 1.3.3 is built on *RTI Connext* 7.3.1.1.
-For details on what's new and fixed in 7.3.1.1, contact support@rti.com.
+*RTI Connector* 1.3.4 is built on *RTI Connext* 7.3.1.2.
+For details on what's new and fixed in 7.3.1.2, contact support@rti.com.
 
 Previous Releases
 =================
+
+Version 1.3.3
+-------------
+*RTI Connector* 1.3.3 is built on *RTI Connext* 7.3.1.1.
+For details on what's new and fixed in 7.3.1.1, contact support@rti.com.
 
 Version 1.3.2
 -------------
