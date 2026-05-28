@@ -66,6 +66,29 @@ following format:
 
 .. [RTI Issue ID CON-317]
 
+What's Fixed in 1.5.0
+^^^^^^^^^^^^^^^^^^^^^
+
+Implicit DataWriters or DataReaders required "implicit::" name prefix
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Implicit *Entities* created directly from the *DomainParticipant* formerly 
+required an ``implicit::`` name prefix. This behavior deviated from standard 
+*Connext* APIs, which offer the flexibility to use either the prefixed or 
+non-prefixed form during a lookup.
+
+For example, using the XML snippet below, the *DataReader* can now be 
+retrieved using either ``ImplicitReader`` or ``implicit::ImplicitReader``:
+
+.. code:: xml
+
+    <domain_participant name="ExampleParticipant"
+                        domain_ref="DomainLib::ExampleDomain">
+        <data_reader name="ImplicitReader" topic_ref="ExampleTopic" />
+    </domain_participant>
+
+.. [RTI Issue ID CON-346]
+
 
 Previous Releases
 =================
