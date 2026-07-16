@@ -43,7 +43,7 @@ authorized, sponsored, or approved by, Microsoft Corporation.
 
 The security features of this product include software developed by the
 OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/). 
-his product includes cryptographic software written by Eric Young 
+This product includes cryptographic software written by Eric Young 
 (eay@cryptsoft.com). This product includes software written by Tim Hudson 
 (tjh@cryptsoft.com).
 
