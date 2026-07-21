@@ -43,9 +43,16 @@ authorized, sponsored, or approved by, Microsoft Corporation.
 
 The security features of this product include software developed by the
 OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/). 
-his product includes cryptographic software written by Eric Young 
+This product includes cryptographic software written by Eric Young 
 (eay@cryptsoft.com). This product includes software written by Tim Hudson 
 (tjh@cryptsoft.com).
+
+.. rubric:: AI Use Disclosure
+
+Our engineering team uses AI-assisted tools to accelerate code generation and
+debugging. However, human developers retain full ownership; every line of code
+is reviewed and approved by human developers.
+
 
 Technical Support |br|
 Real-Time Innovations, Inc. |br|
