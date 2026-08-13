@@ -7,7 +7,8 @@
 ******************************************************************************/
 
 const path = require('path')
-const expect = require('chai').expect
+const { expect } = require('./_chai')
+const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
 const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact

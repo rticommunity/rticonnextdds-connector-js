@@ -8,13 +8,10 @@
 
 const path = require('path')
 const os = require('os')
-const chai = require('chai')
+const { expect } = require('./_chai')
 const koffi = require('koffi')
-const chaiAsPromised = require('chai-as-promised')
 const { deepStrictEqual } = require('assert')
-const expect = chai.expect
-chai.config.includeStack = true
-chai.use(chaiAsPromised)
+const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
 const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
 
 // We have to do this due to the expect() syntax of chai and the fact

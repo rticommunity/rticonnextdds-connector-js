@@ -7,9 +7,10 @@
 ******************************************************************************/
 
 const path = require('path')
-const expect = require('chai').expect
+const { expect } = require('./_chai')
+const sinon = require('./_sinon')
+const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
 const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-const sinon = require('sinon')
 
 // We have to do this due to the expect() syntax of chai and the fact
 // that we install mocha globally
