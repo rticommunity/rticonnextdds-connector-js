@@ -7,43 +7,36 @@
 ******************************************************************************/
 
 const path = require('path')
-const { expect } = require('./_chai')
-const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
-const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-
-// We have to do this due to the expect() syntax of chai and the fact
-// that we install mocha globally
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-undef */
+const assert = require('node:assert/strict')
+const { describe, it, beforeEach, afterEach } = require('node:test')
+const rti = require('../../rticonnextdds-connector')
 
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
 const testExpectSuccessTimeout = 10000
 
 describe('Test operations involving meta data', () => {
-  let connector = null
-  let testOutput = null
-  let testInput = null
+  /** @type {rti.Connector} */
+  let connector
+  /** @type {rti.Output} */
+  let testOutput
+  /** @type {rti.Input} */
+  let testInput
   const testJsonObject = { my_string: 'hello_world' }
 
   beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
     testInput = connector.getInput('TestSubscriber::TestReader2')
-    expect(testInput).to.exist
+    assert.ok(testInput)
     testOutput = connector.getOutput('TestPublisher::TestWriter2')
-    expect(testOutput).to.exist
+    assert.ok(testOutput)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
   })
 
   afterEach(async () => {
@@ -57,18 +50,12 @@ describe('Test operations involving meta data', () => {
     const sourceTimestamp = 0
 
     testOutput.write({ source_timestamp: sourceTimestamp })
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
 
     for (const sample of testInput.samples) {
-      expect(sample.info.get('source_timestamp')).to.deep.equals(sourceTimestamp)
-      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
+      assert.strictEqual(sample.info.get('source_timestamp'), sourceTimestamp)
+      assert.strictEqual(sample.get('my_string'), testJsonObject.my_string)
     }
   })
 
@@ -84,19 +71,13 @@ describe('Test operations involving meta data', () => {
           sequence_number: identSeqNumber
         }
       })
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
 
     for (const sample of testInput.samples) {
-      expect(sample.info.get('identity').writer_guid).to.deep.equals(identWriterGuid)
-      expect(sample.info.get('identity').sequence_number).to.deep.equals(identSeqNumber)
-      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
+      assert.deepStrictEqual(sample.info.get('identity').writer_guid, identWriterGuid)
+      assert.strictEqual(sample.info.get('identity').sequence_number, identSeqNumber)
+      assert.strictEqual(sample.get('my_string'), testJsonObject.my_string)
     }
   })
 
@@ -112,51 +93,45 @@ describe('Test operations involving meta data', () => {
           sequence_number: rIdentSeqNumber
         }
       })
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
 
     for (const sample of testInput.samples.validDataIter) {
-      expect(sample.info.get('related_sample_identity').writer_guid).to.deep.equals(rIdentWriterGuid)
-      expect(sample.info.get('related_sample_identity').sequence_number).to.deep.equals(rIdentSeqNumber)
-      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
+      assert.deepStrictEqual(sample.info.get('related_sample_identity').writer_guid, rIdentWriterGuid)
+      assert.strictEqual(sample.info.get('related_sample_identity').sequence_number, rIdentSeqNumber)
+      assert.strictEqual(sample.get('my_string'), testJsonObject.my_string)
     }
   })
 
   it('test write with unsupported params', async () => {
     testOutput.instance.setFromJson(testJsonObject)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.write({ unsupported_param: 5 })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('test write with invalid action', async () => {
     testOutput.instance.setFromJson(testJsonObject)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.write({ action: 'this_should_be_write_unregister_dispose' })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('test write with invalid source_timestamp', async () => {
     testOutput.instance.setFromJson(testJsonObject)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.write({ source_timestamp: 'this_should_be_positive_integer' })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('test write with invalid guid', async () => {
     testOutput.instance.setFromJson(testJsonObject)
     const identSeqNumber = 1
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.write(
         {
           identity: {
@@ -164,14 +139,14 @@ describe('Test operations involving meta data', () => {
             sequence_number: identSeqNumber
           }
         })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('test write with invalid sequence_number', async () => {
     testOutput.instance.setFromJson(testJsonObject)
     const identWriterGuid = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.write(
         {
           identity: {
@@ -179,156 +154,101 @@ describe('Test operations involving meta data', () => {
             sequence_number: 'this_should_be_an_integer'
           }
         })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('test metadata from write without params', async () => {
     testOutput.instance.setFromJson(testJsonObject)
 
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
 
     for (const sample of testInput.samples.validDataIter) {
       // Source timestamp will either be returned as a string or as a number,
       // depending on whether or not it is larger than 2^53.
-      expect(sample.info.get('source_timestamp')).satisfies((val) => {
-        return (typeof val === 'string' || typeof val === 'number')
-      })
-      expect(sample.info.get('identity').writer_guid).is.an('array')
-      expect(sample.info.get('identity').sequence_number).is.a('number')
-      expect(sample.info.get('related_sample_identity').writer_guid).is.an('array')
-      expect(sample.info.get('related_sample_identity').sequence_number).is.a('number')
-      expect(sample.get('my_string')).to.deep.equals(testJsonObject.my_string)
+      assert.ok(typeof sample.info.get('source_timestamp') === 'string' || typeof sample.info.get('source_timestamp') === 'number')
+      assert.ok(Array.isArray(sample.info.get('identity').writer_guid))
+      assert.strictEqual(typeof sample.info.get('identity').sequence_number, 'number')
+      assert.ok(Array.isArray(sample.info.get('related_sample_identity').writer_guid))
+      assert.strictEqual(typeof sample.info.get('related_sample_identity').sequence_number, 'number')
+      assert.strictEqual(sample.get('my_string'), testJsonObject.my_string)
     }
   })
 
   it('test getting sample_state', async () => {
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
 
     // Since this is the first time that we are accessing the sample, it should
     // have a sample state of NOT_READ
     testInput.read()
-    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('NOT_READ')
+    assert.strictEqual(testInput.samples.get(0).info.get('sample_state'), 'NOT_READ')
     // Now that we have already accessed the sample once time, accessing it
     // again should result in a sample state of READ
     testInput.read()
-    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('READ')
+    assert.strictEqual(testInput.samples.get(0).info.get('sample_state'), 'READ')
     // Taking after a read should also have a sample state of READ
     testInput.take()
-    expect(testInput.samples.get(0).info.get('sample_state')).to.deep.equals('READ')
+    assert.strictEqual(testInput.samples.get(0).info.get('sample_state'), 'READ')
   })
 
   it('test getting instance state', async () => {
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     // Instance is currently alive
-    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('ALIVE')
+    assert.strictEqual(testInput.samples.get(0).info.get('instance_state'), 'ALIVE')
     // Disposing the sample should update the instance state
     testOutput.write({ action: 'dispose' })
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    assert.strictEqual(testInput.samples.get(0).info.get('instance_state'), 'NOT_ALIVE_DISPOSED')
     // Writing the sample again should transition it back to alive
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     // Instance is currently alive
-    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('ALIVE')
+    assert.strictEqual(testInput.samples.get(0).info.get('instance_state'), 'ALIVE')
     // Unregister the instance to get NO_WRITERS
     testOutput.write({ action: 'unregister' })
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).info.get('instance_state')).to.deep.equals('NOT_ALIVE_NO_WRITERS')
+    assert.strictEqual(testInput.samples.get(0).info.get('instance_state'), 'NOT_ALIVE_NO_WRITERS')
   })
 
   it('test getting sample view state', async () => {
     // View state is per-instance
     testOutput.instance.setString('my_key_string', 'Brown')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NEW')
+    assert.strictEqual(testInput.samples.get(0).info.get('view_state'), 'NEW')
     // Updating that instance should update the view state
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NOT_NEW')
+    assert.strictEqual(testInput.samples.get(0).info.get('view_state'), 'NOT_NEW')
     // Writing a new instance should have a NEW view state
     testOutput.instance.setString('my_key_string', 'Maroon')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).info.get('view_state')).to.deep.equals('NEW')
+    assert.strictEqual(testInput.samples.get(0).info.get('view_state'), 'NEW')
   })
 })
 
 describe('accessing key values after instance disposal', () => {
-  let connector = null
+  /** @type {rti.Connector} */
+  let connector
   // Do not create inputs or outputs here since each of the tests
   // requires a different type
 
   beforeEach(() => {
     const participantProfile = 'MyParticipantLibrary::Zero'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
   })
 
   afterEach(async () => {
@@ -345,18 +265,17 @@ describe('accessing key values after instance disposal', () => {
   // };
   it('access key value of disposed instance', async () => {
     const input = connector.getInput('MySubscriber::MySquareReader')
-    expect(input).to.exist
+    assert.ok(input)
     const output = connector.getOutput('MyPublisher::MySquareWriter')
-    expect(input).to.exist
+    assert.ok(input)
     // Wait for discovery between the 2 entities
     try {
       let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
       newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
     } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
+      throw err
     }
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('color', 'Yellow')
@@ -365,29 +284,19 @@ describe('accessing key values after instance disposal', () => {
     output.instance.setBoolean('z', true)
     // Write the sample
     output.write()
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // Now dispose the instance we just wrote
     output.write({ action: 'dispose' })
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     const sample = input.samples.get(0)
     // Sample should contain invalid data, and instance state disposed
-    expect(sample.info.get('valid_data')).to.deep.equals(false)
-    expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    assert.strictEqual(sample.info.get('valid_data'), false)
+    assert.strictEqual(sample.info.get('instance_state'), 'NOT_ALIVE_DISPOSED')
     // It should be possible to access the key field
-    expect(sample.get('color')).to.deep.equals('Yellow')
-    expect(sample.getString('color')).to.deep.equals('Yellow')
+    assert.strictEqual(sample.get('color'), 'Yellow')
+    assert.strictEqual(sample.getString('color'), 'Yellow')
     // All non key fields should not be accessed.
     // Can also obtain the JSON representation of the sample.
     const expectedJson = {
@@ -397,7 +306,7 @@ describe('accessing key values after instance disposal', () => {
       z: false,
       shapesize: 0
     }
-    expect(sample.getJson()).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson(), expectedJson)
   })
 
   // Uses the following type:
@@ -411,18 +320,17 @@ describe('accessing key values after instance disposal', () => {
   // };
   it('access key values of disposed instance with multiple keys', async () => {
     const input = connector.getInput('MySubscriber::MyMultipleKeyedSquareReader')
-    expect(input).to.exist
+    assert.ok(input)
     const output = connector.getOutput('MyPublisher::MyMultipleKeyedSquareWriter')
-    expect(input).to.exist
+    assert.ok(input)
     // Wait for discovery between the 2 entities
     try {
       let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
       newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
     } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
+      throw err
     }
     // This type has multiple key fields, set them all
     output.instance.setString('color', 'Brown')
@@ -434,32 +342,22 @@ describe('accessing key values after instance disposal', () => {
     output.instance.setNumber('shapesize', 0)
     // Write the sample and take it on the input
     output.write()
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // Now dispose the instance we just wrote
     output.write({ action: 'dispose' })
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     const sample = input.samples.get(0)
     // Check key fields
-    expect(sample.get('color')).to.deep.equals('Brown')
-    expect(sample.get('other_color')).to.deep.equals('Blue')
-    expect(sample.get('y')).to.deep.equals(9)
-    expect(sample.get('z')).to.deep.equals(false)
-    expect(sample.getString('color')).to.deep.equals('Brown')
-    expect(sample.getString('other_color')).to.deep.equals('Blue')
-    expect(sample.getNumber('y')).to.deep.equals(9)
-    expect(sample.getBoolean('z')).to.deep.equals(false)
+    assert.strictEqual(sample.get('color'), 'Brown')
+    assert.strictEqual(sample.get('other_color'), 'Blue')
+    assert.strictEqual(sample.get('y'), 9)
+    assert.strictEqual(sample.get('z'), false)
+    assert.strictEqual(sample.getString('color'), 'Brown')
+    assert.strictEqual(sample.getString('other_color'), 'Blue')
+    assert.strictEqual(sample.getNumber('y'), 9)
+    assert.strictEqual(sample.getBoolean('z'), false)
     // Do not access non-key values
     // Check access via JSON object
     const expectedJson = {
@@ -470,7 +368,7 @@ describe('accessing key values after instance disposal', () => {
       z: false,
       shapesize: 0
     }
-    expect(sample.getJson()).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson(), expectedJson)
   })
 
   // Uses the following type:
@@ -499,18 +397,17 @@ describe('accessing key values after instance disposal', () => {
   // };
   it('access the complex key of a disposed instance', async () => {
     const input = connector.getInput('MySubscriber::MyNestedKeyedSquareReader')
-    expect(input).to.exist
+    assert.ok(input)
     const output = connector.getOutput('MyPublisher::MyNestedKeyedSquareWriter')
-    expect(input).to.exist
+    assert.ok(input)
     // Wait for discovery between the 2 entities
     try {
       let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
       newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
     } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
+      throw err
     }
     // Set the sample's fields
     output.instance.setString('keyed_shape.color', 'Black')
@@ -525,47 +422,37 @@ describe('accessing key values after instance disposal', () => {
     output.instance.setNumber('keyed_nested_member.x', 4)
     // Write the sample and take it on the input
     output.write()
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // Now dispose the instance we just wrote
     output.write({ action: 'dispose' })
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     const sample = input.samples.get(0)
-    expect(sample.info.get('valid_data')).to.deep.equals(false)
-    expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
+    assert.strictEqual(sample.info.get('valid_data'), false)
+    assert.strictEqual(sample.info.get('instance_state'), 'NOT_ALIVE_DISPOSED')
     // Everything within keyed_shape is a key
-    expect(sample.getNumber('keyed_shape.x')).to.deep.equals(2)
-    expect(sample.getNumber('keyed_shape.y')).to.deep.equals(0)
-    expect(sample.getNumber('keyed_shape.shapesize')).to.deep.equals(100)
-    expect(sample.getBoolean('keyed_shape.z')).to.deep.equals(true)
-    expect(sample.get('keyed_shape.x')).to.deep.equals(2)
-    expect(sample.get('keyed_shape.y')).to.deep.equals(0)
-    expect(sample.get('keyed_shape.shapesize')).to.deep.equals(100)
-    expect(sample.get('keyed_shape.z')).to.deep.equals(true)
-    expect(sample.get('keyed_shape.color')).to.deep.equals('Black')
-    expect(sample.getString('keyed_shape.color')).to.deep.equals('Black')
+    assert.strictEqual(sample.getNumber('keyed_shape.x'), 2)
+    assert.strictEqual(sample.getNumber('keyed_shape.y'), 0)
+    assert.strictEqual(sample.getNumber('keyed_shape.shapesize'), 100)
+    assert.strictEqual(sample.getBoolean('keyed_shape.z'), true)
+    assert.strictEqual(sample.get('keyed_shape.x'), 2)
+    assert.strictEqual(sample.get('keyed_shape.y'), 0)
+    assert.strictEqual(sample.get('keyed_shape.shapesize'), 100)
+    assert.strictEqual(sample.get('keyed_shape.z'), true)
+    assert.strictEqual(sample.get('keyed_shape.color'), 'Black')
+    assert.strictEqual(sample.getString('keyed_shape.color'), 'Black')
     // keyed_toplevel_member is also a key
-    expect(sample.getNumber('keyed_toplevel_member')).to.deep.equals(1)
-    expect(sample.get('keyed_toplevel_member')).to.deep.equals(1)
+    assert.strictEqual(sample.getNumber('keyed_toplevel_member'), 1)
+    assert.strictEqual(sample.get('keyed_toplevel_member'), 1)
     // Only the 'color' field in keyed_nested_member is keyed
-    expect(sample.get('keyed_nested_member.color')).to.deep.equals('White')
-    expect(sample.get('keyed_nested_member.x')).to.deep.equals(0)
+    assert.strictEqual(sample.get('keyed_nested_member.color'), 'White')
+    assert.strictEqual(sample.get('keyed_nested_member.x'), 0)
     // Do not access any of the non-key values
     // The unkeyed_toplevel_member field has a default value explicitly set
     // in the type. This should not effect the returned value.
-    expect(sample.get('unkeyed_toplevel_member')).to.deep.equals(0)
-    expect(sample.getNumber('unkeyed_toplevel_member')).to.deep.equals(0)
+    assert.strictEqual(sample.get('unkeyed_toplevel_member'), 0)
+    assert.strictEqual(sample.getNumber('unkeyed_toplevel_member'), 0)
     let expectedJson = {
       keyed_shape: {
         color: 'Black',
@@ -594,7 +481,7 @@ describe('accessing key values after instance disposal', () => {
       unkeyed_toplevel_member: 0,
       keyed_toplevel_member: 1
     }
-    expect(sample.getJson()).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson(), expectedJson)
     // Can also obtain the keyed members as a JSON since they are complex
     expectedJson = {
       color: 'Black',
@@ -603,7 +490,7 @@ describe('accessing key values after instance disposal', () => {
       shapesize: 100,
       z: true
     }
-    expect(sample.getJson('keyed_shape')).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson('keyed_shape'), expectedJson)
     expectedJson = {
       color: 'White',
       x: 0,
@@ -611,44 +498,33 @@ describe('accessing key values after instance disposal', () => {
       shapesize: 0,
       z: false
     }
-    expect(sample.getJson('keyed_nested_member')).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson('keyed_nested_member'), expectedJson)
   })
 
   it('access the key fields using an iterator', async () => {
     const input = connector.getInput('MySubscriber::MySquareReader')
-    expect(input).to.exist
+    assert.ok(input)
     const output = connector.getOutput('MyPublisher::MySquareWriter')
-    expect(input).to.exist
+    assert.ok(input)
     // Wait for discovery between the 2 entities
     try {
       let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
       newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
     } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
+      throw err
     }
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('color', 'Yellow')
     output.instance.setNumber('x', 2)
     // Write the sample
     output.write()
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // Now dispose the instance we just wrote
     output.write({ action: 'dispose' })
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // There should be no samples accessible within the validDataIter
     let hadData = false
@@ -656,13 +532,13 @@ describe('accessing key values after instance disposal', () => {
     for (const sample of input.samples.validDataIter) {
       hadData = true
     }
-    expect(hadData).to.deep.equals(false)
+    assert.strictEqual(hadData, false)
     // Should be possible to access key fields in the dataIter
     for (const sample of input.samples) {
-      expect(sample.info.get('valid_data')).to.deep.equals(false)
-      expect(sample.info.get('instance_state')).to.deep.equals('NOT_ALIVE_DISPOSED')
-      expect(sample.getString('color')).to.deep.equals('Yellow')
-      expect(sample.get('color')).to.deep.equals('Yellow')
+      assert.strictEqual(sample.info.get('valid_data'), false)
+      assert.strictEqual(sample.info.get('instance_state'), 'NOT_ALIVE_DISPOSED')
+      assert.strictEqual(sample.getString('color'), 'Yellow')
+      assert.strictEqual(sample.get('color'), 'Yellow')
       const expectedJson = {
         color: 'Yellow',
         x: 0,
@@ -670,7 +546,7 @@ describe('accessing key values after instance disposal', () => {
         shapesize: 0,
         z: false
       }
-      expect(sample.getJson()).to.deep.equals(expectedJson)
+      assert.deepStrictEqual(sample.getJson(), expectedJson)
     }
   })
 
@@ -687,18 +563,17 @@ describe('accessing key values after instance disposal', () => {
   // };
   it('keys within nested structures are not keys unless tagged as keys in top level', async () => {
     const input = connector.getInput('MySubscriber::MySquareWithoutTopLevelKeyReader')
-    expect(input).to.exist
+    assert.ok(input)
     const output = connector.getOutput('MyPublisher::MySquareWithoutTopLevelKeyWriter')
-    expect(input).to.exist
+    assert.ok(input)
     // Wait for discovery between the 2 entities
     try {
       let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
       newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
+      assert.strictEqual(newMatches, 1)
     } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
+      throw err
     }
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('unkeyed_shape.color', 'Yellow')
@@ -707,21 +582,11 @@ describe('accessing key values after instance disposal', () => {
     output.instance.setNumber('keyed_shape.x', 2)
     // Write the sample
     output.write()
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // Now dispose the instance we just wrote
     output.write({ action: 'dispose' })
-    try {
-      await input.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw (err)
-    }
+    await input.wait(testExpectSuccessTimeout)
     input.take()
     // The 'color' field we set is not actually a key. Fields need to be tagged
     // in the top-level type in order to be part of the key. This means that
@@ -743,6 +608,6 @@ describe('accessing key values after instance disposal', () => {
         z: false
       }
     }
-    expect(sample.getJson()).to.deep.equals(expectedJson)
+    assert.deepStrictEqual(sample.getJson(), expectedJson)
   })
 })

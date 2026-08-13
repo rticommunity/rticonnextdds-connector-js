@@ -8,14 +8,9 @@
 
 const path = require('path')
 const os = require('os')
-const { expect } = require('./_chai')
-const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
-const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-
-// We have to do this due to the expect() syntax of chai and the fact
-// that we install mocha globally
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-undef */
+const assert = require('node:assert/strict')
+const { describe, it, before, after } = require('node:test')
+const rti = require('../../rticonnextdds-connector')
 
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
@@ -24,46 +19,47 @@ const testExpectSuccessTimeout = 10000
 // This is to prevent us from hanging the tests for 10s
 const testExpectFailureTimeout = 500
 
-describe('Input Tests', function () {
-  let connector = null
+describe('Input Tests', () => {
+  /** @type {rti.Connector} */
+  let connector
   // Initialization before all tests are executed
-  before(function () {
+  before(() => {
     const participantProfile = 'MyParticipantLibrary::Zero'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
   })
 
   // cleanup after all tests have executed
-  after(async function () {
-    this.timeout(0)
+  after(async () => {
     await connector.close()
   })
 
-  it('Input object should not get instantiated for invalid DataReader', function () {
+  it('Input object should not get instantiated for invalid DataReader', () => {
     const invalidDR = 'invalidDR'
-    expect(function () {
+    assert.throws(() => {
       connector.getInput(invalidDR)
-    }).to.throw(Error)
+    }, Error)
   })
 
   it('Input object should get instantiated for valid ' +
-      'Subscription::DataReader name', function () {
+      'Subscription::DataReader name', () => {
     const validDR = 'MySubscriber::MySquareReader'
     const input = connector.getInput(validDR)
-    expect(input).to.exist
-    expect(input.name).to.equal(validDR)
-    expect(input.connector).to.equal(connector)
+    assert.ok(input)
+    assert.strictEqual(input.name, validDR)
+    assert.strictEqual(input.connector, connector)
   })
 })
 
 describe('Subscriber not automatically enabled tests', () => {
-  let connector = null
+  /** @type {rti.Connector} */
+  let connector
 
   before(() => {
     const participantProfile = 'MyParticipantLibrary::TestNoAutoenableSubscriber'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
-    expect(connector).to.exist.and.to.be.instanceOf(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
   })
 
   after(async () => {
@@ -72,29 +68,19 @@ describe('Subscriber not automatically enabled tests', () => {
 
   it('Entities should not auto-discover each other if QoS is set appropriately', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
-    expect(output).to.exist
-    // The input is not automatically enabled in this QoS profile, meaning the
-    // output should not match with it
-    try {
-      await output.waitForSubscriptions(testExpectFailureTimeout)
-      console.log('Expected output.waitForSubscriptions to timeout but it did not')
-      expect(true).to.deep.equal(false)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    assert.ok(output)
+    await assert.rejects(
+      output.waitForSubscriptions(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('Calling getInput should enable the input', async () => {
     const output = connector.getOutput('TestPublisher::TestWriter')
-    expect(output).to.exist
+    assert.ok(output)
     connector.getInput('TestSubscriber::TestReader')
-    try {
-      const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    const newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
   })
 })
 
@@ -103,19 +89,16 @@ describe('Native call on a DataReader', () => {
   if (os.platform() !== 'win32') {
     it('Should be possible to call an API in the Connector library which is not in the binding ', async () => {
       const participantProfile = 'MyParticipantLibrary::Zero'
-      const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+      const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
       const connector = new rti.Connector(participantProfile, xmlProfile)
       const input = connector.getInput('MySubscriber::MySquareReader')
       const DDS_DataReader_get_topicdescription = rti.connectorBinding.api.func('DDS_DataReader_get_topicdescription', 'RTI_HANDLE', ['RTI_HANDLE'])
       const DDS_TopicDescription_get_name = rti.connectorBinding.api.func('DDS_TopicDescription_get_name', 'string', ['RTI_HANDLE'])
       try {
         const topic = DDS_DataReader_get_topicdescription(input.native)
-        expect(topic).not.to.be.null
+        assert.notStrictEqual(topic, null)
         const topicName = DDS_TopicDescription_get_name(topic)
-        expect(topicName).to.equal('Square')
-      } catch (err) {
-        console.log('Caught err: ' + err)
-        throw (err)
+        assert.strictEqual(topicName, 'Square')
       } finally {
         await connector.close()
       }

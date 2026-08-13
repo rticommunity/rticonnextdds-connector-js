@@ -7,27 +7,25 @@
 ******************************************************************************/
 
 const path = require('path')
-const { expect } = require('./_chai')
-const { describe, it, before, after, beforeEach, afterEach } = require('./_mocha')
-const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-
-// We have to do this due to the expect() syntax of chai and the fact
-// that we install mocha globally
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-undef */
+const assert = require('node:assert/strict')
+const { describe, it, beforeEach, afterEach } = require('node:test')
+const rti = require('../../rticonnextdds-connector')
 
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
 const testExpectSuccessTimeout = 10000
 
-describe('Output Tests', function () {
-  this.timeout(testExpectSuccessTimeout)
-  let connector = null
-  let output = null
-  let input = null
-  beforeEach(function () {
+describe('Output Tests', () => {
+  /** @type {rti.Connector} */
+  let connector
+  /** @type {rti.Output} */
+  let output
+  /** @type {rti.Input} */
+  let input
+
+  beforeEach(() => {
     const participantProfile = 'MyParticipantLibrary::Zero'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
     output = connector.getOutput('MyPublisher::MySquareWriter')
     input = connector.getInput('MySubscriber::MySquareReader')
@@ -38,19 +36,19 @@ describe('Output Tests', function () {
     await connector.close()
   })
 
-  it('Output object should not get instantiated for invalid DataWriter', function () {
+  it('Output object should not get instantiated for invalid DataWriter', () => {
     const invalidDW = 'invalidDW'
-    expect(function () {
+    assert.throws(() => {
       connector.getOutput(invalidDW)
-    }).to.throw(Error)
+    }, Error)
   })
 
   it('Output object should get instantiated for valid ' +
-      'Publication::DataWriter name', function () {
-    expect(output).to.exist
-    expect(output.name).to.equal('MyPublisher::MySquareWriter')
-    expect(output.connector).to.equal(connector)
-  })
+    'Publication::DataWriter name', () => {
+      assert.ok(output)
+      assert.strictEqual(output.name, 'MyPublisher::MySquareWriter')
+      assert.strictEqual(output.connector, connector)
+    })
 
   it('Can wait for acknowledgements on a reliable DataWriter', async () => {
     // Write data on the writer, and wait for it to be ACK'd by the reader
@@ -60,134 +58,134 @@ describe('Output Tests', function () {
     await output.wait(testExpectSuccessTimeout)
     await input.wait(testExpectSuccessTimeout)
     input.take()
-    expect(input.samples.length).to.deep.equals(1)
+    assert.strictEqual(input.samples.length, 1)
   })
 
-  it('output\'s instance should exist', function () {
-    expect(output.instance).to.exist
+  it('output\'s instance should exist', () => {
+    assert.ok(output.instance)
   })
 
   it('setNumber on non-existent field should throw error and ' +
-      'subscriber should not get a message with default values', function () {
-    expect(function () {
-      output.instance.setNumber('invalid_field', 1)
-    }).to.throw(Error)
-  })
+    'subscriber should not get a message with default values', () => {
+      assert.throws(() => {
+        output.instance.setNumber('invalid_field', 1)
+      }, Error)
+    })
 
   it('setString on non-existent field should throw error and ' +
-      'subscriber should not get a message with default values', function () {
-    expect(function () {
-      output.instance.setString('invalid_field', 'value')
-    }).to.throw(Error)
-  })
+    'subscriber should not get a message with default values', () => {
+      assert.throws(() => {
+        output.instance.setString('invalid_field', 'value')
+      }, Error)
+    })
 
   it('setBoolean on non-existent field should throw error and ' +
-      'subscriber should not get a message with default values', function () {
-    expect(function () {
-      output.instance.setBoolean('invalid_field', true)
-    }).to.throw(Error)
-  })
+    'subscriber should not get a message with default values', () => {
+      assert.throws(() => {
+        output.instance.setBoolean('invalid_field', true)
+      }, Error)
+    })
 
   it('setFromJSON should throw error for a JSON object ' +
-      'with non-existent fields and subscriber should not get ' +
-      'a message with default values', function () {
-    expect(function () {
-      const invalidData = '{"invalid_field":1}'
-      output.instance.setFromJSON(JSON.parse(invalidData))
-    }).to.throw(Error)
-  })
+    'with non-existent fields and subscriber should not get ' +
+    'a message with default values', () => {
+      assert.throws(() => {
+        const invalidData = '{"invalid_field":1}'
+        output.instance.setFromJSON(JSON.parse(invalidData))
+      }, Error)
+    })
 
-  it('setString with boolean value should throw Error', function () {
-    expect(function () {
+  it('setString with boolean value should throw Error', () => {
+    assert.throws(() => {
       const stringField = 'color'
       output.instance.setString(stringField, true)
-    }).to.throw(Error)
+    }, Error)
   })
 
-  it('setString with number value should throw Error', function () {
-    expect(function () {
+  it('setString with number value should throw Error', () => {
+    assert.throws(() => {
       const stringField = 'color'
       output.instance.setString(stringField, 11)
-    }).to.throw(Error)
+    }, Error)
   })
 
-  it('setString with JSON value should throw Error', function () {
-    expect(function () {
+  it('setString with JSON value should throw Error', () => {
+    assert.throws(() => {
       const stringField = 'color'
       output.instance.setString(stringField, { key: 'value' })
-    }).to.throw(Error)
+    }, Error)
   })
 
   it('setNumber with string value should throw Error and' +
-      'subscriber should not get a message with erroneous field data', function () {
-    expect(function () {
-      const numberField = 'x'
-      output.instance.setNumber(numberField, 'value')
-    }).to.throw(Error)
-  })
+    'subscriber should not get a message with erroneous field data', () => {
+      assert.throws(() => {
+        const numberField = 'x'
+        output.instance.setNumber(numberField, 'value')
+      }, Error)
+    })
 
-  it('Implicit type-conversion for setNumber with boolean value', function () {
-    expect(function () {
+  it('Implicit type-conversion for setNumber with boolean value', () => {
+    assert.throws(() => {
       const numberField = 'x'
       output.instance.setNumber(numberField, true)
-    }).to.throw(Error)
+    }, Error)
   })
 
   it('setNumber with JSON value should throw Error and ' +
-      'subscriber should not get a message with erroneous field data', function () {
-    expect(function () {
-      const numberField = 'x'
-      output.instance.setNumber(numberField, { key: 'value' })
-    }).to.throw(Error)
-  })
+    'subscriber should not get a message with erroneous field data', () => {
+      assert.throws(() => {
+        const numberField = 'x'
+        output.instance.setNumber(numberField, { key: 'value' })
+      }, Error)
+    })
 
   it('setBoolean with string value should throw Error and ' +
-      'subscriber should not get a  message with erroneous field data', function () {
-    expect(function () {
-      const booleanField = 'z'
-      output.instance.setBoolean(booleanField, 'value')
-    }).to.throw(Error)
-  })
+    'subscriber should not get a  message with erroneous field data', () => {
+      assert.throws(() => {
+        const booleanField = 'z'
+        output.instance.setBoolean(booleanField, 'value')
+      }, Error)
+    })
 
-  it('Implicit type-conversion for setBoolean with number value', function () {
-    expect(function () {
+  it('Implicit type-conversion for setBoolean with number value', () => {
+    assert.throws(() => {
       const booleanField = 'z'
       output.instance.setBoolean(booleanField, 1)
-    }).to.throw(Error)
+    }, Error)
   })
 
   it('setBoolean with JSON value should throw Error and ' +
-      'subscriber should not get a  message with erroneous field data', function () {
-    expect(function () {
-      const booleanField = 'z'
-      output.instance.setBoolean(booleanField, { key: 'value' })
-    }).to.throw(Error)
-  })
+    'subscriber should not get a  message with erroneous field data', () => {
+      assert.throws(() => {
+        const booleanField = 'z'
+        output.instance.setBoolean(booleanField, { key: 'value' })
+      }, Error)
+    })
 
   it('setFromJSON for JSON object with incompatible value types ' +
     'should throw Error and subscriber should not get a message with ' +
-    'erroneous field data', function () {
-    expect(function () {
-      const str = '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'
-      output.instance.setFromJSON(JSON.parse(str))
-    }).to.throw(Error)
-  })
+    'erroneous field data', () => {
+      assert.throws(() => {
+        const str = '{"x":"5","y":true,"color":true,"shapesize":"5","z":"value"}'
+        output.instance.setFromJSON(JSON.parse(str))
+      }, Error)
+    })
 
-  it('Use the type independent set with invalid fieldName', function () {
-    expect(function () {
+  it('Use the type independent set with invalid fieldName', () => {
+    assert.throws(() => {
       output.instance.set(123, 123)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
-  it('Calling the type-independent set with non-existent field name', function () {
-    expect(function () {
+  it('Calling the type-independent set with non-existent field name', () => {
+    assert.throws(() => {
       output.instance.set('non-existent-member', 123)
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
-  it('Try to set a bad JSON value', function () {
-    expect(function () {
+  it('Try to set a bad JSON value', () => {
+    assert.throws(() => {
       output.instance.set('whatever', { x: 12, y: 30 })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 })
