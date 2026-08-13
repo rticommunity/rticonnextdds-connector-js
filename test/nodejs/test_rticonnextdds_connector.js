@@ -53,10 +53,10 @@ describe('Connector Tests', () => {
       connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
 
-    connectors.forEach(async (connector) => {
+    for (const connector of connectors) {
       assert.ok(connector instanceof rti.Connector)
       await connector.close()
-    })
+    }
   })
 
   // Test for CON-163
@@ -67,10 +67,10 @@ describe('Connector Tests', () => {
     for (let i = 0; i < 2; i++) {
       connectors.push(new rti.Connector(participantProfile, xmlProfile))
     }
-    connectors.forEach(async (connector) => {
+    for (const connector of connectors) {
       assert.ok(connector instanceof rti.Connector)
       await connector.close()
-    })
+    }
   })
 
   it('Load two XML files using the url group syntax', async () => {

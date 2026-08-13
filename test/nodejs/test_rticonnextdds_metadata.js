@@ -269,14 +269,10 @@ describe('accessing key values after instance disposal', () => {
     const output = connector.getOutput('MyPublisher::MySquareWriter')
     assert.ok(input)
     // Wait for discovery between the 2 entities
-    try {
-      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      throw err
-    }
+    let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
+    newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('color', 'Yellow')
     output.instance.setNumber('x', 2)
@@ -324,14 +320,10 @@ describe('accessing key values after instance disposal', () => {
     const output = connector.getOutput('MyPublisher::MyMultipleKeyedSquareWriter')
     assert.ok(input)
     // Wait for discovery between the 2 entities
-    try {
-      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      throw err
-    }
+    let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
+    newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
     // This type has multiple key fields, set them all
     output.instance.setString('color', 'Brown')
     output.instance.setString('other_color', 'Blue')
@@ -401,14 +393,10 @@ describe('accessing key values after instance disposal', () => {
     const output = connector.getOutput('MyPublisher::MyNestedKeyedSquareWriter')
     assert.ok(input)
     // Wait for discovery between the 2 entities
-    try {
-      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      throw err
-    }
+    let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
+    newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
     // Set the sample's fields
     output.instance.setString('keyed_shape.color', 'Black')
     output.instance.setNumber('keyed_shape.x', 2)
@@ -507,14 +495,10 @@ describe('accessing key values after instance disposal', () => {
     const output = connector.getOutput('MyPublisher::MySquareWriter')
     assert.ok(input)
     // Wait for discovery between the 2 entities
-    try {
-      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      throw err
-    }
+    let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
+    newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('color', 'Yellow')
     output.instance.setNumber('x', 2)
@@ -567,14 +551,10 @@ describe('accessing key values after instance disposal', () => {
     const output = connector.getOutput('MyPublisher::MySquareWithoutTopLevelKeyWriter')
     assert.ok(input)
     // Wait for discovery between the 2 entities
-    try {
-      let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-      newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      throw err
-    }
+    let newMatches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
+    newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
     // Set some of the fields within the shape type (including the key)
     output.instance.setString('unkeyed_shape.color', 'Yellow')
     output.instance.setNumber('unkeyed_shape.x', 2)

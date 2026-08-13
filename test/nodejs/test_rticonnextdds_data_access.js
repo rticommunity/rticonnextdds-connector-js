@@ -59,25 +59,13 @@ describe('Data access tests with a pre-populated input', () => {
     assert.ok(output)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.ok(matches >= 1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw (err)
-    }
+    const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.ok(matches >= 1)
     // Write data on the the output
     output.instance.setFromJson(testJsonObject)
     output.write()
     // Wait for data to arrive on input
-    try {
-      await prepopulatedInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw (err)
-    }
+    await prepopulatedInput.wait(testExpectSuccessTimeout)
     // Take the data on the input so that we can access it from the test
     prepopulatedInput.take()
     assert.strictEqual(prepopulatedInput.samples.length, 1)
@@ -445,13 +433,8 @@ describe('Tests with a testOutput and testInput', () => {
     assert.ok(testOutput)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      console.log('Caught err ' + err)
-      throw (err)
-    }
+    const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
   })
 
   afterEach(async () => {
@@ -529,13 +512,7 @@ describe('Tests with a testOutput and testInput', () => {
       my_key_string: 'hello'
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const receivedJsonObject = testInput.samples.get(0).getJson()
     assert.deepStrictEqual(receivedJsonObject, testJsonObject)
@@ -569,12 +546,7 @@ describe('Tests with a testOutput and testInput', () => {
     const sent = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     testOutput.instance.set('my_int_sequence', sent)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const received = testInput.samples.get(0).get('my_int_sequence')
     assert.deepStrictEqual(received, sent)
@@ -588,12 +560,7 @@ describe('Tests with a testOutput and testInput', () => {
     const sent = [{ x: 1, y: 2 }, { x: 3, y: 4 }]
     testOutput.instance.set('my_point_sequence', sent)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const received = testInput.samples.get(0).get('my_point_sequence')
     assert.deepStrictEqual(received, sent)
@@ -602,12 +569,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('The type-independent get should return the same result as getJson', async () => {
     testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, y: 4 }] })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.deepStrictEqual(sample.getJson('my_point_sequence'), sample.get('my_point_sequence'))
@@ -616,13 +578,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('Set a boolean field using setNumber and check the resultant value on an input', async () => {
     testOutput.instance.setNumber('my_optional_bool', 1)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const theOptionalBool = testInput.samples.get(0).get('my_optional_bool')
     assert.strictEqual(theOptionalBool, true)
@@ -631,13 +587,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('Set a string with a number and check the resultant value on an input', async () => {
     testOutput.instance.setString('my_string', '1234')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const theNumericString = testInput.samples.get(0).get('my_string')
     assert.strictEqual(theNumericString, '1234')
@@ -648,13 +598,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_int_sequence[1]', 2)
     testOutput.instance.setNumber('my_point_array[4].x', 5)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.get('my_point_sequence[0].y'), 20)
@@ -667,13 +611,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('Change union members', async () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
     assert.strictEqual(sample.getString('my_union#'), 'my_int_sequence')
@@ -681,13 +619,7 @@ describe('Tests with a testOutput and testInput', () => {
     // Change the union to long
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
     assert.strictEqual(sample.getString('my_union#'), 'my_long')
@@ -697,25 +629,14 @@ describe('Tests with a testOutput and testInput', () => {
   it('Change union members', async () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
     assert.strictEqual(sample.getString('my_union#'), 'my_int_sequence')
     // Change the union
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
     assert.strictEqual(sample.getString('my_union#'), 'my_long')
@@ -725,13 +646,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_point.x', 101)
     testOutput.instance.setNumber('my_point_alias.x', 202)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_optional_point.x'), 101)
@@ -740,13 +655,7 @@ describe('Tests with a testOutput and testInput', () => {
 
   it('Get an unset optional boolean', async () => {
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const unsetOptional = testInput.samples.get(0).getBoolean('my_optional_bool')
     assert.strictEqual(unsetOptional, null)
@@ -791,13 +700,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_long', 33)
     testOutput.instance.setNumber('my_optional_long', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_optional_long'), null)
@@ -808,13 +711,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setBoolean('my_optional_bool', true)
     testOutput.instance.setBoolean('my_optional_bool', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_optional_bool'), null)
@@ -827,13 +724,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_optional_point')
     testOutput.instance.clearMember('my_point_alias')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
@@ -847,13 +738,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point.x', 3)
     testOutput.instance.clearMember('my_union.my_int_sequence')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_union.my_int_sequence#'), 0)
@@ -879,13 +764,7 @@ describe('Tests with a testOutput and testInput', () => {
       my_enum: null
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
@@ -917,13 +796,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point.x', 3)
     testOutput.instance.setNumber('my_point_sequence[1].x', 44)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_union.my_int_sequence#'), 3)
@@ -932,13 +805,7 @@ describe('Tests with a testOutput and testInput', () => {
 
     testOutput.instance.setFromJson({ my_int_sequence: [] })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_int_sequence#'), 0)
@@ -952,13 +819,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_point.x', 44)
     testOutput.clearMembers()
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getBoolean('my_optional_bool'), null)
@@ -971,13 +832,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_optional_bool', null)
     testOutput.instance.set('my_optional_point', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getBoolean('my_optional_bool'), null)
@@ -988,13 +843,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setString('my_string', 'Hello, World!')
     testOutput.instance.setString('my_string', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getString('my_string'), '')
@@ -1021,13 +870,7 @@ describe('Tests with a testOutput and testInput', () => {
       my_point_array: [{ x: 100 }, { y: 200 }]
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.getNumber('my_int_sequence#'), 1)
@@ -1047,13 +890,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_int64', 42)
     testOutput.instance.set('my_point_sequence[0].x', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
     assert.strictEqual(sample.get('my_string'), 'Hello, World!')
@@ -1065,13 +902,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('Reset an optional member using the type independent set method', async () => {
     testOutput.instance.set('my_optional_bool', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.strictEqual(testInput.samples.get(0).get('my_optional_bool'), null)
   })
@@ -1081,12 +912,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setFromJson({ 'my_point_sequence[2].x': 111 })
     testOutput.instance.set('my_point_sequence[3]', { x: 444, y: 555 })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[2]'), { x: 111, y: 153 })
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[3]'), { x: 444, y: 555 })
@@ -1097,13 +923,7 @@ describe('Tests with a testOutput and testInput', () => {
     const jsonObj = { x: 9, y: 12 }
     testOutput.instance.set('my_point', jsonObj)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point'), jsonObj)
   })
@@ -1114,12 +934,7 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_int_sequence', intSeq)
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.deepStrictEqual(testInput.samples.get(0).get('my_int_sequence'), intSeq)
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence'), pointSeq)
@@ -1129,24 +944,14 @@ describe('Tests with a testOutput and testInput', () => {
     let pointSeq = [{ x: 100, y: 200 }, { x: 300, y: 400 }, { x: 500, y: 600 }]
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence'), pointSeq)
     // Now we clear an element in the middle of the sequence
     pointSeq = [{ x: 100, y: 200 }, null, { x: 500, y: 600 }]
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[0]'), { x: 100, y: 200 })
     assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[1]'), { x: 0, y: 0 })
@@ -1156,12 +961,7 @@ describe('Tests with a testOutput and testInput', () => {
   it('Can set enum via name', async () => {
     testOutput.instance.setFromJson({ my_enum: 'GREEN' })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      throw err
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     assert.strictEqual(testInput.samples.get(0).get('my_enum'), 1)
   })
@@ -1199,12 +999,7 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: '9007199254740993'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // The values of the 64-bit integers is too large to retrieve with getNumber
@@ -1220,12 +1015,7 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: '-9007199254740993'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       assert.throws(() => {
         testInput.samples.get(0).getNumber('my_int64')
@@ -1239,12 +1029,7 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: '-9007199254740992'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // Obtain the values and confirm they are correct
@@ -1274,12 +1059,7 @@ describe('Tests with a testOutput and testInput', () => {
       testOutput.instance.setNumber('my_uint64', Number.MAX_SAFE_INTEGER)
       testOutput.instance.setNumber('my_int64', Number.MAX_SAFE_INTEGER)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       // Confirm that the values are correct and not corrupted
       assert.strictEqual(testInput.samples.get(0).getNumber('my_uint64'), Number.MAX_SAFE_INTEGER)
@@ -1288,12 +1068,7 @@ describe('Tests with a testOutput and testInput', () => {
       // Also do same test with minimum value
       testOutput.instance.setNumber('my_int64', Number.MIN_SAFE_INTEGER)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       assert.strictEqual(testInput.samples.get(0).getNumber('my_int64'), Number.MIN_SAFE_INTEGER)
     })
@@ -1302,12 +1077,7 @@ describe('Tests with a testOutput and testInput', () => {
       testOutput.instance.setString('my_uint64', '9007199254740993')
       testOutput.instance.setString('my_int64', '-9007199254740993')
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       assert.strictEqual(testInput.samples.get(0).getString('my_uint64'), '9007199254740993')
       assert.strictEqual(testInput.samples.get(0).getString('my_int64'), '-9007199254740993')
@@ -1320,12 +1090,7 @@ describe('Tests with a testOutput and testInput', () => {
         my_uint64: largeIntAsString
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       assert.strictEqual(typeof testInput.samples.get(0).get('my_uint64'), 'string')
       assert.strictEqual(testInput.samples.get(0).get('my_uint64'), largeIntAsString)
@@ -1339,12 +1104,7 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: Number.MIN_SAFE_INTEGER
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       assert.strictEqual(testInput.samples.get(0).get('my_uint64'), Number.MAX_SAFE_INTEGER)
       assert.strictEqual(typeof testInput.samples.get(0).get('my_uint64'), 'number')
@@ -1359,12 +1119,7 @@ describe('Tests with a testOutput and testInput', () => {
       testOutput.instance.set('my_uint64', '18446744073709551615')
       testOutput.instance.set('my_int64', '9223372036854775807')
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       // The values will be returned as strings since they are > 2^53
       assert.strictEqual(testInput.samples.get(0).get('my_uint64'), '18446744073709551615')
@@ -1380,12 +1135,7 @@ describe('Tests with a testOutput and testInput', () => {
       }
       testOutput.instance.setFromJson(jsonTx)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        throw err
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // The JSON.parse() call done in getFromJSON will result in the
@@ -1406,7 +1156,7 @@ describe('Tests with two readers and two writers', () => {
 
   beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
     assert.ok(connector instanceof rti.Connector)
     testInput1 = connector.getInput('TestSubscriber::TestReader')
@@ -1419,20 +1169,10 @@ describe('Tests with two readers and two writers', () => {
     assert.ok(testOutput2)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const newMatches = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
-    try {
-      const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
-      assert.strictEqual(newMatches, 1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    const newMatches1 = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches1, 1)
+    const newMatches2 = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches2, 1)
   })
 
   afterEach(async () => {
@@ -1445,89 +1185,59 @@ describe('Tests with two readers and two writers', () => {
   // Since we have not written any data, all different forms of wait for data
   // should timeout
   it('waiting for data on connector should timeout', async () => {
-    try {
-      await connector.wait(testExpectFailureTimeout)
-      assert.fail('Expected timeout but connector.wait succeeded')
-    } catch (err) {
-      assert.ok(err instanceof rti.TimeoutError)
-    }
+    await assert.rejects(
+      connector.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('waiting for data on testInput should timeout', async () => {
-    try {
-      await testInput1.wait(testExpectFailureTimeout)
-      assert.fail('Expected timeout but testInput1.wait succeeded')
-    } catch (err) {
-      assert.ok(err instanceof rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput1.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('waiting for data on testInput2 should timeout', async () => {
-    try {
-      await testInput2.wait(testExpectFailureTimeout)
-      assert.fail('Expected timeout but testInput2.wait succeeded')
-    } catch (err) {
-      assert.ok(err instanceof rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput2.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('Writing data on a testOutput1 should wake up connector.wait', async () => {
     testOutput1.write()
-    try {
-      await connector.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await connector.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput1 should wake up testInput1.wait', async () => {
     testOutput1.write()
-    try {
-      await testInput1.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput1.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput1 should not wake up testInput2.wait', async () => {
     testOutput1.write()
-    try {
-      await testInput2.wait(testExpectFailureTimeout)
-      assert.fail('Expected timeout but testInput2.wait succeeded')
-    } catch (err) {
-      assert.ok(err instanceof rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput2.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('Writing data on a testOutput2 should wake up connector.wait', async () => {
     testOutput2.write()
-    try {
-      await connector.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await connector.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput2 should wake up testInput2.wait', async () => {
     testOutput2.write()
-    try {
-      await testInput2.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput2.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput2 should not wake up testInput1.wait', async () => {
     testOutput2.write()
-    try {
-      await testInput1.wait(testExpectFailureTimeout)
-      assert.fail('Expected timeout but testInput1.wait succeeded')
-    } catch (err) {
-      assert.ok(err instanceof rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput1.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 })

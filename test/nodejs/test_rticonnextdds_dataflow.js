@@ -74,8 +74,6 @@ params.forEach((retrievalMethod) => {
       assert.strictEqual(validity, true)
     })
 
-    it('')
-
     it('received JSON representation of data should be the same as ' +
       'the JSON object sent', () => {
         const receivedJson = input.samples.getJSON(0)
