@@ -17,9 +17,8 @@
     "koffi": "^2.8.9"
   },
   "scripts": {
-    "test": "mocha ./test/nodejs/",
-    "test-junit": "mocha ./test/nodejs/ --reporter mocha-junit-reporter",
-    "test-json": "mocha ./test/nodejs/ --reporter json --reporter-option output=test-results.json"
+    "test": "node --test --test-concurrency=1 ./test/nodejs/test_*.js",
+    "test-junit": "node --test --test-concurrency=1 --test-reporter junit --test-reporter-destination test-results.xml ./test/nodejs/test_*.js"
   },
   "keywords": [
     "rti",
@@ -35,12 +34,5 @@
   "bugs": {
     "url": "https://github.com/rticommunity/rticonnextdds-connector-js/issues"
   },
-  "homepage": "https://github.com/rticommunity/rticonnextdds-connector-js",
-  "devDependencies": {
-    "chai": "^4.3.4",
-    "chai-as-promised": "^7.1.1",
-    "mocha": "^10.2.0",
-    "mocha-junit-reporter": "^2.2.0",
-    "sinon": "^10.0.0"
-  }
+  "homepage": "https://github.com/rticommunity/rticonnextdds-connector-js"
 }

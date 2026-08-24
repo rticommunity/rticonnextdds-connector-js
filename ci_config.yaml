@@ -1,6 +1,5 @@
 node_versions:
   - "18" # Kept for CI, but ignored in release notes
-  - "19" # ^
   - "20"
   - "22"
   - "24"
