@@ -12,6 +12,29 @@ const { setTimeout: sleep } = require('node:timers/promises')
 const { describe, it, before, after, mock } = require('node:test')
 const rti = require('../../rticonnextdds-connector')
 
+/**
+ * @param {() => boolean} condition - A function that returns a boolean indicating whether the condition is met.
+ * @param {Object} options - An object containing the timeout and interval values.
+ * @param {number} options.timeout - The maximum time to wait for the condition to be met (in milliseconds).
+ * @param {number} options.interval - The time to wait between checks of the condition (in milliseconds).
+ * @returns {Promise<void>} A promise that resolves if the condition is met within the timeout, or rejects if the timeout is reached.
+ */
+async function assertEventually(condition, { timeout, interval } = {}) {
+  const startTime = Date.now()
+  timeout ||= 1000
+  interval ||= 10
+
+  while (true) {
+    if (condition()) {
+      return
+    }
+    if (Date.now() - startTime > timeout) {
+      throw new assert.AssertionError('Condition not met within timeout')
+    }
+    await sleep(interval)
+  }
+}
+
 describe('Connector Tests', () => {
   it('Connector should throw an error for invalid xml path', () => {
     const participantProfile = 'MyParticipantLibrary::Zero'
@@ -144,36 +167,33 @@ describe('Connector Tests', () => {
     })
 
     it('on_data_available callback gets called when data is available', async () => {
-      // spies are used for testing callbacks
-      const spy = mock.fn()
-      connector.once('on_data_available', spy)
+      const listenerMock = mock.fn()
+      connector.once('on_data_available', listenerMock)
       const output = connector.getOutput('MyPublisher::MySquareWriter')
       const testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
       output.instance.setFromJson(JSON.parse(testMsg))
       output.write()
-      await sleep(1000)
-      assert.strictEqual(spy.mock.callCount(), 1)
+      await assertEventually(() => listenerMock.mock.callCount() === 1, { timeout: 1000 })
     })
 
     it('on_data_available emits the error event on error', async () => {
-      const errorSpy = mock.fn()
+      const errorMock = mock.fn()
       // We expect the "error" event to be emitted within the next second
-      connector.once('error', errorSpy)
+      connector.once('error', errorMock)
       // Need to cause the onDataAvailable callback to throw an error, we do
       // this by concurrently waiting on the same connector object
       connector.wait(500)
       connector.once('on_data_available', () => { })
       // We expect the "error" event to be emitted within the next second
-      await sleep(1000)
-      assert.strictEqual(errorSpy.mock.callCount(), 1)
+      await assertEventually(() => errorMock.mock.callCount() === 1, { timeout: 1000 })
       connector.removeAllListeners('on_data_available')
     })
 
     it('internal waitset is waited on repeatedly within on_data_available', async () => {
       // We expect the data to be received within the next second
-      const spy = mock.fn()
+      const listenerMock = mock.fn()
       // Set the listener
-      connector.once('on_data_available', spy)
+      connector.once('on_data_available', listenerMock)
       // Internally, on_data_available calls connector.wait every 500ms.
       // Test that if no data is received within the first 500ms, we call wait
       // multiple times
@@ -181,9 +201,8 @@ describe('Connector Tests', () => {
       const testMsg = '{"x":1,"y":1,"z":true,"color":"BLUE","shapesize":5}'
       output.instance.setFromJson(JSON.parse(testMsg))
       // Write the data after 1000ms, then expect it received within 1500ms total
-      sleep(1000).then(() => output.write())
-      await sleep(1500)
-      assert.strictEqual(spy.mock.callCount(), 1)
+      await sleep(1000).then(() => output.write())
+      await assertEventually(() => listenerMock.mock.callCount() === 1, { timeout: 1500 })
     })
   })
 })
