@@ -7,202 +7,158 @@
 ******************************************************************************/
 
 const path = require('path')
-const expect = require('chai').expect
-const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-const sinon = require('sinon')
+const assert = require('node:assert/strict')
+const { describe, it, beforeEach, afterEach, mock } = require('node:test')
+const rti = require('../../rticonnextdds-connector')
 const events = require('events')
-
-// We have to do this due to the expect() syntax of chai and the fact
-// that we install mocha globally
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-undef */
 
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
 const testExpectSuccessTimeout = 10000
 
-describe('Connector EventEmitter tests', function () {
-  this.timeout(testExpectSuccessTimeout)
-  let connector = null
-  let input = null
-  let output = null
+describe('Connector EventEmitter tests', () => {
+  /** @type {rti.Connector} */
+  let connector
+  /** @type {rti.Input} */
+  let input
+  /** @type {rti.Output} */
+  let output
 
   beforeEach(async () => {
     // Create the connector object
-    const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlPath = path.resolve(__dirname, '../xml/TestConnector.xml')
     const profile = 'MyParticipantLibrary::DataAccessTest'
     connector = new rti.Connector(profile, xmlPath)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
     input = connector.getInput('TestSubscriber::TestReader')
-    expect(input).to.exist
+    assert.ok(input)
     output = connector.getOutput('TestPublisher::TestWriter')
-    expect(output).to.exist
+    assert.ok(output)
 
     // Wait for the entities to match
-    try {
-      const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
-      expect(newMatches).to.be.at.least(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw err
-    }
+    const newMatches = await input.waitForPublications(testExpectSuccessTimeout)
+    assert.ok(newMatches >= 1)
   })
 
   afterEach(async () => {
     await connector.close()
   })
 
-  it('Callback should be called when event is emitted', (done) => {
-    const spy = sinon.spy()
-    connector.on('on_data_available', spy)
+  it('Callback should be called when event is emitted', () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
     connector.emit('on_data_available')
-    expect(spy.calledOnce).to.be.true
-    connector.removeListener('on_data_available', spy)
-    done()
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+    connector.removeListener('on_data_available', listenerMock)
   })
 
-  it('When no data is written, no event should be emitted', (done) => {
-    const spy = sinon.spy()
-    connector.on('on_data_available', spy)
-    setTimeout(() => {
-      expect(spy.notCalled).to.be.true
-      done()
-    }, 250)
+  it('When no data is written, no event should be emitted', async () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
+    await new Promise(resolve => setTimeout(resolve, 250))
+    assert.strictEqual(listenerMock.mock.callCount(), 0)
   })
 
-  it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', (done) => {
-    const spy = sinon.spy()
-    connector.on('on_data_available', spy)
-    // Internally, the connector's waitset is now busy
-    connector.wait(500)
-      .then(() => {
-        // This should not have been possible
-        console.log('Error occurred. Expected wait to fail due to waitSetBusy')
-        throw (err)
-      })
-      .catch((err) => {
-        expect(err.message).to.deep.equals('Can not concurrently wait on the same Connector object')
-        done()
-      })
+  it('It should not be possible to register the event listener and have a Promise waiting for data simultaneously', async () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
+    const err = await connector.wait(500).then(() => null).catch(e => e)
+    assert.strictEqual(err.message, 'Can not concurrently wait on the same Connector object')
   })
 
   it('Using .removeAllListeners() should remove all eventListeners', () => {
-    const spy1 = sinon.spy()
-    const spy2 = sinon.spy()
-    connector.on('on_data_available', spy1)
-    connector.on('on_data_available', spy2)
-    expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
+    const arrayLikeIterable = { length: 2 }
+    const listenerMocks = Array.from(arrayLikeIterable, () => mock.fn())
+    for (const listenerMock of listenerMocks) {
+      connector.on('on_data_available', listenerMock)
+    }
+    assert.strictEqual(connector.listenerCount('on_data_available'), 2)
+
     connector.removeAllListeners('on_data_available')
-    expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
+
+    assert.strictEqual(connector.listenerCount('on_data_available'), 0)
   })
 
-  it('Should be possible to re-use a Connector after calling waitForCallbackFinalization', (done) => {
-    const spy = sinon.spy()
-    connector.on('on_data_available', spy)
-    expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
+  it('Should be possible to re-use a Connector after calling waitForCallbackFinalization', async () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 1)
     connector.emit('on_data_available')
-    expect(spy.calledOnce).to.be.true
-    connector.removeListener('on_data_available', spy)
-    expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-    connector.waitForCallbackFinalization()
-      .then(() => {
-        connector.on('on_data_available', spy)
-        expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
-        connector.emit('on_data_available')
-        expect(spy.calledTwice).to.be.true
-        done()
-      })
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+    connector.removeListener('on_data_available', listenerMock)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 0)
+    await connector.waitForCallbackFinalization()
+    connector.on('on_data_available', listenerMock)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 1)
+    connector.emit('on_data_available')
+    assert.strictEqual(listenerMock.mock.callCount(), 2)
   })
 
-  // We use the events.once() API to detect when an event has occured. It is not
-  // available in all versions of node (added in v11.12), so run these next
-  // test conditionally
-  if (typeof events.once === 'function') {
-    it('Event should be emitted when data is available on an input', (done) => {
-      const spy = sinon.spy()
-      connector.on('on_data_available', spy)
-      output.write()
-      events.once(connector, 'on_data_available')
-        .then(() => {
-          expect(spy.calledOnce).to.be.true
-          done()
-        })
-    })
+  it('Event should be emitted when data is available on an input', async () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+  })
 
-    it('Connector.once() should automatically unregister the callback after data is received', (done) => {
-      const spy = sinon.spy()
-      connector.once('on_data_available', spy)
-      output.write()
-      events.once(connector, 'on_data_available')
-        .then(() => {
-          expect(spy.calledOnce).to.be.true
-          expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-          // Writing again
-          output.write()
-          return events.once(connector, 'on_data_available')
-        })
-        .then(() => {
-          // Should still only have a single call
-          expect(spy.calledOnce).to.be.true
-          done()
-        })
-    })
+  it('Connector.once() should automatically unregister the callback after data is received', async () => {
+    const listenerMock = mock.fn()
+    connector.once('on_data_available', listenerMock)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 0)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+  })
 
-    it('Should be possible to add multiple callbacks for the same event', (done) => {
-      const spy1 = sinon.spy()
-      const spy2 = sinon.spy()
-      connector.on('on_data_available', spy1)
-      connector.on('on_data_available', spy2)
-      expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
-      output.write()
-      events.once(connector, 'on_data_available')
-        .then(() => {
-          expect(spy1.calledOnce).to.be.true
-          expect(spy2.calledOnce).to.be.true
-          done()
-        })
-    })
+  it('Should be possible to add multiple callbacks for the same event', async () => {
+    const arrayLikeIterable = { length: 2 }
+    const listenerMocks = Array.from(arrayLikeIterable, () => mock.fn())
+    for (const listenerMock of listenerMocks) {
+      connector.on('on_data_available', listenerMock)
+    }
+    assert.strictEqual(connector.listenerCount('on_data_available'), 2)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    for (const listenerMock of listenerMocks) {
+      assert.strictEqual(listenerMock.mock.callCount(), 1)
+    }
+  })
 
-    it('Possible to uninstall the eventListener with .off()', (done) => {
-      const spy = sinon.spy()
-      connector.on('on_data_available', spy)
-      output.write()
-      events.once(connector, 'on_data_available')
-        .then(() => {
-          expect(spy.calledOnce).to.be.true
-          connector.removeListener('on_data_available', spy)
-          expect(connector.listenerCount('on_data_available')).to.deep.equals(0)
-          // Writing again
-          output.write()
-          setTimeout(() => {
-            // We should still only have a single call to the spy callback
-            expect(spy.calledOnce).to.be.true
-            done()
-          }, 250)
-        })
-    })
+  it('Possible to uninstall the eventListener with .off()', async () => {
+    const listenerMock = mock.fn()
+    connector.on('on_data_available', listenerMock)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+    connector.removeListener('on_data_available', listenerMock)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 0)
+    output.write()
+    await new Promise(resolve => setTimeout(resolve, 250))
+    assert.strictEqual(listenerMock.mock.callCount(), 1)
+  })
 
-    it('Using .off() should only unregister the supplied callback, if multiple are registered', (done) => {
-      const spy1 = sinon.spy()
-      const spy2 = sinon.spy()
-      connector.on('on_data_available', spy1)
-      connector.on('on_data_available', spy2)
-      expect(connector.listenerCount('on_data_available')).to.deep.equals(2)
-      output.write()
-      events.once(connector, 'on_data_available')
-        .then(() => {
-          expect(spy1.calledOnce).to.be.true
-          expect(spy2.calledOnce).to.be.true
-          connector.removeListener('on_data_available', spy1)
-          expect(connector.listenerCount('on_data_available')).to.deep.equals(1)
-          output.write()
-          return events.once(connector, 'on_data_available')
-        })
-        .then(() => {
-          expect(spy1.calledOnce).to.be.true
-          expect(spy2.calledTwice).to.be.true
-          done()
-        })
-    })
-  }
+  it('Using .off() should only unregister the supplied callback, if multiple are registered', async () => {
+    const arrayLikeIterable = { length: 2 }
+    const listenerMocks = Array.from(arrayLikeIterable, () => mock.fn())
+    for (const listenerMock of listenerMocks) {
+      connector.on('on_data_available', listenerMock)
+    }
+    assert.strictEqual(connector.listenerCount('on_data_available'), 2)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    for (const listenerMock of listenerMocks) {
+      assert.strictEqual(listenerMock.mock.callCount(), 1)
+    }
+    const [spy1, spy2] = listenerMocks
+    connector.removeListener('on_data_available', spy1)
+    assert.strictEqual(connector.listenerCount('on_data_available'), 1)
+    output.write()
+    await events.once(connector, 'on_data_available')
+    assert.strictEqual(spy1.mock.callCount(), 1)
+    assert.strictEqual(spy2.mock.callCount(), 2)
+  })
 })

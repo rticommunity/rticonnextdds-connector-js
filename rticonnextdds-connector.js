@@ -2109,10 +2109,14 @@ class Connector extends EventEmitter {
   }
 }
 
-// Export the API
-module.exports.Connector = Connector
-// Export the binding, so that the customer has access to the library if desired
-module.exports.connectorBinding = connectorBinding
-// Export the Error types so the customer can handle them explicitly
-module.exports.TimeoutError = TimeoutError
-module.exports.DDSError = DDSError
+module.exports = {
+  // Export the API
+  Connector,
+  Input,
+  Output,
+  // Export the binding, so that the customer has access to the library if desired
+  connectorBinding,
+  // Export the Error types so the customer can handle them explicitly
+  TimeoutError,
+  DDSError
+}

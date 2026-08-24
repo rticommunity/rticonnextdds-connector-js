@@ -8,19 +8,9 @@
 
 const path = require('path')
 const os = require('os')
-const chai = require('chai')
-const koffi = require('koffi')
-const chaiAsPromised = require('chai-as-promised')
-const { deepStrictEqual } = require('assert')
-const expect = chai.expect
-chai.config.includeStack = true
-chai.use(chaiAsPromised)
-const rti = require(path.join(__dirname, '/../../rticonnextdds-connector'))
-
-// We have to do this due to the expect() syntax of chai and the fact
-// that we install mocha globally
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-undef */
+const assert = require('node:assert/strict')
+const { describe, it, beforeEach, afterEach } = require('node:test')
+const rti = require('../../rticonnextdds-connector')
 
 // We provide a timeout of 10s to operations that we expect to succeed. This
 // is so that if they fail, we know for sure something went wrong
@@ -30,11 +20,15 @@ const testExpectSuccessTimeout = 10000
 const testExpectFailureTimeout = 500
 
 // These tests test the different ways to access data in Instance and SampleIterator
-describe('Data access tests with a pre-populated input', function () {
-  let connector = null
-  let output = null
-  let prepopulatedInput = null
-  let sample = null
+describe('Data access tests with a pre-populated input', () => {
+  /** @type {rti.Connector} */
+  let connector
+  /** @type {rti.Output} */
+  let output
+  /** @type {rti.Input} */
+  let prepopulatedInput
+  /** @type {object} */
+  let sample
   const testJsonObject = {
     my_long: 10,
     my_double: 3.3,
@@ -58,37 +52,25 @@ describe('Data access tests with a pre-populated input', function () {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlPath = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlPath)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
     prepopulatedInput = connector.getInput('TestSubscriber::TestReader2')
-    expect(prepopulatedInput).to.exist
+    assert.ok(prepopulatedInput)
     output = connector.getOutput('TestPublisher::TestWriter2')
-    expect(output).to.exist
+    assert.ok(output)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(matches).to.be.at.least(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw (err)
-    }
+    const matches = await output.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.ok(matches >= 1)
     // Write data on the the output
     output.instance.setFromJson(testJsonObject)
     output.write()
     // Wait for data to arrive on input
-    try {
-      await prepopulatedInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      throw (err)
-    }
+    await prepopulatedInput.wait(testExpectSuccessTimeout)
     // Take the data on the input so that we can access it from the test
     prepopulatedInput.take()
-    expect(prepopulatedInput.samples.length).to.deep.equals(1)
+    assert.strictEqual(prepopulatedInput.samples.length, 1)
     sample = prepopulatedInput.samples.get(0)
-    expect(sample.validData).to.be.true
+    assert.ok(sample.validData)
   })
 
   afterEach(async () => {
@@ -98,327 +80,329 @@ describe('Data access tests with a pre-populated input', function () {
   })
 
   it('getNumber should return a number', () => {
-    expect(sample.getNumber('my_long')).to.deep.equals(10).and.is.a('number')
-    expect(sample.get('my_long')).to.deep.equals(10).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_long'), 10)
+    assert.strictEqual(sample.get('my_long'), 10)
   })
 
   it('getNumber requires a valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getNumber('NAN', 'my_long')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getNumber requires a valid field name', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getNumber(0, 1)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getString on a number field should return a string', () => {
-    expect(sample.getString('my_long')).to.deep.equals('10').and.is.a('string')
+    assert.strictEqual(sample.getString('my_long'), '10')
     // Even though 3.3 was set, it cannot be perfectly represetned as a double
-    expect(sample.getString('my_double')).to.deep.equals('3.2999999999999998').and.is.a('string')
+    assert.strictEqual(sample.getString('my_double'), '3.2999999999999998')
   })
 
   it('getString requires a valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getString('NaN', 'my_string')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getString requires a valid field name', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getString(0, 1)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getBoolean should return a boolean', () => {
-    expect(sample.getBoolean('my_optional_bool')).to.be.true.and.is.a('boolean')
-    expect(sample.get('my_optional_bool')).to.be.true.and.is.a('boolean')
+    assert.strictEqual(sample.getBoolean('my_optional_bool'), true)
+    assert.strictEqual(sample.get('my_optional_bool'), true)
   })
 
   it('getBoolean requires a valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getBoolean('NAN', 'my_optional_bool')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getBoolean requires a valid field name', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getBoolean(0, 1)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getValue requires a valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getValue('NAN', 'my_optional_bool')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getValue requires a valid field name', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getValue(0, 1)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('getNumber on a boolean field should return a number', () => {
-    expect(sample.getNumber('my_optional_bool')).to.deep.equals(1).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_optional_bool'), 1)
   })
 
   it('getNumber on an enum should return the set value', () => {
-    expect(sample.getNumber('my_enum')).to.deep.equals(1).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_enum'), 1)
   })
 
   it('access a value nested within a struct', () => {
-    expect(sample.getNumber('my_point.x')).to.deep.equals(3).and.is.a('number')
-    expect(sample.getNumber('my_point.y')).to.deep.equals(4).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_point.x'), 3)
+    assert.strictEqual(sample.getNumber('my_point.y'), 4)
   })
 
   it('access values and sizes of sequences and arrays', () => {
-    expect(sample.getNumber('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
-    expect(sample.get('my_point_sequence[0].y')).to.deep.equals(20).and.is.a('number')
-    expect(sample.getNumber('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
-    expect(sample.get('my_int_sequence[1]')).to.deep.equals(2).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_point_sequence[0].y'), 20)
+    assert.strictEqual(sample.get('my_point_sequence[0].y'), 20)
+    assert.strictEqual(sample.getNumber('my_int_sequence[1]'), 2)
+    assert.strictEqual(sample.get('my_int_sequence[1]'), 2)
     // The '#' appended to the type name should provide the length
-    expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
-    expect(sample.get('my_point_sequence#')).to.deep.equals(2).and.is.a('number')
-    expect(sample.getNumber('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
-    expect(sample.get('my_int_sequence#')).to.deep.equals(3).and.is.a('number')
-    expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
-    expect(sample.get('my_point_array[4].x')).to.deep.equals(5).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_point_sequence#'), 2)
+    assert.strictEqual(sample.get('my_point_sequence#'), 2)
+    assert.strictEqual(sample.getNumber('my_int_sequence#'), 3)
+    assert.strictEqual(sample.get('my_int_sequence#'), 3)
+    assert.strictEqual(sample.getNumber('my_point_array[4].x'), 5)
+    assert.strictEqual(sample.get('my_point_array[4].x'), 5)
   })
 
   it('access values past the end of a sequence', () => {
-    expect(sample.getNumber('my_point_sequence[9].y')).to.deep.equals(null)
-    expect(sample.getNumber('my_int_sequence[9]')).to.deep.equals(null)
+    assert.strictEqual(sample.getNumber('my_point_sequence[9].y'), null)
+    assert.strictEqual(sample.getNumber('my_int_sequence[9]'), null)
   })
 
   it('attempt to access non-existent members', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getNumber('my_nonexistent_member')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('attempt to access members with bad sequence syntax', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getNumber('my_point_sequence[9[.y')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('attempt to access the negative member of a sequence', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getNumber('my_point_sequence[-1].y')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('getNumber on unions', () => {
-    expect(sample.getNumber('my_union.my_int_sequence#')).to.deep.equals(3).and.is.a('number')
-    expect(sample.getNumber('my_union.my_int_sequence[1]')).to.deep.equals(20).and.is.a('number')
-    expect(sample.getNumber('my_int_union.my_long')).to.deep.equals(222).and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_union.my_int_sequence#'), 3)
+    assert.strictEqual(sample.getNumber('my_union.my_int_sequence[1]'), 20)
+    assert.strictEqual(sample.getNumber('my_int_union.my_long'), 222)
   })
 
   it('obtain the selected member of a union with # syntax', () => {
-    expect(sample.getString('my_int_union#')).to.deep.equals('my_long').and.is.a('string')
-    expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
-    expect(sample.get('my_union#')).to.deep.equals('my_int_sequence').and.is.a('string')
+    assert.strictEqual(sample.getString('my_int_union#'), 'my_long')
+    assert.strictEqual(sample.getString('my_union#'), 'my_int_sequence')
+    assert.strictEqual(sample.get('my_union#'), 'my_int_sequence')
   })
 
   it('obtain an unset optional member', () => {
-    expect(sample.getNumber('my_optional_long')).to.deep.equals(null)
-    expect(sample.get('my_optional_long')).to.deep.equals(null)
-    expect(sample.getJson().my_optional_long).to.deep.equals(undefined)
+    assert.strictEqual(sample.getNumber('my_optional_long'), null)
+    assert.strictEqual(sample.get('my_optional_long'), null)
+    assert.strictEqual(sample.getJson().my_optional_long, undefined)
   })
 
   it('obtain an unset optional member as a string', () => {
-    expect(sample.getString('my_optional_long')).to.deep.equals(null)
+    assert.strictEqual(sample.getString('my_optional_long'), null)
   })
 
   it('obtain an unset optional complex member', () => {
-    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+    assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
   })
 
   it('unset optional members should not be in JSON objects returned by getJSON', () => {
-    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
+    assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
     const jsonObj = sample.getJson()
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point'), false)
   })
 
   it('get non-existent member with getJson', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getJson('IDoNotExist')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('getJson requires valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getJson('NAN')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('if a member name is supplied to getJson, it must be a string', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getJson(1, 0)
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('attempt to get non-complex members with getJson', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getJson('my_long')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_double')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_optional_bool')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_optional_long')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_string')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_enum')
-    }).to.throw(rti.DDSError)
-    expect(() => {
+    }, rti.DDSError)
+    assert.throws(() => {
       sample.getJson('my_point.x')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('get complex members using getJson', () => {
     const thePoint = sample.getJson('my_point')
-    expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
-    expect(thePoint.x).to.deep.equals(3).and.is.a('number')
-    expect(thePoint.y).to.deep.equals(4).and.is.a('number')
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePoint)), thePoint)
+    assert.strictEqual(thePoint.x, 3)
+    assert.strictEqual(thePoint.y, 4)
 
     const thePointAlias = sample.getJson('my_point_alias')
-    expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
-    expect(thePointAlias.x).to.deep.equals(30).and.is.a('number')
-    expect(thePointAlias.y).to.deep.equals(40).and.is.a('number')
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointAlias)), thePointAlias)
+    assert.strictEqual(thePointAlias.x, 30)
+    assert.strictEqual(thePointAlias.y, 40)
 
     const theUnion = sample.getJson('my_union')
-    expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
-    expect(theUnion.my_int_sequence).to.be.an.instanceof([].constructor)
-      .and.to.deep.equals([10, 20, 30])
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(theUnion)), theUnion)
+    assert.deepStrictEqual(theUnion.my_int_sequence, [10, 20, 30])
 
     const thePointSequence = sample.getJson('my_point_sequence')
-    expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
-    expect(thePointSequence).to.be.an.instanceof([].constructor)
-      .and.to.deep.equals([{ x: 10, y: 20 }, { x: 11, y: 21 }])
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointSequence)), thePointSequence)
+    assert.deepStrictEqual(thePointSequence, [{ x: 10, y: 20 }, { x: 11, y: 21 }])
 
     const thePointSequence0 = sample.getJson('my_point_sequence[0]')
-    expect(JSON.parse(JSON.stringify(thePointSequence0))).to.deep.equals(thePointSequence0)
-    expect(thePointSequence0.x).to.deep.equals(10)
-    expect(thePointSequence0.y).to.deep.equals(20)
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointSequence0)), thePointSequence0)
+    assert.strictEqual(thePointSequence0.x, 10)
+    assert.strictEqual(thePointSequence0.y, 20)
 
     const theArray = sample.getJson('my_point_array')
-    expect(JSON.parse(JSON.stringify(theArray))).to.deep.equals(theArray)
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(theArray)), theArray)
 
     const theArray0 = sample.getJson('my_point_array[0]')
-    expect(JSON.parse(JSON.stringify(theArray0))).to.deep.equals(theArray0)
-    expect(theArray0.x).to.deep.equals(0)
-    expect(theArray0.y).to.deep.equals(0)
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(theArray0)), theArray0)
+    assert.strictEqual(theArray0.x, 0)
+    assert.strictEqual(theArray0.y, 0)
   })
 
   it('get an unset optional complex member using getJson', () => {
     const unsetOptionalComplex = sample.getJson('my_optional_point')
-    expect(unsetOptionalComplex).to.deep.equals(null)
+    assert.strictEqual(unsetOptionalComplex, null)
   })
 
   // We do not run these tests on Windows since the symbols are not exported in the DLL
   if (os.platform() !== 'win32') {
     it('access native dynamic data pointer', () => {
+      // eslint-disable-next-line camelcase
       const DDS_DynamicData_get_member_count = rti.connectorBinding.api.func('DDS_DynamicData_get_member_count', 'uint', ['RTI_HANDLE'])
       const memberCount = DDS_DynamicData_get_member_count(sample.native)
-      expect(memberCount).to.be.greaterThan(0)
+      assert.ok(memberCount > 0)
     })
   }
 
   it('get complex members using get', () => {
     const thePoint = sample.get('my_point')
     // Since my_point is a struct it should have been converted to a JSON object
-    expect(JSON.parse(JSON.stringify(thePoint))).to.deep.equals(thePoint)
-    expect(thePoint.x).to.deep.equals(3)
-    expect(thePoint.y).to.deep.equals(4)
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePoint)), thePoint)
+    assert.strictEqual(thePoint.x, 3)
+    assert.strictEqual(thePoint.y, 4)
 
     const thePointSequence = sample.get('my_point_sequence')
-    expect(JSON.parse(JSON.stringify(thePointSequence))).to.deep.equals(thePointSequence)
-    expect(thePointSequence).to.be.an.instanceof([].constructor)
-    expect(thePointSequence[0]).to.deep.equals({ x: 10, y: 20 })
-    expect(thePointSequence[1]).to.deep.equals({ x: 11, y: 21 })
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointSequence)), thePointSequence)
+    assert.ok(Array.isArray(thePointSequence))
+    assert.deepStrictEqual(thePointSequence[0], { x: 10, y: 20 })
+    assert.deepStrictEqual(thePointSequence[1], { x: 11, y: 21 })
 
     const thePointArray = sample.get('my_point_array')
-    expect(JSON.parse(JSON.stringify(thePointArray))).to.deep.equals(thePointArray)
-    expect(thePointArray).to.be.an.instanceof([].constructor)
-    expect(thePointArray[0]).to.deep.equals({ x: 0, y: 0 })
-    expect(thePointArray[4]).to.deep.equals({ x: 5, y: 15 })
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointArray)), thePointArray)
+    assert.ok(Array.isArray(thePointArray))
+    assert.deepStrictEqual(thePointArray[0], { x: 0, y: 0 })
+    assert.deepStrictEqual(thePointArray[4], { x: 5, y: 15 })
 
     const thePointAlias = sample.get('my_point_alias')
     // Alias should be resolved so we now have a JSON object
-    expect(JSON.parse(JSON.stringify(thePointAlias))).to.deep.equals(thePointAlias)
-    expect(thePointAlias.x).to.deep.equals(30)
-    expect(thePointAlias.y).to.deep.equals(40)
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(thePointAlias)), thePointAlias)
+    assert.strictEqual(thePointAlias.x, 30)
+    assert.strictEqual(thePointAlias.y, 40)
 
     const theOptionalPoint = sample.get('my_optional_point')
     // Unset optional should return null
-    expect(theOptionalPoint).to.deep.equals(null)
+    assert.strictEqual(theOptionalPoint, null)
 
     const theUnion = sample.get('my_union')
     // Since no trailing '#' was supplied we should now have the JSON object
-    expect(JSON.parse(JSON.stringify(theUnion))).to.deep.equals(theUnion)
-    expect(theUnion).to.deep.equals({ my_int_sequence: [10, 20, 30] })
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(theUnion)), theUnion)
+    assert.deepStrictEqual(theUnion, { my_int_sequence: [10, 20, 30] })
   })
 
   it('Try to obtain complex members with getNumber', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getNumber('my_point')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('Try to obtain complex members with getBoolean', () => {
-    expect(() => {
+    assert.throws(() => {
       sample.getBoolean('my_point')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('Try to obtain complex members with getString', () => {
     // It should be possible to complex members with getString, but the returned
     // object will have a type of 'string', not a JSON object
     const complexString = sample.getString('my_point')
-    expect(complexString).to.be.a('string')
+    assert.strictEqual(typeof complexString, 'string')
     // The string should be parsable by JSON
     const complexJson = JSON.parse(complexString)
-    expect(complexJson).to.be.an.instanceof({}.constructor)
-    expect(complexJson.x).to.deep.equals(3)
+    assert.ok(complexJson !== null && typeof complexJson === 'object' && !Array.isArray(complexJson))
+    assert.strictEqual(complexJson.x, 3)
   })
 
   it('Try to obtain complex arrays with getString', () => {
     // It should be possible to complex members with getString, but the returned
     // object will have a type of 'string', not a JSON object
     const complexString = sample.getString('my_point_array')
-    expect(complexString).to.be.a('string')
+    assert.strictEqual(typeof complexString, 'string')
     // The string should be parsable by JSON
     const complexJson = JSON.parse(complexString)
-    expect(complexJson).to.be.an.instanceof([].constructor)
-    expect(complexJson[0].x).to.deep.equals(0)
+    assert.ok(Array.isArray(complexJson))
+    assert.strictEqual(complexJson[0].x, 0)
   })
 
   it('Obtain JSON string of dictionary', () => {
     const jsonInstance = output.instance.getJson()
-    expect(jsonInstance).to.deep.equals(testJsonObject)
+    assert.deepStrictEqual(jsonInstance, testJsonObject)
   })
 
   it('samples.getNative requires valid index', () => {
-    expect(() => {
+    assert.throws(() => {
       prepopulatedInput.samples.getNative('NAN')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 })
 
 describe('Tests with a testOutput and testInput', () => {
-  let connector = null
-  let testOutput = null
-  let testInput = null
+  /** @type {rti.Connector} */
+  let connector
+  /** @type {rti.Output} */
+  let testOutput
+  /** @type {rti.Input} */
+  let testInput
   const testJsonObject = {
     my_long: 10,
     my_double: 3.3,
@@ -442,20 +426,15 @@ describe('Tests with a testOutput and testInput', () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
     const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
     testInput = connector.getInput('TestSubscriber::TestReader2')
-    expect(testInput).to.exist
+    assert.ok(testInput)
     testOutput = connector.getOutput('TestPublisher::TestWriter2')
-    expect(testOutput).to.exist
+    assert.ok(testOutput)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
-    } catch (err) {
-      console.log('Caught err ' + err)
-      throw (err)
-    }
+    const newMatches = await testOutput.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches, 1)
   })
 
   afterEach(async () => {
@@ -466,50 +445,51 @@ describe('Tests with a testOutput and testInput', () => {
 
   if (os.platform() !== 'win32') {
     it('test native API on output', () => {
+      // eslint-disable-next-line camelcase
       const DDS_DynamicData_get_member_count = rti.connectorBinding.api.func('DDS_DynamicData_get_member_count', 'uint', ['RTI_HANDLE'])
       const memberCount = DDS_DynamicData_get_member_count(testOutput.instance.native)
-      expect(memberCount).to.be.greaterThan(0)
+      assert.ok(memberCount > 0)
     })
   }
 
   it('pass null as field name to setX APIs on output', () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setBoolean(null, true)
-    }).to.throw(TypeError)
+    }, TypeError)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setNumber(null, 1)
-    }).to.throw(TypeError)
+    }, TypeError)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setString(null, 'hello')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('try to set a number with a string', () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setNumber('my_long', 'hello')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('try to set a boolean with a string', () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setBoolean('my_optional_bool', 'hello')
-    }).to.throw(TypeError)
+    }, TypeError)
   })
 
   it('try to set non-existent field names', () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setNumber('NonExistent', 1)
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setBoolean('NonExistent', false)
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
 
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setString('NonExistent', 'hello')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('Supply a JSON object where everything is a string', async () => {
@@ -532,16 +512,10 @@ describe('Tests with a testOutput and testInput', () => {
       my_key_string: 'hello'
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const receivedJsonObject = testInput.samples.get(0).getJson()
-    expect(receivedJsonObject).to.deep.equals(testJsonObject)
+    assert.deepStrictEqual(receivedJsonObject, testJsonObject)
   })
 
   it('Bad conversion from string in JSON object', () => {
@@ -556,94 +530,67 @@ describe('Tests with a testOutput and testInput', () => {
       'my_enum',
       'my_uint64']
     for (const field of fieldNames) {
-      expect(() => {
+      assert.throws(() => {
         testOutput.instance.setFromJson({ field: 'this is not a number' })
         console.log(field + ' did not raise an exception')
-      }).to.throw(rti.DDSError)
+      }, rti.DDSError)
     }
   })
 
   it('Attempt to access past the end of a sequence using setFromJson', async () => {
-    expect(() => {
+    assert.throws(() => {
       // my_int_sequence has a bound of 10 and we are supplying 11 elements
       testOutput.instance.setFromJson({ my_int_sequence: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10] })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
     // Ensure that the previous error didn't corrupt the instance
     const sent = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     testOutput.instance.set('my_int_sequence', sent)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const received = testInput.samples.get(0).get('my_int_sequence')
-    expect(received).to.deep.equals(sent)
+    assert.deepStrictEqual(received, sent)
   })
 
   it('Attempt to pass an invalid JSON object to setFromJson', async () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, bad: 4 }] })
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
     // Ensure that the previous error did not corrupt the instance
     const sent = [{ x: 1, y: 2 }, { x: 3, y: 4 }]
     testOutput.instance.set('my_point_sequence', sent)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const received = testInput.samples.get(0).get('my_point_sequence')
-    expect(received).to.deep.equals(sent)
+    assert.deepStrictEqual(received, sent)
   })
 
   it('The type-independent get should return the same result as getJson', async () => {
     testOutput.instance.setFromJson({ my_point_sequence: [{ x: 1, y: 2 }, { x: 3, y: 4 }] })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      throw (err)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getJson('my_point_sequence')).to.deep.equals(sample.get('my_point_sequence'))
+    assert.deepStrictEqual(sample.getJson('my_point_sequence'), sample.get('my_point_sequence'))
   })
 
   it('Set a boolean field using setNumber and check the resultant value on an input', async () => {
     testOutput.instance.setNumber('my_optional_bool', 1)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const theOptionalBool = testInput.samples.get(0).get('my_optional_bool')
-    expect(theOptionalBool).to.be.a('boolean').and.deep.equals(true)
+    assert.strictEqual(theOptionalBool, true)
   })
 
   it('Set a string with a number and check the resultant value on an input', async () => {
     testOutput.instance.setString('my_string', '1234')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      // Fail the test
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const theNumericString = testInput.samples.get(0).get('my_string')
-    expect(theNumericString).to.be.a('string').and.deep.equals('1234')
+    assert.strictEqual(theNumericString, '1234')
   })
 
   it('Test output sequences', async () => {
@@ -651,112 +598,67 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_int_sequence[1]', 2)
     testOutput.instance.setNumber('my_point_array[4].x', 5)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.get('my_point_sequence[0].y')).to.be.a('number').and.deep.equals(20)
-    expect(sample.get('my_int_sequence[1]')).to.be.a('number').and.deep.equals(2)
-    expect(sample.get('my_point_array[4].x')).to.be.a('number').and.deep.equals(5)
-    expect(sample.get('my_point_sequence#')).to.be.a('number').and.deep.equals(1)
-    expect(sample.get('my_int_sequence#')).to.be.a('number').and.deep.equals(2)
+    assert.strictEqual(sample.get('my_point_sequence[0].y'), 20)
+    assert.strictEqual(sample.get('my_int_sequence[1]'), 2)
+    assert.strictEqual(sample.get('my_point_array[4].x'), 5)
+    assert.strictEqual(sample.get('my_point_sequence#'), 1)
+    assert.strictEqual(sample.get('my_int_sequence#'), 2)
   })
 
   it('Change union members', async () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
-    expect(sample.getString('my_union#')).to.be.a('string').that.deep.equals('my_int_sequence')
+    assert.strictEqual(sample.getString('my_union#'), 'my_int_sequence')
 
     // Change the union to long
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
-    expect(sample.getString('my_union#')).to.be.a('string').that.deep.equals('my_long')
-    expect(sample.getNumber('my_union.my_long')).to.be.a('number').that.deep.equals(3)
+    assert.strictEqual(sample.getString('my_union#'), 'my_long')
+    assert.strictEqual(sample.getNumber('my_union.my_long'), 3)
   })
 
   it('Change union members', async () => {
     testOutput.instance.setNumber('my_union.my_int_sequence[1]', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
-    expect(sample.getString('my_union#')).to.deep.equals('my_int_sequence')
-      .and.is.a('string')
+    assert.strictEqual(sample.getString('my_union#'), 'my_int_sequence')
     // Change the union
     testOutput.instance.setNumber('my_union.my_long', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
-    expect(sample.getString('my_union#')).to.deep.equals('my_long')
-      .and.is.a('string')
+    assert.strictEqual(sample.getString('my_union#'), 'my_long')
   })
 
   it('Set an optional', async () => {
     testOutput.instance.setNumber('my_optional_point.x', 101)
     testOutput.instance.setNumber('my_point_alias.x', 202)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(101)
-      .and.is.a('number')
-    expect(sample.getNumber('my_point_alias.x')).to.deep.equals(202)
-      .and.is.a('number')
+    assert.strictEqual(sample.getNumber('my_optional_point.x'), 101)
+    assert.strictEqual(sample.getNumber('my_point_alias.x'), 202)
   })
 
   it('Get an unset optional boolean', async () => {
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Caught error: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const unsetOptional = testInput.samples.get(0).getBoolean('my_optional_bool')
-    expect(unsetOptional).to.deep.equals(null)
+    assert.strictEqual(unsetOptional, null)
   })
 
   it('Returns samples', async () => {
@@ -764,10 +666,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.write()
     await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.length).to.deep.equals(1)
-    expect(testInput.samples.get(0).getNumber('my_long')).to.deep.equals(33)
+    assert.strictEqual(testInput.samples.length, 1)
+    assert.strictEqual(testInput.samples.get(0).getNumber('my_long'), 33)
     testInput.returnSamples()
-    expect(testInput.samples.length).to.deep.equals(0)
+    assert.strictEqual(testInput.samples.length, 0)
   })
 
   it('Returns samples with a timeout', async () => {
@@ -777,59 +679,43 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.write() // Write1
     await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.length).to.deep.equals(1) // Write1
+    assert.strictEqual(testInput.samples.length, 1) // Write1
 
     // Wait without returning samples
     testOutput.write() // Write2
-    await testInput.wait({timeout: testExpectSuccessTimeout, returnSamples: false})
-    expect(testInput.samples.length).to.deep.equals(1) // Write1 was not returned
+    await testInput.wait({ timeout: testExpectSuccessTimeout, returnSamples: false })
+    assert.strictEqual(testInput.samples.length, 1) // Write1 was not returned
     testInput.take()
-    expect(testInput.samples.length).to.deep.equals(1) // Write2
+    assert.strictEqual(testInput.samples.length, 1) // Write2
 
     // Wait with returning samples
     testOutput.write() // Write3
-    await testInput.wait({timeout: testExpectSuccessTimeout, returnSamples: true})
-    expect(testInput.samples.length).to.deep.equals(0) // Write2 was returned
+    await testInput.wait({ timeout: testExpectSuccessTimeout, returnSamples: true })
+    assert.strictEqual(testInput.samples.length, 0) // Write2 was returned
     testInput.take()
-    expect(testInput.samples.length).to.deep.equals(1) // Write3
+    assert.strictEqual(testInput.samples.length, 1) // Write3
   })
 
   it('Reset an optional number', async () => {
     testOutput.instance.setNumber('my_optional_long', 33)
     testOutput.instance.setNumber('my_optional_long', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_optional_long'))
-      .to.deep.equals(null)
-    expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_long'))
-      .to.be.false
+    assert.strictEqual(sample.getNumber('my_optional_long'), null)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_long'), false)
   })
 
   it('Reset an optional bool', async () => {
     testOutput.instance.setBoolean('my_optional_bool', true)
     testOutput.instance.setBoolean('my_optional_bool', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_optional_bool'))
-      .to.deep.equals(null)
-    expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_bool'))
-      .to.be.false
+    assert.strictEqual(sample.getNumber('my_optional_bool'), null)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_bool'), false)
   })
 
   it('Reset an optional complex', async () => {
@@ -838,23 +724,13 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.clearMember('my_optional_point')
     testOutput.instance.clearMember('my_point_alias')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_optional_point.x'))
-      .to.deep.equals(null)
-    expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_point'))
-      .to.be.false
-    expect(sample.getNumber('my_point_alias.x'))
-      .to.deep.equals(null)
-    expect(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_point_alias'))
-      .to.be.false
+    assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_optional_point'), false)
+    assert.strictEqual(sample.getNumber('my_point_alias.x'), null)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(sample.getJson(), 'my_point_alias'), false)
   })
 
   it('Clear a sequence', async () => {
@@ -862,17 +738,11 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point.x', 3)
     testOutput.instance.clearMember('my_union.my_int_sequence')
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_union.my_int_sequence#')).to.deep.equals(0)
-    expect(sample.getNumber('my_point.x')).to.deep.equals(3)
+    assert.strictEqual(sample.getNumber('my_union.my_int_sequence#'), 0)
+    assert.strictEqual(sample.getNumber('my_point.x'), 3)
   })
 
   it('Clear a sequence with a JSON object', async () => {
@@ -894,37 +764,31 @@ describe('Tests with a testOutput and testInput', () => {
       my_enum: null
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_optional_point.x')).to.deep.equals(null)
-    expect(sample.getNumber('my_optional_long')).to.deep.equals(null)
-    expect(sample.getNumber('my_point.x')).to.deep.equals(0)
-    expect(sample.getNumber('my_point.y')).to.deep.equals(0)
-    expect(sample.getNumber('my_point_alias.y')).to.deep.equals(null)
-    expect(sample.getNumber('my_long')).to.deep.equals(0)
-    expect(sample.getBoolean('my_optional_bool')).to.deep.equals(null)
-    expect(sample.getNumber('my_point_sequence#')).to.deep.equals(0)
-    expect(sample.getString('my_string')).to.deep.equals('')
-    expect(sample.getString('my_union#')).to.deep.equals('point')
-    expect(sample.getNumber('my_enum')).to.deep.equals(2)
+    assert.strictEqual(sample.getNumber('my_optional_point.x'), null)
+    assert.strictEqual(sample.getNumber('my_optional_long'), null)
+    assert.strictEqual(sample.getNumber('my_point.x'), 0)
+    assert.strictEqual(sample.getNumber('my_point.y'), 0)
+    assert.strictEqual(sample.getNumber('my_point_alias.y'), null)
+    assert.strictEqual(sample.getNumber('my_long'), 0)
+    assert.strictEqual(sample.getBoolean('my_optional_bool'), null)
+    assert.strictEqual(sample.getNumber('my_point_sequence#'), 0)
+    assert.strictEqual(sample.getString('my_string'), '')
+    assert.strictEqual(sample.getString('my_union#'), 'point')
+    assert.strictEqual(sample.getNumber('my_enum'), 2)
     const jsonObj = sample.getJson()
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_bool')).to.be.false
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_long')).to.be.false
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_point_alias')).to.be.false
-    expect(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point')).to.be.false
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_bool'), false)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_long'), false)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(jsonObj, 'my_point_alias'), false)
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(jsonObj, 'my_optional_point'), false)
   })
 
   it('Clear a non-existent member', () => {
-    expect(() => {
+    assert.throws(() => {
       testOutput.instance.clearMember('nonexistent_member')
-    }).to.throw(rti.DDSError)
+    }, rti.DDSError)
   })
 
   it('Reset a sequence', async () => {
@@ -932,34 +796,22 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_point.x', 3)
     testOutput.instance.setNumber('my_point_sequence[1].x', 44)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     let sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_union.my_int_sequence#')).to.deep.equals(3)
-    expect(sample.getNumber('my_point.x')).to.deep.equals(3)
-    expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2)
+    assert.strictEqual(sample.getNumber('my_union.my_int_sequence#'), 3)
+    assert.strictEqual(sample.getNumber('my_point.x'), 3)
+    assert.strictEqual(sample.getNumber('my_point_sequence#'), 2)
 
     testOutput.instance.setFromJson({ my_int_sequence: [] })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_int_sequence#')).to.deep.equals(0)
+    assert.strictEqual(sample.getNumber('my_int_sequence#'), 0)
     // The other fields are unchanged
-    expect(sample.getNumber('my_point.x')).to.deep.equals(3)
-    expect(sample.getNumber('my_point_sequence#')).to.deep.equals(2)
+    assert.strictEqual(sample.getNumber('my_point.x'), 3)
+    assert.strictEqual(sample.getNumber('my_point_sequence#'), 2)
   })
 
   it('Can clear an entire instance on an output', async () => {
@@ -967,17 +819,11 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setNumber('my_optional_point.x', 44)
     testOutput.clearMembers()
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    sample = testInput.samples.get(0)
-    expect(sample.getBoolean('my_optional_bool')).to.be.null
-    expect(sample.getBoolean('my_optional_point')).to.be.null
+    const sample = testInput.samples.get(0)
+    assert.strictEqual(sample.getBoolean('my_optional_bool'), null)
+    assert.strictEqual(sample.getBoolean('my_optional_point'), null)
   })
 
   it('Can clear a value via the generic set function', async () => {
@@ -986,33 +832,21 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_optional_bool', null)
     testOutput.instance.set('my_optional_point', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    sample = testInput.samples.get(0)
-    expect(sample.getBoolean('my_optional_bool')).to.be.null
-    expect(sample.getBoolean('my_optional_point')).to.be.null
+    const sample = testInput.samples.get(0)
+    assert.strictEqual(sample.getBoolean('my_optional_bool'), null)
+    assert.strictEqual(sample.getBoolean('my_optional_point'), null)
   })
 
   it('Can clear a value via setString', async () => {
     testOutput.instance.setString('my_string', 'Hello, World!')
     testOutput.instance.setString('my_string', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    sample = testInput.samples.get(0)
-    expect(sample.getString('my_string')).to.deep.equals('')
+    const sample = testInput.samples.get(0)
+    assert.strictEqual(sample.getString('my_string'), '')
   })
 
   it('Check that setFromJson shrinks a sequence when it receives a smaller one', async () => {
@@ -1036,23 +870,17 @@ describe('Tests with a testOutput and testInput', () => {
       my_point_array: [{ x: 100 }, { y: 200 }]
     })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.getNumber('my_int_sequence#')).to.deep.equals(1)
-    expect(sample.getNumber('my_point_sequence#')).to.deep.equals(1)
-    expect(sample.getNumber('my_int_sequence[0]')).to.deep.equals(40)
-    expect(sample.getNumber('my_point_sequence[0].y')).to.deep.equals(2)
-    expect(sample.getNumber('my_point_sequence[0].x')).to.deep.equals(0)
-    expect(sample.getNumber('my_point_array[0].x')).to.deep.equals(100)
-    expect(sample.getNumber('my_point_array[0].y')).to.deep.equals(20)
-    expect(sample.getNumber('my_point_array[4].x')).to.deep.equals(14)
+    assert.strictEqual(sample.getNumber('my_int_sequence#'), 1)
+    assert.strictEqual(sample.getNumber('my_point_sequence#'), 1)
+    assert.strictEqual(sample.getNumber('my_int_sequence[0]'), 40)
+    assert.strictEqual(sample.getNumber('my_point_sequence[0].y'), 2)
+    assert.strictEqual(sample.getNumber('my_point_sequence[0].x'), 0)
+    assert.strictEqual(sample.getNumber('my_point_array[0].x'), 100)
+    assert.strictEqual(sample.getNumber('my_point_array[0].y'), 20)
+    assert.strictEqual(sample.getNumber('my_point_array[4].x'), 14)
   })
 
   it('Check the type-independent Instance.set and Sample.get method', async () => {
@@ -1062,33 +890,21 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_int64', 42)
     testOutput.instance.set('my_point_sequence[0].x', 3)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
     const sample = testInput.samples.get(0)
-    expect(sample.get('my_string')).to.deep.equals('Hello, World!')
-    expect(sample.get('my_boolean')).to.deep.equals(true)
-    expect(sample.get('my_int64')).to.deep.equals(42)
-    expect(sample.get('my_point_sequence[0].x')).to.deep.equals(3)
+    assert.strictEqual(sample.get('my_string'), 'Hello, World!')
+    assert.strictEqual(sample.get('my_boolean'), true)
+    assert.strictEqual(sample.get('my_int64'), 42)
+    assert.strictEqual(sample.get('my_point_sequence[0].x'), 3)
   })
 
   it('Reset an optional member using the type independent set method', async () => {
     testOutput.instance.set('my_optional_bool', null)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_optional_bool')).to.deep.equals(null)
+    assert.strictEqual(testInput.samples.get(0).get('my_optional_bool'), null)
   })
 
   it('Test nested JSON object syntax', async () => {
@@ -1096,15 +912,10 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.setFromJson({ 'my_point_sequence[2].x': 111 })
     testOutput.instance.set('my_point_sequence[3]', { x: 444, y: 555 })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_point_sequence[2]')).to.deep.equals({ x: 111, y: 153 })
-    expect(testInput.samples.get(0).get('my_point_sequence[3]')).to.deep.equals({ x: 444, y: 555 })
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[2]'), { x: 111, y: 153 })
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[3]'), { x: 444, y: 555 })
   })
 
   // Confirm desired behaviour for this
@@ -1112,15 +923,9 @@ describe('Tests with a testOutput and testInput', () => {
     const jsonObj = { x: 9, y: 12 }
     testOutput.instance.set('my_point', jsonObj)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      // Fail the test
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_point')).to.deep.equals(jsonObj)
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point'), jsonObj)
   })
 
   it('Use Instance.set to set a list', async () => {
@@ -1129,56 +934,36 @@ describe('Tests with a testOutput and testInput', () => {
     testOutput.instance.set('my_int_sequence', intSeq)
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_int_sequence')).to.deep.equals(intSeq)
-    expect(testInput.samples.get(0).get('my_point_sequence')).to.deep.equals(pointSeq)
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_int_sequence'), intSeq)
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence'), pointSeq)
   })
 
   it('Can clear an element of a complex sequence', async () => {
     let pointSeq = [{ x: 100, y: 200 }, { x: 300, y: 400 }, { x: 500, y: 600 }]
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_point_sequence')).to.deep.equals(pointSeq)
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence'), pointSeq)
     // Now we clear an element in the middle of the sequence
     pointSeq = [{ x: 100, y: 200 }, null, { x: 500, y: 600 }]
     testOutput.instance.set('my_point_sequence', pointSeq)
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_point_sequence[0]')).to.deep.equals({ x: 100, y: 200 })
-    expect(testInput.samples.get(0).get('my_point_sequence[1]')).to.deep.equals({ x: 0, y: 0 })
-    expect(testInput.samples.get(0).get('my_point_sequence[2]')).to.deep.equals({ x: 500, y: 600 })
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[0]'), { x: 100, y: 200 })
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[1]'), { x: 0, y: 0 })
+    assert.deepStrictEqual(testInput.samples.get(0).get('my_point_sequence[2]'), { x: 500, y: 600 })
   })
 
   it('Can set enum via name', async () => {
     testOutput.instance.setFromJson({ my_enum: 'GREEN' })
     testOutput.write()
-    try {
-      await testInput.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Error caught: ' + err)
-      expect(false).to.deep.equals(true)
-    }
+    await testInput.wait(testExpectSuccessTimeout)
     testInput.take()
-    expect(testInput.samples.get(0).get('my_enum')).to.deep.equals(1)
+    assert.strictEqual(testInput.samples.get(0).get('my_enum'), 1)
   })
 
   // Both Lua v5.2 (used within Connector native libraries) and JavaScript have
@@ -1214,37 +999,27 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: '9007199254740993'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // The values of the 64-bit integers is too large to retrieve with getNumber
-      expect(() => {
+      assert.throws(() => {
         testInput.samples.get(0).getNumber('my_uint64')
-      }).to.throw(rti.DDSError)
-      expect(() => {
+      }, rti.DDSError)
+      assert.throws(() => {
         testInput.samples.get(0).getNumber('my_int64')
-      }).to.throw(rti.DDSError)
+      }, rti.DDSError)
 
       // Also check the most negative value
       testOutput.instance.setFromJson({
         my_int64: '-9007199254740993'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
-      expect(() => {
+      assert.throws(() => {
         testInput.samples.get(0).getNumber('my_int64')
-      }).to.throw(rti.DDSError)
+      }, rti.DDSError)
     })
 
     // Check that the getNumber API can handle values stated in documentation
@@ -1254,33 +1029,28 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: '-9007199254740992'
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // Obtain the values and confirm they are correct
       const obtainedUint64 = testInput.samples.get(0).getNumber('my_uint64')
       const obtainedInt64 = testInput.samples.get(0).getNumber('my_int64')
-      expect(obtainedUint64).to.deep.equals(Number.MAX_SAFE_INTEGER + 1)
-      expect(obtainedInt64).to.deep.equals(Number.MIN_SAFE_INTEGER - 1)
+      assert.strictEqual(obtainedUint64, Number.MAX_SAFE_INTEGER + 1)
+      assert.strictEqual(obtainedInt64, Number.MIN_SAFE_INTEGER - 1)
     })
 
     // Check that setNumber throws an error if value is too large
     it('setNumber throws an error if value out of range', () => {
       // Max value for set is 2^53 - 1, anything larger will throw an error
-      expect(() => {
+      assert.throws(() => {
         testOutput.instance.setNumber('my_uint64', Number.MAX_SAFE_INTEGER + 1)
-      }).to.throw(rti.DDSError)
-      expect(() => {
+      }, rti.DDSError)
+      assert.throws(() => {
         testOutput.instance.setNumber('my_int64', Number.MAX_SAFE_INTEGER + 1)
-      }).to.throw(rti.DDSError)
-      expect(() => {
+      }, rti.DDSError)
+      assert.throws(() => {
         testOutput.instance.setNumber('my_int64', Number.MIN_SAFE_INTEGER - 1)
-      }).to.throw(rti.DDSError)
+      }, rti.DDSError)
     })
 
     // Check that setNumber can handle the values stated in the documentation
@@ -1289,43 +1059,28 @@ describe('Tests with a testOutput and testInput', () => {
       testOutput.instance.setNumber('my_uint64', Number.MAX_SAFE_INTEGER)
       testOutput.instance.setNumber('my_int64', Number.MAX_SAFE_INTEGER)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       // Confirm that the values are correct and not corrupted
-      expect(testInput.samples.get(0).getNumber('my_uint64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
-      expect(testInput.samples.get(0).getNumber('my_int64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
+      assert.strictEqual(testInput.samples.get(0).getNumber('my_uint64'), Number.MAX_SAFE_INTEGER)
+      assert.strictEqual(testInput.samples.get(0).getNumber('my_int64'), Number.MAX_SAFE_INTEGER)
 
       // Also do same test with minimum value
       testOutput.instance.setNumber('my_int64', Number.MIN_SAFE_INTEGER)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
-      expect(testInput.samples.get(0).getNumber('my_int64')).to.deep.equals(Number.MIN_SAFE_INTEGER)
+      assert.strictEqual(testInput.samples.get(0).getNumber('my_int64'), Number.MIN_SAFE_INTEGER)
     })
 
     it('Can communicate large 64-bit numbers using getString and setString', async () => {
       testOutput.instance.setString('my_uint64', '9007199254740993')
       testOutput.instance.setString('my_int64', '-9007199254740993')
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
-      expect(testInput.samples.get(0).getString('my_uint64')).to.deep.equals('9007199254740993')
-      expect(testInput.samples.get(0).getString('my_int64')).to.deep.equals('-9007199254740993')
+      assert.strictEqual(testInput.samples.get(0).getString('my_uint64'), '9007199254740993')
+      assert.strictEqual(testInput.samples.get(0).getString('my_int64'), '-9007199254740993')
     })
 
     it('64-bit values larger than 2^53 are returned as strings by get', async () => {
@@ -1335,17 +1090,12 @@ describe('Tests with a testOutput and testInput', () => {
         my_uint64: largeIntAsString
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
-      expect(testInput.samples.get(0).get('my_uint64')).to.be.a.string
-      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(largeIntAsString)
-      expect(testInput.samples.get(0).get('my_int64')).to.be.a.string
-      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(largeIntAsString)
+      assert.strictEqual(typeof testInput.samples.get(0).get('my_uint64'), 'string')
+      assert.strictEqual(testInput.samples.get(0).get('my_uint64'), largeIntAsString)
+      assert.strictEqual(typeof testInput.samples.get(0).get('my_int64'), 'string')
+      assert.strictEqual(testInput.samples.get(0).get('my_int64'), largeIntAsString)
     })
 
     it('64-bit values smaller or equal to 2^53 are returned as numbers by get', async () => {
@@ -1354,17 +1104,12 @@ describe('Tests with a testOutput and testInput', () => {
         my_int64: Number.MIN_SAFE_INTEGER
       })
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
-      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals(Number.MAX_SAFE_INTEGER)
-      expect(testInput.samples.get(0).get('my_uint64')).to.be.a('number')
-      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals(Number.MIN_SAFE_INTEGER)
-      expect(testInput.samples.get(0).get('my_int64')).to.be.a('number')
+      assert.strictEqual(testInput.samples.get(0).get('my_uint64'), Number.MAX_SAFE_INTEGER)
+      assert.strictEqual(typeof testInput.samples.get(0).get('my_uint64'), 'number')
+      assert.strictEqual(testInput.samples.get(0).get('my_int64'), Number.MIN_SAFE_INTEGER)
+      assert.strictEqual(typeof testInput.samples.get(0).get('my_int64'), 'number')
     })
 
     it('Can set large 64-bit numbers using type-agnostic setter', async () => {
@@ -1374,16 +1119,11 @@ describe('Tests with a testOutput and testInput', () => {
       testOutput.instance.set('my_uint64', '18446744073709551615')
       testOutput.instance.set('my_int64', '9223372036854775807')
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
       // The values will be returned as strings since they are > 2^53
-      expect(testInput.samples.get(0).get('my_uint64')).to.deep.equals('18446744073709551615')
-      expect(testInput.samples.get(0).get('my_int64')).to.deep.equals('9223372036854775807')
+      assert.strictEqual(testInput.samples.get(0).get('my_uint64'), '18446744073709551615')
+      assert.strictEqual(testInput.samples.get(0).get('my_int64'), '9223372036854775807')
     })
 
     it('The JSON getter cannot handle large integers', async () => {
@@ -1395,19 +1135,14 @@ describe('Tests with a testOutput and testInput', () => {
       }
       testOutput.instance.setFromJson(jsonTx)
       testOutput.write()
-      try {
-        await testInput.wait(testExpectSuccessTimeout)
-      } catch (err) {
-        console.log('Error caught: ' + err)
-        expect(false).to.deep.equals(true)
-      }
+      await testInput.wait(testExpectSuccessTimeout)
       testInput.take()
 
       // The JSON.parse() call done in getFromJSON will result in the
       // values > Number.MAX_SAFE_INT being corrupted. We cannot detect this.
       const jsonRx = testInput.samples.get(0).getJson()
-      expect(jsonRx.my_int64).to.not.deep.equal(jsonTx.my_int64)
-      expect(jsonRx.my_uint64).to.not.deep.equal(jsonTx.my_uint64)
+      assert.notDeepStrictEqual(jsonRx.my_int64, jsonTx.my_int64)
+      assert.notDeepStrictEqual(jsonRx.my_uint64, jsonTx.my_uint64)
     })
   })
 })
@@ -1421,33 +1156,23 @@ describe('Tests with two readers and two writers', () => {
 
   beforeEach(async () => {
     const participantProfile = 'MyParticipantLibrary::DataAccessTest'
-    const xmlProfile = path.join(__dirname, '/../xml/TestConnector.xml')
+    const xmlProfile = path.resolve(__dirname, '../xml/TestConnector.xml')
     connector = new rti.Connector(participantProfile, xmlProfile)
-    expect(connector).to.exist.and.be.an.instanceof(rti.Connector)
+    assert.ok(connector instanceof rti.Connector)
     testInput1 = connector.getInput('TestSubscriber::TestReader')
-    expect(testInput1).to.exist
+    assert.ok(testInput1)
     testOutput1 = connector.getOutput('TestPublisher::TestWriter')
-    expect(testOutput1).to.exist
+    assert.ok(testOutput1)
     testInput2 = connector.getInput('TestSubscriber::TestReader2')
-    expect(testInput2).to.exist
+    assert.ok(testInput2)
     testOutput2 = connector.getOutput('TestPublisher::TestWriter2')
-    expect(testOutput2).to.exist
+    assert.ok(testOutput2)
 
     // Wait for the input and output to dicovery each other
-    try {
-      const newMatches = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
-    try {
-      const newMatches = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
-      expect(newMatches).to.deep.equals(1)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    const newMatches1 = await testOutput1.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches1, 1)
+    const newMatches2 = await testOutput2.waitForSubscriptions(testExpectSuccessTimeout)
+    assert.strictEqual(newMatches2, 1)
   })
 
   afterEach(async () => {
@@ -1460,94 +1185,59 @@ describe('Tests with two readers and two writers', () => {
   // Since we have not written any data, all different forms of wait for data
   // should timeout
   it('waiting for data on connector should timeout', async () => {
-    try {
-      await connector.wait(testExpectFailureTimeout)
-      console.log('Expected connector.wait to timeout but it did not')
-      throw (err)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    await assert.rejects(
+      connector.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('waiting for data on testInput should timeout', async () => {
-    try {
-      await testInput1.wait(testExpectFailureTimeout)
-      console.log('Expected testInput1.wait to timeout but it did not')
-      throw (err)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput1.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('waiting for data on testInput2 should timeout', async () => {
-    try {
-      await testInput2.wait(testExpectFailureTimeout)
-      console.log('Expected testInput2.wait to timeout but it did not')
-      throw (err)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput2.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('Writing data on a testOutput1 should wake up connector.wait', async () => {
     testOutput1.write()
-    try {
-      await connector.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await connector.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput1 should wake up testInput1.wait', async () => {
     testOutput1.write()
-    try {
-      await testInput1.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput1.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput1 should not wake up testInput2.wait', async () => {
     testOutput1.write()
-    try {
-      await testInput2.wait(testExpectFailureTimeout)
-      console.log('Expected testInput2.wait to timeout but it did not')
-      throw (err)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput2.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 
   it('Writing data on a testOutput2 should wake up connector.wait', async () => {
     testOutput2.write()
-    try {
-      await connector.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await connector.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput2 should wake up testInput2.wait', async () => {
     testOutput2.write()
-    try {
-      await testInput2.wait(testExpectSuccessTimeout)
-    } catch (err) {
-      console.log('Caught err: ' + err)
-      throw (err)
-    }
+    await testInput2.wait(testExpectSuccessTimeout)
   })
 
   it('Writing data on a testOutput2 should not wake up testInput1.wait', async () => {
     testOutput2.write()
-    try {
-      await testInput1.wait(testExpectFailureTimeout)
-      console.log('Expected testInput2.wait to timeout but it did not')
-      throw (err)
-    } catch (err) {
-      expect(err).to.be.an.instanceof(rti.TimeoutError)
-    }
+    await assert.rejects(
+      testInput1.wait(testExpectFailureTimeout),
+      rti.TimeoutError
+    )
   })
 })

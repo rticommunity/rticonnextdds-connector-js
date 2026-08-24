@@ -2,23 +2,29 @@
 
 To run the tests for nodejs binding of **rticonnextdds_connector**:
 
-1. Install [chai](http://chaijs.com/) assertion library, [chai-as-promised](https://github.com/domenic/chai-as-promised) which extends *chai* to work with Promise,
-[sinon](http://sinonjs.org/) for test spies and [mocha](https://mochajs.org/) testing framework with:
+1. To execute all the tests, issue the following command from the base directory:
 
-  ```
-  npm install chai
-  npm install chai-as-promised
-  npm install mocha 
-  npm install sinon 
-  ```
+   ```console
+   npm test
+   ```
 
-2. To execute all the tests, issue the following command from the base directory: 
-  
-   ``mocha ./test/nodejs``
-  
-   To execute each test individually, also include the name of the test file: 
-  
-   ``mocha ./test/nodejs/test_rticonnextdds_dataflow.js``
+   Or directly with `node`:
+
+   ```console
+   node --test --test-concurrency=1 ./test/nodejs/test_*.js
+   ```
+
+   To execute each test individually, also include the name of the test file:
+
+   ```console
+   node --test ./test/nodejs/test_rticonnextdds_dataflow.js
+   ```
+
+   To produce a JUnit XML report:
+
+   ```console
+   npm run test-junit
+   ```
 
 Nodejs tests are organized as follows:
 
