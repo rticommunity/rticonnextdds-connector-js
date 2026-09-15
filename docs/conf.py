@@ -26,8 +26,8 @@ from datetime import date
 today_fmt = "%B %Y"
 
 # The full version, including alpha/beta/rc tags
-release = '1.5.0'
-version = '1.5.0'
+release = '1.6.0'
+version = '1.6.0'
 
 master_doc = 'index'
 primary_domain = 'js'
