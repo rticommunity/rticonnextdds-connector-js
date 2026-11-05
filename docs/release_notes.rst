@@ -35,6 +35,16 @@ repository <https://github.com/rticommunity/rticonnextdds-connector>`__.
 Current Release
 ===============
 
+Version 1.5.1
+-------------
+*RTI Connector* 1.5.1 is built on *RTI Connext 7.7.0.2*.
+For more details on what's new and fixed in 7.7.0.2, see
+the Release Notes Supplement for 7.7.0.2 on the 
+`RTI Community Portal <https://community.rti.com/documentation/rti-connext-dds-770>`__.
+
+Previous Releases
+=================
+
 Version 1.5.0
 -------------
 
@@ -90,8 +100,6 @@ retrieved using either ``ImplicitReader`` or ``implicit::ImplicitReader``:
 .. [RTI Issue ID CON-346]
 
 
-Previous Releases
-=================
 
 What's New in 1.4.0
 ^^^^^^^^^^^^^^^^^^^
