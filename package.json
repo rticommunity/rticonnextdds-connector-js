@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "events": "^3.2.0",
-    "koffi": "^2.8.9"
+    "koffi": "^2.8"
   },
   "scripts": {
     "test": "mocha ./test/nodejs/",
