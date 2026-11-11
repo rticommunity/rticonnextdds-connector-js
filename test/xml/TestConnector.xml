@@ -63,34 +63,34 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     <!-- types -->
     <types>
-        <struct name="ShapeType" extensibility="extensible">
+        <struct name="ShapeType" extensibility="final">
             <member name="color" stringMaxLength="128" type="string" key="true"/>
             <member name="x" type="long"/>
             <member name="y" type="long"/>
             <member name="shapesize" type="long"/>
             <member name="z" type="boolean"/>
         </struct>
-        <enum name="ShapeFillKind" extensibility="extensible">
+        <enum name="ShapeFillKind" extensibility="final">
             <enumerator name="SOLID_FILL" value="0"/>
             <enumerator name="TRANSPARENT_FILL" value="1"/>
             <enumerator name="HORIZONTAL_HATCH_FILL" value="2"/>
             <enumerator name="VERTICAL_HATCH_FILL" value="3"/>
         </enum>
-        <struct name="ShapeTypeExtended" baseType="ShapeType" extensibility="extensible">
+        <struct name="ShapeTypeExtended" baseType="ShapeType" extensibility="final">
             <member name="fillKind" type="nonBasic" nonBasicTypeName="ShapeFillKind"/>
             <member name="angle" type="float"/>
         </struct>
 
-        <enum name="Color">
+        <enum name="Color" extensibility="final">
             <enumerator name="RED"/>
             <enumerator name="GREEN"/>
             <enumerator name="BLUE"/>
         </enum>
-        <struct name= "Point">
+        <struct name= "Point" extensibility="final">
             <member name="x" type="int32"/>
             <member name="y" type="int32"/>
         </struct>
-        <union name="MyUnion">
+        <union name="MyUnion" extensibility="final">
             <discriminator type="nonBasic" nonBasicTypeName="Color"/>
             <case>
               <caseDiscriminator value="(RED)"/>
@@ -105,7 +105,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
               <member name="my_int_sequence" sequenceMaxLength="10" type="int32"/>
             </case>
         </union>
-        <union name="MyIntUnion">
+        <union name="MyIntUnion" extensibility="final">
             <discriminator type="long"/>
             <case>
               <caseDiscriminator value="10"/>
@@ -117,7 +117,7 @@ This code contains trade secrets of Real-Time Innovations, Inc.
             </case>
         </union>
         <typedef name="PointAlias" type="nonBasic"  nonBasicTypeName= "Point"/>
-        <struct name= "MyType">
+        <struct name= "MyType" extensibility="final">
             <member name="my_long" type="int32"/>
             <member name="my_double" type="float64"/>
             <member name="my_enum" type="nonBasic"  nonBasicTypeName= "Color" default="BLUE"/>
@@ -137,14 +137,14 @@ This code contains trade secrets of Real-Time Innovations, Inc.
             <member name="my_uint64" type="uint64"/>
             <member name="my_key_string" stringMaxLength="128" type="string" key="true"/>
         </struct>
-        <struct name="UnkeyedShapeType">
+        <struct name="UnkeyedShapeType" extensibility="final">
             <member name="color" stringMaxLength="128" type="string"/>
             <member name="x" type="long"/>
             <member name="y" type="long"/>
             <member name="shapesize" type="long"/>
             <member name="z" type="boolean"/>
         </struct>
-        <struct name="MultipleKeyedShapeType">
+        <struct name="MultipleKeyedShapeType" extensibility="final">
             <member name="color" stringMaxLength="128" type="string" key="true"/>
             <member name="other_color" stringMaxLength="128" type="string" key="true"/>
             <member name="x" type="long"/>
@@ -152,14 +152,14 @@ This code contains trade secrets of Real-Time Innovations, Inc.
             <member name="shapesize" type="long"/>
             <member name="z" type="boolean" key="true"/>
         </struct>
-        <struct name="NestedKeyedShapeType">
+        <struct name="NestedKeyedShapeType" extensibility="final">
             <member name="keyed_shape" type="nonBasic" nonBasicTypeName="UnkeyedShapeType" key="true"/>
             <member name="unkeyed_shape" type="nonBasic" nonBasicTypeName="UnkeyedShapeType"/>
             <member name="keyed_nested_member" type="nonBasic" nonBasicTypeName="ShapeType" key="true"/>
             <member name="unkeyed_toplevel_member" type="long" default="12"/>
             <member name="keyed_toplevel_member" type="long" key="true"/>
         </struct>
-        <struct name="ShapeTypeWithoutToplevelKeyType">
+        <struct name="ShapeTypeWithoutToplevelKeyType" extensibility="final">
             <member name="unkeyed_shape" type="nonBasic" nonBasicTypeName="ShapeType"/>
             <member name="keyed_shape" type="nonBasic" nonBasicTypeName="ShapeType" key="true"/>
         </struct>

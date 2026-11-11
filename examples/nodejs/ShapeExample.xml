@@ -25,19 +25,19 @@ This code contains trade secrets of Real-Time Innovations, Inc.
 
     <!-- types -->
     <types>
-        <struct name="ShapeType" extensibility="extensible">
+        <struct name="ShapeType" extensibility="final">
             <member name="color" stringMaxLength="128" type="string" key="true"/>
             <member name="x" type="long"/>
             <member name="y" type="long"/>
             <member name="shapesize" type="long"/>
         </struct>
-        <enum name="ShapeFillKind" extensibility="extensible">
+        <enum name="ShapeFillKind" extensibility="final">
             <enumerator name="SOLID_FILL" value="0"/>
             <enumerator name="TRANSPARENT_FILL" value="1"/>
             <enumerator name="HORIZONTAL_HATCH_FILL" value="2"/>
             <enumerator name="VERTICAL_HATCH_FILL" value="3"/>
         </enum>
-        <struct name="ShapeTypeExtended" baseType="ShapeType" extensibility="extensible">
+        <struct name="ShapeTypeExtended" baseType="ShapeType" extensibility="final">
             <member name="fillKind" type="nonBasic" nonBasicTypeName="ShapeFillKind"/>
             <member name="angle" type="float"/>
         </struct>
